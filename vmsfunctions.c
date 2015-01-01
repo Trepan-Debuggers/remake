@@ -1,6 +1,5 @@
 /* VMS functions
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -15,18 +14,18 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "make.h"
+#include "makeint.h"
 #include "debug.h"
 #include "job.h"
+
+#include <ctype.h>
+#include <string.h>
 
 #ifdef __DECC
 #include <starlet.h>
 #endif
-#include <descrip.h>
+
 #include <rms.h>
-#include <iodef.h>
-#include <atrdef.h>
-#include <fibdef.h>
 #include "vmsdir.h"
 
 #ifdef HAVE_VMSDIR_H
@@ -128,135 +127,100 @@ closedir (DIR *dir)
 }
 #endif /* compiled for OpenVMS prior to V7.x */
 
-char *
-getwd (char *cwd)
+/* Argv0 will be a full vms file specification, like
+   node$dka100:[utils.gnumake]make.exe;47
+   prefix it with "mcr " to make it a vms command, executable for DCL. */
+const char *
+vms_command(const char* argv0)
 {
-  static char buf[512];
-
-  if (cwd)
-    return (getcwd (cwd, 512));
-  else
-    return (getcwd (buf, 512));
+  size_t l = strlen(argv0) + 1;
+  char* s = xmalloc(l + 4);
+  memcpy(s, "mcr ", 4);
+  memcpy(s+4, argv0, l);
+  return s;
 }
 
-#if 0
-/*
- * Is this used? I don't see any reference, so I suggest to remove it.
- */
-int
-vms_stat (char *name, struct stat *buf)
+/* Argv0 aka argv[0] will be a full vms file specification, like
+   node$dka100:[utils.gnumake]make.exe;47, set up by the CRTL.
+   The vms progname should be ^^^^, the file name without
+   file type .exe and ;version.
+   Use sys$parse to get the name part of the file specification. That is
+   in the above example, pick up "make" and return a copy of that string.
+   If something goes wrong in sys$parse (unlikely, this is a VMS/CRTL supplied
+   file specification) or if there is an empty name part (not easy to produce,
+   but it is possible) just return "make".
+   Somes notes ...
+   NAM[L]$M_SYNCHK requests a syntax check, only.
+   NAM is for ODS2 names (shorter parts, output usually converted to UPPERCASE).
+   NAML is for ODS2/ODS5 names (longer parts, output unchanged).
+   NAM$M_NO_SHORT_UPCASE may not be available for older versions of VMS.
+   NAML is not available on older versions of VMS (NAML$C_BID not defined).
+   argv[0] on older versions of VMS (no extended parse style and no
+   CRTL feature DECC$ARGV_PARSE_STYLE) is always in lowercase. */
+const char *
+vms_progname(const char* argv0)
 {
   int status;
-  int i;
+  static struct FAB fab;
+  char *progname;
+  const char *fallback = "make";
 
-  static struct FAB Fab;
-  static struct NAM Nam;
-  static struct fibdef Fib;	/* short fib */
-  static struct dsc$descriptor FibDesc =
-  { sizeof (Fib), DSC$K_DTYPE_Z, DSC$K_CLASS_S, (char *) &Fib };
-  static struct dsc$descriptor_s DevDesc =
-  { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, &Nam.nam$t_dvi[1] };
-  static char EName[NAM$C_MAXRSS];
-  static char RName[NAM$C_MAXRSS];
-  static struct dsc$descriptor_s FileName =
-  { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0 };
-  static struct dsc$descriptor_s string =
-  { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0 };
-  static unsigned long Rdate[2];
-  static unsigned long Cdate[2];
-  static struct atrdef Atr[] =
-  {
-#if defined(VAX)
-    /* Revision date */
-    { sizeof (Rdate), ATR$C_REVDATE, (unsigned int) &Rdate[0] },
-    /* Creation date */
-    { sizeof (Cdate), ATR$C_CREDATE, (unsigned int) &Cdate[0] },
+#ifdef NAML$C_BID
+  static char esa[NAML$C_MAXRSS];
+  static struct NAML naml;
 #else
-    /* Revision date */
-    { sizeof (Rdate), ATR$C_REVDATE, &Rdate[0] },
-    /* Creation date */
-    { sizeof (Cdate), ATR$C_CREDATE, &Cdate[0]},
+  static char esa[NAM$C_MAXRSS];
+  static struct NAM nam;
 #endif
-    { 0, 0, 0 }
-  };
-  static short int DevChan;
-  static short int iosb[4];
 
-  name = vmsify (name, 0);
+  fab = cc$rms_fab;
+  fab.fab$l_fna = (char*)argv0;
+  fab.fab$b_fns = strlen(argv0);
 
-  /* initialize RMS structures, we need a NAM to retrieve the FID */
-  Fab = cc$rms_fab;
-  Fab.fab$l_fna = name;		/* name of file */
-  Fab.fab$b_fns = strlen (name);
-  Fab.fab$l_nam = &Nam;		/* FAB has an associated NAM */
+#ifdef NAML$C_BID
+  fab.fab$l_naml = &naml;
+  naml = cc$rms_naml;
+  naml.naml$l_long_expand = esa;
+  naml.naml$l_long_expand_alloc = NAML$C_MAXRSS;
+  naml.naml$b_nop = NAML$M_SYNCHK;
+  naml.naml$l_input_flags = NAML$M_NO_SHORT_OUTPUT;
+#else
+  fab.fab$l_nam = &nam;
+  nam = cc$rms_nam;
+  nam.nam$l_esa = esa;
+  nam.nam$b_ess = NAM$C_MAXRSS;
+# ifdef NAM$M_NO_SHORT_UPCASE
+  nam.nam$b_nop = NAM$M_SYNCHK | NAM$M_NO_SHORT_UPCASE;
+# else
+  nam.nam$b_nop = NAM$M_SYNCHK;
+# endif
+#endif
 
-  Nam = cc$rms_nam;
-  Nam.nam$l_esa = EName;	/* expanded filename */
-  Nam.nam$b_ess = sizeof (EName);
-  Nam.nam$l_rsa = RName;	/* resultant filename */
-  Nam.nam$b_rss = sizeof (RName);
-
-  /* do $PARSE and $SEARCH here */
-  status = sys$parse (&Fab);
+  status = sys$parse(&fab);
   if (!(status & 1))
-    return -1;
+    return fallback;
 
-  DevDesc.dsc$w_length = Nam.nam$t_dvi[0];
-  status = sys$assign (&DevDesc, &DevChan, 0, 0);
-  if (!(status & 1))
-    return -1;
-
-  FileName.dsc$a_pointer = Nam.nam$l_name;
-  FileName.dsc$w_length = Nam.nam$b_name + Nam.nam$b_type + Nam.nam$b_ver;
-
-  /* Initialize the FIB */
-  for (i = 0; i < 3; i++)
+#ifdef NAML$C_BID
+  if (naml.naml$l_long_name_size == 0)
+    return fallback;
+  progname = xmalloc(naml.naml$l_long_name_size + 1);
+  memcpy(progname, naml.naml$l_long_name, naml.naml$l_long_name_size);
+  progname[naml.naml$l_long_name_size] = '\0';
+#else
+  if (nam.nam$b_name == 0)
+    return fallback;
+  progname = xmalloc(nam.nam$b_name + 1);
+# ifdef NAM$M_NO_SHORT_UPCASE
+  memcpy(progname, nam.nam$l_name, nam.nam$b_name);
+# else
     {
-#ifndef __VAXC
-      Fib.fib$w_fid[i] = Nam.nam$w_fid[i];
-      Fib.fib$w_did[i] = Nam.nam$w_did[i];
-#else
-      Fib.fib$r_fid_overlay.fib$w_fid[i] = Nam.nam$w_fid[i];
-      Fib.fib$r_did_overlay.fib$w_did[i] = Nam.nam$w_did[i];
-#endif
+      int i;
+      for (i = 0; i < nam.nam$b_name; i++)
+        progname[i] = tolower(nam.nam$l_name[i]);
     }
-
-  status = sys$qiow (0, DevChan, IO$_ACCESS, &iosb, 0, 0,
-		     &FibDesc, &FileName, 0, 0, &Atr, 0);
-  sys$dassgn (DevChan);
-  if (!(status & 1))
-    return -1;
-  status = iosb[0];
-  if (!(status & 1))
-    return -1;
-
-  status = stat (name, buf);
-  if (status)
-    return -1;
-
-  buf->st_mtime = ((Rdate[0] >> 24) & 0xff) + ((Rdate[1] << 8) & 0xffffff00);
-  buf->st_ctime = ((Cdate[0] >> 24) & 0xff) + ((Cdate[1] << 8) & 0xffffff00);
-
-  return 0;
-}
+# endif
+  progname[nam.nam$b_name] = '\0';
 #endif
 
-char *
-cvt_time (unsigned long tval)
-{
-  static long int date[2];
-  static char str[27];
-  static struct dsc$descriptor date_str =
-  { 26, DSC$K_DTYPE_T, DSC$K_CLASS_S, str };
-
-  date[0] = (tval & 0xff) << 24;
-  date[1] = ((tval >> 8) & 0xffffff);
-
-  if ((date[0] == 0) && (date[1] == 0))
-    return ("never");
-
-  sys$asctim (0, &date_str, date, 0);
-  str[26] = '\0';
-
-  return (str);
+  return progname;
 }

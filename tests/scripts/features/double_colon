@@ -151,5 +151,14 @@ two');
 
 unlink('result','one','two');
 
+# TEST 10: check for proper backslash handling
+#          Savannah bug #33399
+
+run_make_test('
+a\ xb :: ; @echo one
+a\ xb :: ; @echo two
+',
+              '', "one\ntwo\n");
+
 # This tells the test driver that the perl test script executed properly.
 1;

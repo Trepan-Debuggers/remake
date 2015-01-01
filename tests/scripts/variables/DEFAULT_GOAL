@@ -42,10 +42,7 @@ run_make_test('
 .DEFAULT_GOAL = foo
 ',
 '',
-"#MAKE#: *** No rule to make target `foo\'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/DEFAULT_GOAL.mk.1\"
-",
+"#MAKE#: *** No rule to make target 'foo'.  Stop.",
 512);
 
 
@@ -55,10 +52,7 @@ run_make_test('
 .DEFAULT_GOAL := foo bar
 ',
 '',
-"#MAKE#: *** .DEFAULT_GOAL contains more than one target.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/DEFAULT_GOAL.mk.2\"
-",
+'#MAKE#: *** .DEFAULT_GOAL contains more than one target.  Stop.',
 512);
 
 
@@ -87,10 +81,7 @@ N =
 
 foo: ; @echo "boo"
 ',
-              '', "#MAKE#: *** No targets.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/DEFAULT_GOAL.mk.4\"
-", 512);
+              '', "#MAKE#: *** No targets.  Stop.\n", 512);
 
 # This tells the test driver that the perl test script executed properly.
 1;

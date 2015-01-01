@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -17,7 +17,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file dbg_fns.h 
+/** \file dbg_fns.h
  *
  *  \brief debugger helper functions.
 */
@@ -30,15 +30,15 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "rule.h"
 
-extern floc_t *p_target_loc;
+extern gmk_floc *p_target_loc;
 extern char   *psz_target_name;
 
 /*! We use the if when we fake a line number because
    a real one hasn't been recorded on the stack. */
-extern floc_t  fake_floc;
+extern gmk_floc  fake_floc;
 
 brkpt_mask_t get_brkpt_option(const char *psz_break_type);
-const floc_t *get_current_floc(void);
+const gmk_floc *get_current_floc(void);
 
 /*!
   Return the current target from the stack or NULL
@@ -54,7 +54,7 @@ const file_t * get_current_target(void);
 extern bool get_int(const char *psz_arg, /*out*/ int *pi_result,
 		    bool b_warn);
 
-/*! Parse psz_arg for a unsigned integer. The value is returned in 
+/*! Parse psz_arg for a unsigned integer. The value is returned in
     *pi_result. The retun value is true if parsing succeeded.
  */
 extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result,
@@ -70,7 +70,7 @@ extern char *get_word(char **ppsz_str);
 
 /*! Find the target in first word of psz_args or use $@ (the current
     stack) if none.  We also allow $@ or @ explicitly as a target name
-    to mean the current target on the stack. NULL is returned if a lookup 
+    to mean the current target on the stack. NULL is returned if a lookup
     of the target name was not found. ppsz_target is to the name
     looked up.
  */
@@ -79,16 +79,16 @@ get_target(/*in/out*/ char **ppsz_args, /*out*/ const char **ppsz_target);
 
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */
-extern bool is_abbrev_of(const char *psz_substr, 
+extern bool is_abbrev_of(const char *psz_substr,
 			 const char *psz_word, unsigned int i_min);
-/*! toggle var on or on or off depending on psz_onoff */    
+/*! toggle var on or on or off depending on psz_onoff */
 extern void on_off_toggle(const char *psz_onoff, int *var) ;
 
 /** Print where we are in the Makefile. */
-extern void print_debugger_location(const file_t *p_target, 
+extern void print_debugger_location(const file_t *p_target,
 				    debug_enter_reason_t reason,
 				    const floc_stack_node_t *p_stack_floc);
-    
+
 /** Strip whitespace from the start and end of STRING.  Return a pointer
    into STRING. */
 extern char *stripwhite (char *string);

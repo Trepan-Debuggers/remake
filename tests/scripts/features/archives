@@ -1,0 +1,97 @@
+#                                                              -*-mode: perl-*-
+
+$description = "Test GNU make's archive management features.";
+
+$details = "\
+This only works on systems that support it.";
+
+# If this instance of make doesn't support archives, skip it
+exists $FEATURES{archives} or return -1;
+
+# Create some .o files to work with
+utouch(-60, qw(a1.o a2.o a3.o));
+
+my $ar = $CONFIG_FLAGS{AR};
+
+# Some versions of ar print different things on creation.  Find out.
+my $created = `$ar rv libxx.a a1.o 2>&1`;
+
+# Some versions of ar print different things on add.  Find out.
+my $add = `$ar rv libxx.a a2.o 2>&1`;
+$add =~ s/a2\.o/#OBJECT#/g;
+
+# Some versions of ar print different things on replacement.  Find out.
+my $repl = `$ar rv libxx.a a2.o 2>&1`;
+$repl =~ s/a2\.o/#OBJECT#/g;
+
+unlink('libxx.a');
+
+# Very simple
+run_make_test('all: libxx.a(a1.o)',
+              '', "$ar rv libxx.a a1.o\n$created");
+
+# Multiple .o's.  Add a new one to the existing library
+($_ = $add) =~ s/#OBJECT#/a2.o/g;
+run_make_test('all: libxx.a(a1.o a2.o)',
+              '', "$ar rv libxx.a a2.o\n$_");
+
+# Touch one of the .o's so it's rebuilt
+utouch(-40, 'a1.o');
+($_ = $repl) =~ s/#OBJECT#/a1.o/g;
+run_make_test(undef, '', "$ar rv libxx.a a1.o\n$_");
+
+# Use wildcards
+run_make_test('all: libxx.a(*.o)',
+              '', "#MAKE#: Nothing to be done for 'all'.\n");
+
+# Touch one of the .o's so it's rebuilt
+utouch(-30, 'a1.o');
+($_ = $repl) =~ s/#OBJECT#/a1.o/g;
+run_make_test(undef, '', "$ar rv libxx.a a1.o\n$_");
+
+# Use both wildcards and simple names
+utouch(-50, 'a2.o');
+($_ = $add) =~ s/#OBJECT#/a3.o/g;
+$_ .= "$ar rv libxx.a a2.o\n";
+($_ .= $repl) =~ s/#OBJECT#/a2.o/g;
+run_make_test('all: libxx.a(a3.o *.o)', '',
+              "$ar rv libxx.a a3.o\n$_");
+
+# Check whitespace handling
+utouch(-40, 'a2.o');
+($_ = $repl) =~ s/#OBJECT#/a2.o/g;
+run_make_test('all: libxx.a(  a3.o    *.o     )', '',
+              "$ar rv libxx.a a2.o\n$_");
+
+rmfiles(qw(a1.o a2.o a3.o libxx.a));
+
+# Check non-archive targets
+# See Savannah bug #37878
+run_make_test(q!
+all: foo(bar).baz
+foo(bar).baz: ; @echo '$@'
+!,
+              '', "foo(bar).baz\n");
+
+# Check renaming of archive targets.
+# See Savannah bug #38442
+
+mkdir('artest', 0777);
+touch('foo.vhd');
+
+run_make_test(q!
+DIR = artest
+vpath % $(DIR)
+default: lib(foo)
+(%): %.vhd ; @cd $(DIR) && touch $(*F) && $(AR) $(ARFLAGS) $@ $(*F) >/dev/null 2>&1 && rm $(*F)
+.PHONY: default
+!,
+              '', "");
+
+run_make_test(undef, '', "#MAKE#: Nothing to be done for 'default'.\n");
+
+unlink('foo.vhd');
+remove_directory_tree('artest');
+
+# This tells the test driver that the perl test script executed properly.
+1;

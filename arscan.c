@@ -1,7 +1,5 @@
 /* Library function for scanning an archive file.
-Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+Copyright (C) 1987-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -16,7 +14,12 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "make.h"
+#include "makeint.h"
+
+#ifdef TEST
+/* Hack, the real error() routine eventually pulls in die from main.c */
+#define error(a, b, c, d)
+#endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -24,7 +27,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/file.h>
 #endif
 
-#ifndef	NO_ARCHIVES
+#ifndef NO_ARCHIVES
 
 #ifdef VMS
 #include <lbrdef.h>
@@ -32,98 +35,138 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <credef.h>
 #include <descrip.h>
 #include <ctype.h>
+#include <ssdef.h>
+#include <stsdef.h>
+#include <rmsdef.h>
+globalvalue unsigned int LBR$_HDRTRUNC;
+
 #if __DECC
 #include <unixlib.h>
 #include <lbr$routines.h>
 #endif
+const char *
+vmsify (const char *name, int type);
 
+/* Time conversion from VMS to Unix
+   Conversion from local time (stored in library) to GMT (needed for gmake)
+   Note: The tm_gmtoff element is a VMS extension to the ANSI standard. */
+static time_t
+vms_time_to_unix(void *vms_time)
+{
+  struct tm *tmp;
+  time_t unix_time;
+
+  unix_time = decc$fix_time(vms_time);
+  tmp = localtime(&unix_time);
+  unix_time -= tmp->tm_gmtoff;
+
+  return unix_time;
+}
+
+
+/* VMS library routines need static variables for callback */
 static void *VMS_lib_idx;
 
-static char *VMS_saved_memname;
-
-static time_t VMS_member_date;
+static const void *VMS_saved_arg;
 
 static long int (*VMS_function) ();
 
+static long int VMS_function_ret;
+
+
+/* This is a callback procedure for lib$get_index */
 static int
-VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
+VMS_get_member_info(struct dsc$descriptor_s *module, unsigned long *rfa)
 {
   int status, i;
-  long int fnval;
+  const int truncated = 0; /* Member name may be truncated */
+  time_t member_date; /* Member date */
+  char *filename;
+  unsigned int buffer_length; /* Actual buffer length */
 
-  time_t val;
+  /* Unused constants - Make does not actually use most of these */
+  const int file_desc = -1; /* archive file descriptor for reading the data */
+  const int header_position = 0; /* Header position */
+  const int data_position = 0; /* Data position in file */
+  const int data_size = 0; /* Data size */
+  const int uid = 0; /* member gid */
+  const int gid = 0; /* member gid */
+  const int mode = 0; /* member protection mode */
+  /* End of unused constants */
 
   static struct dsc$descriptor_s bufdesc =
     { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL };
 
+  /* Only need the module definition */
   struct mhddef *mhd;
-  char filename[128];
 
-  bufdesc.dsc$a_pointer = filename;
-  bufdesc.dsc$w_length = sizeof (filename);
-
-  status = lbr$set_module (&VMS_lib_idx, rfa, &bufdesc,
-			   &bufdesc.dsc$w_length, 0);
-  if (! (status & 1))
+  /* If a previous callback is non-zero, just return that status */
+  if (VMS_function_ret)
     {
-      error (NILF, _("lbr$set_module() failed to extract module info, status = %d"),
-	     status);
-
-      lbr$close (&VMS_lib_idx);
-
-      return 0;
+      return SS$_NORMAL;
     }
 
-  mhd = (struct mhddef *) filename;
+  /* lbr_set_module returns more than just the module header. So allocate
+     a buffer which is big enough: the maximum LBR$C_MAXHDRSIZ. That's at
+     least bigger than the size of struct mhddef.
+     If the request is too small, a buffer truncated warning is issued so
+     it can be reissued with a larger buffer.
+     We do not care if the buffer is truncated, so that is still a success. */
+  mhd = xmalloc(LBR$C_MAXHDRSIZ);
+  bufdesc.dsc$a_pointer = (char *) mhd;
+  bufdesc.dsc$w_length = LBR$C_MAXHDRSIZ;
 
-#ifdef __DECC
-  /* John Fowler <jfowler@nyx.net> writes this is needed in his environment,
-   * but that decc$fix_time() isn't documented to work this way.  Let me
-   * know if this causes problems in other VMS environments.
-   */
-  {
-    /* Modified by M. Gehre at 11-JAN-2008 because old formula is wrong:
-     * val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
-     * a) daylight specifies, if the timezone has daylight saving enabled, not
-     *    if it is active
-     * b) what we need is the information, if daylight saving was active, if
-     *    the library module was replaced. This information we get using the
-     *    localtime function
-     */
+  status = lbr$set_module(&VMS_lib_idx, rfa, &bufdesc, &buffer_length, 0);
 
-    struct tm *tmp;
+  if ((status != LBR$_HDRTRUNC) && !$VMS_STATUS_SUCCESS(status))
+    {
+      ON(error, NILF,
+          _("lbr$set_module() failed to extract module info, status = %d"),
+          status);
 
-    /* Conversion from VMS time to C time */
-    val = decc$fix_time (&mhd->mhd$l_datim);
+      lbr$close(&VMS_lib_idx);
 
-    /*
-     * Conversion from local time (stored in library) to GMT (needed for gmake)
-     * Note: The tm_gmtoff element is a VMS extension to the ANSI standard.
-     */
-    tmp = localtime (&val);
-    val -= tmp->tm_gmtoff;
-  }
+      return status;
+    }
+
+#ifdef TEST
+  /* When testing this code, it is useful to know the length returned */
+  printf("Input length = %d, actual = %d\n",
+      bufdesc.dsc$w_length, buffer_length);
 #endif
 
+  /* Conversion from VMS time to C time.
+     VMS defectlet - mhddef is sub-optimal, for the time, it has a 32 bit
+     longword, mhd$l_datim, and a 32 bit fill instead of two longwords, or
+     equivalent. */
+  member_date = vms_time_to_unix(&mhd->mhd$l_datim);
+  free(mhd);
+
+  /* Here we have a problem.  The module name on VMS does not have
+     a file type, but the filename pattern in the "VMS_saved_arg"
+     may have one.
+     But only the method being called knows how to interpret the
+     filename pattern.
+     There are currently two different formats being used.
+     This means that we need a VMS specific code in those methods
+     to handle it. */
+  filename = xmalloc(module->dsc$w_length + 1);
+
+  /* TODO: We may need an option to preserve the case of the module
+     For now force the module name to lower case */
   for (i = 0; i < module->dsc$w_length; i++)
-    filename[i] = _tolower ((unsigned char)module->dsc$a_pointer[i]);
+    filename[i] = _tolower((unsigned char )module->dsc$a_pointer[i]);
 
   filename[i] = '\0';
 
-  VMS_member_date = (time_t) -1;
+  VMS_function_ret = (*VMS_function)(file_desc, filename, truncated,
+      header_position, data_position, data_size, member_date, uid, gid, mode,
+      VMS_saved_arg);
 
-  fnval =
-    (*VMS_function) (-1, filename, 0, 0, 0, 0, val, 0, 0, 0,
-		     VMS_saved_memname);
-
-  if (fnval)
-    {
-      VMS_member_date = fnval;
-      return 0;
-    }
-  else
-    return 1;
+  free(filename);
+  return SS$_NORMAL;
 }
+
 
 /* Takes three arguments ARCHIVE, FUNCTION and ARG.
 
@@ -155,67 +198,96 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (const char *archive, ar_member_func_t function, const void *arg)
+ar_scan (const char *archive, ar_member_func_t function, const void *varg)
 {
-  char *p;
+  char *vms_archive;
 
   static struct dsc$descriptor_s libdesc =
     { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL };
 
-  unsigned long func = LBR$C_READ;
-  unsigned long type = LBR$C_TYP_UNK;
-  unsigned long index = 1;
-
+  const unsigned long func = LBR$C_READ;
+  const unsigned long type = LBR$C_TYP_UNK;
+  const unsigned long index = 1;
+  unsigned long lib_idx;
   int status;
 
-  status = lbr$ini_control (&VMS_lib_idx, &func, &type, 0);
+  VMS_saved_arg = varg;
 
-  if (! (status & 1))
+  /* Null archive string can show up in test and cause an access violation */
+  if (archive == NULL)
     {
-      error (NILF, _("lbr$ini_control() failed with status = %d"), status);
-      return -2;
-    }
-
-  /* there is no such descriptor with "const char *dsc$a_pointer" */
-  libdesc.dsc$a_pointer = (char *)archive;
-  libdesc.dsc$w_length = strlen (archive);
-
-  status = lbr$open (&VMS_lib_idx, &libdesc, 0, 0, 0, 0, 0);
-
-  if (! (status & 1))
-    {
-      error (NILF, _("unable to open library `%s' to lookup member `%s'"),
-	     archive, (char *)arg);
+      /* Null filenames do not exist */
       return -1;
     }
 
-  VMS_saved_memname = (char *)arg;
+  /* archive path name must be in VMS format */
+  vms_archive = (char *) vmsify(archive, 0);
 
-  /* For comparison, delete .obj from arg name.  */
+  status = lbr$ini_control(&VMS_lib_idx, &func, &type, 0);
 
-  p = strrchr (VMS_saved_memname, '.');
-  if (p)
-    *p = '\0';
+  if (!$VMS_STATUS_SUCCESS(status))
+    {
+      ON(error, NILF, _("lbr$ini_control() failed with status = %d"), status);
+      return -2;
+    }
+
+  libdesc.dsc$a_pointer = vms_archive;
+  libdesc.dsc$w_length = strlen(vms_archive);
+
+  status = lbr$open(&VMS_lib_idx, &libdesc, 0, NULL, 0, NULL, 0);
+
+  if (!$VMS_STATUS_SUCCESS(status))
+    {
+
+      /* TODO: A library format failure could mean that this is a file
+         generated by the GNU AR utility and in that case, we need to
+         take the UNIX codepath.  This will also take a change to the
+         GNV AR wrapper program. */
+
+      switch (status)
+        {
+      case RMS$_FNF:
+        /* Archive does not exist */
+        return -1;
+      default:
+#ifndef TEST
+        OSN(error, NILF,
+            _("unable to open library '%s' to lookup member status %d"),
+            archive, status);
+#endif
+        /* For library format errors, specification says to return -2 */
+        return -2;
+        }
+    }
 
   VMS_function = function;
 
-  VMS_member_date = (time_t) -1;
-  lbr$get_index (&VMS_lib_idx, &index, VMS_get_member_info, 0);
+  /* Clear the return status, as we are supposed to stop calling the
+     callback function if it becomes non-zero, and this is a static
+     variable. */
+  VMS_function_ret = 0;
 
-  /* Undo the damage.  */
-  if (p)
-    *p = '.';
+  status = lbr$get_index(&VMS_lib_idx, &index, VMS_get_member_info, NULL, 0);
 
-  lbr$close (&VMS_lib_idx);
+  lbr$close(&VMS_lib_idx);
 
-  return VMS_member_date > 0 ? VMS_member_date : 0;
+  /* Unless a failure occurred in the lbr$ routines, return the
+     the status from the 'function' routine. */
+  if ($VMS_STATUS_SUCCESS(status))
+    {
+      return VMS_function_ret;
+    }
+
+  /* This must be something wrong with the library and an error
+     message should already have been printed. */
+  return -2;
 }
 
 #else /* !VMS */
 
 /* SCO Unix's compiler defines both of these.  */
-#ifdef	M_UNIX
-#undef	M_XENIX
+#ifdef  M_UNIX
+#undef  M_XENIX
 #endif
 
 /* On the sun386i and in System V rel 3, ar.h defines two different archive
@@ -224,7 +296,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
    to have a nonzero value.  */
 
 #if (!defined (PORTAR) || PORTAR == 0) && (!defined (PORT5AR) || PORT5AR == 0)
-#undef	PORTAR
+#undef  PORTAR
 #ifdef M_XENIX
 /* According to Jim Sievert <jas1@rsvl.unisys.com>, for SCO XENIX defining
    PORTAR to 1 gets the wrong archive format, and defining it to 0 gets the
@@ -253,23 +325,23 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #endif
 
 #ifndef WINDOWS32
-# ifndef __BEOS__
+# if !defined (__ANDROID__) && !defined (__BEOS__)
 #  include <ar.h>
 # else
-   /* BeOS 5 doesn't have <ar.h> but has archives in the same format
+   /* These platforms don't have <ar.h> but have archives in the same format
     * as many other Unices.  This was taken from GNU binutils for BeOS.
     */
-#  define ARMAG	"!<arch>\n"	/* String that begins an archive file.  */
-#  define SARMAG 8		/* Size of that string.  */
-#  define ARFMAG "`\n"		/* String in ar_fmag at end of each header.  */
+#  define ARMAG "!<arch>\n"     /* String that begins an archive file.  */
+#  define SARMAG 8              /* Size of that string.  */
+#  define ARFMAG "`\n"          /* String in ar_fmag at end of each header.  */
 struct ar_hdr
   {
-    char ar_name[16];		/* Member file name, sometimes / terminated. */
-    char ar_date[12];		/* File date, decimal seconds since Epoch.  */
-    char ar_uid[6], ar_gid[6];	/* User and group IDs, in ASCII decimal.  */
-    char ar_mode[8];		/* File mode, in ASCII octal.  */
-    char ar_size[10];		/* File size, in ASCII decimal.  */
-    char ar_fmag[2];		/* Always contains ARFMAG.  */
+    char ar_name[16];           /* Member file name, sometimes / terminated. */
+    char ar_date[12];           /* File date, decimal seconds since Epoch.  */
+    char ar_uid[6], ar_gid[6];  /* User and group IDs, in ASCII decimal.  */
+    char ar_mode[8];            /* File mode, in ASCII octal.  */
+    char ar_size[10];           /* File size, in ASCII decimal.  */
+    char ar_fmag[2];            /* Always contains ARFMAG.  */
   };
 # endif
 # define TOCHAR(_m)     (_m)
@@ -294,8 +366,8 @@ struct ar_hdr
 #endif
 
 /* Cray's <ar.h> apparently defines this.  */
-#ifndef	AR_HDR_SIZE
-# define   AR_HDR_SIZE	(sizeof (struct ar_hdr))
+#ifndef AR_HDR_SIZE
+# define   AR_HDR_SIZE  (sizeof (struct ar_hdr))
 #endif
 
 /* Takes three arguments ARCHIVE, FUNCTION and ARG.
@@ -330,12 +402,10 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
-#ifdef AIAMAGBIG
+# ifdef AIAMAGBIG
   int big_archive = 0;
   FL_HDR_BIG fl_header_big;
-#endif
-#else
-  int long_name = 0;
+# endif
 #endif
   char *namemap = 0;
   int desc = open (archive, O_RDONLY, 0);
@@ -347,8 +417,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
     register int nread = read (desc, buf, SARMAG);
     if (nread != SARMAG || memcmp (buf, ARMAG, SARMAG))
       {
-	(void) close (desc);
-	return -2;
+        (void) close (desc);
+        return -2;
       }
   }
 #else
@@ -358,39 +428,39 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 
     if (nread != FL_HSZ)
       {
-	(void) close (desc);
-	return -2;
+        (void) close (desc);
+        return -2;
       }
 #ifdef AIAMAGBIG
     /* If this is a "big" archive, then set the flag and
        re-read the header into the "big" structure. */
     if (!memcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
       {
-	big_archive = 1;
+        big_archive = 1;
 
-	/* seek back to beginning of archive */
-	if (lseek (desc, 0, 0) < 0)
-	  {
-	    (void) close (desc);
-	    return -2;
-	  }
+        /* seek back to beginning of archive */
+        if (lseek (desc, 0, 0) < 0)
+          {
+            (void) close (desc);
+            return -2;
+          }
 
-	/* re-read the header into the "big" structure */
-	nread = read (desc, &fl_header_big, FL_HSZ_BIG);
-	if (nread != FL_HSZ_BIG)
-	  {
-	    (void) close (desc);
-	    return -2;
-	  }
+        /* re-read the header into the "big" structure */
+        nread = read (desc, &fl_header_big, FL_HSZ_BIG);
+        if (nread != FL_HSZ_BIG)
+          {
+            (void) close (desc);
+            return -2;
+          }
       }
     else
 #endif
        /* Check to make sure this is a "normal" archive. */
       if (memcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
-	{
+        {
           (void) close (desc);
           return -2;
-	}
+        }
   }
 #else
   {
@@ -399,11 +469,11 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #else
     unsigned short int buf;
 #endif
-    register int nread = read(desc, &buf, sizeof (buf));
+    register int nread = read (desc, &buf, sizeof (buf));
     if (nread != sizeof (buf) || buf != ARMAG)
       {
-	(void) close (desc);
-	return -2;
+        (void) close (desc);
+        return -2;
       }
   }
 #endif
@@ -421,143 +491,144 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #ifdef AIAMAGBIG
     if ( big_archive )
       {
-	sscanf (fl_header_big.fl_fstmoff, "%20ld", &member_offset);
-	sscanf (fl_header_big.fl_lstmoff, "%20ld", &last_member_offset);
+        sscanf (fl_header_big.fl_fstmoff, "%20ld", &member_offset);
+        sscanf (fl_header_big.fl_lstmoff, "%20ld", &last_member_offset);
       }
     else
 #endif
       {
-	sscanf (fl_header.fl_fstmoff, "%12ld", &member_offset);
-	sscanf (fl_header.fl_lstmoff, "%12ld", &last_member_offset);
+        sscanf (fl_header.fl_fstmoff, "%12ld", &member_offset);
+        sscanf (fl_header.fl_lstmoff, "%12ld", &last_member_offset);
       }
 
     if (member_offset == 0)
       {
-	/* Empty archive.  */
-	close (desc);
-	return 0;
+        /* Empty archive.  */
+        close (desc);
+        return 0;
       }
 #else
-#ifndef	M_XENIX
+#ifndef M_XENIX
     register long int member_offset = sizeof (int);
-#else	/* Xenix.  */
+#else   /* Xenix.  */
     register long int member_offset = sizeof (unsigned short int);
-#endif	/* Not Xenix.  */
+#endif  /* Not Xenix.  */
 #endif
 #endif
 
     while (1)
       {
-	register int nread;
-	struct ar_hdr member_header;
+        register int nread;
+        struct ar_hdr member_header;
 #ifdef AIAMAGBIG
-	struct ar_hdr_big member_header_big;
+        struct ar_hdr_big member_header_big;
 #endif
 #ifdef AIAMAG
-	char name[256];
-	int name_len;
-	long int dateval;
-	int uidval, gidval;
-	long int data_offset;
+        char name[256];
+        int name_len;
+        long int dateval;
+        int uidval, gidval;
+        long int data_offset;
 #else
-	char namebuf[sizeof member_header.ar_name + 1];
-	char *name;
-	int is_namemap;		/* Nonzero if this entry maps long names.  */
+        char namebuf[sizeof member_header.ar_name + 1];
+        char *name;
+        int is_namemap;         /* Nonzero if this entry maps long names.  */
+        int long_name = 0;
 #endif
-	long int eltsize;
-	int eltmode;
-	long int fnval;
+        long int eltsize;
+        int eltmode;
+        long int fnval;
 
-	if (lseek (desc, member_offset, 0) < 0)
-	  {
-	    (void) close (desc);
-	    return -2;
-	  }
+        if (lseek (desc, member_offset, 0) < 0)
+          {
+            (void) close (desc);
+            return -2;
+          }
 
 #ifdef AIAMAG
 #define       AR_MEMHDR_SZ(x) (sizeof(x) - sizeof (x._ar_name))
 
 #ifdef AIAMAGBIG
-	if (big_archive)
-	  {
-	    nread = read (desc, &member_header_big,
-			  AR_MEMHDR_SZ(member_header_big) );
+        if (big_archive)
+          {
+            nread = read (desc, &member_header_big,
+                          AR_MEMHDR_SZ(member_header_big) );
 
-	    if (nread != AR_MEMHDR_SZ(member_header_big))
-	      {
-		(void) close (desc);
-		return -2;
-	      }
+            if (nread != AR_MEMHDR_SZ(member_header_big))
+              {
+                (void) close (desc);
+                return -2;
+              }
 
-	    sscanf (member_header_big.ar_namlen, "%4d", &name_len);
-	    nread = read (desc, name, name_len);
+            sscanf (member_header_big.ar_namlen, "%4d", &name_len);
+            nread = read (desc, name, name_len);
 
-	    if (nread != name_len)
-	      {
-		(void) close (desc);
-		return -2;
-	      }
+            if (nread != name_len)
+              {
+                (void) close (desc);
+                return -2;
+              }
 
-	    name[name_len] = 0;
+            name[name_len] = 0;
 
-	    sscanf (member_header_big.ar_date, "%12ld", &dateval);
-	    sscanf (member_header_big.ar_uid, "%12d", &uidval);
-	    sscanf (member_header_big.ar_gid, "%12d", &gidval);
-	    sscanf (member_header_big.ar_mode, "%12o", &eltmode);
-	    sscanf (member_header_big.ar_size, "%20ld", &eltsize);
+            sscanf (member_header_big.ar_date, "%12ld", &dateval);
+            sscanf (member_header_big.ar_uid, "%12d", &uidval);
+            sscanf (member_header_big.ar_gid, "%12d", &gidval);
+            sscanf (member_header_big.ar_mode, "%12o", &eltmode);
+            sscanf (member_header_big.ar_size, "%20ld", &eltsize);
 
-	    data_offset = (member_offset + AR_MEMHDR_SZ(member_header_big)
-			   + name_len + 2);
-	  }
-	else
+            data_offset = (member_offset + AR_MEMHDR_SZ(member_header_big)
+                           + name_len + 2);
+          }
+        else
 #endif
-	  {
-	    nread = read (desc, &member_header,
-			  AR_MEMHDR_SZ(member_header) );
+          {
+            nread = read (desc, &member_header,
+                          AR_MEMHDR_SZ(member_header) );
 
-	    if (nread != AR_MEMHDR_SZ(member_header))
-	      {
-		(void) close (desc);
-		return -2;
-	      }
+            if (nread != AR_MEMHDR_SZ(member_header))
+              {
+                (void) close (desc);
+                return -2;
+              }
 
-	    sscanf (member_header.ar_namlen, "%4d", &name_len);
-	    nread = read (desc, name, name_len);
+            sscanf (member_header.ar_namlen, "%4d", &name_len);
+            nread = read (desc, name, name_len);
 
-	    if (nread != name_len)
-	      {
-		(void) close (desc);
-		return -2;
-	      }
+            if (nread != name_len)
+              {
+                (void) close (desc);
+                return -2;
+              }
 
-	    name[name_len] = 0;
+            name[name_len] = 0;
 
-	    sscanf (member_header.ar_date, "%12ld", &dateval);
-	    sscanf (member_header.ar_uid, "%12d", &uidval);
-	    sscanf (member_header.ar_gid, "%12d", &gidval);
-	    sscanf (member_header.ar_mode, "%12o", &eltmode);
-	    sscanf (member_header.ar_size, "%12ld", &eltsize);
+            sscanf (member_header.ar_date, "%12ld", &dateval);
+            sscanf (member_header.ar_uid, "%12d", &uidval);
+            sscanf (member_header.ar_gid, "%12d", &gidval);
+            sscanf (member_header.ar_mode, "%12o", &eltmode);
+            sscanf (member_header.ar_size, "%12ld", &eltsize);
 
-	    data_offset = (member_offset + AR_MEMHDR_SZ(member_header)
-			   + name_len + 2);
-	  }
-	data_offset += data_offset % 2;
+            data_offset = (member_offset + AR_MEMHDR_SZ(member_header)
+                           + name_len + 2);
+          }
+        data_offset += data_offset % 2;
 
-	fnval =
-	  (*function) (desc, name, 0,
-		       member_offset, data_offset, eltsize,
-		       dateval, uidval, gidval,
-		       eltmode, arg);
+        fnval =
+          (*function) (desc, name, 0,
+                       member_offset, data_offset, eltsize,
+                       dateval, uidval, gidval,
+                       eltmode, arg);
 
-#else	/* Not AIAMAG.  */
-	nread = read (desc, &member_header, AR_HDR_SIZE);
-	if (nread == 0)
-	  /* No data left means end of file; that is OK.  */
-	  break;
+#else   /* Not AIAMAG.  */
+        nread = read (desc, &member_header, AR_HDR_SIZE);
+        if (nread == 0)
+          /* No data left means end of file; that is OK.  */
+          break;
 
-	if (nread != AR_HDR_SIZE
+        if (nread != AR_HDR_SIZE
 #if defined(ARFMAG) || defined(ARFZMAG)
-	    || (
+            || (
 # ifdef ARFMAG
                 memcmp (member_header.ar_fmag, ARFMAG, 2)
 # else
@@ -571,152 +642,152 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 # endif
                )
 #endif
-	    )
-	  {
-	    (void) close (desc);
-	    return -2;
-	  }
+            )
+          {
+            (void) close (desc);
+            return -2;
+          }
 
-	name = namebuf;
-	memcpy (name, member_header.ar_name, sizeof member_header.ar_name);
-	{
-	  register char *p = name + sizeof member_header.ar_name;
-	  do
-	    *p = '\0';
-	  while (p > name && *--p == ' ');
-
-#ifndef AIAMAG
-	  /* If the member name is "//" or "ARFILENAMES/" this may be
-	     a list of file name mappings.  The maximum file name
-	     length supported by the standard archive format is 14
-	     characters.  This member will actually always be the
-	     first or second entry in the archive, but we don't check
-	     that.  */
-	  is_namemap = (!strcmp (name, "//")
-			|| !strcmp (name, "ARFILENAMES/"));
-#endif	/* Not AIAMAG. */
-	  /* On some systems, there is a slash after each member name.  */
-	  if (*p == '/')
-	    *p = '\0';
+        name = namebuf;
+        memcpy (name, member_header.ar_name, sizeof member_header.ar_name);
+        {
+          register char *p = name + sizeof member_header.ar_name;
+          do
+            *p = '\0';
+          while (p > name && *--p == ' ');
 
 #ifndef AIAMAG
-	  /* If the member name starts with a space or a slash, this
-	     is an index into the file name mappings (used by GNU ar).
-	     Otherwise if the member name looks like #1/NUMBER the
-	     real member name appears in the element data (used by
-	     4.4BSD).  */
-	  if (! is_namemap
-	      && (name[0] == ' ' || name[0] == '/')
-	      && namemap != 0)
-	    {
-	      name = namemap + atoi (name + 1);
-	      long_name = 1;
-	    }
-	  else if (name[0] == '#'
-		   && name[1] == '1'
-		   && name[2] == '/')
-	    {
-	      int namesize = atoi (name + 3);
+          /* If the member name is "//" or "ARFILENAMES/" this may be
+             a list of file name mappings.  The maximum file name
+             length supported by the standard archive format is 14
+             characters.  This member will actually always be the
+             first or second entry in the archive, but we don't check
+             that.  */
+          is_namemap = (!strcmp (name, "//")
+                        || !strcmp (name, "ARFILENAMES/"));
+#endif  /* Not AIAMAG. */
+          /* On some systems, there is a slash after each member name.  */
+          if (*p == '/')
+            *p = '\0';
 
-	      name = alloca (namesize + 1);
-	      nread = read (desc, name, namesize);
-	      if (nread != namesize)
-		{
-		  close (desc);
-		  return -2;
-		}
-	      name[namesize] = '\0';
+#ifndef AIAMAG
+          /* If the member name starts with a space or a slash, this
+             is an index into the file name mappings (used by GNU ar).
+             Otherwise if the member name looks like #1/NUMBER the
+             real member name appears in the element data (used by
+             4.4BSD).  */
+          if (! is_namemap
+              && (name[0] == ' ' || name[0] == '/')
+              && namemap != 0)
+            {
+              name = namemap + atoi (name + 1);
+              long_name = 1;
+            }
+          else if (name[0] == '#'
+                   && name[1] == '1'
+                   && name[2] == '/')
+            {
+              int namesize = atoi (name + 3);
 
-	      long_name = 1;
-	    }
+              name = alloca (namesize + 1);
+              nread = read (desc, name, namesize);
+              if (nread != namesize)
+                {
+                  close (desc);
+                  return -2;
+                }
+              name[namesize] = '\0';
+
+              long_name = 1;
+            }
 #endif /* Not AIAMAG. */
-	}
+        }
 
-#ifndef	M_XENIX
-	sscanf (TOCHAR (member_header.ar_mode), "%o", &eltmode);
-	eltsize = atol (TOCHAR (member_header.ar_size));
-#else	/* Xenix.  */
-	eltmode = (unsigned short int) member_header.ar_mode;
-	eltsize = member_header.ar_size;
-#endif	/* Not Xenix.  */
+#ifndef M_XENIX
+        sscanf (TOCHAR (member_header.ar_mode), "%o", &eltmode);
+        eltsize = atol (TOCHAR (member_header.ar_size));
+#else   /* Xenix.  */
+        eltmode = (unsigned short int) member_header.ar_mode;
+        eltsize = member_header.ar_size;
+#endif  /* Not Xenix.  */
 
-	fnval =
-	  (*function) (desc, name, ! long_name, member_offset,
-		       member_offset + AR_HDR_SIZE, eltsize,
-#ifndef	M_XENIX
-		       atol (TOCHAR (member_header.ar_date)),
-		       atoi (TOCHAR (member_header.ar_uid)),
-		       atoi (TOCHAR (member_header.ar_gid)),
-#else	/* Xenix.  */
-		       member_header.ar_date,
-		       member_header.ar_uid,
-		       member_header.ar_gid,
-#endif	/* Not Xenix.  */
-		       eltmode, arg);
+        fnval =
+          (*function) (desc, name, ! long_name, member_offset,
+                       member_offset + AR_HDR_SIZE, eltsize,
+#ifndef M_XENIX
+                       atol (TOCHAR (member_header.ar_date)),
+                       atoi (TOCHAR (member_header.ar_uid)),
+                       atoi (TOCHAR (member_header.ar_gid)),
+#else   /* Xenix.  */
+                       member_header.ar_date,
+                       member_header.ar_uid,
+                       member_header.ar_gid,
+#endif  /* Not Xenix.  */
+                       eltmode, arg);
 
 #endif  /* AIAMAG.  */
 
-	if (fnval)
-	  {
-	    (void) close (desc);
-	    return fnval;
-	  }
+        if (fnval)
+          {
+            (void) close (desc);
+            return fnval;
+          }
 
 #ifdef AIAMAG
-	if (member_offset == last_member_offset)
-	  /* End of the chain.  */
-	  break;
+        if (member_offset == last_member_offset)
+          /* End of the chain.  */
+          break;
 
 #ifdef AIAMAGBIG
-	if (big_archive)
+        if (big_archive)
          sscanf (member_header_big.ar_nxtmem, "%20ld", &member_offset);
-	else
+        else
 #endif
-	  sscanf (member_header.ar_nxtmem, "%12ld", &member_offset);
+          sscanf (member_header.ar_nxtmem, "%12ld", &member_offset);
 
-	if (lseek (desc, member_offset, 0) != member_offset)
-	  {
-	    (void) close (desc);
-	    return -2;
-	  }
+        if (lseek (desc, member_offset, 0) != member_offset)
+          {
+            (void) close (desc);
+            return -2;
+          }
 #else
 
-	/* If this member maps archive names, we must read it in.  The
-	   name map will always precede any members whose names must
-	   be mapped.  */
-	if (is_namemap)
-	  {
-	    char *clear;
-	    char *limit;
+        /* If this member maps archive names, we must read it in.  The
+           name map will always precede any members whose names must
+           be mapped.  */
+        if (is_namemap)
+          {
+            char *clear;
+            char *limit;
 
-	    namemap = alloca (eltsize);
-	    nread = read (desc, namemap, eltsize);
-	    if (nread != eltsize)
-	      {
-		(void) close (desc);
-		return -2;
-	      }
+            namemap = alloca (eltsize);
+            nread = read (desc, namemap, eltsize);
+            if (nread != eltsize)
+              {
+                (void) close (desc);
+                return -2;
+              }
 
-	    /* The names are separated by newlines.  Some formats have
-	       a trailing slash.  Null terminate the strings for
-	       convenience.  */
-	    limit = namemap + eltsize;
-	    for (clear = namemap; clear < limit; clear++)
-	      {
-		if (*clear == '\n')
-		  {
-		    *clear = '\0';
-		    if (clear[-1] == '/')
-		      clear[-1] = '\0';
-		  }
-	      }
+            /* The names are separated by newlines.  Some formats have
+               a trailing slash.  Null terminate the strings for
+               convenience.  */
+            limit = namemap + eltsize;
+            for (clear = namemap; clear < limit; clear++)
+              {
+                if (*clear == '\n')
+                  {
+                    *clear = '\0';
+                    if (clear[-1] == '/')
+                      clear[-1] = '\0';
+                  }
+              }
 
-	    is_namemap = 0;
-	  }
+            is_namemap = 0;
+          }
 
-	member_offset += AR_HDR_SIZE + eltsize;
-	if (member_offset % 2 != 0)
-	  member_offset++;
+        member_offset += AR_HDR_SIZE + eltsize;
+        if (member_offset % 2 != 0)
+          member_offset++;
 #endif
       }
   }
@@ -748,22 +819,45 @@ ar_name_equal (const char *name, const char *mem, int truncated)
 #else
       struct ar_hdr hdr;
 #if !defined (__hpux) && !defined (cray)
-      return strneq (name, mem, sizeof(hdr.ar_name) - 1);
+      return strneq (name, mem, sizeof (hdr.ar_name) - 1);
 #else
-      return strneq (name, mem, sizeof(hdr.ar_name) - 2);
+      return strneq (name, mem, sizeof (hdr.ar_name) - 2);
 #endif /* !__hpux && !cray */
 #endif /* !AIAMAG */
     }
-#endif /* !VMS */
 
   return !strcmp (name, mem);
+#else
+  /* VMS members do not have suffixes, but the filenames usually
+     have.
+     Do we need to strip VMS disk/directory format paths?
+
+     Most VMS compilers etc. by default are case insensitive
+     but produce uppercase external names, incl. module names.
+     However the VMS librarian (ar) and the linker by default
+     are case sensitive: they take what they get, usually
+     uppercase names. So for the non-default settings of the
+     compilers etc. there is a need to have a case sensitive
+     mode. */
+  {
+    int len;
+    len = strlen(mem);
+    int match;
+    char *dot;
+    if ((dot=strrchr(name,'.')))
+      match = (len == dot - name) && !strncasecmp(name, mem, len);
+    else
+      match = !strcasecmp (name, mem);
+    return match;
+  }
+#endif /* !VMS */
 }
 
 #ifndef VMS
 /* ARGSUSED */
 static long int
 ar_member_pos (int desc UNUSED, const char *mem, int truncated,
-	       long int hdrpos, long int datapos UNUSED, long int size UNUSED,
+               long int hdrpos, long int datapos UNUSED, long int size UNUSED,
                long int date UNUSED, int uid UNUSED, int gid UNUSED,
                int mode UNUSED, const void *name)
 {
@@ -817,7 +911,7 @@ ar_member_touch (const char *arname, const char *memname)
     ar_hdr.ar_date[ui] = ' ';
   sprintf (TOCHAR (ar_hdr.ar_date), "%ld", (long int) statbuf.st_mtime);
 #ifdef AIAMAG
-  ar_hdr.ar_date[strlen(ar_hdr.ar_date)] = ' ';
+  ar_hdr.ar_date[strlen (ar_hdr.ar_date)] = ' ';
 #endif
 #else
   ar_hdr.ar_date = statbuf.st_mtime;
@@ -842,14 +936,14 @@ ar_member_touch (const char *arname, const char *memname)
 
 long int
 describe_member (int desc, const char *name, int truncated,
-		 long int hdrpos, long int datapos, long int size,
+                 long int hdrpos, long int datapos, long int size,
                  long int date, int uid, int gid, int mode, const void *arg)
 {
   extern char *ctime ();
 
-  printf (_("Member `%s'%s: %ld bytes at %ld (%ld).\n"),
-	  name, truncated ? _(" (name might be truncated)") : "",
-	  size, hdrpos, datapos);
+  printf (_("Member '%s'%s: %ld bytes at %ld (%ld).\n"),
+          name, truncated ? _(" (name might be truncated)") : "",
+          size, hdrpos, datapos);
   printf (_("  Date %s"), ctime (&date));
   printf (_("  uid = %d, gid = %d, mode = 0%o.\n"), uid, gid, mode);
 
@@ -863,5 +957,5 @@ main (int argc, char **argv)
   return 0;
 }
 
-#endif	/* TEST.  */
-#endif	/* NO_ARCHIVES.  */
+#endif  /* TEST.  */
+#endif  /* NO_ARCHIVES.  */

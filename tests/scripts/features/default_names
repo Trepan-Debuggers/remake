@@ -10,32 +10,35 @@ open(MAKEFILE,"> $makefile");
 print MAKEFILE "FIRST: ; \@echo It chose GNUmakefile\n";
 close(MAKEFILE);
 
-# DOS/WIN32 platforms preserve case, but Makefile is the same file as makefile.
-# Just test what we can here (avoid Makefile versus makefile test).
-
-if ($port_type eq 'UNIX') {
-  # Create another makefile called "makefile"
-  open(MAKEFILE,"> makefile");
-  print MAKEFILE "SECOND: ; \@echo It chose makefile\n";
-  close(MAKEFILE);
-}
-
-# Create another makefile called "Makefile"
-open(MAKEFILE,"> Makefile");
-print MAKEFILE "THIRD: ; \@echo It chose Makefile\n";
+# Create another makefile called "makefile"
+open(MAKEFILE,"> makefile");
+print MAKEFILE "SECOND: ; \@echo It chose makefile\n";
 close(MAKEFILE);
 
+# DOS/WIN32/MacOSX platforms are case-insensitive / case-preserving, so
+# Makefile is the same file as makefile.  Just test what we can here.
 
-&run_make_with_options("","",&get_logfile);
-&compare_output("It chose GNUmakefile\n",&get_logfile(1));
-unlink $makefile;
-
-if ($port_type eq 'UNIX') {
-  &run_make_with_options("","",&get_logfile);
-  &compare_output("It chose makefile\n",&get_logfile(1));
-  unlink "makefile";
+my $case_sensitive = 0;
+if (! -f 'Makefile') {
+    # Create another makefile called "Makefile"
+    $case_sensitive = 1;
+    open(MAKEFILE,"> Makefile");
+    print MAKEFILE "THIRD: ; \@echo It chose Makefile\n";
+    close(MAKEFILE);
 }
 
-&run_make_with_options("","",&get_logfile);
-&compare_output("It chose Makefile\n",&get_logfile(1));
-unlink "Makefile";
+run_make_with_options("","",&get_logfile);
+compare_output("It chose GNUmakefile\n",&get_logfile(1));
+unlink($makefile);
+
+run_make_with_options("","",&get_logfile);
+compare_output("It chose makefile\n",&get_logfile(1));
+unlink("makefile");
+
+if ($case_sensitive) {
+    run_make_with_options("","",&get_logfile);
+    compare_output("It chose Makefile\n",&get_logfile(1));
+    unlink("Makefile");
+}
+
+1;

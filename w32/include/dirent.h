@@ -1,6 +1,5 @@
 /* Windows version of dirent.h
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -37,16 +36,16 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct dirent
 {
-  ino_t d_ino; 			/* unused - no equivalent on WINDOWS32 */
+  ino_t d_ino;                  /* unused - no equivalent on WINDOWS32 */
   char d_name[NAME_MAX+1];
 };
 
 typedef struct dir_struct {
-	ULONG	dir_ulCookie;
-	HANDLE	dir_hDirHandle;
-	DWORD	dir_nNumFiles;
-	char	dir_pDirectoryName[NAME_MAX+1];
-	struct dirent dir_sdReturn;
+        ULONG   dir_ulCookie;
+        HANDLE  dir_hDirHandle;
+        DWORD   dir_nNumFiles;
+        char    dir_pDirectoryName[NAME_MAX+1];
+        struct dirent dir_sdReturn;
 } DIR;
 
 DIR *opendir(const char *);

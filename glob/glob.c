@@ -377,6 +377,11 @@ glob (pattern, flags, errfunc, pglob)
       return -1;
     }
 
+  /* POSIX requires all slashes to be matched.  This means that with
+     a trailing slash we must match only directories.  */
+  if (pattern[0] && pattern[strlen (pattern) - 1] == '/')
+    flags |= GLOB_ONLYDIR;
+
   if (flags & GLOB_BRACE)
     {
       const char *begin = strchr (pattern, '{');

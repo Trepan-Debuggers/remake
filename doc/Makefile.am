@@ -1,6 +1,5 @@
 # -*-Makefile-*-, or close enough
-# Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-# 2010 Free Software Foundation, Inc.
+# Copyright (C) 2000-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -18,25 +17,8 @@
 
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
-TEXI2PDF = texi2dvi --pdf
 
-EXTRA_DIST = test1.mk test2.mk
-
-# info_TEXINFOS =	make.texi remake.texi
-info_TEXINFOS =	remake.texi
+info_TEXINFOS =	make.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
-MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf 
-
-CLEANFILES = make*.html make*.info remake.html remake*.info
-
-## ----------------------------- ##
-## Other documentation formats.  ##
-## ----------------------------- ##
-
-html: remake_1.html
-
-remake_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
-	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/remake.texi --output remake.html
-
-.PHONY: html
+CLEANFILES = make*.html

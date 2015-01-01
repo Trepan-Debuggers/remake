@@ -33,10 +33,7 @@ close(MAKEFILE);
 # use the .PHONY target.
 &touch("clean");
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-$delete_command $example clean
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = "$delete_command $example clean\n";
 &run_make_with_options($makefile,"clean",&get_logfile);
 
 if (-f $example) {

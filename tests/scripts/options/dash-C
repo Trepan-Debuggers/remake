@@ -34,13 +34,9 @@ if (-f $example) {
 }
 
 # Create the answer to what should be produced by this Makefile
-$answer = "$make_name: Entering directory `$wpath'
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-"
-        . "$delete_command EXAMPLE
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"
-        . "$make_name: Leaving directory `$wpath'\n";
+$answer = "$make_name: Entering directory '$wpath'\n"
+        . "$delete_command EXAMPLE\n"
+        . "$make_name: Leaving directory '$wpath'\n";
 
 &compare_output($answer,&get_logfile(1));
 
@@ -66,13 +62,9 @@ if (-f $example) {
 }
 
 # Create the answer to what should be produced by this Makefile
-$answer = "$make_name: Entering directory `$wpath'
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-"
-        . "$delete_command EXAMPLEslash
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"
-        . "$make_name: Leaving directory `$wpath'\n";
+$answer = "$make_name: Entering directory '$wpath'\n"
+        . "$delete_command EXAMPLEslash\n"
+        . "$make_name: Leaving directory '$wpath'\n";
 
 &compare_output($answer,&get_logfile(1));
 

@@ -1,0 +1,31 @@
+#                                                                    -*-perl-*-
+
+$description = "Test remake --tasks and --targets.\n";
+
+$details = "\
+See that make --tasks shows some targets and assocated comments";
+
+# TEST #0 --tasks
+# -------
+
+run_make_test('
+#: A simple comment
+all:
+	echo "Simple comment"
+', '-r -R --tasks', 'all	# A simple comment
+');
+
+# TEST #0 --targets
+# -------
+
+run_make_test('
+#: A simple comment
+all:
+	echo "Simple comment"
+', '-r -R --targets', '	.DEFAULT
+	.SUFFIXES
+	all	# A simple comment
+	work/remake/tasks.mk.1
+');
+
+1;

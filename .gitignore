@@ -18,6 +18,7 @@
 /autom4te.cache
 /build.sh
 /build.sh.in
+/config
 /config.ami
 /config.h
 /config.h-vms
@@ -34,5 +35,6 @@
 /remake
 /remake-*.tar.bz2
 /remake-*.tar.gz
+/*.log
 /stamp-h1
 /tmp

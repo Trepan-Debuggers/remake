@@ -33,18 +33,10 @@ close(MAKEFILE);
 
 # TEST #1
 
-if (0) {
 &utouch(-20, 'foo.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
-$answer = 
-"##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.f foo.e
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.e foo.d
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = "cp foo.f foo.e\ncp foo.e foo.d\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #2
@@ -52,7 +44,7 @@ cp foo.e foo.d
 unlink('foo.e');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
-$answer = "$make_name: `foo.d' is up to date.\n";
+$answer = "$make_name: 'foo.d' is up to date.\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #3
@@ -61,22 +53,13 @@ $answer = "$make_name: `foo.d' is up to date.\n";
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.f foo.e
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.e foo.d
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = "cp foo.f foo.e\ncp foo.e foo.d\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #4
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.e foo.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = "cp foo.e foo.c\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #5
@@ -84,7 +67,7 @@ cp foo.e foo.c
 unlink('foo.e');
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "$make_name: `foo.c' is up to date.\n";
+$answer = "$make_name: 'foo.c' is up to date.\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #6
@@ -93,17 +76,11 @@ $answer = "$make_name: `foo.c' is up to date.\n";
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.f foo.e
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp foo.e foo.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = "cp foo.f foo.e\ncp foo.e foo.c\n";
 &compare_output($answer, &get_logfile(1));
 
 unlink('foo.f', 'foo.e', 'foo.d', 'foo.c');
-};
+
 # TEST #7 -- test the "global" .SECONDARY, with no targets.
 
 $makefile2 = &get_tmpfile;
@@ -126,7 +103,7 @@ close(MAKEFILE);
 touch('final');
 
 &run_make_with_options($makefile2, '', &get_logfile);
-$answer = "$make_name: `final' is up to date.\n";
+$answer = "$make_name: 'final' is up to date.\n";
 &compare_output($answer, &get_logfile(1));
 
 unlink('source', 'final', 'intermediate');
@@ -147,25 +124,17 @@ unlink('version2');
 # TEST #9 -- Savannah bug #15919
 # The original fix for this bug caused a new bug, shown here.
 
-if (0) {
 touch(qw(1.a 2.a));
 
 run_make_test('
 %.c : %.b ; cp $< $@
 %.b : %.a ; cp $< $@
-all : 1.c 2.c', '-rR -j',
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp 1.a 1.b
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cp 2.a 2.b
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+all : 1.c 2.c
+2.a: 1.c', '-rR -j',
+'cp 1.a 1.b
 cp 1.b 1.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp 2.a 2.b
 cp 2.b 2.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm 1.b 2.b');
 
 unlink(qw(1.a 2.a 1.c 2.c));
@@ -186,21 +155,11 @@ test : test.4
 %.2 : %.1 ; touch $@
 
 %.1 : %.0 ; touch $@', '-rR -j 2',
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-touch test.1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'touch test.1
 touch test.2
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.3
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.int
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.4
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm test.int');
 
 # After a touch of test.0 it should give the same output, except we don't need
@@ -208,18 +167,10 @@ rm test.int');
 sleep(1);
 touch('test.0');
 run_make_test(undef, '-rR -j 2',
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-touch test.1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'touch test.1
 touch test.2
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.int
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.4
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm test.int');
 
 # With both test.0 and test.3 updated it should still build everything except
@@ -227,21 +178,13 @@ rm test.int');
 sleep(1);
 touch('test.0', 'test.3');
 run_make_test(undef, '-rR -j 2',
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-touch test.1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'touch test.1
 touch test.2
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.int
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch test.4
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm test.int');
 
 unlink(qw(test.0 test.1 test.2 test.3 test.4));
-};
+
 # This tells the test driver that the perl test script executed properly.
 1;

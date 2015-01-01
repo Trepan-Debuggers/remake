@@ -151,9 +151,6 @@ unsigned int get_path_max (void);
 # define CHAR_BIT 8
 #endif
 
-/* Nonzero if the integer type T is signed.  */
-#define INTEGER_TYPE_SIGNED(t) ((t) -1 < 0)
-
 /* The minimum and maximum values for the integer type T.
    Use ~ (t) 0, not -1, for portability to 1's complement hosts.  */
 #define INTEGER_TYPE_MINIMUM(t) \
@@ -258,17 +255,6 @@ char *strerror (int errnum);
 char *strsignal (int signum);
 #endif
 
-/* ISDIGIT offers the following features:
-   - Its arg may be any int or unsigned int; it need not be an unsigned char.
-   - It's guaranteed to evaluate its argument exactly once.
-      NOTE!  Make relies on this behavior, don't change it!
-   - It's typically faster.
-   POSIX 1003.2-1992 section 2.5.2.1 page 50 lines 1556-1558 says that
-   only '0' through '9' are digits.  Prefer ISDIGIT to isdigit() unless
-   it's important to use the locale's definition of `digit' even when the
-   host does not conform to POSIX.  */
-#define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
-
 /* Test if two strings are equal. Is this worthwhile?  Should be profiled.  */
 #define streq(a, b) \
    ((a) == (b) || \
@@ -350,16 +336,6 @@ extern int unixy_shell;
 struct rlimit stack_limit;
 #endif
 
-struct floc
-  {
-    const char *filenm;
-    unsigned long lineno;
-  };
-#define NILF ((struct floc *)0)
-
-#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
-
-
 /* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
    variadic versions of these functions.  */
 
@@ -369,23 +345,7 @@ struct floc
 # endif
 #endif
 
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-const char *concat (unsigned int, ...);
-void message (int prefix, const char *fmt, ...)
-              __attribute__ ((__format__ (__printf__, 2, 3)));
-void error (const struct floc *flocp, const char *fmt, ...)
-            __attribute__ ((__format__ (__printf__, 2, 3)));
-void fatal (const struct floc *flocp, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-#else
-const char *concat ();
-void message ();
-void error ();
-void fatal ();
-#endif
-
 void die (int);
-void log_working_directory (int);
 void pfatal_with_name (const char *);
 void perror_with_name (const char *, const char *);
 void *xmalloc (unsigned int);
@@ -410,16 +370,6 @@ void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
 time_t ar_member_date (const char *);
 
-typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
-				      long int hdrpos, long int datapos,
-				      long int size, long int date, int uid,
-				      int gid, int mode, const void *arg);
-
-long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
-int ar_name_equal (const char *name, const char *mem, int truncated);
-#ifndef VMS
-int ar_member_touch (const char *arname, const char *memname);
-#endif
 #endif
 
 int dir_file_exists_p (const char *, const char *);
@@ -441,15 +391,13 @@ const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
 int gpath_search (const char *file, unsigned int len);
 
 /*! Construct the list of include directories
-   from the arguments and the default list.  
+   from the arguments and the default list.
 */
 extern void construct_include_path (const char **arg_dirs);
 
 void user_access (void);
 void make_access (void);
 void child_access (void);
-
-void close_stdout (void);
 
 char *strip_whitespace (const char **begpp, const char **endpp);
 
@@ -458,8 +406,6 @@ void strcache_init (void);
 void strcache_print_stats (const char *prefix);
 int strcache_iscached (const char *str);
 const char *strcache_add (const char *str);
-const char *strcache_add_len (const char *str, int len);
-int strcache_setbufsize (int size);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>
@@ -508,9 +454,6 @@ int strncasecmp (const char *s1, const char *s2, int n);
 # endif
 #endif
 
-extern const struct floc *reading_file;
-extern const struct floc **expanding_var;
-
 extern char **environ;
 
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
@@ -538,8 +481,6 @@ extern double max_load_average;
 extern int max_load_average;
 #endif
 
-extern char *program;
-
 /*! Value of argv[0] which seems to get modified. Can we merge this with
     program below? */
 extern char *argv0;
@@ -566,20 +507,6 @@ extern int handling_fatal_signal;
 #endif
 #ifndef MAX
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
-#endif
-
-#ifdef VMS
-typedef enum {
-  MAKE_SUCCESS = 1, /**< GNU Make completed okay */
-  MAKE_TROUBLE = 2, /**< A we ran failed */
-  MAKE_FAILURE = 3  /**< GNU Make had an internal error/failure */
-} make_exit_code_t;
-#else
-typedef enum {
-  MAKE_SUCCESS = 0, /**< GNU Make completed okay */
-  MAKE_TROUBLE = 1, /**< A we ran failed */
-  MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
-} make_exit_code_t;
 #endif
 
 /* Set up heap debugging library dmalloc.  */
@@ -636,6 +563,4 @@ typedef enum {
    NULL at the end of the directory--and _doesn't_ reset errno.  So, we have
    to do it ourselves here.  */
 
-#define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
-                           while((_v)==0 && errno==EINTR)
 #endif /*MAKE_H*/

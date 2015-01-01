@@ -39,7 +39,7 @@ floc_stack_node_t *p_stack_floc_top = NULL;
 
 /*! Push "target" to the call stack. */
 extern target_stack_node_t *
-trace_push_target (target_stack_node_t *p, file_t *p_target) 
+trace_push_target (target_stack_node_t *p, file_t *p_target)
 {
   target_stack_node_t *new_node = CALLOC(target_stack_node_t, 1);
 
@@ -59,25 +59,25 @@ trace_push_target (target_stack_node_t *p, file_t *p_target)
     if ( db_level & DB_VERBOSE ) {
       print_file_target_prefix(p_target);
       printf("\n");
-    } 
+    }
   }
-  
+
   return new_node;
 };
 
 /*! Pop the next target from the call stack.. */
 extern void
-trace_pop_target (target_stack_node_t *p) 
+trace_pop_target (target_stack_node_t *p)
 {
   if (NULL == p) return;
   free(p->p_target);
   free(p);
 }
 
-/*! Push "p_floc" to the floc stack. Return the new stack top. 
+/*! Push "p_floc" to the floc stack. Return the new stack top.
 */
 extern void
-trace_push_floc (floc_t *p_floc) 
+trace_push_floc (gmk_floc *p_floc)
 {
   floc_stack_node_t *new_node = CALLOC (floc_stack_node_t, 1);
 
@@ -92,7 +92,7 @@ trace_push_floc (floc_t *p_floc)
 
 /*! Pop the next target from the floc stack. */
 extern void
-trace_pop_floc (void) 
+trace_pop_floc (void)
 {
   if (NULL == p_stack_floc_top) return;
   else {

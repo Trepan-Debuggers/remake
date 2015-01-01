@@ -42,24 +42,20 @@ close(MAKEFILE);
 
 unlink("cleanit");
 $cleanit_error = `sh -c "$rm_command cleanit 2>&1"`;
+chomp $cleanit_error;
 $delete_error_code = $? >> 8;
 
 # TEST #1
 # -------
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-$rm_command cleanit
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"
-         . $cleanit_error
-         . "work/features/errors.mk:1: [clean] Error $delete_error_code (ignored)\n"
-         . "\n"
-         . "#0  clean at errors.mk:1
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-"
-         ."$rm_command foo
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+my $answer = qq{$rm_command cleanit
+$cleanit_error
+work/features/errors.mk:2: recipe for target 'clean' failed
+work/features/errors.mk:1: [clean] Error 1 (ignored)
+
+#0  clean at errors.mk:1
+$rm_command foo
+};
 
 $logfile = &get_logfile;
 &run_make_with_options($makefile,"",$logfile);
@@ -81,24 +77,19 @@ if (!$vos)
   &compare_output_string($answer, $slurp, $logfile);
 }
 
-
 &touch("foo");
 
 # TEST #2
 # -------
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-$rm_command cleanit
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
-         . $cleanit_error
-         ."work/features/errors.mk:4: [clean2] Error $delete_error_code (ignored)\n"
-         . "\n"
-         . "#0  clean2 at errors.mk:4
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-"
-         ."$rm_command foo
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-";
+$answer = qq{$rm_command cleanit
+$cleanit_error
+work/features/errors.mk:5: recipe for target 'clean2' failed
+work/features/errors.mk:4: [clean2] Error 1 (ignored)
+
+#0  clean2 at errors.mk:4
+$rm_command foo
+};
 
 $logfile = &get_logfile;
 &run_make_with_options($makefile,"clean2 -i",$logfile);

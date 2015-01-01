@@ -29,9 +29,7 @@ else {
 # just check the error code.
 
 &run_make_with_options($makefile, "-j1foo 2>/dev/null", &get_logfile, 512);
-$answer = "Command-line invocation:
-	\"$make_path -f work/options/general.mk -j1foo\"
-";
+$answer = "";
 &compare_output($answer, &get_logfile(1));
 
 1;

@@ -73,12 +73,8 @@ sub touchfiles {
 
 push(@touchedfiles, "bar.c");
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cat bar.d > bar.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$answer = "cat bar.d > bar.c
 cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -86,23 +82,19 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 &touchfiles("$VP/notarget.c", "notarget.b", "notarget.d");
 
-&run_make_with_options($makefile,"notarget",&get_logfile,512);
-
 $answer = "not creating notarget.c from notarget.d
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat notarget.c > notarget.b 2>/dev/null || exit 1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-work/features/vpathplus.mk:15: *** [notarget.b] Error 1
+$makefile:16: recipe for target 'notarget.b' failed
+$makefile:15: *** [notarget.b] Error 1
 
-#0  notarget.b at vpathplus.mk:15
-#1  notarget at vpathplus.mk:31
-Command-line invocation:
-	\"$make_path -f work/features/vpathplus.mk notarget\"
+#0  notarget.b at work/features/vpathplus.mk:15
+#1  notarget at work/features/vpathplus.mk:31
 ";
 
-$logfile = &get_logfile(1);
-$slurp = &read_file_into_string ($logfile);
-$slurp =~ s/ at .*vpathplus/ at vpathplus/g;
+my $logfile = &get_logfile;
+&run_make_with_options($makefile, "notarget", $logfile, 512);
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s{at .*work/features/}{at work/features/}gm;
 &compare_output_string($answer, $slurp, $logfile);
 
 # Test intermediate file handling (part 1)
@@ -113,15 +105,9 @@ $slurp =~ s/ at .*vpathplus/ at vpathplus/g;
 
 push(@touchedfiles, "inter.a", "inter.b");
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cat ${VP}inter.d > inter.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$answer = "cat ${VP}inter.d > inter.c
 cat inter.c > inter.b 2>/dev/null || exit 1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.b > inter.a
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm inter.b inter.c
 ";
 &compare_output($answer,&get_logfile(1));
@@ -136,15 +122,9 @@ push(@touchedfiles, "$VP/inter.b", "$VP/inter.d");
 
 &run_make_with_options($makefile,"intermediate",&get_logfile);
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-cat ${VP}inter.d > inter.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$answer = "cat ${VP}inter.d > inter.c
 cat inter.c > inter.b 2>/dev/null || exit 1
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.b > inter.a
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm inter.c
 ";
 &compare_output($answer,&get_logfile(1));

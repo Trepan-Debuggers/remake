@@ -1,7 +1,5 @@
 /* Get the system load averages.
-Copyright (C) 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1985-2014 Free Software Foundation, Inc.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -86,9 +84,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
 /* Exclude all the code except the test program at the end
-   if the system has its own `getloadavg' function.
+   if the system has its own 'getloadavg' function.
 
-   The declaration of `errno' is needed by the test program
+   The declaration of 'errno' is needed by the test program
    as well as the function itself, so it comes first.  */
 
 #include <errno.h>
@@ -745,7 +743,7 @@ getloadavg (double loadavg[], int nelem)
 #  define LDAV_DONE
   /* This call can return -1 for an error, but with good args
      it's not supposed to fail.  The first argument is for no
-     apparent reason of type `long int *'.  */
+     apparent reason of type 'long int *'.  */
   dg_sys_info ((long int *) &load_info,
 	       DG_SYS_INFO_LOAD_INFO_TYPE,
 	       DG_SYS_INFO_LOAD_VERSION_0);
@@ -987,7 +985,7 @@ getloadavg (double loadavg[], int nelem)
 #endif /* ! HAVE_GETLOADAVG */
 
 #ifdef TEST
-#include "make.h"
+#include "makeint.h"
 
 int
 main (int argc, char **argv)

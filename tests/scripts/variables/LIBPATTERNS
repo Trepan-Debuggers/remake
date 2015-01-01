@@ -20,7 +20,7 @@ run_make_test('
 .LIBPATTERNS = mtest_foo.a mtest_%.a
 all: -lfoo ; @echo "build $@ from $<"
 ',
-              '', "#MAKE#: .LIBPATTERNS element `mtest_foo.a' is not a pattern
+              '', "#MAKE#: .LIBPATTERNS element 'mtest_foo.a' is not a pattern
 build all from mtest_foo.a\n");
 
 # TEST 2: target-specific override

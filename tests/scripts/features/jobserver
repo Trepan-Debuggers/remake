@@ -1,0 +1,61 @@
+#                                                                    -*-perl-*-
+
+$description = "Test jobserver.";
+
+$details = "These tests are ones that specifically are different when the
+jobserver feature is available.  Most -j tests are the same whether or not
+jobserver is available, and those appear in the 'parallelism' test suite.";
+
+exists $FEATURES{'jobserver'} or return -1;
+
+if (!$parallel_jobs) {
+  return -1;
+}
+
+# Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
+# We can't test this directly because there's no way a makefile can
+# show the value of MAKEFLAGS we were re-exec'd with.  We can intuit it
+# by looking for "disabling jobserver mode" warnings; we should only
+# get one from the original invocation and none from the re-exec.
+# See Savannah bug #18124
+
+unlink('inc.mk');
+
+run_make_test(q!
+-include inc.mk
+recur:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@rm -f inc.mk
+	@$(MAKE) -j2 -f #MAKEFILE# all
+all:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@echo $@
+inc.mk:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@echo 'FOO = bar' > $@
+!,
+              '--no-print-directory -j2', "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
+
+unlink('inc.mk');
+
+# Test recursion when make doesn't think it exists.
+# See Savannah bug #39934
+# Or Red Hat bug https://bugzilla.redhat.com/show_bug.cgi?id=885474
+
+open(MAKEFILE,"> Makefile2");
+print MAKEFILE '
+vpath %.c ../
+foo:
+';
+close(MAKEFILE);
+
+run_make_test(q!
+default: ; @ #MAKEPATH# -f Makefile2
+!,
+              '-j2 --no-print-directory',
+"#MAKE#[1]: warning: jobserver unavailable: using -j1.  Add '+' to parent make rule.
+#MAKE#[1]: Nothing to be done for 'foo'.");
+
+rmfiles('Makefile2');
+
+1;

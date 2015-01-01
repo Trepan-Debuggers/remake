@@ -15,13 +15,9 @@ foo:
 	@echo $(MAKE)
 !,
               '',
-              "$make_path
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-$make_path -f #MAKEFILE# foo
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-"
-              . "#MAKE#[1]: Entering directory `#PWD#'\n"
-              . "$make_path\n#MAKE#[1]: Leaving directory `#PWD#'\n");
+              "#MAKEPATH#\n#MAKEPATH# -f #MAKEFILE# foo\n"
+              . "#MAKE#[1]: Entering directory '#PWD#'\n"
+              . "#MAKEPATH#\n#MAKE#[1]: Leaving directory '#PWD#'\n");
 
 rmfiles("foo");
 

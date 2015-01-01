@@ -1,6 +1,5 @@
 /* Debugging macros and interface.
-Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1999-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -33,11 +32,11 @@ typedef enum {
   DB_BASIC          = 0x001, /**< targets which need to be made and status;
 				 also set when tracing or debugging */
   DB_VERBOSE        = 0x002, /**< A more verbose trace */
-  DB_JOBS           = 0x004, /**< Prints messages giving details on the 
-				  invocation of specific subcommands. 
+  DB_JOBS           = 0x004, /**< Prints messages giving details on the
+				  invocation of specific subcommands.
 				  Can be set via --debug=jobs
 			     */
-  DB_IMPLICIT       = 0x008, /**< Prints messages describing the implicit 
+  DB_IMPLICIT       = 0x008, /**< Prints messages describing the implicit
 				  rule searches for each target. Can be
 				  set via --debug=implicit
 			     */
@@ -55,7 +54,7 @@ typedef enum {
   DEBUGGER_ON_FATAL  = 0x2,   /**< Enter debugger on a fatal error */
   DEBUGGER_ON_SIG    = 0x4    /**< Enter debugger on getting a signal */
 } debug_enter_debugger_t;
-  
+
 typedef enum {
   DEBUGGER_QUIT_RC   = 77,    /**< debugger issued a "quit" command. */
 } debug_dummy_t;
@@ -70,7 +69,7 @@ extern debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 /** bitmask of debug_level_mask values. */
 extern int db_level;
 
-/*! 
+/*!
   If 0 (or false) we are not in the debugger command read loop.
   If 1 (or true) we are in the debugger command read loop.
   If DEBUGGER_QUIT_RC we've requested to quit.
@@ -103,14 +102,14 @@ extern bool b_debugger_goal;
 /*! If true, enter the debugger before reading any makefiles. */
 extern bool b_debugger_preread;
 
-/*! If nonzero, we are debugging after each "step" for that many times. 
+/*! If nonzero, we are debugging after each "step" for that many times.
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
 */
 extern unsigned int i_debugger_stepping;
 
-/*! If nonzero, we are debugging after each "next" for that many times. 
+/*! If nonzero, we are debugging after each "next" for that many times.
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
@@ -138,7 +137,7 @@ extern stringlist_t *db_flags;
    print_spaces (_depth);    \
    DBPRINT(_x)
 
-/*! Debugged print if debug mask is set indented a number of spaces 
+/*! Debugged print if debug mask is set indented a number of spaces
     implied by global variable "depth"
 */
 #define DBS(_l,_x)           \
@@ -148,7 +147,7 @@ extern stringlist_t *db_flags;
     }                        \
   } while(0)
 
-/*! Debugged print if debug mask is set indented a number of spaces 
+/*! Debugged print if debug mask is set indented a number of spaces
     given by "_depth"
 */
 #define DBSD(_l,_x,_depth)   \
@@ -158,26 +157,15 @@ extern stringlist_t *db_flags;
     }                        \
   } while(0)
 
-#define DBF(_l,_x)  do{ if(ISDB(_l))					\
-      {									\
-	print_spaces (depth);						\
-	if (file->floc.filenm) {					\
-	  print_floc_prefix(&file->floc);				\
-	  printf("\t");							\
-	}								\
-	printf (_x, file->name);					\
-	fflush (stdout);} }while(0)
+extern int db_level;
 
-#define DB(_l,_x)   do{ if(ISDB(_l)) {DBPRINT(_x);} }while(0)
+#define ISDB(_l)    ((_l)&db_level)
 
-/** Toggle -d on receipt of SIGUSR1.  */
-#ifdef SIGUSR1
-RETSIGTYPE debug_signal_handler (int sig);
-#endif
+#define DBF(_l,_x)  do{ if(ISDB(_l)) {print_spaces (depth); \
+                                      printf (_x, file->name); \
+                                      fflush (stdout);} }while(0)
 
-/*! Set the global db_level mask based on the command option list
-  db_flags.
- */
-extern void decode_debug_flags (int debug_flag, stringlist_t *db_flags);
+#define DB(_l,_x)   do{ if(ISDB(_l)) {printf _x; fflush (stdout);} }while(0)
+
 
 #endif /*DEBUG_H*/

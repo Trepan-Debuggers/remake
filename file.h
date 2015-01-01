@@ -40,7 +40,7 @@ void    free_file  (file_t *p_file);
 
   @param sig if is nonzero, this was caused by a fatal signal,
   meaning that a different message will be printed, and
-  the message will go to stderr rather than stdout.  
+  the message will go to stderr rather than stdout.
 */
 void    remove_intermediates (int sig);
 
@@ -53,7 +53,7 @@ char   *build_target_list (char *old_list);
     The enumeration is created be helpful in debuggers where wants just to
     refer to the PRINT_TARGET_ names and get something.
 */
-typedef enum 
+typedef enum
 {
   PRINT_TARGET_NONORDER  = 0x001,
   PRINT_TARGET_ORDER     = 0x002,
@@ -78,62 +78,6 @@ extern void  print_target (const void *item);
 
 /*! Print some or all properties of the data base of files.  */
 extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
-
-#if FILE_TIMESTAMP_HI_RES
-# define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
-    file_timestamp_cons (fname, (st).st_mtime, (st).st_mtim.ST_MTIM_NSEC)
-#else
-# define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
-    file_timestamp_cons (fname, (st).st_mtime, 0)
-#endif
-
-/** If FILE_TIMESTAMP is 64 bits (or more), use nanosecond resolution.
-   (Multiply by 2**30 instead of by 10**9 to save time at the cost of
-   slightly decreasing the number of available timestamps.)  With
-   64-bit FILE_TIMESTAMP, this stops working on 2514-05-30 01:53:04
-   UTC, but by then uintmax_t should be larger than 64 bits.  */
-#define FILE_TIMESTAMPS_PER_S (FILE_TIMESTAMP_HI_RES ? 1000000000 : 1)
-#define FILE_TIMESTAMP_LO_BITS (FILE_TIMESTAMP_HI_RES ? 30 : 0)
-
-#define FILE_TIMESTAMP_S(ts) (((ts) - ORDINARY_MTIME_MIN) \
-			      >> FILE_TIMESTAMP_LO_BITS)
-#define FILE_TIMESTAMP_NS(ts) ((int) (((ts) - ORDINARY_MTIME_MIN) \
-				      & ((1 << FILE_TIMESTAMP_LO_BITS) - 1)))
-
-/** Upper bound on length of string "YYYY-MM-DD HH:MM:SS.NNNNNNNNN"
-   representing a file timestamp.  The upper bound is not necessarily 19,
-   since the year might be less than -999 or greater than 9999.
-
-   Subtract one for the sign bit if in case file timestamps can be negative;
-   subtract FLOOR_LOG2_SECONDS_PER_YEAR to yield an upper bound on how many
-   file timestamp bits might affect the year;
-   302 / 1000 is log10 (2) rounded up;
-   add one for integer division truncation;
-   add one more for a minus sign if file timestamps can be negative;
-   add 4 to allow for any 4-digit epoch year (e.g. 1970);
-   add 25 to allow for "-MM-DD HH:MM:SS.NNNNNNNNN".  */
-#define FLOOR_LOG2_SECONDS_PER_YEAR 24
-#define FILE_TIMESTAMP_PRINT_LEN_BOUND \
-  (((sizeof (FILE_TIMESTAMP) * CHAR_BIT - 1 - FLOOR_LOG2_SECONDS_PER_YEAR) \
-    * 302 / 1000) \
-   + 1 + 1 + 4 + 25)
-
-/** Convert an external file timestamp to internal form.  */
-extern FILE_TIMESTAMP file_timestamp_cons (char const *fname, time_t s, 
-					   int ns);
-
-/** Return the current time as a file timestamp, setting *RESOLUTION to
-   its resolution.  */
-extern FILE_TIMESTAMP file_timestamp_now (int *resolution);
-
-/** 
-    Place into the buffer P a printable representation of the file
-    timestamp TS.
-    
-    @param p output buffer for printable timestamp
-    @param ts timestamp to convert.
- */
-extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 
 /*! Expand and parse each dependency line. */
 extern void expand_deps (file_t *f);

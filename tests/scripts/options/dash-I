@@ -50,12 +50,10 @@ $answer = "This is another included makefile\n";
 &compare_output($answer,&get_logfile(1));
 
 
-$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-$mkpath ANOTHER -f $makefile
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-${make_name}[1]: Entering directory `$pwd'
+$answer = "$mkpath ANOTHER -f $makefile
+${make_name}[1]: Entering directory '$pwd'
 This is another included makefile
-${make_name}[1]: Leaving directory `$pwd'\n";
+${make_name}[1]: Leaving directory '$pwd'\n";
 
 &run_make_with_options($makefile,"-I $workdir recurse",&get_logfile);
 &compare_output($answer,&get_logfile(1));

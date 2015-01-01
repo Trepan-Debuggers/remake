@@ -32,31 +32,10 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 #include "trace.h"
 
-/*! Fancy processing for variadic functions in both ANSI and pre-ANSI
-   compilers.  */
-#if defined __STDC__ && __STDC__
-extern void message (int prefix, const char *fmt, ...)
-                     __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void error (const floc_t *flocp, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void fatal (const floc_t *flocp, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-#else
-extern void message ();
-extern void error ();
-extern void fatal ();
-#endif
-
 /*! Versions of error and fatal with the ability to show call-stack. */
-#if defined __STDC__ && __STDC__
 void err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-#else
-void err();
-void fatal_err();
-#endif
+void fatal_err (target_stack_node_t *p_call, const char *fmt, ...);
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -93,10 +72,10 @@ extern void print_file_target_prefix (const file_t *p_target);
 extern void print_target_prefix (const char *p_name);
 
 /*! Display common prefix message output file target. */
-extern void print_floc_prefix (const floc_t *p_floc);
+extern void print_floc_prefix (const gmk_floc *p_floc);
 
 /*! Display common prefix message output file target. */
-extern debug_return_t print_child_cmd (child_t *p_child, 
+extern debug_return_t print_child_cmd (child_t *p_child,
 				       target_stack_node_t *p);
 
 extern void print_target_stack_entry(const file_t *p_target, int i, int i_pos);

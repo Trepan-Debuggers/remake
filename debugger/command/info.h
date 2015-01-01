@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../stack.h"
 #include "../file2line.h"
 
-const char *WARRANTY = 
+const char *WARRANTY =
 "			    NO WARRANTY\n"
 "\n"
 "  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY\n"
@@ -102,7 +102,7 @@ subcommand_var_info_t info_subcommands[] = {
     "\n\nShow specific target information. See 'help target'.",
     NULL, false,
     1},
-  { "targets",    
+  { "targets",
     "Show a list of target names and file locations",
     " [NAMES|POSITIONS|TASKS|ALL]\n\n"
 "Show the explicitly-named targets found in read Makefiles.\n"
@@ -129,11 +129,11 @@ subcommand_var_info_t info_subcommands[] = {
 };
 
 /*! Show target information: location, name, and description. */
-static void 
-dbg_cmd_info_target_entry (const file_t *p_target, 
-                           info_target_output_mask_t output_mask) 
+static void
+dbg_cmd_info_target_entry (const file_t *p_target,
+                           info_target_output_mask_t output_mask)
 {
-    const floc_t *p_floc = &p_target->floc;
+    const gmk_floc *p_floc = &p_target->floc;
     if (p_floc) {
       if ((p_floc->filenm) && (output_mask & INFO_TARGET_POSITION)) {
         printf("%s:%lu", p_floc->filenm, p_floc->lineno);
@@ -148,7 +148,7 @@ dbg_cmd_info_target_entry (const file_t *p_target,
       if (p_target->description)
         printf("\t# %s", p_target->description);
       printf("\n");
-    } else if 
+    } else if
         ( (output_mask & INFO_TARGET_TASKS
            && (p_target->cmds || p_target->phony)
            && p_floc->filenm)
@@ -163,7 +163,7 @@ dbg_cmd_info_target_entry (const file_t *p_target,
 }
 
 int
-dbg_target_compare(const void *p1, const void *p2) 
+dbg_target_compare(const void *p1, const void *p2)
 {
     const struct file *p_target1 = *(const file_t **) p1;
     const struct file *p_target2 = *(const file_t **) p2;
@@ -173,12 +173,12 @@ dbg_target_compare(const void *p1, const void *p2)
 void
 dbg_cmd_info_targets(info_target_output_mask_t output_mask)
 {
-  struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
+  struct file **file_slot_0 = (struct file **) hash_dump (&files, 0,
                                                           dbg_target_compare);
   struct file **file_end = file_slot_0 + files.ht_fill;
   struct file **pp_file_slot;
   struct file *p_target;
-  
+
   for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
     if ((p_target = *pp_file_slot) != NULL)
       dbg_cmd_info_target_entry(p_target, output_mask);
@@ -187,25 +187,25 @@ dbg_cmd_info_targets(info_target_output_mask_t output_mask)
 
 /* Show line information. We want output to be compatible with gdb output.*/
 void
-dbg_cmd_info_line() 
+dbg_cmd_info_line()
 {
-  if (p_stack_top && p_stack_top->p_target && 
+  if (p_stack_top && p_stack_top->p_target &&
       p_stack_top->p_target->floc.filenm) {
-    const floc_t *p_floc = &p_stack_top->p_target->floc;
-    if (!basename_filenames && strlen(p_floc->filenm) 
-        && p_floc->filenm[0] != '/') 
-      dbg_msg("Line %lu of \"%s/%s\"", 
+    const gmk_floc *p_floc = &p_stack_top->p_target->floc;
+    if (!basename_filenames && strlen(p_floc->filenm)
+        && p_floc->filenm[0] != '/')
+      dbg_msg("Line %lu of \"%s/%s\"",
               p_floc->lineno, starting_directory,
               p_floc->filenm);
-    else 
+    else
       dbg_msg("Line %lu of \"%s\"", p_floc->lineno, p_floc->filenm);
   } else {
     dbg_msg("No line number info recorded.\n");
   }
 }
 
-void 
-dbg_cmd_info_program() 
+void
+dbg_cmd_info_program()
 {
   printf(_("Starting directory `%s'\n"), starting_directory);
   printf(_("Program invocation:\n"));
@@ -213,7 +213,7 @@ dbg_cmd_info_program()
   dbg_print_invocation();
   printf(_("Recursion level: %d\n"), makelevel);
   dbg_cmd_info_line();
-  switch (last_stop_reason) 
+  switch (last_stop_reason)
     {
     case DEBUG_BRKPT_AFTER_CMD:
       printf(_("Program is stopped after running rule command(s).\n"));
@@ -257,15 +257,15 @@ dbg_cmd_info_program()
     }
 }
 
-  
+
 /* Give some info regarding the running program. */
-debug_return_t 
+debug_return_t
 dbg_cmd_info(char *psz_args)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     unsigned int i;
     for (i = 0; info_subcommands[i].name; i++) {
-      dbg_help_subcmd_entry("info", "%-10s -- %s", 
+      dbg_help_subcmd_entry("info", "%-10s -- %s",
                             &(info_subcommands[i]), false);
     }
     return debug_readloop;
@@ -285,7 +285,7 @@ dbg_cmd_info(char *psz_args)
 	  initialize_file_variables (p_target, 0);
 	  set_file_variables (p_target);
 	  if (!p_target->variables) {
-	    printf("Can't get variable information for target %s\n", 
+	    printf("Can't get variable information for target %s\n",
 		   psz_target);
 	    return debug_readloop;
 	  }
@@ -294,7 +294,7 @@ dbg_cmd_info(char *psz_args)
 	dbg_errmsg("No target information for %s.", psz_target);
 	return debug_cmd_error;
       }
-      hash_map_arg (&p_target->variables->set->table, 
+      hash_map_arg (&p_target->variables->set->table,
 		    print_variable_info, NULL);
     } else if (is_abbrev_of (psz_subcmd, "breakpoints", 1)) {
       list_breakpoints();
@@ -315,10 +315,10 @@ dbg_cmd_info(char *psz_args)
 	print_rule_data_base (false);
       else if (0 == strcmp(psz_args, "verbose"))
 	print_rule_data_base (true);
-      else 
+      else
 	{
 	  rule_t *r = find_rule(psz_args);
-	  if (r) 
+	  if (r)
 	    print_rule(r, true);
 	  else
 	    dbg_errmsg(_("Rule %s not found.\n"), psz_args);
@@ -347,17 +347,17 @@ dbg_cmd_info(char *psz_args)
 
     } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
       if (0 == strlen(psz_args)) {
-        if (p_stack_top && p_stack_top->p_target && 
+        if (p_stack_top && p_stack_top->p_target &&
             p_stack_top->p_target->name)
           printf("target: %s\n", p_stack_top->p_target->name);
-        else 
+        else
           {
             printf("target unknown\n");
           }
-      } 
+      }
       else
         dbg_cmd_target(psz_args);
-      
+
     } else if (is_abbrev_of (psz_subcmd, "variables", 1)) {
       print_variable_data_base();
     } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {
@@ -365,25 +365,25 @@ dbg_cmd_info(char *psz_args)
     } else if (is_abbrev_of (psz_subcmd, "warranty", 1)) {
       printf("%s", WARRANTY);
     } else {
-      dbg_errmsg(_("Undefined command \"%s\". Try \"help info\"."), 
+      dbg_errmsg(_("Undefined command \"%s\". Try \"help info\"."),
                  psz_subcmd);
     }
   }
-  
+
   return debug_readloop;
 }
 
 static void
-dbg_cmd_info_init(unsigned int c) 
+dbg_cmd_info_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_info;
   short_command[c].use = _("info [SUBCOMMAND]");
-  short_command[c].doc = 
+  short_command[c].doc =
     _("Show program information regarding SUBCOMMAND.\n"
       "If SUBCOMMAND is not specified, give list of \"info\" subcommands.");
 }
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  indent-tabs-mode: nil

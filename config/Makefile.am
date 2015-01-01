@@ -1,6 +1,5 @@
 # -*-Makefile-*-, or close enough
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free
-# Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -16,9 +15,4 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST =	codeset.m4 gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 nls.m4 \
-		intdiv0.m4 inttypes-pri.m4 inttypes.m4 inttypes_h.m4 \
-		isc-posix.m4 lcmessage.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 \
-		progtest.m4 stdint_h.m4 uintmax_t.m4 ulonglong.m4 longlong.m4 \
-		dospaths.m4 po.m4 signed.m4 longdouble.m4 wchar_t.m4 \
-		wint_t.m4 intmax.m4 printf-posix.m4 xsize.m4 size_max.m4
+# Autoconf / automake know how to handle this directory.

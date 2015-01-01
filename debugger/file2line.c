@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -41,7 +41,7 @@ file2lines_hash_2 (const void *key)
 static int
 file2lines_hash_cmp (const void *x, const void *y)
 {
-  return strcmp(((const lineno_array_t *) x)->hname, 
+  return strcmp(((const lineno_array_t *) x)->hname,
 		((const lineno_array_t *) y)->hname);
 }
 
@@ -62,7 +62,7 @@ target_for_file_and_line (const char *psz_filename, unsigned int lineno,
   assert (*psz_filename != '\0');
   lookup_linenos.hname = psz_filename;
   if (0 == file2lines.ht_size) file2lines_init();
-  pp_linenos = (lineno_array_t **) 
+  pp_linenos = (lineno_array_t **)
     hash_find_slot(&file2lines, &lookup_linenos);
 
   if (NULL == *pp_linenos) return NULL;
@@ -72,7 +72,7 @@ target_for_file_and_line (const char *psz_filename, unsigned int lineno,
 }
 
 void
-enter_target_lineno (const char *psz_filename, unsigned int lineno, 
+enter_target_lineno (const char *psz_filename, unsigned int lineno,
 	      file_t *p_target)
 {
   lineno_array_t lookup_linenos;
@@ -80,7 +80,7 @@ enter_target_lineno (const char *psz_filename, unsigned int lineno,
   file_t *p_file;
 
   lookup_linenos.hname = psz_filename;
-  pp_linenos = (lineno_array_t **) 
+  pp_linenos = (lineno_array_t **)
     hash_find_slot(&file2lines, &lookup_linenos);
   p_file = lookup_file(psz_filename);
 
@@ -91,7 +91,7 @@ enter_target_lineno (const char *psz_filename, unsigned int lineno,
   if (p_file->nlines == 0) {
     printf("Warning: %s shows no lines\n", psz_filename);
   }
-    
+
   if (HASH_VACANT(*pp_linenos)) {
     const unsigned int nlines = p_file->nlines+1;
     void **new_array = calloc (sizeof(void *), nlines);
@@ -112,7 +112,7 @@ static void
 file2line_init (const void *item)
 {
   file_t *p_target = (file_t *) item;
-  const floc_t *p_floc = &p_target->floc;
+  const gmk_floc *p_floc = &p_target->floc;
   if (p_floc && p_floc->filenm) {
     enter_target_lineno(p_floc->filenm, p_floc->lineno, p_target);
   }
@@ -129,7 +129,7 @@ enter_rule_lineno (rule_t *r)
 
   if (!psz_filename) return;
   lookup_linenos.hname = psz_filename;
-  pp_linenos = (lineno_array_t **) 
+  pp_linenos = (lineno_array_t **)
     hash_find_slot(&file2lines, &lookup_linenos);
   p_file = lookup_file(psz_filename);
 
@@ -140,7 +140,7 @@ enter_rule_lineno (rule_t *r)
   if (p_file->nlines == 0) {
     printf("Warning: %s shows no lines\n", psz_filename);
   }
-    
+
   if (HASH_VACANT(*pp_linenos)) {
     const unsigned int nlines = p_file->nlines+1;
     void **new_array = calloc (sizeof(void *), nlines);
@@ -161,10 +161,10 @@ enter_rule_lineno (rule_t *r)
   Initializes hash table file2lines. file2lines is used in breakpoints
   only. So we do this on demand.
 */
-bool file2lines_init(void) 
+bool file2lines_init(void)
 {
   if (!read_makefiles) return false;
-  hash_init (&file2lines, files.ht_size, file2lines_hash_1, file2lines_hash_2, 
+  hash_init (&file2lines, files.ht_size, file2lines_hash_1, file2lines_hash_2,
 	     file2lines_hash_cmp);
   hash_map (&files, file2line_init);
 
@@ -174,17 +174,17 @@ bool file2lines_init(void)
       enter_rule_lineno(r);
     }
   }
-  
+
   return true;
 }
 
-void file2lines_print_entry(const void *item) 
+void file2lines_print_entry(const void *item)
 {
     const lineno_array_t *p_linenos = (lineno_array_t *) item;
     unsigned int i;
     file_t *p_target;
     printf("%s:\n", p_linenos->hname);
-    for (i=0; i<p_linenos->size; i++) 
+    for (i=0; i<p_linenos->size; i++)
       {
 	p_target = p_linenos->array[i];
         if (p_target) {
@@ -200,13 +200,13 @@ void file2lines_print_entry(const void *item)
       }
 }
 
-void file2lines_dump(void) 
+void file2lines_dump(void)
 {
   file2lines_init();
   hash_map (&file2lines, file2lines_print_entry);
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

@@ -1,3 +1,9 @@
+2013-10-20  Paul Smith  <psmith@gnu.org>
+
+	* glob.c (glob): Cherry-pick a471e96a5352a5f0bde6d32dd36d33524811a2b1
+	from git://sourceware.org/git/glibc.git to fix SV 18123,
+	https://sourceware.org/bugzilla/show_bug.cgi?id=10278
+
 2008-09-28  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
 
 	* glob.c (my_realloc) [__DJGPP__]: Don't define, and don't
