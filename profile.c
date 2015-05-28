@@ -1,6 +1,6 @@
 /* Compile with:
    gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
-   gcc mock.o version.o alloc.o flags.o enter_file.o hash.o strcache.o test-profile.o -o test-profile
+   gcc mock.o version.o alloc.o globals.o misc.o output.o enter_file.o hash.o strcache.o test-profile.o -o test-profile
 */
 #include <stdio.h>
 #include <sys/types.h>
@@ -50,6 +50,16 @@ init_callgrind(const char *creator, const char *invocation,
 
 static unsigned int next_file_num = 0;
 static unsigned int next_fn_num   = 0;
+
+extern void
+add_file(file_t *target) {
+  fprintf(callgrind_fd,
+	  "fl=(%d) %s\n",
+	  next_file_num++,
+	  target->floc.filenm);
+}
+
+
 extern void
 add_target(file_t *target) {
   fprintf(callgrind_fd,

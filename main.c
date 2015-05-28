@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
 #include "filedef.h"
 #include "dep.h"
 #include "variable.h"
@@ -47,6 +48,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef _AMIGA
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
+
+extern void initialize_stopchar_map ();
 
 void init_dir (void);
 void remote_setup (void);
@@ -143,28 +146,6 @@ int use_readline_flag =
 #endif
     ;
 
-/*! If nonzero, we are debugging after each "step" for that many times.
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_stepping = 0;
-
-/*! If nonzero, we are debugging after each "next" for that many times.
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_nexting = 0;
-
-/*! If nonzero, enter the debugger if we hit a fatal error.
-*/
-unsigned int debugger_on_error = 0;
-
-/*! If nonzero, we have requested some sort of debugging.
-*/
-unsigned int debugger_enabled;
-
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
     giving a file directory location helps a debugger frontend
     when we change directories. For regression tests it is helpful to
@@ -189,18 +170,6 @@ int suspend_flag = 0;
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
-
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --targets
- */
-
-int show_targets_flag = 0;
-
-/*! Nonzero gives a list of explicit target names that have commands
-  associated with them and exits. Set by option --tasks
- */
-
-int show_tasks_flag = 0;
 
 /*! Nonzero gives a list of explicit target names that have commands
    AND comments associated with them and exits. Set by option --task-comments
@@ -292,31 +261,14 @@ static int print_usage_flag = 0;
 */
 static stringlist_t* debugger_opts = NULL;
 
-/*! If 1, same as --debugger=preaction */
-int debugger_flag;
-
-/* If nonzero, we should print a warning message
-   for each reference to an undefined variable.  */
-
-int warn_undefined_variables_flag;
-
 /* If nonzero, always build all targets, regardless of whether
    they appear out of date or not.  */
-
 static int always_make_set = 0;
 int always_make_flag = 0;
 
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
 int rebuilding_makefiles = 0;
-
-/* Remember the original value of the SHELL variable, from the environment.  */
-
-struct variable shell_var;
-
-/* This character introduces a command: it's the first char on the line.  */
-
-char cmd_prefix = '\t';
 
 
 /* The usage output.  We write it this way to make life easier for the
@@ -540,9 +492,6 @@ char **global_argv;
 /*! Our current directory before processing any -C options.  */
 char *directory_before_chdir = NULL;
 
-/*! Our current directory after processing all -C options.  */
-char *starting_directory;
-
 /*! Pointer to the value of the .DEFAULT_GOAL special variable.
   The value will be the name of the goal to remake if the command line
   does not override it.  It can be set by the makefile, or else it's
@@ -555,10 +504,6 @@ struct variable * default_goal_var;
    This is zero if the makefiles do not define .DEFAULT.  */
 struct file *default_file;
 
-/*! Nonzero if we have seen the magic '.POSIX' target.
-   This turns on pedantic compliance with POSIX.2.  */
-int posix_pedantic;
-
 /* Nonzero if we have seen the '.SECONDEXPANSION' target.
    This turns on secondary expansion of prerequisites.  */
 
@@ -570,12 +515,6 @@ int second_expansion;
 
 int one_shell;
 
-/* One of OUTPUT_SYNC_* if the "--output-sync" option was given.  This
-   attempts to synchronize the output of parallel jobs such that the results
-   of each job stay together.  */
-
-int output_sync = OUTPUT_SYNC_NONE;
-
 /* Nonzero if we have seen the '.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
@@ -586,12 +525,6 @@ int not_parallel;
    warning at the end of the run. */
 
 int clock_skew_detected;
-
-/* Map of possible stop characters for searching strings.  */
-#ifndef UCHAR_MAX
-# define UCHAR_MAX 255
-#endif
-unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
 
 /* If output-sync is enabled we'll collect all the output generated due to
    options, while reading makefiles, etc.  */
@@ -682,46 +615,6 @@ initialize_global_hash_tables (void)
   init_hash_files ();
   hash_init_directories ();
   hash_init_function_table ();
-}
-
-/* This character map locate stop chars when parsing GNU makefiles.
-   Each element is true if we should stop parsing on that character.  */
-
-static void
-initialize_stopchar_map ()
-{
-  int i;
-
-  stopchar_map[(int)'\0'] = MAP_NUL;
-  stopchar_map[(int)'#'] = MAP_COMMENT;
-  stopchar_map[(int)';'] = MAP_SEMI;
-  stopchar_map[(int)'='] = MAP_EQUALS;
-  stopchar_map[(int)':'] = MAP_COLON;
-  stopchar_map[(int)'%'] = MAP_PERCENT;
-  stopchar_map[(int)'|'] = MAP_PIPE;
-  stopchar_map[(int)'.'] = MAP_DOT | MAP_USERFUNC;
-  stopchar_map[(int)','] = MAP_COMMA;
-  stopchar_map[(int)'$'] = MAP_VARIABLE;
-
-  stopchar_map[(int)'-'] = MAP_USERFUNC;
-  stopchar_map[(int)'_'] = MAP_USERFUNC;
-
-  stopchar_map[(int)'/'] = MAP_DIRSEP;
-#if defined(VMS)
-  stopchar_map[(int)']'] = MAP_DIRSEP;
-#elif defined(HAVE_DOS_PATHS)
-  stopchar_map[(int)'\\'] = MAP_DIRSEP;
-#endif
-
-  for (i = 1; i <= UCHAR_MAX; ++i)
-    {
-      if (isblank(i))
-        stopchar_map[i] = MAP_BLANK;
-      if (isspace(i))
-        stopchar_map[i] |= MAP_SPACE;
-      if (isalnum(i))
-        stopchar_map[i] = MAP_USERFUNC;
-    }
 }
 
 static const char *

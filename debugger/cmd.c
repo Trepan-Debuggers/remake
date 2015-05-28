@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2004-2005, 2007-2009, 2011, 2014 R. Bernstein
+Copyright (C) 2004-2005, 2007-2009, 2011, 2014-2015 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "makeint.h"
 #include "msg.h"
 #include "debug.h"
+#include "debugger.h"
 #include "file.h"
 #include "print.h"
 #include "break.h"
@@ -53,10 +54,6 @@ enum {
 } debugger_enum1;
 
 
-
-/** True if we are inside the debugger, false otherwise. */
-int in_debugger = false;
-
 /**
    Command-line args after the command-name part. For example in:
    break foo
@@ -84,18 +81,7 @@ typedef debug_return_t (*dbg_cmd_t) (char *psz_args);
 /* A structure which contains information on the commands this program
    can understand. */
 
-typedef struct {
-  dbg_cmd_t func;               /* Function to call to do the job. */
-  const char *doc;		/* Documentation for this function.  */
-  const char *use;		/* short command usage.  */
-} short_cmd_t;
-
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
-
-typedef struct {
-  const char *long_name;	/* long name of command. */
-  const char short_name;	/* Index into short_cmd array. */
-} long_cmd_t;
 
 /* Should be in alphabetic order by command name. */
 long_cmd_t commands[] = {

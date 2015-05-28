@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
-#include "main.h"
+#include "globals.h"
 #include "debugger/cmd.h"
 
 #include <assert.h>
@@ -130,11 +130,6 @@ dep_t *read_makefiles = NULL;
 /* Maximum length of an element of the above.  */
 
 static unsigned int max_incl_len;
-
-/* The filename and pointer to line number of the
-   makefile currently being read in.  */
-
-const gmk_floc *reading_file = 0;
 
 static int eval_makefile (const char *filename, int flags);
 static void eval (struct ebuffer *buffer, int flags);
