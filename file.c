@@ -39,30 +39,6 @@ int snapped_deps = 0;
 
 /* Hash table of files the makefile knows how to make.  */
 
-static unsigned long
-file_hash_1 (const void *key)
-{
-  return_ISTRING_HASH_1 (((struct file const *) key)->hname);
-}
-
-static unsigned long
-file_hash_2 (const void *key)
-{
-  return_ISTRING_HASH_2 (((struct file const *) key)->hname);
-}
-
-static int
-file_hash_cmp (const void *x, const void *y)
-{
-  return_ISTRING_COMPARE (((struct file const *) x)->hname,
-                          ((struct file const *) y)->hname);
-}
-
-#ifndef FILE_BUCKETS
-#define FILE_BUCKETS    1007
-#endif
-struct hash_table files;
-
 /* Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
@@ -140,68 +116,6 @@ lookup_file (const char *name)
   return f;
 }
 
-/* Look up a file record for file NAME and return it.
-   Create a new record if one doesn't exist.  NAME will be stored in the
-   new record so it should be constant or in the strcache etc.
- */
-
-struct file *
-enter_file (const char *name)
-{
-  struct file *f;
-  struct file *new;
-  struct file **file_slot;
-  struct file file_key;
-
-  assert (*name != '\0');
-  assert (! verify_flag || strcache_iscached (name));
-
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  if (*name != '.')
-    {
-      const char *n;
-      char *lname, *ln;
-      lname = xstrdup (name);
-      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-        if (isupper ((unsigned char)*n))
-          *ln = tolower ((unsigned char)*n);
-        else
-          *ln = *n;
-
-      *ln = '\0';
-      name = strcache_add (lname);
-      free (lname);
-    }
-#endif
-
-  file_key.hname = name;
-  file_slot = (struct file **) hash_find_slot (&files, &file_key);
-  f = *file_slot;
-  if (! HASH_VACANT (f) && !f->double_colon)
-    {
-      f->builtin = 0;
-      return f;
-    }
-
-  new = xcalloc (sizeof (struct file));
-  new->name = new->hname = name;
-  new->update_status = us_none;
-
-  if (HASH_VACANT (f))
-    {
-      new->last = new;
-      hash_insert_at (&files, new, file_slot);
-    }
-  else
-    {
-      /* There is already a double-colon entry for this file.  */
-      new->double_colon = f;
-      f->last->prev = new;
-      f->last = new;
-    }
-
-  return new;
-}
 
 /* Rehash FILE to NAME.  This is not as simple as resetting
    the 'hname' member, since it must be put in a new hash bucket,
@@ -1277,12 +1191,6 @@ build_target_list (char *value)
     }
 
   return value;
-}
-
-void
-init_hash_files (void)
-{
-  hash_init (&files, 1000, file_hash_1, file_hash_2, file_hash_cmp);
 }
 
 /* EOF */

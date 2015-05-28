@@ -123,40 +123,18 @@ struct command_switch
 
 /* The recognized command switches.  */
 
-/* Nonzero means do extra verification (that may slow things down).  */
-
-int verify_flag;
-
-/* Nonzero means do not print commands to be executed (-s).  */
-
-int silent_flag;
-
-/* Nonzero means just touch the files
-   that would appear to need remaking (-t)  */
-
-int touch_flag;
-
-/* Nonzero means just print what commands would need to be executed,
-   don't actually execute them (-n).  */
-
-int just_print_flag;
-
 /* Synchronize output (--output-sync).  */
 
 char *output_sync_option = 0;
-
-/*! If 1, we don't give additional error reporting information. */
-int no_extended_errors = 0;
-
-/*! If true, show version information on entry. */
-bool b_show_version = false;
 
 /*! If non-null, contains the type of tracing we are to do.
   This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
-/*! Nonzero means use GNU readline in the debugger. */
+/*! If true, show version information on entry. */
+bool b_show_version = false;
 
+/*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
     1
@@ -207,53 +185,10 @@ int suspend_flag = 0;
 
 /* Environment variables override makefile definitions.  */
 
-int env_overrides = 0;
-
-/* Nonzero means ignore status codes returned by commands
-   executed to remake files.  Just treat them all as successful (-i).  */
-
-int ignore_errors_flag = 0;
-
-/* Nonzero means don't remake anything, just print the data base
-   that results from reading the makefile (-p).  */
-
-int print_data_base_flag = 0;
-
-/* Nonzero means don't remake anything; just return a nonzero status
-   if the specified targets are not up to date (-q).  */
-
-int question_flag = 0;
-
-/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
-
-int no_builtin_rules_flag = 0;
-int no_builtin_variables_flag = 0;
-
 /* Nonzero means keep going even if remaking some file fails (-k).  */
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
-
-/* Nonzero means check symlink mtimes.  */
-
-int check_symlink_flag = 0;
-
-/* Nonzero means print directory before starting and when done (-w).  */
-
-int print_directory_flag = 0;
-
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
-
-int inhibit_print_directory_flag = 0;
-
-/* Nonzero means print version information.  */
-
-int print_version_flag = 0;
-
-/*! Nonzero means --trace and shell trace with input.  */
-
-int shell_trace = 0;
 
 /*! Nonzero gives a list of explicit target names and exits. Set by option
   --targets
@@ -272,6 +207,11 @@ int show_tasks_flag = 0;
  */
 
 int show_task_comments_flag = 0;
+
+/* Nonzero means ignore print_directory_flag and never print the directory.
+   This is necessary because print_directory_flag is set implicitly.  */
+
+int inhibit_print_directory_flag = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -594,14 +534,6 @@ char *argv0 = NULL;
 
 /*! The name we were invoked with.  */
 
-#ifdef WINDOWS32
-/* On MS-Windows, we chop off the .exe suffix in 'main', so this
-   cannot be 'const'.  */
-char *program = NULL;
-#else
-const char *program = NULL;
-#endif
-
 /*! Our initial arguments -- used for debugger restart execvp.  */
 char **global_argv;
 
@@ -610,9 +542,6 @@ char *directory_before_chdir = NULL;
 
 /*! Our current directory after processing all -C options.  */
 char *starting_directory;
-
-/*! Value of the MAKELEVEL variable at startup (or 0).  */
-unsigned int makelevel;
 
 /*! Pointer to the value of the .DEFAULT_GOAL special variable.
   The value will be the name of the goal to remake if the command line
