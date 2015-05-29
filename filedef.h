@@ -28,6 +28,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct file
   {
+    unsigned long elapsed_msec;  /* Time in msecs to perform action */
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */

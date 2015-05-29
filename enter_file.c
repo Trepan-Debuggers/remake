@@ -52,6 +52,80 @@ file_hash_cmp (const void *x, const void *y)
 #define FILE_BUCKETS    1007
 #endif
 
+/* Access the hash table of all file records.
+   lookup_file  given a name, return the struct file * for that name,
+                or nil if there is none.
+*/
+
+struct file *
+lookup_file (const char *name)
+{
+  struct file *f;
+  struct file file_key;
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
+  char *lname;
+#endif
+
+  assert (*name != '\0');
+
+  /* This is also done in parse_file_seq, so this is redundant
+     for names read from makefiles.  It is here for names passed
+     on the command line.  */
+#ifdef VMS
+# ifndef WANT_CASE_SENSITIVE_TARGETS
+  if (*name != '.')
+    {
+      const char *n;
+      char *ln;
+      lname = xstrdup (name);
+      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
+        *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
+      *ln = '\0';
+      name = lname;
+    }
+# endif
+
+  while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
+      name += 2;
+#endif
+  while (name[0] == '.'
+#ifdef HAVE_DOS_PATHS
+         && (name[1] == '/' || name[1] == '\\')
+#else
+         && name[1] == '/'
+#endif
+         && name[2] != '\0')
+    {
+      name += 2;
+      while (*name == '/'
+#ifdef HAVE_DOS_PATHS
+             || *name == '\\'
+#endif
+             )
+        /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+        ++name;
+    }
+
+  if (*name == '\0')
+    /* It was all slashes after a dot.  */
+#if defined(VMS)
+    name = "[]";
+#elif defined(_AMIGA)
+    name = "";
+#else
+    name = "./";
+#endif
+
+  file_key.hname = name;
+  f = hash_find_item (&files, &file_key);
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
+  if (*name != '.')
+    free (lname);
+#endif
+
+  return f;
+}
+
 struct file *
 enter_file (const char *name)
 {

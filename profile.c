@@ -61,15 +61,16 @@ add_file(file_t *target) {
 
 
 extern void
-add_target(file_t *target) {
+add_target(file_t *from_target, file_t *to_target) {
+  if (lookup_file(to_target->floc.filenm) == NULL) {
+    add_file(to_target);
+  }
   fprintf(callgrind_fd,
-	  "fl=(%d) %s\nfn(%d) %s\n%lu %lu\n\n",
-	  next_file_num++,
-	  target->floc.filenm,
+	  "fn=(%d) %s\n%lu %lu\n\n",
 	  next_fn_num++,
-	  target->name,
-	  target->floc.lineno,
-	  (unsigned long) 500);
+	  to_target->name,
+	  to_target->floc.lineno,
+	  to_target->elapsed_msec);
 }
 
 extern void
@@ -83,10 +84,21 @@ close_callgrind(void) {
 int main(int argc, const char **argv) {
   bool rc = init_callgrind("remake 4.1+dbg1.0", "remake foo",
 			   "Program termination");
+  init_hash_files();
   if (rc) {
-    init_hash_files();
     file_t *target = enter_file("Makefile");
+    file_t *target2;
+    target->floc.filenm = "Makefile";
+    add_file(target);
+
+    target2 = enter_file("all");
+    target2->floc.filenm = "Makefile";
+    target2->floc.lineno = 5;
+    target2->elapsed_msec = 500;
+    add_target(target, target2);
+
     printf("%s\n", callgrind_fname);
+
 
     close_callgrind();
   }
