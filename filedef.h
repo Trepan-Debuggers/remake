@@ -28,8 +28,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct file
   {
-    time_t elapsed_time;         /* Time update target; used in --profile */
-    unsigned long profiled_fn;   /* function number used in --profile */
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */

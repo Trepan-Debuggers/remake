@@ -8,6 +8,65 @@
 #include <errno.h>
 
 #include "profile.h"
+#include "hash.h"
+
+/*! \brief Node for an item in the target call stack */
+typedef struct profile_call profile_call_t;
+typedef struct profile_call   {
+  file_t         *p_target;
+  profile_call_t *p_next;
+} profile_call_t;
+
+struct profile_entry   {
+  time_t elapsed_time;     /* Time update target; used in --profile */
+  const char *name;
+  gmk_floc floc;           /* location in Makefile - for tracing */
+  profile_call_t *calls;   /* List of targets this target calls.  */
+};
+typedef struct profile_entry profile_entry_t;
+
+static struct hash_table profile_table;
+
+static unsigned long
+profile_table_entry_hash_1 (const void *key)
+{
+  return_ISTRING_HASH_1 (((profile_entry_t *) key)->name);
+}
+
+static unsigned long
+profile_table_entry_hash_2 (const void *key)
+{
+  return_ISTRING_HASH_2 (((profile_entry_t *) key)->name);
+}
+
+static int
+profile_hash_cmp (const void *x, const void *y)
+{
+  return_ISTRING_COMPARE (((profile_entry_t *) x)->name,
+                          ((profile_entry_t *) y)->name);
+}
+
+static profile_entry_t *
+add_profile_entry (const file_t *target)
+{
+  /* Look up the string in the hash.  If it's there, return it.  */
+  profile_entry_t **slot = (profile_entry_t **) hash_find_slot (&profile_table,
+								&(target->name));
+  profile_entry_t *profile_entry  = *slot;
+  profile_entry_t *new;
+
+  if (!HASH_VACANT (profile_entry))
+    return profile_entry;
+
+  /* Not there yet so add it to a buffer, then into the hash table.  */
+  new = xcalloc (sizeof (profile_entry_t));
+  new->name = target->name;
+  memcpy(&(new->floc), &(target->floc), sizeof(gmk_floc));
+
+  hash_insert_at (&profile_table, new, slot);
+  new->calls = NULL;
+  return new;
+}
 
 #define CALLGRIND_FILE_PREFIX "callgrind.out."
 #define CALLGRIND_FILE_TEMPLATE CALLGRIND_FILE_PREFIX "%d"
@@ -43,6 +102,8 @@ init_callgrind(const char *creator, const char *const *argv,
     printf("Error in opening callgrind file %s\n", callgrind_fname);
     return false;
   }
+  hash_init (&profile_table, 1000, profile_table_entry_hash_1,
+	     profile_table_entry_hash_2, profile_hash_cmp);
   fprintf(callgrind_fd, CALLGRIND_PREAMBLE_TEMPLATE1,
 	  creator);
   fprintf(callgrind_fd, "cmd:");
@@ -55,51 +116,72 @@ init_callgrind(const char *creator, const char *const *argv,
   return true;
 }
 
+#if 0
 static unsigned int next_file_num = 0;
 static unsigned int next_fn_num   = 1;
+#endif
 
 extern void
-add_file(file_t *target) {
-  fprintf(callgrind_fd,
-	  "fl=(%d) %s\n",
-	  next_file_num++,
-	  target->floc.filenm);
-  target->file_profiled = 1;
-}
-
-
-extern void
-add_target(file_t *target) {
-  file_t *target_prev = target->prev;
-  file_t *target_file = lookup_file(target->floc.filenm);
-  if (target_prev) {
-    file_t *prev_filename = lookup_file(target_prev->floc.filenm);
-    if (prev_filename && !prev_filename->file_profiled) {
-      add_file(prev_filename);
+add_target(file_t *target, file_t *prev, time_t elapsed_time) {
+  profile_entry_t *p = add_profile_entry(target);
+  p->elapsed_time = elapsed_time;
+  if (prev) {
+    profile_entry_t *q = add_profile_entry(prev);
+    if (q) {
+      profile_call_t *new = CALLOC(profile_call_t, 1);
+      new->p_target = target;
+      new->p_next = q->calls;
+      q->calls = new;
     }
   }
-  if (target_file && !target_file->file_profiled) {
-      add_file(target);
-  }
+}
 
-  fprintf(callgrind_fd,
-	  "fn=(%d) %s\n%lu %lu\n",
-	  next_fn_num,
-	  target->name,
-	  target->floc.lineno,
-	  target->elapsed_time);
-  if (target_prev && target_prev->profiled_fn) {
-    fprintf(callgrind_fd,
-	    "cfn=(%lu)\n\n",
-	    target_prev->profiled_fn);
+static void
+print_profile_entry (const void *item)
+{
+  const profile_entry_t *p = item;
+  profile_call_t *c;
+  printf("name: %s, file: %s, line: %lu, time: %lu\n",
+	 p->name, p->floc.filenm, p->floc.lineno, p->elapsed_time);
+  for (c = p->calls; c; c = c->p_next) {
+    printf("calls: %s\n", c->p_target->name);
   }
-  target->profiled_fn = next_fn_num;
-  target->file_profiled = 1;
-  next_fn_num++;
+}
+
+/* Print all profile entries */
+static void
+print_profile(struct hash_table *hash_table)
+{
+  hash_map (hash_table, print_profile_entry);
+}
+
+static void
+callgrind_profile_entry (const void *item)
+{
+  const profile_entry_t *p = item;
+  profile_call_t *c;
+  fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
+  fprintf(callgrind_fd, "fn=%s\n", p->name);
+  fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno, p->elapsed_time);
+  for (c = p->calls; c; c = c->p_next) {
+    fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
+    fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
+    fprintf(callgrind_fd, "calls=1 %lu\n", p->floc.lineno);
+  }
+  fprintf(callgrind_fd, "\n");
+}
+
+/* Print all profile entries */
+void
+callgrind_profile_data(struct hash_table *hash_table)
+{
+  hash_map (hash_table, callgrind_profile_entry);
 }
 
 extern void
 close_callgrind(void) {
+  print_profile(&profile_table);
+  callgrind_profile_data(&profile_table);
   printf("Created callgrind profiling data file: %s\n", callgrind_fname);
   fclose(callgrind_fd);
 }
@@ -116,19 +198,18 @@ int main(int argc, const char * const* argv) {
     file_t *target2, *target3;
     target->floc.filenm = "Makefile";
 
+
     target2 = enter_file("all");
     target2->floc.filenm = "Makefile";
     target2->floc.lineno = 5;
-    target2->elapsed_time = 500;
     target2->prev = target;
-    add_target(target2);
+    add_target(target2, NULL, 500);
 
     target3 = enter_file("all-recursive");
     target3->floc.filenm = "Makefile";
     target3->floc.lineno = 5;
-    target3->elapsed_time = 500;
     target3->prev = target2;
-    add_target(target3);
+    add_target(target3, target2, 1000);
 
     close_callgrind();
   }

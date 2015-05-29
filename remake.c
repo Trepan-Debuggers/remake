@@ -480,6 +480,14 @@ update_file_1 (struct file *file, unsigned int depth,
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
+      if (profile_flag) {
+	finished_time = time(NULL);
+	if (start_time > 0 && finished_time > 0 &&
+	    p_call_stack->p_parent) {
+	  add_target(file, p_call_stack->p_parent->p_target,
+		     finished_time - start_time);
+	}
+      }
       trace_pop_target(p_call_stack);
       return file->update_status;
     default:
@@ -875,6 +883,14 @@ update_file_1 (struct file *file, unsigned int depth,
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
       if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
 	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+      if (profile_flag) {
+	finished_time = time(NULL);
+	if (start_time > 0 && finished_time > 0 &&
+	    p_call_stack->p_parent) {
+	  add_target(file, p_call_stack->p_parent->p_target,
+		     finished_time - start_time);
+	}
+      }
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -894,17 +910,18 @@ update_file_1 (struct file *file, unsigned int depth,
       break;
     }
 
-  if (profile_flag) {
-    finished_time = time(NULL);
-    if (start_time > 0 && finished_time > 0) {
-      file->elapsed_time = finished_time - start_time;
-      add_target(file);
-    }
-  }
-
   file->updated = 1;
   if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+  if (profile_flag) {
+    finished_time = time(NULL);
+    if (start_time > 0 && finished_time > 0 &&
+	p_call_stack->p_parent) {
+      add_target(file, p_call_stack->p_parent->p_target,
+		 finished_time - start_time);
+    }
+  }
+
   trace_pop_target(p_call_stack);
   return file->update_status;
 }
