@@ -35,6 +35,9 @@ int print_version_flag = 0;
 /*! Nonzero means --trace and shell trace with input.  */
 int shell_trace = 0;
 
+/* Nonzero means profile calls (option --profile).  */
+int profile_flag = 0;
+
 /* Nonzero means do extra verification (that may slow things down).  */
 int verify_flag;
 

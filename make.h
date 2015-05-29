@@ -486,7 +486,7 @@ extern int max_load_average;
 extern char *argv0;
 
 /*! Our initial arguments -- used for debugger restart execvp.  */
-extern char **global_argv;
+extern const char * const *global_argv;
 
 extern char *starting_directory;
 

@@ -16,6 +16,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "globals.h"
+#include "profile.h"
 #include "filedef.h"
 #include "dep.h"
 #include "variable.h"
@@ -327,6 +328,8 @@ static const char *const usage[] =
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
     N_("\
+  -P, --profile               Print profiling information for each target.\n"),
+    N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
@@ -350,7 +353,7 @@ static const char *const usage[] =
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
   --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n"
-                              "\full\"\n. The default is \"full\".\n"),
+                              "\"full\"\n. The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -396,6 +399,7 @@ static const struct command_switch switches[] =
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'P', flag, &profile_flag, 1, 1, 0, 0, 0, "profile" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -487,7 +491,7 @@ char *argv0 = NULL;
 /*! The name we were invoked with.  */
 
 /*! Our initial arguments -- used for debugger restart execvp.  */
-char **global_argv;
+const char * const*global_argv;
 
 /*! Our current directory before processing any -C options.  */
 char *directory_before_chdir = NULL;
@@ -990,13 +994,8 @@ msdos_return_to_initial_directory (void)
 }
 #endif  /* __MSDOS__ */
 
-#ifdef _AMIGA
 int
-main (int argc, char **argv)
-#else
-int
-main (int argc, char **argv, char **envp)
-#endif
+main (int argc, const char **argv, char **envp)
 {
   static char *stdin_nm = 0;
   int makefile_status = MAKE_SUCCESS;
@@ -1539,6 +1538,8 @@ main (int argc, char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
+  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION,
+				   argv, "Program termination");
 
 #ifdef MAKE_JOBSERVER
   /* If the jobserver-fds option is seen, make sure that -j is reasonable.
@@ -3495,5 +3496,6 @@ die (int status)
         }
     }
 
+  if (profile_flag) close_callgrind();
   exit (status);
 }

@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
+#include "profile.h"
 #include "debugger/cmd.h"
 #include "filedef.h"
 #include "job.h"
@@ -432,6 +434,8 @@ update_file_1 (struct file *file, unsigned int depth,
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
+  time_t start_time = profile_flag ? time(NULL) : 0;
+  time_t finished_time;
 
   DBF (DB_VERBOSE, _("Considering target file '%s'.\n"));
   p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
@@ -889,6 +893,14 @@ update_file_1 (struct file *file, unsigned int depth,
     case us_none:
       break;
     }
+
+  if (profile_flag) {
+    finished_time = time(NULL);
+    if (start_time > 0 && finished_time > 0) {
+      file->elapsed_time = finished_time - start_time;
+      add_target(file);
+    }
+  }
 
   file->updated = 1;
   if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )

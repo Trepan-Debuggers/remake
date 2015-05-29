@@ -93,7 +93,8 @@ DEBUGGER_H = \
 make_SOURCES =	alloc.c ar.c arscan.c commands.c default.c dir.c \
 		enter_file.c expand.c \
 	        file.c function.c getopt.c getopt1.c globals.c guile.c \
-	        implicit.c job.c load.c	loadapi.c main.c misc.c output.c print.c \
+	        implicit.c job.c load.c	loadapi.c main.c misc.c output.c \
+		profile.c print.c \
 		read.c remake.c rule.c \
 		signame.c strcache.c variable.c version.c vpath.c hash.c \
 		buildargv.c debug.c trace.c \

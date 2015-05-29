@@ -28,7 +28,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct file
   {
-    unsigned long elapsed_msec;  /* Time in msecs to perform action */
+    time_t elapsed_time;         /* Time update target; used in --profile */
+    unsigned long profiled_fn;   /* function number used in --profile */
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
@@ -113,6 +114,8 @@ struct file
                                    considered on current scan of goal chain */
     unsigned int no_diag:1;     /* True if the file failed to update and no
                                    diagnostics has been issued (dontcare). */
+    unsigned int file_profiled:1;  /* True if --profile has been set and
+				      we have emitted a callgrind file line. */
   };
 
 

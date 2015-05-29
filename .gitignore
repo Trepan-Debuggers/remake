@@ -2,7 +2,7 @@
 *.o
 .deps
 /*.log
-/*~
+*~
 /.dep_segment
 /ABOUT-NLS
 /ChangeLog
@@ -39,3 +39,4 @@
 /stamp-h1
 /test-profile
 /tmp
+callgrind.out.*

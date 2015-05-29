@@ -35,11 +35,13 @@ extern int check_symlink_flag;
 extern int print_directory_flag;
 
 /* Nonzero means print version information.  */
-
 extern int print_version_flag;
 
 /*! Nonzero means --trace and shell trace with input.  */
 extern int shell_trace;
+
+/* Nonzero means profile calls (option --profile).  */
+extern int profile_flag;
 
 /* Nonzero means do extra verification (that may slow things down).  */
 extern int verify_flag;
