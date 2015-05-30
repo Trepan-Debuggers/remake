@@ -29,19 +29,19 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct hash_table files;
 
-static unsigned long
+extern unsigned long
 file_hash_1 (const void *key)
 {
   return_ISTRING_HASH_1 (((struct file const *) key)->hname);
 }
 
-static unsigned long
+extern unsigned long
 file_hash_2 (const void *key)
 {
   return_ISTRING_HASH_2 (((struct file const *) key)->hname);
 }
 
-int
+extern int
 file_hash_cmp (const void *x, const void *y)
 {
   return_ISTRING_COMPARE (((struct file const *) x)->hname,

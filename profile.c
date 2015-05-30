@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* Compile with:
    gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
    make mock.o
-   gcc mock.o version.o alloc.o globals.o misc.o output.o enter_file.o hash.o strcache.o test-profile.o -o test-profile
+   gcc mock.o version.o alloc.o globals.o misc.o output.o file_basic.o hash.o strcache.o test-profile.o -o test-profile
 */
 #include <stdio.h>
 #include <sys/types.h>
@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 /*! \brief Node for an item in the target call stack */
 typedef struct profile_call profile_call_t;
 typedef struct profile_call   {
-  file_t         *p_target;
+  const file_t   *p_target;
   profile_call_t *p_next;
 } profile_call_t;
 
@@ -273,14 +273,12 @@ int main(int argc, const char * const* argv) {
     target2 = enter_file("all");
     target2->floc.filenm = "Makefile";
     target2->floc.lineno = 5;
-    target2->prev = target;
     target2->elapsed_time = 500;
     add_target(target2, NULL);
 
     target3 = enter_file("all-recursive");
     target3->floc.filenm = "Makefile";
     target3->floc.lineno = 5;
-    target3->prev = target2;
     target3->elapsed_time = 1000;
     add_target(target3, target2);
 
