@@ -32,6 +32,7 @@ struct file
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
     gmk_floc floc;              /* location in Makefile - for tracing */
+    uint64_t elapsed_time;      /* Runtime in 100microsec to build target */
     unsigned int nlines;	/* Number of lines in file - for debugging. */
 
     const char *description;    /* Description of target taken from comment.

@@ -1,5 +1,6 @@
 /* Compile with:
    gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
+   make mock.o
    gcc mock.o version.o alloc.o globals.o misc.o output.o enter_file.o hash.o strcache.o test-profile.o -o test-profile
 */
 #include <stdio.h>
@@ -18,7 +19,7 @@ typedef struct profile_call   {
 } profile_call_t;
 
 struct profile_entry   {
-  time_t elapsed_time;     /* Time update target; used in --profile */
+  uint64_t elapsed_time;   /* rutime in milliseconds */
   const char *name;
   gmk_floc floc;           /* location in Makefile - for tracing */
   profile_call_t *calls;   /* List of targets this target calls.  */
@@ -122,9 +123,9 @@ static unsigned int next_fn_num   = 1;
 #endif
 
 extern void
-add_target(file_t *target, file_t *prev, time_t elapsed_time) {
+add_target(file_t *target, file_t *prev) {
   profile_entry_t *p = add_profile_entry(target);
-  p->elapsed_time = elapsed_time;
+  p->elapsed_time = target->elapsed_time;
   if (prev) {
     profile_entry_t *q = add_profile_entry(prev);
     if (q) {
@@ -160,13 +161,17 @@ callgrind_profile_entry (const void *item)
 {
   const profile_entry_t *p = item;
   profile_call_t *c;
-  fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
+  if (p->floc.filenm) fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
   fprintf(callgrind_fd, "fn=%s\n", p->name);
-  fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno, p->elapsed_time);
+  fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+	  p->elapsed_time == 0 ? 1 : p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
-    fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
+    if (c->p_target->floc.filenm)
+      fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
     fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
     fprintf(callgrind_fd, "calls=1 %lu\n", p->floc.lineno);
+    fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+	    c->p_target->elapsed_time == 0 ? 1 : c->p_target->elapsed_time);
   }
   fprintf(callgrind_fd, "\n");
 }
@@ -203,13 +208,15 @@ int main(int argc, const char * const* argv) {
     target2->floc.filenm = "Makefile";
     target2->floc.lineno = 5;
     target2->prev = target;
-    add_target(target2, NULL, 500);
+    target2->elapsed_time = 500;
+    add_target(target2, NULL);
 
     target3 = enter_file("all-recursive");
     target3->floc.filenm = "Makefile";
     target3->floc.lineno = 5;
     target3->prev = target2;
-    add_target(target3, target2, 1000);
+    target3->elapsed_time = 1000;
+    add_target(target3, target2);
 
     close_callgrind();
   }

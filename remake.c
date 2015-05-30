@@ -420,6 +420,33 @@ complain (struct file *file)
     }
 }
 
+/* #define GETTIME(t)					  \ */
+/*   time_error ||= (0 == gettimeofday(&t, NULL)));	  \ */
+
+static inline bool
+GETTIME(struct timeval *t) {
+  return (0 != gettimeofday(t, NULL));
+}
+
+static uint64_t
+TIME_IN_100MICRO(struct timeval *time) {
+  return ((time->tv_sec * (uint64_t)10000) +
+	  (uint64_t) (time->tv_usec / 100));
+}
+
+static uint64_t
+time_diff(struct timeval *start_time, struct timeval *finish_time) {
+  struct timeval diff_time;
+  diff_time.tv_sec = finish_time->tv_sec - start_time->tv_sec;
+  diff_time.tv_usec = finish_time->tv_usec;
+  if (diff_time.tv_usec < start_time->tv_usec) {
+    diff_time.tv_usec += 1000000;
+    diff_time.tv_sec--;
+  }
+  diff_time.tv_usec -= start_time->tv_usec;
+  return TIME_IN_100MICRO(&diff_time);
+}
+
 /* Consider a single 'struct file' and update it as appropriate.
    Return 0 on success, or non-0 on failure.  */
 
@@ -434,8 +461,12 @@ update_file_1 (struct file *file, unsigned int depth,
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
-  time_t start_time = profile_flag ? time(NULL) : 0;
-  time_t finished_time;
+  struct timeval finish_time;
+  struct timeval start_time;
+  bool time_error = false;
+
+  if (profile_flag)
+    time_error = time_error || GETTIME(&start_time);
 
   DBF (DB_VERBOSE, _("Considering target file '%s'.\n"));
   p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
@@ -480,13 +511,10 @@ update_file_1 (struct file *file, unsigned int depth,
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
-      if (profile_flag) {
-	finished_time = time(NULL);
-	if (start_time > 0 && finished_time > 0 &&
-	    p_call_stack->p_parent) {
-	  add_target(file, p_call_stack->p_parent->p_target,
-		     finished_time - start_time);
-	}
+      if (profile_flag && !time_error && p_call_stack->p_parent) {
+	time_error = time_error || GETTIME(&finish_time);
+	file->elapsed_time = time_diff(&start_time, &finish_time);
+	add_target(file, p_call_stack->p_parent->p_target);
       }
       trace_pop_target(p_call_stack);
       return file->update_status;
@@ -711,8 +739,13 @@ update_file_1 (struct file *file, unsigned int depth,
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file '%s'.\n"));
 
+  time_error = time_error || GETTIME(&finish_time);
+  if (profile_flag && !time_error && p_call_stack->p_parent) {
+    file->elapsed_time = time_diff(&start_time, &finish_time);
+  }
+
   if ( file->tracing & BRK_AFTER_PREREQ )
-      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
+    enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
 
   if (running)
     {
@@ -855,6 +888,12 @@ update_file_1 (struct file *file, unsigned int depth,
          VPATH filename if we found one.  hfile will be either the
          local name if no VPATH or the VPATH name if one was found.  */
 
+      time_error = time_error || GETTIME(&finish_time);
+      if (file && profile_flag && !time_error && p_call_stack->p_parent) {
+	file->elapsed_time = time_diff(&start_time, &finish_time);
+	add_target(file, p_call_stack->p_parent->p_target);
+      }
+
       while (file)
         {
           file->name = file->hname;
@@ -883,13 +922,10 @@ update_file_1 (struct file *file, unsigned int depth,
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
       if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
 	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
-      if (profile_flag) {
-	finished_time = time(NULL);
-	if (start_time > 0 && finished_time > 0 &&
-	    p_call_stack->p_parent) {
-	  add_target(file, p_call_stack->p_parent->p_target,
-		     finished_time - start_time);
-	}
+      time_error = time_error || GETTIME(&finish_time);
+      if (profile_flag && !time_error && p_call_stack->p_parent) {
+	file->elapsed_time = time_diff(&start_time, &finish_time);
+	add_target(file, p_call_stack->p_parent->p_target);
       }
       trace_pop_target(p_call_stack);
       return 0;
@@ -914,11 +950,11 @@ update_file_1 (struct file *file, unsigned int depth,
   if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
   if (profile_flag) {
-    finished_time = time(NULL);
-    if (start_time > 0 && finished_time > 0 &&
+    time_error = time_error || GETTIME(&finish_time);
+    if (profile_flag && !time_error &&
 	p_call_stack->p_parent) {
-      add_target(file, p_call_stack->p_parent->p_target,
-		 finished_time - start_time);
+      file->elapsed_time = time_diff(&start_time, &finish_time);
+      add_target(file, p_call_stack->p_parent->p_target);
     }
   }
 
