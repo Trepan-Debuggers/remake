@@ -83,9 +83,10 @@ creator: %s\n"
 
 #define CALLGRIND_PREAMBLE_TEMPLATE2 "pid: %u\n\
 desc: Trigger: %s\n\
+desc: Node: Targets\n\
 \n\
 positions: line\n\
-events: Target\n\
+events: 100usec\n\
 \n"
 
 extern bool
