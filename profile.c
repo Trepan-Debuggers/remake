@@ -1,3 +1,22 @@
+/*
+Copyright (C) 2015 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
+
+GNU Make is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+GNU Make is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Make; see the file COPYING.  If not, write to
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
 /* Compile with:
    gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
    make mock.o
@@ -10,6 +29,8 @@
 
 #include "profile.h"
 #include "hash.h"
+
+/* #define DEBUG_PROFILE */
 
 /*! \brief Node for an item in the target call stack */
 typedef struct profile_call profile_call_t;
@@ -82,19 +103,51 @@ static FILE *callgrind_fd;
 creator: %s\n"
 
 #define CALLGRIND_PREAMBLE_TEMPLATE2 "pid: %u\n\
+\n\
 desc: Trigger: %s\n\
 desc: Node: Targets\n\
 \n\
 positions: line\n\
-events: 100usec\n\
-\n"
+events: 100usec\n"
 
 extern bool
-init_callgrind(const char *creator, const char *const *argv,
-	       const char *program_status) {
-  const pid_t callgrind_pid = getpid();
-  size_t len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, callgrind_pid);
+get_time(struct timeval *t) {
+  return (0 != gettimeofday(t, NULL));
+}
+
+static inline uint64_t
+time_in_100micro(struct timeval *time) {
+  return ((time->tv_sec * (uint64_t)10000) +
+	  (uint64_t) (time->tv_usec / 100));
+}
+
+extern uint64_t
+time_diff(struct timeval *start_time, struct timeval *finish_time) {
+  struct timeval diff_time;
+  diff_time.tv_sec = finish_time->tv_sec - start_time->tv_sec;
+  diff_time.tv_usec = finish_time->tv_usec;
+  if (diff_time.tv_usec < start_time->tv_usec) {
+    diff_time.tv_usec += 1000000;
+    diff_time.tv_sec--;
+  }
+  diff_time.tv_usec -= start_time->tv_usec;
+  return time_in_100micro(&diff_time);
+}
+
+static struct timeval program_start_time;
+static struct timeval program_finish_time;
+static bool time_error;
+static pid_t callgrind_pid;
+
+extern bool
+init_callgrind(const char *creator, const char *const *argv) {
+  size_t len;
   unsigned int i;
+
+  callgrind_pid = getpid();
+  len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, callgrind_pid);
+  time_error = get_time(&program_start_time);
+
   if (len >= CALLGRIND_FILENAME_LEN) {
     printf("Error in generating name\n");
     return false;
@@ -113,12 +166,11 @@ init_callgrind(const char *creator, const char *const *argv,
       fprintf(callgrind_fd, " %s", argv[i]);
     }
   fprintf(callgrind_fd, "\n");
-  fprintf(callgrind_fd, CALLGRIND_PREAMBLE_TEMPLATE2, callgrind_pid,
-	  program_status);
   return true;
 }
 
 #if 0
+/* Could use this for name compression */
 static unsigned int next_file_num = 0;
 static unsigned int next_fn_num   = 1;
 #endif
@@ -138,6 +190,7 @@ add_target(file_t *target, file_t *prev) {
   }
 }
 
+#ifdef DEBUG_PROFILE
 static void
 print_profile_entry (const void *item)
 {
@@ -156,6 +209,7 @@ print_profile(struct hash_table *hash_table)
 {
   hash_map (hash_table, print_profile_entry);
 }
+#endif
 
 static void
 callgrind_profile_entry (const void *item)
@@ -185,8 +239,20 @@ callgrind_profile_data(struct hash_table *hash_table)
 }
 
 extern void
-close_callgrind(void) {
+close_callgrind(const char *program_status) {
+  fprintf(callgrind_fd, CALLGRIND_PREAMBLE_TEMPLATE2, callgrind_pid,
+	  program_status);
+  if (!time_error) {
+    time_error = time_error || get_time(&program_finish_time);
+  }
+
+  if (!time_error) {
+    fprintf(callgrind_fd, "summary: %lu\n\n",
+	    time_diff(&program_start_time, &program_finish_time));
+  }
+#ifdef DEBUG_PROFILE
   print_profile(&profile_table);
+#endif
   callgrind_profile_data(&profile_table);
   printf("Created callgrind profiling data file: %s\n", callgrind_fname);
   fclose(callgrind_fd);
@@ -196,8 +262,7 @@ close_callgrind(void) {
 #include "config.h"
 #include "types.h"
 int main(int argc, const char * const* argv) {
-  bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv,
-			   "Program termination");
+  bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
   init_hash_files();
   if (rc) {
     file_t *target = enter_file("Makefile");
@@ -219,7 +284,7 @@ int main(int argc, const char * const* argv) {
     target3->elapsed_time = 1000;
     add_target(target3, target2);
 
-    close_callgrind();
+    close_callgrind("Program termination");
   }
   return rc;
 }

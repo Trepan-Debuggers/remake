@@ -420,30 +420,6 @@ complain (struct file *file)
     }
 }
 
-static inline bool
-get_time(struct timeval *t) {
-  return (0 != gettimeofday(t, NULL));
-}
-
-static uint64_t
-time_in_100micro(struct timeval *time) {
-  return ((time->tv_sec * (uint64_t)10000) +
-	  (uint64_t) (time->tv_usec / 100));
-}
-
-static uint64_t
-time_diff(struct timeval *start_time, struct timeval *finish_time) {
-  struct timeval diff_time;
-  diff_time.tv_sec = finish_time->tv_sec - start_time->tv_sec;
-  diff_time.tv_usec = finish_time->tv_usec;
-  if (diff_time.tv_usec < start_time->tv_usec) {
-    diff_time.tv_usec += 1000000;
-    diff_time.tv_sec--;
-  }
-  diff_time.tv_usec -= start_time->tv_usec;
-  return time_in_100micro(&diff_time);
-}
-
 #define PROFILE_TIME					       \
   if (profile_flag && !time_error) {			       \
     time_error = time_error || get_time(&finish_time);	       \

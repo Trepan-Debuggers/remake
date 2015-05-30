@@ -1538,8 +1538,7 @@ main (int argc, const char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
-  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION,
-				   argv, "Program termination");
+  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
 
 #ifdef MAKE_JOBSERVER
   /* If the jobserver-fds option is seen, make sure that -j is reasonable.
@@ -3496,6 +3495,26 @@ die (int status)
         }
     }
 
-  if (profile_flag) close_callgrind();
+  if (profile_flag) {
+    const char *status_str;
+    switch (status) {
+      case MAKE_SUCCESS:
+	status_str = "Normal program termination";
+	break;
+      case MAKE_TROUBLE:
+	status_str = "Platform failure termination";
+	break;
+      case MAKE_FAILURE:
+	status_str = "Failure program termination";
+	break;
+      case DEBUGGER_QUIT_RC:
+	status_str = "Debugger termination";
+	break;
+      default:
+	status_str = "";
+      }
+
+    close_callgrind(status_str);
+  }
   exit (status);
 }
