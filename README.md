@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake)
+[![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake) [![Join the chat at https://gitter.im/rocky/remake](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rocky/remake?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Patched GNU Make 4.1 sources to add improved error reporting, tracing,
 target listing, graph visualization, and profiling. It also
@@ -8,7 +8,6 @@ contains debugger. See the remake-3-82 branch for a patched GNU Make
 Tracing and Debugging
 ---------------------
 
-[![Join the chat at https://gitter.im/rocky/remake](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rocky/remake?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Although there's a full debugger here, most of the time I can get by
 using no options since normal output is a little more verbose and detailed.
 When that isn't enough, I use the *--trace* or *-x* option, e.g:
