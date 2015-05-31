@@ -2,7 +2,7 @@
 static debug_return_t
 dbg_cmd_run(char *psz_arg)
 {
-  char **ppsz_argv = global_argv;
+  char * const *ppsz_argv = (char * const *)global_argv;
   const char *psz_make_cmd = global_argv[0];
   printf("Changing directory to %s and restarting...\n",
 	 directory_before_chdir);

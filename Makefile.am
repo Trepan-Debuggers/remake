@@ -90,21 +90,30 @@ DEBUGGER_H = \
 		debugger/stack.h		\
 		debugger/subcmd.h
 
-make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
-		function.c getopt.c getopt1.c guile.c implicit.c job.c load.c \
-		loadapi.c main.c misc.c output.c print.c read.c remake.c rule.c \
-		signame.c strcache.c variable.c version.c vpath.c hash.c \
-		buildargv.c debug.c trace.c \
-		$(remote) \
-	 	$(DEBUGGER_SRC)
+make_SOURCES =	alloc.c ar.c arscan.c \
+	buildargv.c commands.c default.c \
+	debug.c dir.c \
+	expand.c file_basic.c file.c function.c \
+	getopt.c getopt1.c globals.c guile.c \
+	hash.c implicit.c job.c load.c loadapi.c main.c misc.c output.c \
+	profile.c print.c \
+	read.c remake.c rule.c \
+	signame.c strcache.c \
+	trace.c variable.c version.c vpath.c \
+	$(remote) \
+	$(DEBUGGER_SRC)
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
-noinst_HEADERS = commands.h dep.h filedef.h job.h makeint.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h output.h implicit.h \
-		buildargv.h expand.h file.h function.h read.h main.h make.h \
-		print.h trace.h types.h vpath.h  \
-		$(DEBUGGER_H)
+noinst_HEADERS = buildargv.h commands.h \
+	debug.h dep.h expand.h \
+	file_basic.h file.h function.h filedef.h \
+	getopt.h gettext.h  hash.h \
+	job.h main.h make.h makeint.h \
+	output.h implicit.h print.h \
+	read.h rule.h \
+	trace.h types.h variable.h vpath.h  \
+	$(DEBUGGER_H)
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 		$(GUILE_LIBS)

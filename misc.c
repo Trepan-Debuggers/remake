@@ -203,95 +203,6 @@ strerror (int errnum)
 }
 #endif
 
-/* Like malloc but get fatal error if memory is exhausted.  */
-/* Don't bother if we're using dmalloc; it provides these for us.  */
-
-#ifndef HAVE_DMALLOC_H
-
-#undef xmalloc
-#undef xcalloc
-#undef xrealloc
-#undef xstrdup
-
-void *
-xmalloc (unsigned int size)
-{
-  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
-  void *result = malloc (size ? size : 1);
-  if (result == 0)
-    OUT_OF_MEM();
-  return result;
-}
-
-
-void *
-xcalloc (unsigned int size)
-{
-  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
-  void *result = calloc (size ? size : 1, 1);
-  if (result == 0)
-    OUT_OF_MEM();
-  return result;
-}
-
-
-void *
-xrealloc (void *ptr, unsigned int size)
-{
-  void *result;
-
-  /* Some older implementations of realloc() don't conform to ISO.  */
-  if (! size)
-    size = 1;
-  result = ptr ? realloc (ptr, size) : malloc (size);
-  if (result == 0)
-    OUT_OF_MEM();
-  return result;
-}
-
-
-char *
-xstrdup (const char *ptr)
-{
-  char *result;
-
-#ifdef HAVE_STRDUP
-  result = strdup (ptr);
-#else
-  result = malloc (strlen (ptr) + 1);
-#endif
-
-  if (result == 0)
-    OUT_OF_MEM();
-
-#ifdef HAVE_STRDUP
-  return result;
-#else
-  return strcpy (result, ptr);
-#endif
-}
-
-#endif  /* HAVE_DMALLOC_H */
-
-char *
-xstrndup (const char *str, unsigned int length)
-{
-  char *result;
-
-#ifdef HAVE_STRNDUP
-  result = strndup (str, length);
-  if (result == 0)
-    OUT_OF_MEM();
-#else
-  result = xmalloc (length + 1);
-  if (length > 0)
-    strncpy (result, str, length);
-  result[length] = '\0';
-#endif
-
-  return result;
-}
-
 
 /* Limited INDEX:
    Search through the string STRING, which ends at LIMIT, for the character C.
@@ -724,3 +635,49 @@ get_path_max (void)
   return value;
 }
 #endif
+
+/* Map of possible stop characters for searching strings.  */
+#ifndef UCHAR_MAX
+# define UCHAR_MAX 255
+#endif
+unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
+
+/* This character map locate stop chars when parsing GNU makefiles.
+   Each element is true if we should stop parsing on that character.  */
+
+extern void
+initialize_stopchar_map ()
+{
+  int i;
+
+  stopchar_map[(int)'\0'] = MAP_NUL;
+  stopchar_map[(int)'#'] = MAP_COMMENT;
+  stopchar_map[(int)';'] = MAP_SEMI;
+  stopchar_map[(int)'='] = MAP_EQUALS;
+  stopchar_map[(int)':'] = MAP_COLON;
+  stopchar_map[(int)'%'] = MAP_PERCENT;
+  stopchar_map[(int)'|'] = MAP_PIPE;
+  stopchar_map[(int)'.'] = MAP_DOT | MAP_USERFUNC;
+  stopchar_map[(int)','] = MAP_COMMA;
+  stopchar_map[(int)'$'] = MAP_VARIABLE;
+
+  stopchar_map[(int)'-'] = MAP_USERFUNC;
+  stopchar_map[(int)'_'] = MAP_USERFUNC;
+
+  stopchar_map[(int)'/'] = MAP_DIRSEP;
+#if defined(VMS)
+  stopchar_map[(int)']'] = MAP_DIRSEP;
+#elif defined(HAVE_DOS_PATHS)
+  stopchar_map[(int)'\\'] = MAP_DIRSEP;
+#endif
+
+  for (i = 1; i <= UCHAR_MAX; ++i)
+    {
+      if (isblank(i))
+        stopchar_map[i] = MAP_BLANK;
+      if (isspace(i))
+        stopchar_map[i] |= MAP_SPACE;
+      if (isalnum(i))
+        stopchar_map[i] = MAP_USERFUNC;
+    }
+}

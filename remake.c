@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
+#include "profile.h"
 #include "debugger/cmd.h"
 #include "filedef.h"
 #include "job.h"
@@ -418,6 +420,20 @@ complain (struct file *file)
     }
 }
 
+#define PROFILE_TIME					       \
+  if (profile_flag && !time_error) {			       \
+    time_error = time_error || get_time(&finish_time);	       \
+    file->elapsed_time = time_diff(&start_time, &finish_time); \
+    if (p_call_stack->p_parent)				       \
+      add_target(file, p_call_stack->p_parent->p_target);      \
+  }
+
+#define INCR_PROFILE_TIME					\
+  if (profile_flag && !time_error) {				\
+    time_error = time_error || get_time(&finish_time);		\
+    file->elapsed_time += time_diff(&start_time, &finish_time); \
+  }
+
 /* Consider a single 'struct file' and update it as appropriate.
    Return 0 on success, or non-0 on failure.  */
 
@@ -432,6 +448,12 @@ update_file_1 (struct file *file, unsigned int depth,
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
+  struct timeval finish_time;
+  struct timeval start_time;
+  bool time_error = false;
+
+  if (profile_flag)
+    time_error = time_error || get_time(&start_time);
 
   DBF (DB_VERBOSE, _("Considering target file '%s'.\n"));
   p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
@@ -461,6 +483,7 @@ update_file_1 (struct file *file, unsigned int depth,
         }
 
       DBF (DB_VERBOSE, _("File '%s' was considered already.\n"));
+      INCR_PROFILE_TIME;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -472,10 +495,12 @@ update_file_1 (struct file *file, unsigned int depth,
       break;
     case cs_running:
       DBF (DB_VERBOSE, _("Still updating file '%s'.\n"));
+      INCR_PROFILE_TIME;
       trace_pop_target(p_call_stack);
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
+      INCR_PROFILE_TIME;
       trace_pop_target(p_call_stack);
       return file->update_status;
     default:
@@ -700,13 +725,14 @@ update_file_1 (struct file *file, unsigned int depth,
   DBF (DB_VERBOSE, _("Finished prerequisites of target file '%s'.\n"));
 
   if ( file->tracing & BRK_AFTER_PREREQ )
-      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
+    enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
 
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
       DBF (DB_VERBOSE, _("The prerequisites of '%s' are being made.\n"));
+      INCR_PROFILE_TIME;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -722,6 +748,7 @@ update_file_1 (struct file *file, unsigned int depth,
       --depth;
 
       DBF (DB_VERBOSE, _("Giving up on target file '%s'.\n"));
+      PROFILE_TIME;
 
       if (depth == 0 && keep_going_flag
           && !just_print_flag && !question_flag)
@@ -843,6 +870,8 @@ update_file_1 (struct file *file, unsigned int depth,
          VPATH filename if we found one.  hfile will be either the
          local name if no VPATH or the VPATH name if one was found.  */
 
+      PROFILE_TIME;
+
       while (file)
         {
           file->name = file->hname;
@@ -871,6 +900,7 @@ update_file_1 (struct file *file, unsigned int depth,
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
       if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
 	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+      PROFILE_TIME;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -893,6 +923,8 @@ update_file_1 (struct file *file, unsigned int depth,
   file->updated = 1;
   if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+  PROFILE_TIME;
+
   trace_pop_target(p_call_stack);
   return file->update_status;
 }
