@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake)
 
 Patched GNU Make 4.1 sources to add improved error reporting, tracing,
-target listing, and graph visualization and profiling. It also
+target listing, graph visualization, and profiling. It also
 contains debugger. See the remake-3-82 branch for a patched GNU Make
 3.82.
 
