@@ -1,23 +1,33 @@
-This is the VMS version of GNU Make, updated by Hartmut Becker
-
-Changes are based on GNU make 3.82.
-
-This version was built and tested on OpenVMS V7.3 (VAX), V7.3-2 (Alpha) and
-V8.3-1H1 (I64).
+This version of GNU make has been tested on
+OpenVMS V8.3 (Alpha) and V8.4 (Integrity).
 
 Build instructions
+------------------
 Make a 1st version
        $ @makefile.com  ! ignore any compiler and/or linker warning
-       $ rena make.exe 1st-make.exe
-Use the 1st version to generate a 2nd version
-       $ mc sys$disk:[]1st-make clean
+       $ copy make.exe 1st-make.exe
+  Use the 1st version to generate a 2nd version
+       $ mc sys$disk:[]1st-make clean  ! ignore any file not found messages
        $ mc sys$disk:[]1st-make
-Verify your 2nd version
-       $ rena make.exe 2nd-make.exe
+  Verify your 2nd version
+       $ copy make.exe 2nd-make.exe
        $ mc sys$disk:[]2nd-make clean
        $ mc sys$disk:[]2nd-make
+  Don't use the HP C V7.2-001 compiler, which has an incompatible change
+  how __STDC__ is defined. This results at least in compile time warnings.
+
+Changes since GNU make 3.82
+---------------------------
 
-Changes (3.81.90)
+Fix build problems.
+
+The new feature "Loadable objects" is not yet supported. If you need it,
+please send a change request or submit a bug report.
+
+The new option --output-sync (-O) is accepted but has no effect: GNU make
+for VMS does not support running multiple commands simultaneously.
+
+Changes for GNU make 3.82
 
 Michael Gehre (at VISTEC-SEMI dot COM) supplied a fix for a problem with
 timestamps of object modules in OLBs. The timestamps were not correctly
@@ -33,30 +43,6 @@ Fix a problem with cached strings, which showed on case-insensitive file
 systems.
 
 Build fixes for const-ified code in VMS specific sources.
-
-Build notes:
-- Try to avoid HP C V7.2-001, which has an incompatible change
-how __STDC__ is defined. This results at least in compile time warnings.
-
-- On V8.3-1H1, if you press Ctrl+C you may see a traceback, starting with
-%SYSTEM-F-CONTROLC, operation completed under CTRL/C
-%TRACE-F-TRACEBACK, symbolic stack dump follows
-image     module    routine               line      rel PC           abs PC
-
-DECC$SHR  C$SIGNAL  gsignal              27991 0000000000001180
-FFFFFFFF84AB2DA0
-DECC$SHR  C$SIGNAL  raise                28048 0000000000001280
-FFFFFFFF84AB2EA0
-DECC$SHR  C$SIGPENDING  decc$$deliver_signals
-                                         12475 0000000000000890
-FFFFFFFF84C13690
-...
-This looks like an incompatibility to the Alpha and VAX behavior, so it looks
-like a problem in I64 VMS version(s).
-
-- There is no clean build on VAX. In the environment I tested, I had to use GNU
-make's alloca which produced a couple of compile time warnings. It seems too
-much effort to work on a clean build on VAX.
 
 A note on appending the redirected output. With this change, a simple mechanism
 is implemented to make ">>" work in action lines. In VMS there is no simple
@@ -78,117 +64,24 @@ happens. Pressing Ctrl+Y to abort make is one case. In case of Ctrl+Y the
 associated command procedure is left in SYS$SCRATCH as well. Its name is
 CMDxxxxx.COM.
 
-Change in the Ctrl+Y handling
+Change in the Ctrl+Y handling. The CtrlY handler now uses $delprc to delete all
+children. This way also actions with DCL commands will be stopped. As before
+the CtrlY handler then sends SIGQUIT to itself, which is handled in common
+code.
 
-Ctrl+Y was: The CtrlY handler called $forcex for the current child.
-
-Ctrl+Y changed: The CtrlY handler uses $delprc to delete all children. This way
-also actions with DCL commands will be stopped. As before Ctrl+Y then sends
-SIGQUIT to itself, which is handled in common code.
-
-Change in deleteing temporary command files
-
-Temporary command files were deleted in the main line, after returning from the
-vms child termination handler. If Ctrl+C was pressed, the handler is called but
-did not return to main line.
-
-Now, temporary command files are deleted in the vms child termination
-handler. That deletes the them even if a Ctrl+C was pressed.
+Change in deleteing temporary command files. Temporary command files are now
+deleted in the vms child termination handler. That deletes them even if
+a Ctrl+C was pressed.
 
 The behavior of pressing Ctrl+C is not changed. It still has only an effect,
 after the current action is terminated. If that doesn't happen or takes too
 long, Ctrl+Y should be used instead.
 
-Changes (3.80)
+Changes for GNU make 3.80
 
 . In default.c define variable ARCH as IA64 for VMS on Itanium systems.
 
 . In makefile.vms avoid name collision for glob and globfree.
-
-In newer version of the VMS CRTL there are glob and globfree implemented.
-Compiling and linking may result in
-
-  %ILINK-W-MULDEFLNKG, symbol DECC$GLOBFREE has subsequent linkage definition
-       in module DECC$SHR file SYS$COMMON:[SYSLIB]DECC$SHR.EXE;1
-  %ILINK-W-MULDEF, symbol DECC$GLOBFREE multiply defined
-       in module DECC$SHR file SYS$COMMON:[SYSLIB]DECC$SHR.EXE;1
-
-linker messages (and similar for DECC$GLOB). The messages just say, that
-globfree is a known CRTL whose name was mapped by the compiler to
-DECC$GLOBFREE.  This is done in glob.c as well, so this name is defined
-twice. One possible solution is to use the VMS versions of glob and
-globfree. However, then the build environment needs to figure out if
-there is a new CRTL supporting these or not. This adds complexity. Even
-more, these functions return VMS file specifications, which is not
-expected by the other make sources. There is a switch at run time (a VMS
-logical DECC$GLOB_UNIX_STYLE), which can be set to get Unix style
-names. This may conflict with other software. The recommended solution
-for this is to set this switch just prior to calling main: in an
-initialization routine. This adds more complexity and more VMS specific
-code. It is easier to tell the compiler NOT to map the routine names
-with a simple change in makefile.vms.
-
-Some notes on case sensitive names in rules and on the disk. In the VMS
-template for CONFIG.H case sensitive rules can be enabled with defining
-WANT_CASE_SENSITIVE_TARGETS. For recent version of VMS there is a case
-sensitive file system: ODS5. To make use of that, additionally un-defining
-the HAVE_CASE_INSENSITIVE_FS is required. As these are C macros, different
-versions of make need to be built to have any case sensitivity for VMS
-working. Unfortunately, for ODS5 disks that's not all.
-
-- Usually DCL upcases command line tokens (except strings) and usually the
-  file system is case blind (similar to how Windows systems work)
-	$ set proc/parse=extended/case=sensitive
-  preserves lower and UPPER on the command line and (for this process and all
-  sub-processes) enables case sensitivity in the file system
-
-- Usually the CRTL tries to reverse what DCL did with command line tokens, it
-  lowercases all tokens (except strings)
-	$ define DECC$ARGV_PARSE_STYLE enable
-  passes (the now preserved) lower and UPPER from the command line to main()
-
-- Usually the CRTL upcases the arguments to open() and friends
-	$ define DECC$EFS_CASE_PRESERVE enable
-  preserves the names as is.
-
-It is important to know that not all VMS tools are ready for case sensitivity.
-With this setup some tools may not work as expected. The setup should not
-blindly be applied for all users in default login procedures.
-
-Example? The poor coding gives a compiler message, showing that there are
-different files:
-
-$ dir
-
-Directory ODS5DISK[HB]
-
-A.c;1               B.c;1               c.c;1               X.c;1
-x.c;1
-
-Total of 5 files.
-$ ods5make x.obj
-cc    /obj=x.obj x.c
-
-foo(){lowercase_x();}
-......^
-%CC-I-IMPLICITFUNC, In this statement, the identifier "lowercase_x" is implicitly declared as a function.
-at line number 1 in file ODS5DISK[HB]x.c;1
-$ mc SYS$SYSDEVICE:[HARTMUT.MAKE_3_80P]ods5make X.obj
-cc    /obj=X.obj X.c
-
-foo() {UPPERCASE_X();}
-.......^
-%CC-I-IMPLICITFUNC, In this statement, the identifier "UPPERCASE_X" is implicitly declared as a function.
-at line number 1 in file ODS5DISK[HB]X.c;1
-$ dir
-
-Directory ODS5DISK[HB]
-
-A.c;1               B.c;1               c.c;1               X.c;1
-x.c;1               X.obj;1             x.obj;1
-
-Total of 7 files.
-$
 
 This is the VMS port of GNU Make done by Hartmut.Becker@compaq.com.
 
@@ -212,7 +105,7 @@ returns a modification time 1 hour ahead. This results in GNU make
 warning messages. For a just created source you will see:
 
  $ gmake x.exe
- gmake.exe;1: *** Warning: File `x.c' has modification time in the future (940582863 > 940579269)
+ gmake.exe;1: *** Warning: File 'x.c' has modification time in the future (940582863 > 940579269)
  cc    /obj=x.obj x.c
  link  x.obj    /exe=x.exe
  gmake.exe;1: *** Warning:  Clock skew detected.  Your build may be incomplete.
@@ -353,7 +246,7 @@ replaced it with a hack in vmsfunctions.c. I will provide a full rewrite
 somewhere in the future. Be warned, the time resolution inside make is
 less than what vms provides. This might be a problem on the faster Alphas.
 
-You can use a : in a filename only if you preceed it with a backslash ('\').
+You can use a : in a filename only if you precede it with a backslash ('\').
 E.g.- hobbes\:[bogas.files]
 
 Make ignores success, informational, or warning errors (-S-, -I-, or
@@ -375,8 +268,7 @@ Long command lines are now converted to command files.
 Comma (',') as a separator is now allowed. See makefile.vms for an example.
 
 -------------------------------------------------------------------------------
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the

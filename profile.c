@@ -72,21 +72,25 @@ static profile_entry_t *
 add_profile_entry (const file_t *target)
 {
   /* Look up the string in the hash.  If it's there, return it.  */
-  profile_entry_t **slot = (profile_entry_t **) hash_find_slot (&profile_table,
-								&(target->name));
-  profile_entry_t *profile_entry  = *slot;
+
   profile_entry_t *new;
+  profile_entry_t **slot;
+  profile_entry_t *profile_entry;
 
-  if (!HASH_VACANT (profile_entry))
-    return profile_entry;
-
-  /* Not there yet so add it to a buffer, then into the hash table.  */
   new = xcalloc (sizeof (profile_entry_t));
   new->name = target->name;
-  memcpy(&(new->floc), &(target->floc), sizeof(gmk_floc));
 
-  hash_insert_at (&profile_table, new, slot);
+  slot = hash_find_slot (&profile_table, new);
+  profile_entry = *slot;
+  if (!HASH_VACANT (profile_entry)) {
+    free(new);
+    return profile_entry;
+  }
+
+  /* Not there yet so finish initializing data add it to a buffer, then into the hash table.  */
   new->calls = NULL;
+  memcpy(&(new->floc), &(target->floc), sizeof(gmk_floc));
+  hash_insert_at (&profile_table, new, slot);
   return new;
 }
 
