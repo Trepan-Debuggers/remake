@@ -80,7 +80,7 @@ add_profile_entry (const file_t *target)
   new = xcalloc (sizeof (profile_entry_t));
   new->name = target->name;
 
-  slot = hash_find_slot (&profile_table, new);
+  slot = (profile_entry_t **) hash_find_slot (&profile_table, new);
   profile_entry = *slot;
   if (!HASH_VACANT (profile_entry)) {
     free(new);
