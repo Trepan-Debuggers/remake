@@ -87,7 +87,8 @@ add_profile_entry (const file_t *target)
     return profile_entry;
   }
 
-  /* Not there yet so finish initializing data add it to a buffer, then into the hash table.  */
+  /* Not there yet. So finish initializing data and add it into the
+     profile hash table.  */
   new->calls = NULL;
   memcpy(&(new->floc), &(target->floc), sizeof(gmk_floc));
   hash_insert_at (&profile_table, new, slot);
