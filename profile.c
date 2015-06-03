@@ -223,14 +223,17 @@ callgrind_profile_entry (const void *item)
   profile_call_t *c;
   if (p->floc.filenm) fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
   fprintf(callgrind_fd, "fn=%s\n", p->name);
-  fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n", p->floc.lineno,
+  fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
+	  (uint64_t) p->floc.lineno,
 	  p->elapsed_time == 0 ? 1 : p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
     if (c->p_target->floc.filenm)
       fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
     fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
-    fprintf(callgrind_fd, "calls=1 %" PRIu64 "\n", p->floc.lineno);
-    fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n", p->floc.lineno,
+    fprintf(callgrind_fd, "calls=1 %" PRIu64 "\n",
+	    (uint64_t) p->floc.lineno);
+    fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
+	    (uint64_t) p->floc.lineno,
 	    c->p_target->elapsed_time == 0 ? 1 : c->p_target->elapsed_time);
   }
   fprintf(callgrind_fd, "\n");
