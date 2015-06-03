@@ -201,7 +201,7 @@ print_profile_entry (const void *item)
 {
   const profile_entry_t *p = item;
   profile_call_t *c;
-  printf("name: %s, file: %s, line: %lu, time: %lu\n",
+  printf("name: %s, file: %s, line: %" PRIu64 ", time: %" PRIu64 "\n",
 	 p->name, p->floc.filenm, p->floc.lineno, p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
     printf("calls: %s\n", c->p_target->name);
@@ -223,14 +223,14 @@ callgrind_profile_entry (const void *item)
   profile_call_t *c;
   if (p->floc.filenm) fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
   fprintf(callgrind_fd, "fn=%s\n", p->name);
-  fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+  fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n", p->floc.lineno,
 	  p->elapsed_time == 0 ? 1 : p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
     if (c->p_target->floc.filenm)
       fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
     fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
-    fprintf(callgrind_fd, "calls=1 %lu\n", p->floc.lineno);
-    fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+    fprintf(callgrind_fd, "calls=1 %" PRIu64 "\n", p->floc.lineno);
+    fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n", p->floc.lineno,
 	    c->p_target->elapsed_time == 0 ? 1 : c->p_target->elapsed_time);
   }
   fprintf(callgrind_fd, "\n");
@@ -252,7 +252,7 @@ close_callgrind(const char *program_status) {
   }
 
   if (!time_error) {
-    fprintf(callgrind_fd, "summary: %lu\n\n",
+    fprintf(callgrind_fd, "summary: %" PRIu64 "\n\n",
 	    time_diff(&program_start_time, &program_finish_time));
   }
 #ifdef DEBUG_PROFILE
