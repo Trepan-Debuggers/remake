@@ -75,9 +75,6 @@ debug_enter_reason_t last_stop_reason;
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
-/* Common debugger command function prototype */
-typedef debug_return_t (*dbg_cmd_t) (char *psz_args);
-
 /* A structure which contains information on the commands this program
    can understand. */
 

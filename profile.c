@@ -33,10 +33,9 @@ Boston, MA 02111-1307, USA.  */
 /* #define DEBUG_PROFILE */
 
 /*! \brief Node for an item in the target call stack */
-typedef struct profile_call profile_call_t;
 typedef struct profile_call   {
   const file_t   *p_target;
-  profile_call_t *p_next;
+  struct profile_call *p_next;
 } profile_call_t;
 
 struct profile_entry   {
@@ -115,6 +114,9 @@ desc: Node: Targets\n\
 positions: line\n\
 events: 100usec\n"
 
+#ifndef HAVE_GETTIMEOFDAY
+# error Somebody has to work out how to handle if getimeofday isn not around
+#endif
 extern bool
 get_time(struct timeval *t) {
   return (0 != gettimeofday(t, NULL));

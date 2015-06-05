@@ -30,7 +30,7 @@ if WINDOWSENV
   W32LIB =	-Lw32 -lw32
 endif
 
-SUBDIRS =	glob config po doc $(MAYBE_W32)
+SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
 
 bin_PROGRAMS =	make
 include_HEADERS = gnumake.h
@@ -103,14 +103,15 @@ make_SOURCES =	alloc.c ar.c arscan.c \
 	$(remote) \
 	$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
+EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
 
 noinst_HEADERS = buildargv.h commands.h \
-	debug.h dep.h expand.h \
+	debug.h debugger.h dep.h expand.h \
 	file_basic.h file.h function.h filedef.h \
-	getopt.h gettext.h  hash.h \
-	job.h main.h make.h makeint.h \
-	output.h implicit.h print.h \
+	getopt.h gettext.h  globals.h hash.h \
+	job.h main.h make.h makeint.h mock.h \
+	output.h implicit.h \
+	print.h profile.h \
 	read.h rule.h \
 	trace.h types.h variable.h vpath.h  \
 	$(DEBUGGER_H)
@@ -151,7 +152,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 
 DISTCLEANFILES = build.sh
 
-MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
+MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
 
 # Forward targets
 

@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg0.91],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[4.1+dbg1.0],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 
@@ -612,8 +612,16 @@ AS_IF([test "x$make_cv_load" = xno && test "x$user_load" = xyes],
 ])
 
 # Specify what files are to be created.
-AC_CONFIG_FILES([Makefile glob/Makefile po/Makefile.in config/Makefile \
-                 doc/Makefile w32/Makefile tests/config-flags.pm])
+AC_CONFIG_FILES([ \
+	Makefile \
+	glob/Makefile \
+	po/Makefile.in \
+	config/Makefile \
+        doc/Makefile \
+	unittest/Makefile \
+	w32/Makefile \
+	tests/config-flags.pm
+	])
 
 # OK, do it!
 

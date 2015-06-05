@@ -1,3 +1,12 @@
+Version 4.1+dbg-1.0
+2015-06-3  Marilyn release
+
+* Add --profile
+  This creates callgrind profile output for a given run
+  the callgrind output can be used with kcachegrind, callgrind_annotate,
+  or gprof2dot to analyze data. You can get not only timings, but
+  a graph of the target dependencies checked
+
 Version 4.1+dbg-0.91
 2015-01-1
 

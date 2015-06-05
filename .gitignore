@@ -1,8 +1,9 @@
 *.a
 *.o
+*~
 .deps
 /*.log
-*~
+/.Tpo
 /.dep_segment
 /ABOUT-NLS
 /ChangeLog
