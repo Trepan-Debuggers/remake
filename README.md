@@ -65,7 +65,7 @@ option. For example:
 
     remake --profile # target...
 
-*remake* outputs [callgrind profile format](http://valgrind.org/docs/manual/cl-manual.html) data which can be used with [kcachegrind](http://kcachegrind.sourceforge.net/html/Home.html) or other tools that work with this format.
+*remake* outputs [callgrind profile format](http://valgrind.org/docs/manual/cl-format.html) data which can be used with [kcachegrind](http://kcachegrind.sourceforge.net/html/Home.html) or other tools that work with this format.
 
 See also
 --------

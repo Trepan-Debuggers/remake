@@ -3,7 +3,7 @@ Profiling
 
 You can get timing and callgraph information for a specific *remake* run by using the `--profile` option.
 When that is used, the file `callgrind.out`.*pid* is produced and this is in the file format that `valgrind --tool=callgrind` uses.
-See the [callgrind manual](http://valgrind.org/docs/manual/cl-manual.html) for some information on this.
+See the [callgrind format manual](http://valgrind.org/docs/manual/cl-format.html) for some information on this.
 
 Programs that can interpret this are:
 
