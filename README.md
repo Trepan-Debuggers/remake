@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake) [![Join the chat at https://gitter.im/rocky/remake](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rocky/remake?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake)
 
 Patched GNU Make 4.1 sources to add improved error reporting, tracing,
 target listing, graph visualization, and profiling. It also
