@@ -39,7 +39,7 @@ typedef struct profile_call   {
 } profile_call_t;
 
 struct profile_entry   {
-  uint64_t elapsed_time;   /* rutime in milliseconds */
+  uint64_t elapsed_time;   /* runtime in milliseconds */
   const char *name;
   gmk_floc floc;           /* location in Makefile - for tracing */
   profile_call_t *calls;   /* List of targets this target calls.  */
@@ -115,7 +115,7 @@ positions: line\n\
 events: 100usec\n"
 
 #ifndef HAVE_GETTIMEOFDAY
-# error Somebody has to work out how to handle if getimeofday isn not around
+# error Somebody has to work out how to handle if getimeofday is not around
 #endif
 extern bool
 get_time(struct timeval *t) {
