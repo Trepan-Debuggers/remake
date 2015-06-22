@@ -103,6 +103,7 @@ long_cmd_t commands[] = {
   { "run"     , 'R' },
   { "set"     , '=' },
   { "setq"    , '"' },
+  { "setqx"   , '`' },
   { "shell"   , '!' },
   { "show"    , 'S' },
   { "source"  , '<' },
@@ -189,6 +190,7 @@ find_command (const char *psz_name)
 #include "command/run.h"
 #include "command/set.h"
 #include "command/setq.h"
+#include "command/setqx.h"
 #include "command/shell.h"
 #include "command/show.h"
 #include "command/skip.h"
@@ -234,6 +236,7 @@ cmd_initialize(void)
   dbg_cmd_comment_init ('#');
   dbg_cmd_set_init     ('=');
   dbg_cmd_setq_init    ('"');
+  dbg_cmd_setqx_init   ('`');
   dbg_cmd_shell_init   ('!');
 }
 
@@ -316,7 +319,15 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       dbg_msg(_("Variable %s now has value '%s'"), psz_varname,
 	     psz_value);
     } else {
-      try_without_dollar(psz_varname);
+      p_v = try_without_dollar(psz_varname);
+      if (p_v) {
+        char *psz_value =  expand ? variable_expand(psz_args) : psz_args;
+        define_variable_in_set(p_v->name, u_len, psz_value,
+                               o_debugger, 0, NULL,
+                               &(p_v->fileinfo));
+        dbg_msg(_("Variable %s now has value '%s'"), psz_varname,
+                psz_value);
+      }
     }
   }
   return debug_readloop;

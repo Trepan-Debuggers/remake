@@ -1,7 +1,7 @@
 /* Set a variable definition with all variable references in the value
    part of psz_string expanded. */
-/* 
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2011, 2015 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* Documentation for help set, and help set xxx. Note the format has
    been customized to make ddd work. In particular for "basename" it should
-   be 
+   be
      set basename -- Set if were are to show shor or long filenames is off.
    (or "is on").
 */
@@ -37,7 +37,7 @@ subcommand_var_info_t set_subcommands[] = {
     "Set GNU Make debug mask (set via --debug or -d)",
     " VALUE \n\nSet GNU Make debug mask (set via --debug or -d).",
     &db_level, false, 3},
-  { "ignore-errors", 
+  { "ignore-errors",
     "Set value of GNU Make --ignore-errors (or -i) flag",
     " {on|off|toggle} \n\nSet value of GNU Make --ignore-errors (or -i) flag.",
     &ignore_errors_flag, true, 3},
@@ -52,16 +52,14 @@ subcommand_var_info_t set_subcommands[] = {
 #ifdef FIXED
   { "trace",
     "Set value of shell_tracing.",
-    NULL, 
+    NULL,
     &no_shell_trace,    false, 3},
 #endif
-  { "variable",      
-    "Set a GNU Make variable VARIABLE",
-    " VARIABLE VALUE\n\n"
-"Set GNU Make variable VARIABLE to value VALUE\n"
-"VALUE is expanded before assignment.\n"
+  { "variable",
+    "Change a debugger setting",
+    " OPTION is one of: basename, debug, ignore-errors, keep-going, or silent\n\n"
 "\n"
-"See also 'setq'.",
+"See also 'setq' and 'setqx' for setting a GNU Make variable.",
     NULL,
     false, 0},
   { NULL, NULL, NULL, NULL, false, 0}
@@ -69,8 +67,8 @@ subcommand_var_info_t set_subcommands[] = {
 
 static bool
 dbg_cmd_set_bool(const char *psz_varname, const char *psz_flag_name,
-                 const char *psz_flag_value, 
-                 unsigned int min, int *p_bool_flag) 
+                 const char *psz_flag_value,
+                 unsigned int min, int *p_bool_flag)
 {
   if (is_abbrev_of (psz_varname, psz_flag_name, min)) {
       if (!psz_flag_value || 0==strlen(psz_flag_value))
@@ -84,13 +82,13 @@ dbg_cmd_set_bool(const char *psz_varname, const char *psz_flag_name,
 }
 
 
-static debug_return_t 
-dbg_cmd_set(char *psz_args) 
+static debug_return_t
+dbg_cmd_set(char *psz_args)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     unsigned int i;
     for (i = 0; set_subcommands[i].name; i++) {
-      dbg_help_subcmd_entry("set", "%-10s -- %s", 
+      dbg_help_subcmd_entry("set", "%-10s -- %s",
                             &(set_subcommands[i]), false);
     }
     return debug_readloop;
@@ -116,37 +114,36 @@ dbg_cmd_set(char *psz_args)
     } else if (is_abbrev_of (psz_varname, "args", 3)) {
         ...
 #endif
-    } else 
-      for (p_subcmd_info = set_subcommands; *p_subcmd_info->name; 
+    } else
+      for (p_subcmd_info = set_subcommands; p_subcmd_info && p_subcmd_info->name;
            p_subcmd_info++) {
-        if (dbg_cmd_set_bool(psz_varname, p_subcmd_info->name, 
+        if (dbg_cmd_set_bool(psz_varname, p_subcmd_info->name,
                              psz_args, p_subcmd_info->min_abbrev,
                              p_subcmd_info->var))
           return debug_readloop;
       }
-    dbg_errmsg("Unknown set option %s\n", psz_varname);
+    dbg_errmsg("Unknown set option %s\nSee 'help set' for options. Or did you mean setq?\n",
+               psz_varname);
     return debug_cmd_error;
   }
 }
 
 static void
-dbg_cmd_set_init(unsigned int c) 
+dbg_cmd_set_init(unsigned int c)
 {
-    
+
   short_command[c].func = &dbg_cmd_set;
-  short_command[c].use =  
-    _("set OPTION {on|off|toggle}\n"
-"  set variable VARIABLE VALUE    ");
-  short_command[c].doc  = 
-    _("In the first form, Set debugger value for OPTION.\n"
-"In the second form, set a GNU make variable\n"
+  short_command[c].use =
+    _("set OPTION {on|off|toggle}");
+  short_command[c].doc  =
+    _("Set debugger boolean value for OPTION.\n"
 "Run `set' for a list of options and current values\n"
 "\n"
 "See also 'setq'."
       );
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

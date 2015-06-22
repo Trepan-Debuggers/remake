@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 R. Bernstein  <rocky@gnu.org>
+/* Copyright (C) 2011, 2015 R. Bernstein  <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -19,21 +19,21 @@ Boston, MA 02111-1307, USA.  */
 /* Set a variable definition without variable references but don't
    expand variable references in the value part of psz_string. */
 static debug_return_t
-dbg_cmd_setq(char *psz_string)
+dbg_cmd_setqx(char *psz_string)
 {
-  dbg_cmd_set_var(psz_string, 0);
+  dbg_cmd_set_var(psz_string, 1);
   return debug_readloop;
 }
 
 static void
-dbg_cmd_setq_init(unsigned int c)
+dbg_cmd_setqx_init(unsigned int c)
 {
-  short_command[c].func = &dbg_cmd_setq;
-  short_command[c].use  = _("setq VARIABLE VALUE");
+  short_command[c].func = &dbg_cmd_setqx;
+  short_command[c].use  = _("setqx VARIABLE VALUE");
   short_command[c].doc  =
     _("Set MAKE variable VARIABLE to VALUE. Variable definitions\n"
       "\tinside VALUE is expanded before assignment occurs."
-"\nSee also 'setqx'.");
+"\nSee also 'setq'.");
 }
 
 

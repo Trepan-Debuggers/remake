@@ -75,6 +75,7 @@ DEBUGGER_H = \
 		debugger/command/run.h		\
 		debugger/command/set.h		\
 		debugger/command/setq.h		\
+		debugger/command/setqx.h	\
 		debugger/command/shell.h	\
 		debugger/command/show.h		\
 		debugger/command/skip.h		\

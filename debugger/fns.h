@@ -105,7 +105,7 @@ extern bool dbg_cmd_show_exp(char *psz_arg, bool expand);
 extern void print_db_level(debug_level_mask_t e_debug_level);
 
 /*! See if psz_varname is $varname or $(varname) */
-extern void try_without_dollar(const char *psz_varname);
+extern variable_t *try_without_dollar(const char *psz_varname);
 
 extern void dbg_print_invocation(void);
 
