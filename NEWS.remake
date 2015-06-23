@@ -1,3 +1,10 @@
+Version 4.1+dbg-1.1
+2015-06-23
+
+* Fix segv in set command
+* Add setqx which is like setq (set a varable) but expands the value
+  before it assigns
+
 Version 4.1+dbg-1.0
 2015-06-3  Marilyn release
 
