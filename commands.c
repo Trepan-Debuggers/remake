@@ -810,15 +810,16 @@ print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 
   if (b_expand && p_target) {
     variable_set_list_t *p_file_vars = NULL;
+    variable_set_t *p_set = NULL;
     initialize_file_variables (p_target, 0);
     set_file_variables (p_target);
     p_file_vars = p_target->variables;
+    p_set = p_file_vars->set;
     s = variable_expand_set(p_cmds->commands, p_file_vars);
   } else {
     s = p_cmds->commands;
   }
 
-  s = p_cmds->commands;
   while (*s != '\0')
     {
       const char *end;
