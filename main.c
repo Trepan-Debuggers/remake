@@ -1036,6 +1036,7 @@ main (int argc, const char **argv, char **envp)
   }
 #endif
 
+  global_argv = argv;
   /* Needed for OS/2 */
   initialize_main (&argc, &argv);
 
