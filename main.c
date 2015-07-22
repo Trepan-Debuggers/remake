@@ -122,6 +122,14 @@ struct command_switch
 
 #define short_option(c) ((c) <= CHAR_MAX)
 
+/* True if C is a switch value that corresponds to a short option.
+   The short option -X' is a little weird in that it corresponds to
+   long option --debugger with a particular value, "preread".
+   So we'll treat that not as a short option.
+*/
+
+#define short_option_X(c) (((c) <= CHAR_MAX) && ((c) != 'X'))
+
 /* The structure used to hold the list of strings given
    in command switches of a type that takes strlist arguments.  */
 
@@ -3098,7 +3106,7 @@ define_makeflags (int all, int makefile)
     else                                                                      \
       /* " -xfoo", plus space to escape "foo".  */                            \
       flagslen += 1 + 1 + 1 + (3 * (LEN));                                    \
-    if (!short_option (cs->c))                                                \
+    if (!short_option_X (cs->c))                                              \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);                                 \
   } while (0)
@@ -3202,7 +3210,7 @@ define_makeflags (int all, int makefile)
   *p++ = '-';
 
   /* Add simple options as a group.  */
-  while (flags != 0 && !flags->arg && short_option (flags->cs->c))
+  while (flags != 0 && !flags->arg && short_option_X (flags->cs->c))
     {
       *p++ = flags->cs->c;
       flags = flags->next;
@@ -3215,7 +3223,7 @@ define_makeflags (int all, int makefile)
       *p++ = '-';
 
       /* Add the flag letter or name to the string.  */
-      if (short_option (flags->cs->c))
+      if (short_option_X (flags->cs->c))
         *p++ = flags->cs->c;
       else
         {
