@@ -1,4 +1,5 @@
 /* Argument parsing and main program of GNU Make.
+Copyright (C) 2015 Rocky Bernstein
 Copyright (C) 1988-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -121,14 +122,6 @@ struct command_switch
 /* True if C is a switch value that corresponds to a short option.  */
 
 #define short_option(c) ((c) <= CHAR_MAX)
-
-/* True if C is a switch value that corresponds to a short option.
-   The short option -X' is a little weird in that it corresponds to
-   long option --debugger with a particular value, "preread".
-   So we'll treat that not as a short option.
-*/
-
-#define short_option_X(c) (((c) <= CHAR_MAX) && ((c) != 'X'))
 
 /* The structure used to hold the list of strings given
    in command switches of a type that takes strlist arguments.  */
@@ -351,8 +344,8 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n"
-"                             have commands associated with them.\n"),
+  --tasks                     Give list of explicitly-named targets which\n\
+                              have commands associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
@@ -360,8 +353,8 @@ static const char *const usage[] =
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
-  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n"
-                              "\"full\"\n. The default is \"full\".\n"),
+  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
+                              \"full\". The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -372,17 +365,18 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
-  -x --trace[=TYPE]           Trace command execution TYPE may be\n\
+  -x, --trace[=TYPE]          Trace command execution TYPE may be\n\
                               \"command\", \"read\", \"normal\",\"\n\
                               \"noshell\", or \"full\". Default is \"normal\"\n"),
     N_("\
-  --debugger[=TYPE]            Enter debugger. TYPE may be\n\
-                               \"goal\", \"preread\", \"preaction\",\n\
-                               \"full\", \"error\", or \"fatal\".\n"),
+  --debugger-stop[=TYPE]      Which point to enter debugger. TYPE may be\n\
+                              \"goal\", \"preread\", \"preaction\",\n\
+                              \"full\", \"error\", or \"fatal\".\n\
+                              Only makes sense with -X set.\n"),
     N_("\n\
-  -X                           Same as \"--debugger=preaction\"\n"),
+  -X, --debugger              Enter debugger\n"),
     N_("\
-   --no-readline               Do not use GNU ReadLine in debugger.\n"),
+   --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 
@@ -419,7 +413,6 @@ static const struct command_switch switches[] =
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
-    { 'X', strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
 
     /* These options take arguments.  */
@@ -459,6 +452,7 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
+    { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger-stop" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -3106,7 +3100,7 @@ define_makeflags (int all, int makefile)
     else                                                                      \
       /* " -xfoo", plus space to escape "foo".  */                            \
       flagslen += 1 + 1 + 1 + (3 * (LEN));                                    \
-    if (!short_option_X (cs->c))                                              \
+    if (!short_option (cs->c))                                              \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);                                 \
   } while (0)
@@ -3210,7 +3204,7 @@ define_makeflags (int all, int makefile)
   *p++ = '-';
 
   /* Add simple options as a group.  */
-  while (flags != 0 && !flags->arg && short_option_X (flags->cs->c))
+  while (flags != 0 && !flags->arg && short_option (flags->cs->c))
     {
       *p++ = flags->cs->c;
       flags = flags->next;
@@ -3223,7 +3217,7 @@ define_makeflags (int all, int makefile)
       *p++ = '-';
 
       /* Add the flag letter or name to the string.  */
-      if (short_option_X (flags->cs->c))
+      if (short_option (flags->cs->c))
         *p++ = flags->cs->c;
       else
         {
