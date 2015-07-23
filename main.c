@@ -413,7 +413,7 @@ static const struct command_switch switches[] =
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
-    { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
+    { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, "debugger" },
 
     /* These options take arguments.  */
     { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },
