@@ -530,7 +530,10 @@ update_file_1 (struct file *file, unsigned int depth,
   check_renamed (file);
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
-    DBF (DB_BASIC, _("File '%s' does not exist.\n"));
+    if (color_option)
+      DBF (DB_BASIC, _("File '"TXTCYN"%s"TXTRST"' does not exist.\n"));
+    else
+      DBF (DB_BASIC, _("File '%s' does not exist.\n"));
     if (i_debugger_nexting && file->cmds) {
 	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
     }
@@ -882,8 +885,10 @@ update_file_1 (struct file *file, unsigned int depth,
       return 0;
     }
 
-  DBF (DB_BASIC, _("Must remake target '%s'.\n"));
-
+  if (color_option)
+    DBF (DB_BASIC, _(TXTRED"Must remake target `%s'."TXTRST));
+  else
+    DBF (DB_BASIC, _("Must remake target '%s'.\n"));
   /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
      VPATH.  */
   if (!streq (file->name, file->hname))
@@ -908,10 +913,16 @@ update_file_1 (struct file *file, unsigned int depth,
   switch (file->update_status)
     {
     case us_failed:
-      DBF (DB_BASIC, _("Failed to remake target file '%s'.\n"));
+      if (color_option)
+        DBF (DB_BASIC, _(BAKRED"Failed to remake target file `%s'."TXTRST"\n"));
+      else
+        DBF (DB_BASIC, _("Failed to remake target file '%s'.\n"));
       break;
     case us_success:
-      DBF (DB_BASIC, _("Successfully remade target file '%s'.\n"));
+      if (color_option)
+        DBF (DB_BASIC, _(TXTGRN"Successfully remade target file `%s'."TXTRST"\n"));
+      else
+        DBF (DB_BASIC, _("Successfully remade target file '%s'.\n"));
       break;
     case us_question:
       DBF (DB_BASIC, _("Target file '%s' needs to be remade under -q.\n"));

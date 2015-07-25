@@ -375,6 +375,8 @@ static const char *const usage[] =
                               Only makes sense with -X set.\n"),
     N_("\n\
   -X, --debugger              Enter debugger\n"),
+    N_("\n\
+  -c, --color                 Display some debug message in color on the terminal\n"),
     N_("\
    --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
@@ -414,6 +416,7 @@ static const struct command_switch switches[] =
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, "debugger" },
+    { 'c', flag, &color_option, 1, 1, 0, 0, 0, "color" },
 
     /* These options take arguments.  */
     { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },

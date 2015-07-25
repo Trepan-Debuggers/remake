@@ -27,7 +27,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #include "debug.h"
 #include "hash.h"
-
+#include "globals.h"
 
 /* Remember whether snap_deps has been invoked: we need this to be sure we
    don't add new rules (via $(eval ...)) afterwards.  In the future it would
@@ -753,8 +753,10 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
   putchar ('\n');
   if (!p_target->is_target)
     puts (_("# Not a target:"));
-  printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
-
+  if (color_option)
+    printf (TXTRED"Target:"TXTRST" %s:%s", p_target->name, p_target->double_colon ? ":" : "");
+  else
+    printf ("Target: %s:%s", p_target->name, p_target->double_colon ? ":" : "");
     /* Print all normal dependencies; note any order-only deps.  */
     for (d = p_target->deps; d != 0; d = d->next)
       if (! d->ignore_mtime) {

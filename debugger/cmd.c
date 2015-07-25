@@ -474,6 +474,8 @@ debug_return_t enter_debugger (target_stack_node_t *p,
         snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ",
                  open_depth, where_history(), close_depth);
 
+        // show separator line before next command prompt
+        printf("================================================================================\n");
         line = readline (prompt);
       } else
 #endif
