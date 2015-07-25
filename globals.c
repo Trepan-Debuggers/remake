@@ -130,3 +130,5 @@ struct variable shell_var;
 /* The filename and pointer to line number of the
    makefile currently being read in.  */
 const gmk_floc *reading_file = 0;
+
+unsigned int color_option = 0;

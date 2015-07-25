@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "expand.h"
+#include "globals.h"
 #ifdef WINDOWS32
 #include <windows.h>
 #include "w32err.h"
@@ -800,7 +801,10 @@ print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 {
   const char *s;
 
-  fputs (_("#  recipe to execute"), stdout);
+  if (color_option)
+    fputs (_("#  "TXTGRN"recipe to execute"TXTRST), stdout);
+  else
+    fputs (_("#  recipe to execute"), stdout);
 
   if (p_cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));

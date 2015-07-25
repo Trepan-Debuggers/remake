@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "print.h"
 #include "msg.h"
+#include "globals.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -446,9 +447,12 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
       } else
 	print_variable(p_v);
     } else {
-      if (expand)
-	printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
-      else {
+      if (expand) {
+        if (color_option)
+          printf(TXTCYN"Will update target:%s"TXTRST"\n", variable_expand_set(psz_varname, p_file_vars));
+        else
+	  printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
+      } else {
 	try_without_dollar(psz_varname);
 	return false;
       }

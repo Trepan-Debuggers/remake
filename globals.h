@@ -87,4 +87,6 @@ extern bool b_debugger_preread;
 /* Remember the original value of the SHELL variable, from the environment.  */
 struct variable shell_var;
 
+extern unsigned int color_option;
+
 #endif /*GLOBALS_H*/

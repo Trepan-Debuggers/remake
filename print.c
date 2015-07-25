@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dep.h"
 #include "read.h"
 #include "print.h"
+#include "globals.h"
 
 #include <stdarg.h>
 
@@ -335,16 +336,26 @@ print_target_stack_entry (const file_t *p_target, int i, int i_pos)
     if (i_pos != -1) {
       printf("%s", (i == i_pos) ? "=>" : "  ");
     }
-    printf ("#%u  %s at ", i, psz_target_name);
+    if (color_option)
+      printf ("#%u  "TXTCYN"%s"TXTRST" at ", i, psz_target_name);
+    else
+      printf ("#%u  %s at ", i, psz_target_name);
     print_floc_prefix(&floc);
   } else {
     if (i_pos != -1) {
       printf("%s", (i == i_pos) ? "=>" : "  ");
     }
-    if (p_target->phony)
-      printf ("#%u  %s (.PHONY target)", i, psz_target_name);
-    else
-      printf ("#%u  %s at ??", i, psz_target_name);
+    if (p_target->phony) {
+      if (color_option)
+        printf ("#%u  "TXTCYN"%s"TXTRST" (.PHONY target)", i, psz_target_name);
+      else
+        printf ("#%u  %s (.PHONY target)", i, psz_target_name);
+    } else {
+      if (color_option)
+        printf ("#%u  "TXTCYN"%s"TXTRST" at ??", i, psz_target_name);
+      else
+        printf ("#%u  %s at ??", i, psz_target_name);
+    }
 
   }
   printf ("\n");
