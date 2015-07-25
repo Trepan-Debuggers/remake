@@ -531,9 +531,9 @@ update_file_1 (struct file *file, unsigned int depth,
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
     if (color_option)
-      DBF (DB_BASIC, _("File `"TXTCYN"%s"TXTRST"' does not exist.\n"));
+      DBF (DB_BASIC, _("File '"TXTCYN"%s"TXTRST"' does not exist.\n"));
     else
-      DBF (DB_BASIC, _("File `%s' does not exist.\n"));
+      DBF (DB_BASIC, _("File '%s' does not exist.\n"));
     if (i_debugger_nexting && file->cmds) {
 	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
     }
