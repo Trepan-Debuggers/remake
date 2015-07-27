@@ -1963,6 +1963,7 @@ main (int argc, const char **argv, char **envp)
     int old_builtin_variables_flag = no_builtin_variables_flag;
 
     /* Decode switches again, for variables set by the makefile.  */
+    decode_env_switches (STRING_SIZE_TUPLE ("REMAKEFLAGS"));
     decode_env_switches (STRING_SIZE_TUPLE ("GNUMAKEFLAGS"));
 
     /* Clear GNUMAKEFLAGS to avoid duplication.  */
@@ -3100,7 +3101,7 @@ define_makeflags (int all, int makefile)
     else                                                                      \
       /* " -xfoo", plus space to escape "foo".  */                            \
       flagslen += 1 + 1 + 1 + (3 * (LEN));                                    \
-    if (!short_option (cs->c))                                              \
+    if (!short_option (cs->c))                                                \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);                                 \
   } while (0)
@@ -3117,7 +3118,7 @@ define_makeflags (int all, int makefile)
           if (!*(int *) cs->value_ptr == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
-            ADD_FLAG (0, 0);
+	    if (cs->c != 'X') ADD_FLAG (0, 0);
           break;
 
         case positive_int:
@@ -3206,8 +3207,10 @@ define_makeflags (int all, int makefile)
   /* Add simple options as a group.  */
   while (flags != 0 && !flags->arg && short_option (flags->cs->c))
     {
-      *p++ = flags->cs->c;
-      flags = flags->next;
+      if (flags->cs->c != 'X') {
+	*p++ = flags->cs->c;
+	flags = flags->next;
+      }
     }
 
   /* Now add more complex flags: ones with options and/or long names.  */
@@ -3217,9 +3220,9 @@ define_makeflags (int all, int makefile)
       *p++ = '-';
 
       /* Add the flag letter or name to the string.  */
-      if (short_option (flags->cs->c))
-        *p++ = flags->cs->c;
-      else
+      if (short_option (flags->cs->c)) {
+        if (flags->cs->c != 'X') *p++ = flags->cs->c;
+      } else
         {
           /* Long options require a double-dash.  */
           *p++ = '-';
