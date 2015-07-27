@@ -1963,7 +1963,6 @@ main (int argc, const char **argv, char **envp)
     int old_builtin_variables_flag = no_builtin_variables_flag;
 
     /* Decode switches again, for variables set by the makefile.  */
-    decode_env_switches (STRING_SIZE_TUPLE ("REMAKEFLAGS"));
     decode_env_switches (STRING_SIZE_TUPLE ("GNUMAKEFLAGS"));
 
     /* Clear GNUMAKEFLAGS to avoid duplication.  */
