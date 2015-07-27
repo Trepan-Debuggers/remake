@@ -21,7 +21,6 @@ Boston, MA 02111-1307, USA.  */
 static debug_return_t
 dbg_cmd_setqx(char *psz_string)
 {
-  printf("XXXX %s\n", psz_string);
   dbg_cmd_set_var(psz_string, 1);
   return debug_readloop;
 }
