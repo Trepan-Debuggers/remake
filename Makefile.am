@@ -160,6 +160,7 @@ MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
 html-local:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
+#: Make (re)make
 make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
