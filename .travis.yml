@@ -1,8 +1,14 @@
 language: C
 
-install:
-  # Prerequisites
-  - "sudo apt-get install autopoint libreadline-dev wget texinfo"
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - autopoint
+      - libreadline-dev
+      - wget
+      - texinfo
 
 # run the tests
 #script: autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
