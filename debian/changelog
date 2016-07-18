@@ -1,3 +1,15 @@
+remake (4.1+dbg1.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #804180, #806552)
+  * Culled remake.texi and make.texi since they are not DFSG-compliant
+  * Imported some patches from the 'make' Debian package:
+    - We don't get as confused with timestamp-less .a files, which are now
+      made by default on Debian (Debian bugs #798804, #798913)
+    - We can handle excessively long commandlines (Debian bug #688601)
+    - We handle NULL return from ttyname
+  
+ -- Dima Kogan <dkogan@debian.org>  Sun, 17 Jul 2016 17:35:59 -0700
+
 remake (3.82+dbg0.9+dfsg-2) unstable; urgency=medium
 
   * debian/patches/up_texi_fixes to fix building documentation (Closes: #712346)
