@@ -11,3 +11,9 @@
 override_dh_auto_configure:
 	dh_auto_configure $@ -- --disable-nls --enable-maintainer-mode
 
+# do not ship conflicting /usr/include/gnumake.h. This lives in the 'make'
+# package, which has a library component. There's no reason to do this with
+# remake, so I simply remove it
+override_dh_install:
+	rm debian/remake/usr/include/*
+	dh_install
