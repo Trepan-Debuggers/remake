@@ -1,0 +1,25 @@
+remake-dfsg (4.1+dbg1.1+dfsg-1) unstable; urgency=low
+
+  WARNING: Backward-incompatibility!
+
+  The ar program in the binutils package in Debian is now configured
+  with --enable-deterministic-archives. This change makes the archives
+  reproducible, by setting the UID, GID, and timestamp to 0. However,
+  when dealing with archives created with the libxx(*.o) style rules,
+  make needs the timestamp of the file in order to decide to update it
+  or not. With the current deterministic behavior of ar, the time stamp
+  is always 0. This has consequences, since make will fall back to always
+  adding each member to the archive, whether or not it is required. This
+  is a change in behaviour, and, for instance, it makes make fail to
+  build, failing 7 out of 10 archive tests.
+  .
+  Since binutils will create archive with time stamps set to 0 when
+  running in "deterministic" mode, make will always try to update such
+  members. When this is detected, make will emit a warning.
+  .
+  There is some online discussion:
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=798804
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=798913
+  https://bugzilla.redhat.com/show_bug.cgi?id=1195883
+
+ -- Manoj Srivastava <srivasta@debian.org>  Mon, 18 Jan 2016 16:09:19 -0800
