@@ -1,4 +1,4 @@
-remake-dfsg (4.1+dbg1.1+dfsg-1) unstable; urgency=low
+remake (4.1+dbg1.1+dfsg-1) unstable; urgency=low
 
   WARNING: Backward-incompatibility!
 
