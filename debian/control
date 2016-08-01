@@ -1,7 +1,8 @@
 Source: remake
 Section: devel
 Priority: extra
-Maintainer: Yaroslav Halchenko <debian@onerussian.com>
+Maintainer: Dima Kogan <dkogan@debian.org>
+Uploaders: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                autotools-dev,
@@ -11,7 +12,7 @@ Build-Depends: debhelper (>= 9),
 Homepage: http://bashdb.sourceforge.net/remake
 Vcs-Browser: http://github.com/rocky/remake
 Vcs-git: git://github.com/rocky/remake.git -b debian
-Standards-Version: 3.9.4
+Standards-Version: 3.9.8
 
 Package: remake
 Architecture: any

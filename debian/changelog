@@ -1,5 +1,6 @@
 remake (4.1+dbg1.1+dfsg-1) unstable; urgency=medium
 
+  [ Dima Kogan ]
   * New upstream release (Closes: #804180, #806552)
   * Culled remake.texi and make.texi since they are not DFSG-compliant
   * Imported some patches from the 'make' Debian package:
@@ -7,8 +8,13 @@ remake (4.1+dbg1.1+dfsg-1) unstable; urgency=medium
       made by default on Debian (Debian bugs #798804, #798913)
     - We can handle excessively long commandlines (Debian bug #688601)
     - We handle NULL return from ttyname
-  
- -- Dima Kogan <dkogan@debian.org>  Sun, 17 Jul 2016 17:35:59 -0700
+
+  [ Yaroslav Halchenko ]
+  * debian/control
+    - Make Dima the Maintainer and downgrade myself into Uploaders
+    - Boost up policy compliance to 3.9.8 (no changes)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 01 Aug 2016 19:34:00 -0400
 
 remake (3.82+dbg0.9+dfsg-2) unstable; urgency=medium
 
