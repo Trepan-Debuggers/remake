@@ -1,0 +1,164 @@
+From: rocky <rocky@gnu.org>
+Date: Wed, 20 Jul 2016 20:56:41 -0400
+Subject: Reinstate manpage. Document --target option
+
+Fixes issue #32
+---
+ make.1 | 90 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 79 insertions(+), 11 deletions(-)
+
+diff --git a/make.1 b/make.1
+index ed04db9..063052f 100644
+--- a/make.1
++++ b/make.1
+@@ -1,6 +1,6 @@
+-.TH MAKE 1 "03 March 2012" "GNU" "User Commands"
++.TH REMAKE 1 "03 March 2016" "GNU" "User Commands"
+ .SH NAME
+-make \- GNU make utility to maintain groups of programs
++remake \- GNU make utility with enhanced debugger
+ .SH SYNOPSIS
+ .B make
+ [\fIOPTION\fR]... [\fITARGET\fR]...
+@@ -12,9 +12,11 @@ utility will determine automatically which pieces of a large program need to
+ be recompiled, and issue the commands to recompile them.  The manual describes
+ the GNU implementation of
+ .BR make ,
+-which was written by Richard Stallman and Roland McGrath, and is currently
+-maintained by Paul Smith.  Our examples show C programs, since they are very
+-common, but you can use
++which was written by Richard Stallman and Roland McGrath, and is
++currently maintained by Paul Smith.  Extended error reporting,
++debugger, and profiling extensions were written by Rocky Bernstein.
++Our examples show C programs, since they are very common, but you can
++use
+ .B make
+ with any programming language whose compiler can be run with a shell command.
+ In fact,
+@@ -121,6 +123,23 @@ which files actually need to be remade, which implicit rules are
+ considered and which are applied---everything interesting about how
+ .B make
+ decides what to do.
++
++.TP 0.5i
++.BR "\-\-profile"
++Creates callgrind profile output.
++Callgrind output can be used with kcachegrind, callgrind_annotate,
++or gprof2dot to analyze data. You can get not only timings, but
++a graph of the target dependencies checked
++
++.TP 0.5i
++.BR "\-\-targets"
++Print a list of explicitly named targets found in read-in makefiles.
++
++.TP 0.5i
++.BR \-\-tasks
++Print a list of explicitly named targets found in read-in makefiles which
++have commands associated with them and are either phony or are not implicit.
++
+ .TP 0.5i
+ .BI \-\-debug "[=FLAGS]"
+ Print debugging information in addition to normal processing.
+@@ -147,6 +166,56 @@ for debugging while remaking makefiles.  Use
+ .I n
+ to disable all previous debugging flags.
+ .TP 0.5i
++.B \-x, " \-\-trace"
++Print trace information. Commands in rules which are normally
++silent are shown, same as if \fB\-\-just\-print\fR were given.
++
++.TP 0.5i
++.BI \-\-trace "[=FLAGS]"
++Set trace flags
++If the
++.I FLAGS
++are omitted, then the behavior is the same as if
++.B \-d
++was specified.
++.I FLAGS
++may be
++.I read
++for all tracing Makefiles,
++.I noshell
++which is like \fInormal\fR but shell tracing
++is disabled, or
++.I full
++for maximum tracing.
++
++.TP 0.5i
++.B \-X, " \-\-debugger"
++Enter debugger
++.TP 0.5i
++.BI \-\-debugger "[=TYPE]"
++Enter debugger with
++If the
++.I TYPE
++are omitted, then the behavior is the same as if
++.B \-X
++was specified.
++.I TYPE
++may be
++.I goal
++for all tracing Makefiles read
++.BR \-d ),
++.I preread
++which is the same as given no option
++.I preaction
++which is like \fInormal\fR but shell tracing
++is disabled
++.I full
++for maximum tracing.
++.I fatal
++for entering the debugger on a fatal error,
++.I error
++for entering the debugger on an error
++.TP 0.5i
+ \fB\-e\fR, \fB\-\-environment\-overrides\fR
+ Give variables taken from the environment precedence
+ over variables from makefiles.
+@@ -155,6 +224,7 @@ over variables from makefiles.
+ Use
+ .I file
+ as a makefile.
++
+ .TP 0.5i
+ \fB\-i\fR, \fB\-\-ignore\-errors\fR
+ Ignore all errors in commands executed to remake files.
+@@ -291,15 +361,12 @@ This is used to pretend that the commands were done, in order to fool
+ future invocations of
+ .BR make .
+ .TP 0.5i
+-.B \-\-trace
+-Information about the disposition of each target is printed (why the target is
+-being rebuilt and what commands are run to rebuild it).
+-.TP 0.5i
+ \fB\-v\fR, \fB\-\-version\fR
+ Print the version of the
+ .B make
+ program plus a copyright, a list of authors and a notice that there
+ is no warranty.
++
+ .TP 0.5i
+ \fB\-w\fR, \fB\-\-print\-directory\fR
+ Print a message containing the working directory
+@@ -308,6 +375,7 @@ This may be useful for tracking down errors from complicated nests of
+ recursive
+ .B make
+ commands.
++
+ .TP 0.5i
+ .B \-\-no\-print\-directory
+ Turn off
+@@ -358,10 +426,10 @@ should give you access to the complete manual.
+ .SH BUGS
+ See the chapter ``Problems and Bugs'' in
+ .IR "The GNU Make Manual" .
+-.SH AUTHOR
++.SH AUTHORS
+ This manual page contributed by Dennis Morse of Stanford University.
+ Further updates contributed by Mike Frysinger.  It has been reworked by Roland
+-McGrath.  Maintained by Paul Smith.
++McGrath.  Maintained by Paul Smith. Remake-specific changes by Rocky Bernstein
+ .SH "COPYRIGHT"
+ Copyright \(co 1992-1993, 1996-2014 Free Software Foundation, Inc.
+ This file is part of

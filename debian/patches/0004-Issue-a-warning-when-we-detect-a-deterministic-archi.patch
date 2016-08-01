@@ -1,0 +1,29 @@
+From: =?utf-8?q?J=C3=A9r=C3=A9my_Bobbio?= <lunar@debian.org>
+Date: Sun, 17 Jan 2016 11:01:09 +0000
+Subject: Issue a warning when we detect a "deterministic" archive
+
+binutils will create archive with timestamps set to 0 when running in
+"deterministic" mode. As make will always try to update such members,
+let's notify users with a warning.
+---
+ remake.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/remake.c b/remake.c
+index 9986744..1ca305f 100644
+--- a/remake.c
++++ b/remake.c
+@@ -1378,6 +1378,13 @@ f_mtime (struct file *file, int search)
+         return NONEXISTENT_MTIME;
+ 
+       found = ar_member_date (file->hname, &member_date);
++      if (found && member_date == (time_t) 0)
++        {
++              OSS (error, NILF,
++                   _("Warning: Archive '%s' seems to have been created in deterministic mode. '%s' will always be updated. Please consider passing the U flag to ar to avoid the problem."),
++                   arfile->name, memname);
++
++        }
+       mtime = found ? file_timestamp_cons (file->hname, member_date, 0) : NONEXISTENT_MTIME;
+     }
+   else

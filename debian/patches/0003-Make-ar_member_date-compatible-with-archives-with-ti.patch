@@ -1,0 +1,173 @@
+From: =?utf-8?q?J=C3=A9r=C3=A9my_Bobbio?= <lunar@debian.org>
+Date: Sun, 17 Jan 2016 10:55:40 +0000
+Subject: Make ar_member_date compatible with archives with timestamps set to 0
+
+ar_scan() scanning function uses 0 to indicate that scanning should continue.
+This made ar_member_date() unable to differentiate when it was unable to find
+the requested member from a member with a timestamp set to 0.
+
+We thus change its prototype to have its return value indicate if it has been
+able to find the requested member. The timestamp is set through the newly given
+pointer.
+---
+ ar.c       | 33 +++++++++++++++++++++++++--------
+ commands.c |  5 ++++-
+ dir.c      |  7 +++++--
+ make.h     |  3 ++-
+ makeint.h  |  2 +-
+ remake.c   |  7 +++----
+ 6 files changed, 40 insertions(+), 17 deletions(-)
+
+diff --git a/ar.c b/ar.c
+index 675572a..d10a8df 100644
+--- a/ar.c
++++ b/ar.c
+@@ -68,25 +68,39 @@ ar_parse_name (const char *name, char **arname_p, char **memname_p)
+ 
+ /* This function is called by 'ar_scan' to find which member to look at.  */
+ 
++struct member_date_lookup
++{
++  const char *name;
++  time_t *member_date;
++};
++
+ /* ARGSUSED */
+ static long int
+ ar_member_date_1 (int desc UNUSED, const char *mem, int truncated,
+                   long int hdrpos UNUSED, long int datapos UNUSED,
+                   long int size UNUSED, long int date,
+                   int uid UNUSED, int gid UNUSED, int mode UNUSED,
+-                  const void *name)
++                  const void *data)
+ {
+-  return ar_name_equal (name, mem, truncated) ? date : 0;
++  const struct member_date_lookup *lookup_data = data;
++  if (ar_name_equal (lookup_data->name, mem, truncated))
++    {
++      *lookup_data->member_date = date;
++      return 1;
++    }
++  return 0;
+ }
+ 
+-/* Return the modtime of NAME.  */
++/* Read the modtime of NAME in MEMBER_DATE.
++   Returns 1 if NAME exists, 0 otherwise.  */
+ 
+-time_t
+-ar_member_date (const char *name)
++int
++ar_member_date (const char *name, time_t *member_date)
+ {
+   char *arname;
+   char *memname;
+-  long int val;
++  int found;
++  struct member_date_lookup lookup_data;
+ 
+   ar_parse_name (name, &arname, &memname);
+ 
+@@ -107,11 +121,14 @@ ar_member_date (const char *name)
+       (void) f_mtime (arfile, 0);
+   }
+ 
+-  val = ar_scan (arname, ar_member_date_1, memname);
++  lookup_data.name = memname;
++  lookup_data.member_date = member_date;
++  found = ar_scan (arname, ar_member_date_1, &lookup_data);
+ 
+   free (arname);
+ 
+-  return (val <= 0 ? (time_t) -1 : (time_t) val);
++  /* return 0 (not found) if the archive does not exist or has invalid format. */
++  return (found == 1) ? 1 : 0;
+ }
+ 
+ /* Set the archive-member NAME's modtime to now.  */
+diff --git a/commands.c b/commands.c
+index f45fd69..9136166 100644
+--- a/commands.c
++++ b/commands.c
+@@ -733,7 +733,10 @@ delete_target (struct file *file, const char *on_behalf_of)
+       time_t file_date = (file->last_mtime == NONEXISTENT_MTIME
+                           ? (time_t) -1
+                           : (time_t) FILE_TIMESTAMP_S (file->last_mtime));
+-      if (ar_member_date (file->name) != file_date)
++      time_t member_date = NONEXISTENT_MTIME;
++      int found;
++      found = ar_member_date (file->name, &member_date);
++      if (found && member_date != file_date)
+         {
+           if (on_behalf_of)
+             OSS (error, NILF,
+diff --git a/dir.c b/dir.c
+index 7e00b8f..6b8881f 100644
+--- a/dir.c
++++ b/dir.c
+@@ -748,8 +748,11 @@ file_exists_p (const char *name)
+   const char *slash;
+ 
+ #ifndef NO_ARCHIVES
+-  if (ar_name (name))
+-    return ar_member_date (name) != (time_t) -1;
++  {
++    time_t member_date;
++    if (ar_name (name))
++      return ar_member_date (name, &member_date);
++  }
+ #endif
+ 
+ #ifdef VMS
+diff --git a/make.h b/make.h
+index fa6b37f..7359cb3 100644
+--- a/make.h
++++ b/make.h
+@@ -368,7 +368,8 @@ FILE *open_tmpfile (char **, const char *);
+ int ar_name (const char *);
+ void ar_parse_name (const char *, char **, char **);
+ int ar_touch (const char *);
+-time_t ar_member_date (const char *);
++int ar_member_date (const char *, time_t *);
++
+ 
+ #endif
+ 
+diff --git a/makeint.h b/makeint.h
+index d971c90..85b1f40 100644
+--- a/makeint.h
++++ b/makeint.h
+@@ -482,7 +482,7 @@ const char *find_percent_cached (const char **);
+ int ar_name (const char *);
+ void ar_parse_name (const char *, char **, char **);
+ int ar_touch (const char *);
+-time_t ar_member_date (const char *);
++int ar_member_date (const char *, time_t *);
+ 
+ typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
+                                       long int hdrpos, long int datapos,
+diff --git a/remake.c b/remake.c
+index 65af151..9986744 100644
+--- a/remake.c
++++ b/remake.c
+@@ -1329,6 +1329,7 @@ f_mtime (struct file *file, int search)
+ 
+       char *arname, *memname;
+       struct file *arfile;
++      int found;
+       time_t member_date;
+ 
+       /* Find the archive's name.  */
+@@ -1376,10 +1377,8 @@ f_mtime (struct file *file, int search)
+         /* The archive doesn't exist, so its members don't exist either.  */
+         return NONEXISTENT_MTIME;
+ 
+-      member_date = ar_member_date (file->hname);
+-      mtime = (member_date == (time_t) -1
+-               ? NONEXISTENT_MTIME
+-               : file_timestamp_cons (file->hname, member_date, 0));
++      found = ar_member_date (file->hname, &member_date);
++      mtime = found ? file_timestamp_cons (file->hname, member_date, 0) : NONEXISTENT_MTIME;
+     }
+   else
+ #endif
