@@ -8,6 +8,7 @@ remake (4.1+dbg1.1+dfsg-1) unstable; urgency=medium
       made by default on Debian (Debian bugs #798804, #798913)
     - We can handle excessively long commandlines (Debian bug #688601)
     - We handle NULL return from ttyname
+  * New upstream supports Guile, so we use (and Depend on) it
 
   [ Yaroslav Halchenko ]
   * debian/control
