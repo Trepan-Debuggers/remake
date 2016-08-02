@@ -9,6 +9,7 @@ Build-Depends: debhelper (>= 9),
                gettext, autopoint,
                autoconf, automake, texinfo,
                libreadline6-dev | libreadline-dev (>= 6),
+               guile-2.0-dev
 Homepage: http://bashdb.sourceforge.net/remake
 Vcs-Browser: http://github.com/rocky/remake
 Vcs-git: git://github.com/rocky/remake.git -b debian
