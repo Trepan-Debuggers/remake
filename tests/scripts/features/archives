@@ -2,6 +2,11 @@
 
 $description = "Test GNU make's archive management features.";
 
+# Rocky: skip for now
+$details = "\
+FIXME: reinstate. Determinism in Linux kernels changes this.";
+return -1;
+
 $details = "\
 This only works on systems that support it.";
 
