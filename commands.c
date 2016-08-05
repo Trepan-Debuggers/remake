@@ -733,7 +733,10 @@ delete_target (struct file *file, const char *on_behalf_of)
       time_t file_date = (file->last_mtime == NONEXISTENT_MTIME
                           ? (time_t) -1
                           : (time_t) FILE_TIMESTAMP_S (file->last_mtime));
-      if (ar_member_date (file->name) != file_date)
+      time_t member_date = NONEXISTENT_MTIME;
+      int found;
+      found = ar_member_date (file->name, &member_date);
+      if (found && member_date != file_date)
         {
           if (on_behalf_of)
             OSS (error, NILF,

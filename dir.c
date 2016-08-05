@@ -748,8 +748,11 @@ file_exists_p (const char *name)
   const char *slash;
 
 #ifndef NO_ARCHIVES
-  if (ar_name (name))
-    return ar_member_date (name) != (time_t) -1;
+  {
+    time_t member_date;
+    if (ar_name (name))
+      return ar_member_date (name, &member_date);
+  }
 #endif
 
 #ifdef VMS
