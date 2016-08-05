@@ -428,10 +428,11 @@ extern struct rlimit stack_limit;
 /* The number of bytes needed to represent the largest integer as a string.  */
 #define INTSTR_LENGTH         CSTRLEN ("18446744073709551616")
 
+#define DEFAULT_TTYNAME "true"
 #ifdef HAVE_TTYNAME
 # define TTYNAME(_f) ttyname (_f)
 #else
-# define TTYNAME(_f) "true"
+# define TTYNAME(_f) DEFAULT_TTYNAME
 #endif
 
 

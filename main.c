@@ -1376,13 +1376,18 @@ main (int argc, const char **argv, char **envp)
 #ifdef HAVE_ISATTY
     if (isatty (fileno (stdout)))
       if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMOUT")))
-        define_variable_cname ("MAKE_TERMOUT", TTYNAME (fileno (stdout)),
-                               o_default, 0)->export = v_export;
-
+        {
+          const char *tty = TTYNAME (fileno (stdout));
+          define_variable_cname ("MAKE_TERMOUT", tty ? tty : DEFAULT_TTYNAME,
+                                 o_default, 0)->export = v_export;
+        }
     if (isatty (fileno (stderr)))
       if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMERR")))
-        define_variable_cname ("MAKE_TERMERR", TTYNAME (fileno (stderr)),
-                               o_default, 0)->export = v_export;
+        {
+          const char *tty = TTYNAME (fileno (stderr));
+          define_variable_cname ("MAKE_TERMERR", tty ? tty : DEFAULT_TTYNAME,
+                                 o_default, 0)->export = v_export;
+        }
 #endif
 
   /* Reset in case the switches changed our minds.  */
