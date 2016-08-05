@@ -36,7 +36,7 @@ $slurp =~ s:^#0  all at .*work/targets/:#0 all at work/targets/:gm;
 &compare_output_string($answer, $slurp, $logfile);
 
 # Test the default value of various POSIX-specific variables
-my %POSIX = (AR => 'ar', ARFLAGS => '-rv',
+my %POSIX = (AR => 'ar', ARFLAGS => 'rvU',
              YACC => 'yacc', YFLAGS => '',
              LEX => 'lex', LFLAGS => '',
              LDFLAGS => '',

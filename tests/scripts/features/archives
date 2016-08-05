@@ -28,17 +28,17 @@ unlink('libxx.a');
 
 # Very simple
 run_make_test('all: libxx.a(a1.o)',
-              '', "$ar rv libxx.a a1.o\n$created");
+              '', "$ar rvU libxx.a a1.o\n$created");
 
 # Multiple .o's.  Add a new one to the existing library
 ($_ = $add) =~ s/#OBJECT#/a2.o/g;
 run_make_test('all: libxx.a(a1.o a2.o)',
-              '', "$ar rv libxx.a a2.o\n$_");
+              '', "$ar rvU libxx.a a2.o\n$_");
 
 # Touch one of the .o's so it's rebuilt
 utouch(-40, 'a1.o');
 ($_ = $repl) =~ s/#OBJECT#/a1.o/g;
-run_make_test(undef, '', "$ar rv libxx.a a1.o\n$_");
+run_make_test(undef, '', "$ar rvU libxx.a a1.o\n$_");
 
 # Use wildcards
 run_make_test('all: libxx.a(*.o)',
@@ -47,21 +47,21 @@ run_make_test('all: libxx.a(*.o)',
 # Touch one of the .o's so it's rebuilt
 utouch(-30, 'a1.o');
 ($_ = $repl) =~ s/#OBJECT#/a1.o/g;
-run_make_test(undef, '', "$ar rv libxx.a a1.o\n$_");
+run_make_test(undef, '', "$ar rvU libxx.a a1.o\n$_");
 
 # Use both wildcards and simple names
 utouch(-50, 'a2.o');
 ($_ = $add) =~ s/#OBJECT#/a3.o/g;
-$_ .= "$ar rv libxx.a a2.o\n";
+$_ .= "$ar rvU libxx.a a2.o\n";
 ($_ .= $repl) =~ s/#OBJECT#/a2.o/g;
 run_make_test('all: libxx.a(a3.o *.o)', '',
-              "$ar rv libxx.a a3.o\n$_");
+              "$ar rvU libxx.a a3.o\n$_");
 
 # Check whitespace handling
 utouch(-40, 'a2.o');
 ($_ = $repl) =~ s/#OBJECT#/a2.o/g;
 run_make_test('all: libxx.a(  a3.o    *.o     )', '',
-              "$ar rv libxx.a a2.o\n$_");
+              "$ar rvU libxx.a a2.o\n$_");
 
 rmfiles(qw(a1.o a2.o a3.o libxx.a));
 
