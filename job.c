@@ -31,6 +31,14 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <string.h>
 
+#if defined (HAVE_LINUX_BINFMTS_H) && defined (HAVE_SYS_USER_H)
+#include <sys/user.h>
+#include <linux/binfmts.h>
+#endif
+#ifndef PAGE_SIZE
+# define PAGE_SIZE (sysconf(_SC_PAGESIZE))
+#endif
+
 /* Default shell to use.  */
 #ifdef WINDOWS32
 #include <windows.h>
@@ -3190,6 +3198,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 #ifdef WINDOWS32
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 #endif
+    char *args_ptr;
 
 # ifdef __EMX__ /* is this necessary? */
     if (!unixy_shell && shellflags)
@@ -3355,8 +3364,17 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
         return new_argv;
       }
 
+#ifdef MAX_ARG_STRLEN
+    static char eval_line[] = "eval\\ \\\"set\\ x\\;\\ shift\\;\\ ";
+#define ARG_NUMBER_DIGITS 5
+#define EVAL_LEN (sizeof(eval_line)-1 + shell_len + 4                   \
+                  + (7 + ARG_NUMBER_DIGITS) * 2 * line_len / (MAX_ARG_STRLEN - 2))
+#else
+#define EVAL_LEN 0
+#endif
+
     new_line = xmalloc ((shell_len*2) + 1 + sflags_len + 1
-                        + (line_len*2) + 1);
+                        + (line_len*2) + 1 + EVAL_LEN);
     ap = new_line;
     /* Copy SHELL, escaping any characters special to the shell.  If
        we don't escape them, construct_command_argv_internal will
@@ -3376,6 +3394,30 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 #ifdef WINDOWS32
     command_ptr = ap;
 #endif
+
+#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
+    if (unixy_shell && line_len > MAX_ARG_STRLEN)
+      {
+       unsigned j;
+       memcpy (ap, eval_line, sizeof (eval_line) - 1);
+       ap += sizeof (eval_line) - 1;
+       for (j = 1; j <= 2 * line_len / (MAX_ARG_STRLEN - 2); j++)
+         ap += sprintf (ap, "\\$\\{%u\\}", j);
+       *ap++ = '\\';
+       *ap++ = '"';
+       *ap++ = ' ';
+       /* Copy only the first word of SHELL to $0.  */
+       for (p = shell; *p != '\0'; ++p)
+         {
+           if (isspace ((unsigned char)*p))
+             break;
+           *ap++ = *p;
+         }
+       *ap++ = ' ';
+      }
+#endif
+    args_ptr = ap;
+
     for (p = line; *p != '\0'; ++p)
       {
         if (restp != NULL && *p == '\n')
@@ -3423,6 +3465,13 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
           }
 #endif
         *ap++ = *p;
+#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
+       if (unixy_shell && line_len > MAX_ARG_STRLEN && (ap - args_ptr > MAX_ARG_STRLEN - 2))
+         {
+           *ap++ = ' ';
+           args_ptr = ap;
+         }
+#endif
       }
     if (ap == new_line + shell_len + sflags_len + 2)
       {
