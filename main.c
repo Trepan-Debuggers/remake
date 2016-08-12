@@ -316,7 +316,7 @@ static const char *const usage[] =
     N_("\
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
-  --no-extended-errors         Do not give additional error reporting.\n"),
+  --no-extended-errors        Do not give additional error reporting.\n"),
     N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any recipe; just print them.\n"),
@@ -366,7 +366,7 @@ static const char *const usage[] =
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]          Trace command execution TYPE may be\n\
-                              \"command\", \"read\", \"normal\",\"\n\
+                              \"command\", \"read\", \"normal\",.\"\n\
                               \"noshell\", or \"full\". Default is \"normal\"\n"),
     N_("\
   --debugger-stop[=TYPE]      Which point to enter debugger. TYPE may be\n\
@@ -374,7 +374,7 @@ static const char *const usage[] =
                               \"full\", \"error\", or \"fatal\".\n\
                               Only makes sense with -X set.\n"),
     N_("\n\
-  -X, --debugger              Enter debugger\n"),
+  -X, --debugger              Enter debugger.\n"),
     N_("\
    --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
