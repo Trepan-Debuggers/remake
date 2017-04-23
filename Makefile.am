@@ -157,6 +157,8 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
+po_repo = http://translationproject.org/latest/make
+
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime

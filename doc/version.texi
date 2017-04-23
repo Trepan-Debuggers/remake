@@ -1,4 +1,4 @@
-@set UPDATED 18 March 2011
-@set UPDATED-MONTH March 2011
+@set UPDATED 23 April 2017
+@set UPDATED-MONTH April 2017
 @set EDITION 3.82+dbg-0.3
 @set VERSION 3.82+dbg-0.3
