@@ -12,4 +12,4 @@ addons:
 
 # run the tests
 #script: autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
-script: autoreconf -i && ./configure && make update && make && TRAVIS=1 make check
+script: autoreconf -i && ./configure && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
