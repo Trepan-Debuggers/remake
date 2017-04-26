@@ -543,7 +543,7 @@ void expand_command_lines(struct commands *cmds, /*out*/ char **lines,
       lines[i] = allocated_variable_expand_for_file (cmds->command_lines[i],
 						     file);
     }
-    
+
 }
 
 
@@ -779,7 +779,7 @@ delete_child_targets (struct child *child)
 
 /* Print out the commands in CMDS.  */
 
-/*! 
+/*!
   Print out the commands.
 
   @param p_cmds location of commands to print out.
@@ -801,11 +801,9 @@ print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 
   if (b_expand && p_target) {
     variable_set_list_t *p_file_vars = NULL;
-    variable_set_t *p_set = NULL;
     initialize_file_variables (p_target, 0);
     set_file_variables (p_target);
     p_file_vars = p_target->variables;
-    p_set = p_file_vars->set;
     s = variable_expand_set(p_cmds->commands, p_file_vars);
   } else {
     s = p_cmds->commands;

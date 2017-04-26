@@ -3311,7 +3311,7 @@ die (int status)
       if (directory_before_chdir != 0)
         {
           /* If it fails we don't care: shut up GCC.  */
-          int _x;
+          int _x UNUSED;
           _x = chdir (directory_before_chdir);
         }
 
