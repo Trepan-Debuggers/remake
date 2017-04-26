@@ -3466,7 +3466,8 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 #endif
         *ap++ = *p;
 #if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
-       if (unixy_shell && line_len > MAX_ARG_STRLEN && (ap - args_ptr > MAX_ARG_STRLEN - 2))
+       if (unixy_shell && line_len > MAX_ARG_STRLEN &&
+	   (ap - args_ptr > (unsigned long) MAX_ARG_STRLEN - 2))
          {
            *ap++ = ' ';
            args_ptr = ap;
