@@ -2662,6 +2662,15 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                                  const char *shellflags, const char *ifs,
                                  int flags, char **batch_filename UNUSED)
 {
+#ifdef MAX_ARG_STRLEN
+    static char eval_line[] = "eval\\ \\\"set\\ x\\;\\ shift\\;\\ ";
+#define ARG_NUMBER_DIGITS 5
+#define EVAL_LEN (sizeof(eval_line)-1 + shell_len + 4                   \
+                  + (7 + ARG_NUMBER_DIGITS) * 2 * line_len / (MAX_ARG_STRLEN - 2))
+#else
+#define EVAL_LEN 0
+#endif
+
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
      We call 'system' for anything that requires ''slow'' processing,
@@ -3364,15 +3373,6 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
         return new_argv;
       }
 
-#ifdef MAX_ARG_STRLEN
-    static char eval_line[] = "eval\\ \\\"set\\ x\\;\\ shift\\;\\ ";
-#define ARG_NUMBER_DIGITS 5
-#define EVAL_LEN (sizeof(eval_line)-1 + shell_len + 4                   \
-                  + (7 + ARG_NUMBER_DIGITS) * 2 * line_len / (MAX_ARG_STRLEN - 2))
-#else
-#define EVAL_LEN 0
-#endif
-
     new_line = xmalloc ((shell_len*2) + 1 + sflags_len + 1
                         + (line_len*2) + 1 + EVAL_LEN);
     ap = new_line;
@@ -3467,7 +3467,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
         *ap++ = *p;
 #if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
        if (unixy_shell && line_len > MAX_ARG_STRLEN &&
-	   (ap - args_ptr > (unsigned long) MAX_ARG_STRLEN - 2))
+	   (ap - args_ptr > (long) MAX_ARG_STRLEN - 2))
          {
            *ap++ = ' ';
            args_ptr = ap;
