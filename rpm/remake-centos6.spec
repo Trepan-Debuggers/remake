@@ -2,7 +2,7 @@
 Summary: GNU Make with comprehensible tracing and a debugger
 Name: remake
 Epoch: 1
-Version: 3.82+dbg0.9
+Version: 3.82+dbg0.7
 Release: 19%{?dist}
 License: GPLv3
 Group: Development/Tools
