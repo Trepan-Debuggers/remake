@@ -23,14 +23,11 @@ Boston, MA 02111-1307, USA.  */
 debug_level_mask_t debug_dummy_level_mask;
 debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 
-int db_level   = 0;
 int debug_flag = 0;
 
 /*! If true, enter the debugger before updating goal. */
 bool b_debugger_goal = false;
 
-/*! If true, enter the debugger before reading any makefiles. */
-bool b_debugger_preread = false;
 stringlist_t *db_flags;
 
 /** Toggle -d on receipt of SIGUSR1.  */
@@ -102,7 +99,7 @@ decode_debug_flags (int b_debug_flag, stringlist_t *ppsz_db_flags)
     }
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

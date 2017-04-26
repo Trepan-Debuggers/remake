@@ -96,7 +96,7 @@ make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
 		strcache.c variable.c version.c vpath.c hash.c \
-		buildargv.c debug.c print.c trace.c \
+		buildargv.c debug.c globals.c profile.c print.c trace.c \
 	 	$(DEBUGGER_SRC)
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
@@ -148,7 +148,7 @@ MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
-make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES) 
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
 	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
@@ -221,7 +221,7 @@ check-loadavg: loadavg$(EXEEXT)
 
 # FIXME: doesn't work.
 ##: Run remake-specific tests using Ruby rspec
-#check-rspec: 
+#check-rspec:
 #	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
 
 # The loadavg function is invoked during "make check" to test getloadavg.

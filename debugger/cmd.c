@@ -52,10 +52,6 @@ enum {
 } debugger_enum1;
 
 
-
-/** True if we are inside the debugger, false otherwise. */
-int in_debugger = false;
-
 /**
    Command-line args after the command-name part. For example in:
    break foo
