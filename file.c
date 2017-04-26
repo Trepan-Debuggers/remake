@@ -802,9 +802,10 @@ set_command_state (struct file *file, enum cmd_state state)
 /* Convert an external file timestamp to internal form.  */
 
 FILE_TIMESTAMP
-file_timestamp_cons (const char *fname, time_t s, int ns)
+file_timestamp_cons (const char *fname, time_t stamp, int ns)
 {
   int offset = ORDINARY_MTIME_MIN + (FILE_TIMESTAMP_HI_RES ? ns : 0);
+  FILE_TIMESTAMP s = stamp;
   FILE_TIMESTAMP product = (FILE_TIMESTAMP) s << FILE_TIMESTAMP_LO_BITS;
   FILE_TIMESTAMP ts = product + offset;
 
@@ -933,11 +934,11 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
 	    printf (" %s", dep_name (d));
       }
   }
-  
+
   putchar ('\n');
 
   if (i_mask & PRINT_TARGET_ATTRS) {
-    
+
     if (p_target->precious)
       puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
     if (p_target->phony)
@@ -963,7 +964,7 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
   }
 
   if (i_mask & PRINT_TARGET_TIME) {
-    
+
     if (p_target->last_mtime == UNKNOWN_MTIME)
       puts (_("#  Modification time never checked."));
     else if (p_target->last_mtime == NONEXISTENT_MTIME)
@@ -982,7 +983,7 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
   }
 
   if (i_mask & PRINT_TARGET_STATE) {
-    
+
     switch (p_target->command_state)
       {
       case cs_running:
@@ -1023,7 +1024,7 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
 	abort ();
       }
   }
-  
+
 
   if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
     print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
@@ -1065,7 +1066,7 @@ print_prereqs (const struct dep *deps)
   putchar ('\n');
 }
 
-/*! 
+/*!
 Print the data base of files.
 */
 void

@@ -219,7 +219,7 @@ static void start_job_command (struct child *child,
 			       target_stack_node_t *p_call_stack);
 static int load_too_high (void);
 static int job_next_command (struct child *);
-static int start_waiting_job (child_t *c, 
+static int start_waiting_job (child_t *c,
 			      target_stack_node_t *p_call_stack);
 
 /* Chain of all live (or recently deceased) children.  */
@@ -513,7 +513,7 @@ child_handler (int sig UNUSED)
 extern int shell_function_pid, shell_function_completed;
 
 /* Reap all dead children, storing the returned status and the new command
-   state (`cs_finished') in the `file' member of the `struct child' for the
+   state ('cs_finished') in the 'file' member of the 'struct child' for the
    dead child, and removing the child from the chain.  In addition, if BLOCK
    nonzero, we block in this function until we've reaped at least one
    complete child, waiting for it to die if necessary.  If ERR is nonzero,
@@ -548,7 +548,7 @@ reap_children (int block, int err_code, target_stack_node_t *p_call_stack)
       int remote = 0;
       pid_t pid;
       int exit_code, exit_sig, coredump;
-      register struct child *lastc, *c;
+      struct child *lastc, *c;
       int child_failed;
       int any_remote, any_local;
       int dontcare;
@@ -566,21 +566,21 @@ reap_children (int block, int err_code, target_stack_node_t *p_call_stack)
 	}
 
       /* We have one less dead child to reap.  As noted in
-	 child_handler() above, this count is completely unimportant for
-	 all modern, POSIX-y systems that support wait3() or waitpid().
-	 The rest of this comment below applies only to early, broken
-	 pre-POSIX systems.  We keep the count only because... it's there...
+         child_handler() above, this count is completely unimportant for
+         all modern, POSIX-y systems that support wait3() or waitpid().
+         The rest of this comment below applies only to early, broken
+         pre-POSIX systems.  We keep the count only because... it's there...
 
-	 The test and decrement are not atomic; if it is compiled into:
-		register = dead_children - 1;
-		dead_children = register;
-	 a SIGCHLD could come between the two instructions.
-	 child_handler increments dead_children.
-	 The second instruction here would lose that increment.  But the
-	 only effect of dead_children being wrong is that we might wait
-	 longer than necessary to reap a child, and lose some parallelism;
-	 and we might print the "Waiting for unfinished jobs" message above
-	 when not necessary.  */
+         The test and decrement are not atomic; if it is compiled into:
+                register = dead_children - 1;
+                dead_children = register;
+         a SIGCHLD could come between the two instructions.
+         child_handler increments dead_children.
+         The second instruction here would lose that increment.  But the
+         only effect of dead_children being wrong is that we might wait
+         longer than necessary to reap a child, and lose some parallelism;
+         and we might print the "Waiting for unfinished jobs" message above
+         when not necessary.  */
 
       if (dead_children > 0)
 	--dead_children;
@@ -802,7 +802,7 @@ reap_children (int block, int err_code, target_stack_node_t *p_call_stack)
 	in_debugger = DEBUGGER_QUIT_RC;
 	die(DEBUGGER_QUIT_RC);
       }
-      
+
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
@@ -921,14 +921,14 @@ reap_children (int block, int err_code, target_stack_node_t *p_call_stack)
 	    in_debugger = DEBUGGER_QUIT_RC;
 	    die(DEBUGGER_QUIT_RC);
 	}
-      
+
 	/* If the job failed, and the -k flag was not given, die,
 	   unless we are already in the process of dying.  */
 	if (!err_code && child_failed && !dontcare && !keep_going_flag &&
 	    /* fatal_error_signal will die with the right signal.  */
-	    !handling_fatal_signal) 
+	    !handling_fatal_signal)
 	{
-	  if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
+	  if ( (debugger_on_error & DEBUGGER_ON_FATAL)
 	       || i_debugger_stepping || i_debugger_nexting )
 	      enter_debugger(p_call_stack, &file, 2, DEBUG_ERROR_HIT);
 	  die (2);
@@ -1070,7 +1070,7 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
    it can be cleaned up in the event of a fatal signal.  */
 
 static void
-start_job_command (child_t *child, 
+start_job_command (child_t *child,
 		   target_stack_node_t *p_call_stack)
 {
 #if !defined(_AMIGA) && !defined(WINDOWS32)
@@ -1139,9 +1139,9 @@ start_job_command (child_t *child,
       }
   }
 
-  /* If -q was given, say that updating `failed' if there was any text on the
-     command line, or `succeeded' otherwise.  The exit status of 1 tells the
-     user that -q is saying `something to do'; the exit status for a random
+  /* If -q was given, say that updating 'failed' if there was any text on the
+     command line, or 'succeeded' otherwise.  The exit status of 1 tells the
+     user that -q is saying 'something to do'; the exit status for a random
      error is 2.  */
   if (argv != 0 && question_flag && !(flags & COMMANDS_RECURSE))
     {
@@ -1193,7 +1193,7 @@ start_job_command (child_t *child,
      appear.  */
 
   {
-    int print_it = 
+    int print_it =
 	(just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
 	|| (db_level & DB_SHELL);
 
@@ -1639,7 +1639,7 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
   /* Expand the command lines and store the results in LINES.  */
   lines = xmalloc (cmds->ncommand_lines * sizeof (char *));
   expand_command_lines(cmds, lines, file);
-  
+
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
@@ -2269,15 +2269,15 @@ void clean_tmp (void)
    is overridden.  */
 
 static char **
-construct_command_argv_internal (char *line, char **restp, char *shell,
-                                 char *shellflags, char *ifs, int flags,
-				 char **batch_filename_ptr)
+construct_command_argv_internal (char *line, char **restp, const char *shell,
+                                 const char *shellflags, const char *ifs,
+				 int flags, char **batch_filename_ptr UNUSED)
 {
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
-     We call `system' for anything that requires ``slow'' processing,
+     We call 'system' for anything that requires ''slow'' processing,
      because DOS shells are too dumb.  When $SHELL points to a real
-     (unix-style) shell, `system' just calls it to do everything.  When
+     (unix-style) shell, 'system' just calls it to do everything.  When
      $SHELL points to a DOS shell, `system' does most of the work
      internally, calling the shell only for its internal commands.
      However, it looks on the $PATH first, so you can e.g. have an

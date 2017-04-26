@@ -1,11 +1,6 @@
 /* Miscellaneous generic support functions for GNU Make.
-Copyright (C) 2005, 2008, 2009, 2011 R. Bernstein <rocky@gnu.org>
+Copyright (C) 1988-2014, 2017 Free Software Foundation, Inc.
 This file is part of GNU Make (remake variant).
-
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
-This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -77,9 +72,9 @@ alpha_compare (const void *v1, const void *v2)
 void
 collapse_continuations (char *line)
 {
-  register char *in, *out, *p;
-  register int backslash;
-  register unsigned int bs_write;
+  char *in, *out, *p;
+  int backslash;
+  unsigned int bs_write;
 
   in = strchr (line, '\n');
   if (in == 0)
@@ -165,8 +160,8 @@ print_spaces (unsigned int n)
 }
 
 
-/** Return a string whose contents concatenate the NUM strings provided
-    This string lives in static, re-used memory.  */
+/* Return a string whose contents concatenate the NUM strings provided
+   This string lives in static, re-used memory.  */
 
 const char *
 #if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
@@ -179,7 +174,7 @@ concat (num, va_alist)
 {
   static unsigned int rlen = 0;
   static char *result = NULL;
-  int ri = 0;
+  unsigned int ri = 0;
 
 #if USE_VARIADIC
   va_list args;
@@ -219,6 +214,7 @@ concat (num, va_alist)
 
   return result;
 }
+
 
 #ifndef HAVE_STRERROR
 
