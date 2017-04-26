@@ -1,9 +1,12 @@
-*.o
 *.a
+*.o
+*~
 .deps
-/*~
+/*.log
+/.Tpo
 /.dep_segment
 /ABOUT-NLS
+/ChangeLog
 /Makefile
 /Makefile.DOS
 /Makefile.in
@@ -17,6 +20,7 @@
 /autom4te.cache
 /build.sh
 /build.sh.in
+/config
 /config.ami
 /config.h
 /config.h-vms
@@ -26,6 +30,7 @@
 /config.status
 /configh.dos
 /configure
+/debian/remake.debhelper.log
 /loadavg
 /make
 /po-check-*
@@ -33,4 +38,6 @@
 /remake-*.tar.bz2
 /remake-*.tar.gz
 /stamp-h1
+/test-profile
 /tmp
+callgrind.out.*
