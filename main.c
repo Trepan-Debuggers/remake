@@ -18,6 +18,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "main.h"
+#include "globals.h"
+#include "profile.h"
 #include "dep.h"
 #include "filedef.h"
 #include "variable.h"
@@ -122,14 +124,7 @@ struct command_switch
 
 /* The recognized command switches.  */
 
-/* Nonzero means do not print commands to be executed (-s).  */
-
-int silent_flag;
-
-/* Nonzero means just touch the files
-   that would appear to need remaking (-t)  */
-
-int touch_flag;
+/* Synchronize output (--output-sync).  */
 
 /* Nonzero means just print what commands would need to be executed,
    don't actually execute them (-n).  */
@@ -145,8 +140,10 @@ int tracing_flag;
   This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
-/*! Nonzero means use GNU readline in the debugger. */
+/*! If true, show version information on entry. */
+bool b_show_version = false;
 
+/*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
     1
@@ -176,6 +173,8 @@ static struct stringlist *verbosity_flags;
 
 int suspend_flag = 0;
 #endif
+
+/* Environment variables override makefile definitions.  */
 
 /* Nonzero means keep going even if remaking some file fails (-k).  */
 
@@ -340,7 +339,7 @@ static const char *const usage[] =
     N_("\
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
-  --no-extended-errors         Do not give additional error reporting.\n"),
+  --no-extended-errors        Do not give additional error reporting.\n"),
     N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any recipe; just print them.\n"),
@@ -349,6 +348,8 @@ static const char *const usage[] =
                               Consider FILE to be very old and don't remake it.\n"),
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
+    N_("\
+  -P, --profile               Print profiling information for each target.\n"),
     N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
@@ -363,17 +364,17 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n"
-"                              have commands associated with them.\n"),
-/*
-    N_("\
-  --task-comments             Give list of explicitly-named targets which.\n"
-"                              have commands AND comments associated with them.\n"),
-*/
+  --tasks                     Give list of explicitly-named targets which\n\
+                              have commands associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
+  --trace                     Print tracing information.\n"),
+    N_("\
   -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
+                              \"full\". The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -441,6 +442,7 @@ static const struct command_switch switches[] =
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'o', filename, &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'P', flag, &profile_flag, 1, 1, 0, 0, 0, "profile" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -1444,6 +1446,9 @@ main (int argc, char **argv, char **envp)
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
+
+
+  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
@@ -2921,7 +2926,7 @@ define_makeflags (int all, int makefile)
           if (!*(int *) cs->value_ptr == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
-            ADD_FLAG (0, 0);
+	    if (cs->c != 'X') ADD_FLAG (0, 0);
           break;
 
         case positive_int:
@@ -3324,6 +3329,27 @@ die (int status)
     print_cmdline();
   }
 
+  if (profile_flag) {
+    const char *status_str;
+    switch (status) {
+      case MAKE_SUCCESS:
+	status_str = "Normal program termination";
+	break;
+      case MAKE_TROUBLE:
+	status_str = "Platform failure termination";
+	break;
+      case MAKE_FAILURE:
+	status_str = "Failure program termination";
+	break;
+      case DEBUGGER_QUIT_RC:
+	status_str = "Debugger termination";
+	break;
+      default:
+	status_str = "";
+      }
+
+    close_callgrind(status_str);
+  }
   exit (status);
 }
 

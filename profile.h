@@ -19,7 +19,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <sys/time.h>
 #include "filedef.h"
-extern bool init_callgrind(const char *creator, const char *const *argv);
+extern bool init_callgrind(const char *creator, char **argv);
 extern void add_target(file_t *target, file_t *prev);
 extern void close_callgrind(const char *program_status);
 extern bool get_time(struct timeval *t);

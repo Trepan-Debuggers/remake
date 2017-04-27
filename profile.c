@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* Compile with:
    gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
    make mock.o
-   gcc mock.o version.o alloc.o globals.o misc.o output.o enter_file.o hash.o strcache.o test-profile.o -o test-profile
+   gcc mock.o version.o alloc.o globals.o misc.o output.o file_basic.o hash.o strcache.o test-profile.o -o test-profile
 */
 #include <stdio.h>
 #include <sys/types.h>
@@ -41,7 +41,7 @@ typedef struct profile_call   {
 } profile_call_t;
 
 struct profile_entry   {
-  uint64_t elapsed_time;   /* rutime in milliseconds */
+  uint64_t elapsed_time;   /* runtime in milliseconds */
   const char *name;
   floc_t floc;             /* location in Makefile - for tracing */
   profile_call_t *calls;   /* List of targets this target calls.  */
@@ -73,21 +73,26 @@ static profile_entry_t *
 add_profile_entry (const file_t *target)
 {
   /* Look up the string in the hash.  If it's there, return it.  */
-  profile_entry_t **slot = (profile_entry_t **) hash_find_slot (&profile_table,
-								&(target->name));
-  profile_entry_t *profile_entry  = *slot;
+
   profile_entry_t *new;
+  profile_entry_t **slot;
+  profile_entry_t *profile_entry;
 
-  if (!HASH_VACANT (profile_entry))
-    return profile_entry;
-
-  /* Not there yet so add it to a buffer, then into the hash table.  */
   new = xcalloc (sizeof (profile_entry_t));
   new->name = target->name;
-  memcpy(&(new->floc), &(target->floc), sizeof(floc_t));
 
-  hash_insert_at (&profile_table, new, slot);
+  slot = (profile_entry_t **) hash_find_slot (&profile_table, new);
+  profile_entry = *slot;
+  if (!HASH_VACANT (profile_entry)) {
+    free(new);
+    return profile_entry;
+  }
+
+  /* Not there yet. So finish initializing data and add it into the
+     profile hash table.  */
   new->calls = NULL;
+  memcpy(&(new->floc), &(target->floc), sizeof(floc_t));
+  hash_insert_at (&profile_table, new, slot);
   return new;
 }
 
@@ -111,6 +116,9 @@ desc: Node: Targets\n\
 positions: line\n\
 events: 100usec\n"
 
+#ifndef HAVE_GETTIMEOFDAY
+# error Somebody has to work out how to handle if getimeofday is not around
+#endif
 extern bool
 get_time(struct timeval *t) {
   return (0 != gettimeofday(t, NULL));
@@ -141,7 +149,7 @@ static bool time_error;
 static pid_t callgrind_pid;
 
 extern bool
-init_callgrind(const char *creator, const char *const *argv) {
+init_callgrind(const char *creator, char **argv) {
   size_t len;
   unsigned int i;
 
@@ -197,7 +205,7 @@ print_profile_entry (const void *item)
 {
   const profile_entry_t *p = item;
   profile_call_t *c;
-  printf("name: %s, file: %s, line: %lu, time: %lu\n",
+  printf("name: %s, file: %s, line: %" PRIu64 ", time: %" PRIu64 "\n",
 	 p->name, p->floc.filenm, p->floc.lineno, p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
     printf("calls: %s\n", c->p_target->name);
@@ -219,14 +227,17 @@ callgrind_profile_entry (const void *item)
   profile_call_t *c;
   if (p->floc.filenm) fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
   fprintf(callgrind_fd, "fn=%s\n", p->name);
-  fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+  fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
+	  (uint64_t) p->floc.lineno,
 	  p->elapsed_time == 0 ? 1 : p->elapsed_time);
   for (c = p->calls; c; c = c->p_next) {
     if (c->p_target->floc.filenm)
       fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
     fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
-    fprintf(callgrind_fd, "calls=1 %lu\n", p->floc.lineno);
-    fprintf(callgrind_fd, "%lu %lu\n", p->floc.lineno,
+    fprintf(callgrind_fd, "calls=1 %" PRIu64 "\n",
+	    (uint64_t) p->floc.lineno);
+    fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
+	    (uint64_t) p->floc.lineno,
 	    c->p_target->elapsed_time == 0 ? 1 : c->p_target->elapsed_time);
   }
   fprintf(callgrind_fd, "\n");
@@ -248,7 +259,7 @@ close_callgrind(const char *program_status) {
   }
 
   if (!time_error) {
-    fprintf(callgrind_fd, "summary: %lu\n\n",
+    fprintf(callgrind_fd, "summary: %" PRIu64 "\n\n",
 	    time_diff(&program_start_time, &program_finish_time));
   }
 #ifdef DEBUG_PROFILE
@@ -274,14 +285,12 @@ int main(int argc, const char * const* argv) {
     target2 = enter_file("all");
     target2->floc.filenm = "Makefile";
     target2->floc.lineno = 5;
-    target2->prev = target;
     target2->elapsed_time = 500;
     add_target(target2, NULL);
 
     target3 = enter_file("all-recursive");
     target3->floc.filenm = "Makefile";
     target3->floc.lineno = 5;
-    target3->prev = target2;
     target3->elapsed_time = 1000;
     add_target(target3, target2);
 
