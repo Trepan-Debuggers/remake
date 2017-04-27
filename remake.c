@@ -1,4 +1,5 @@
 /* Basic dependency engine for GNU Make.
+Copyright (C) 2011 R. Bernstein rocky@gnu.org
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 2010 Free Software Foundation, Inc.
@@ -496,6 +497,7 @@ update_file_1 (struct file *file, unsigned int depth,
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
       DBF (DB_BASIC, _("File `%s' does not exist.\n"));
+      /* print_target_stack(p_call_stack, -1, MAX_STACK_SHOW); */
       if (i_debugger_nexting && file->cmds) {
 	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
       }
@@ -782,9 +784,6 @@ update_file_1 (struct file *file, unsigned int depth,
 	}
     }
 
-  /* Here depth returns to the value it had when we were called.  */
-  depth--;
-
   if (file->double_colon && file->deps == 0)
     {
       must_make = 1;
@@ -1028,7 +1027,6 @@ check_dep (struct file *file, unsigned int depth,
   struct dep *d;
   int dep_status = 0;
 
-  ++depth;
   start_updating (file);
 
   /* We might change file if we find a different one via vpath;
@@ -1115,7 +1113,7 @@ check_dep (struct file *file, unsigned int depth,
 
 	      d->file->parent = file;
               maybe_make = *must_make_ptr;
-              dep_status |= check_dep (d->file, depth, this_mtime,
+              dep_status |= check_dep (d->file, depth+1, this_mtime,
                                        &maybe_make, p_call_stack);
               if (! d->ignore_mtime)
                 *must_make_ptr = maybe_make;

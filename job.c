@@ -1198,9 +1198,14 @@ start_job_command (child_t *child,
 	|| (db_level & DB_SHELL);
 
     if (print_it) {
-      message (0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      char pid_str[20] = ">>";
+      if (job_slots != 1)
+	snprintf(pid_str, sizeof(pid_str), "%d", child->pid);
+      message(0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>%s>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+	      pid_str);
       message (0, "%s", p);
-      message (0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      message(0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<%s<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
+	      job_slots != 1 ? pid_str : "<<");
     } else
       message (0, (char *) 0);
   }

@@ -1,3 +1,10 @@
+Version 3.82+dbg-0.8
+2011-10-27
+* Add --tasks descriptions
+* Fix indentation bug in --trace
+* Give process id in output line when --jobs != 1
+* More correct target depth calculation
+
 Version 3.82+dbg-0.7
 2011-06-12 Fleetwood release
 * Add --tasks (akin to rake --tasks) option to list interesting targets

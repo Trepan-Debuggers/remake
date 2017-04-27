@@ -1,4 +1,7 @@
 /* Miscellaneous generic support functions for GNU Make.
+Copyright (C) 2005, 2008, 2009, 2011 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
+
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 2010 Free Software Foundation, Inc.
@@ -150,18 +153,20 @@ collapse_continuations (char *line)
   *out = '\0';
 }
 
-/* Print N spaces (used in debug for target-depth).  */
-
+/** Print n*2 spaces. Used to show target-depth when debugging flags
+    are set. */
 void
 print_spaces (unsigned int n)
 {
-  while (n-- > 0)
+  while (n-- > 0) {
     putchar (' ');
+    putchar (' ');
+  }
 }
 
 
-/* Return a string whose contents concatenate the NUM strings provided
-   This string lives in static, re-used memory.  */
+/** Return a string whose contents concatenate the NUM strings provided
+    This string lives in static, re-used memory.  */
 
 const char *
 #if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H

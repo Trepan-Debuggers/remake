@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
+#include "main.h"
 
 #include <assert.h>
 
@@ -149,6 +150,7 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
+			  char *target_description, 
                           const struct floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
                                enum variable_origin origin,
@@ -156,7 +158,8 @@ static void record_target_var (struct nameseq *filenames, char *defn,
                                const struct floc *flocp);
 static enum make_word_type get_next_mword (char *buffer, char *delim,
                                            char **startp, unsigned int *length);
-static void remove_comments (char *line);
+static void remove_comments (char *line, char **description, 
+                             char **prev_description, unsigned long lineno);
 static char *find_char_unquote (char *string, int stop1, int stop2,
                                 int blank, int ignorevars);
 
@@ -544,10 +547,12 @@ parse_var_assignment (const char *line, struct vmodifiers *vmod)
 }
 
 
+static unsigned long int target_description_lineno = 0;
+static unsigned long int prev_target_description_lineno = 0;
+
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
    SET_DEFAULT is true if we are allowed to set the default goal.  */
-
 static void
 eval (struct ebuffer *ebuf, int set_default)
 {
@@ -567,16 +572,42 @@ eval (struct ebuffer *ebuf, int set_default)
   const char *pattern_percent;
   struct floc *fstart;
   struct floc fi;
+  static char *target_description;      /* Place to store most recent
+					 * target description */
+  static char *prev_target_description; /* Most of the time, we read
+					   two targets before
+					   processing the first. I
+					   think this happens because
+					   the second target signals
+					   the end of the first
+					   target. As a result, we
+					   need to save two
+					   descriptions to be able to
+					   use the previous
+					   description for the first
+					   target. For the last target
+					   of the file though, EOF
+					   signals the end of the
+					   target so we don't use
+					   prev_target_description. */ 
 
 #define record_waiting_files()						      \
   do									      \
     {									      \
       if (filenames != 0)						      \
         {                                                                     \
+	  /* Have we seen two descriptions since this target or one? */       \
+	  char *description = target_description_lineno > tgts_started	?     \
+	      prev_target_description : target_description;		      \
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        &fi);                                                 \
+			description, &fi);				      \
+	  /* Don't use the target_description values more than once. */       \
+	  if (target_description_lineno > tgts_started)		      	      \
+	      prev_target_description = NULL;				      \
+	  else								      \
+	      target_description = NULL;				      \
           filenames = 0;						      \
         }                                                                     \
       commands_idx = 0;							      \
@@ -601,6 +632,8 @@ eval (struct ebuffer *ebuf, int set_default)
      statement we just parsed also finishes the previous rule.  */
 
   commands = xmalloc (200);
+  prev_target_description = NULL;
+  target_description = NULL;
 
   while (1)
     {
@@ -690,7 +723,8 @@ eval (struct ebuffer *ebuf, int set_default)
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
       collapse_continuations (collapsed);
-      remove_comments (collapsed);
+      remove_comments (collapsed, &target_description, 
+		       &prev_target_description, ebuf->floc.lineno);
 
       /* Get rid if starting space (including formfeed, vtab, etc.)  */
       p = collapsed;
@@ -1309,15 +1343,25 @@ eval (struct ebuffer *ebuf, int set_default)
    This is done by copying the text at LINE onto itself.  */
 
 static void
-remove_comments (char *line)
+remove_comments (char *line, char **target_description,
+                 char **prev_target_description, unsigned long lineno)
 {
   char *comment;
 
   comment = find_char_unquote (line, '#', 0, 0, 0);
 
-  if (comment != 0)
-    /* Cut off the line at the #.  */
-    *comment = '\0';
+  if (comment != 0) {
+      if (show_tasks_flag) {
+ 	  if (0 == strncmp(comment, "#: ", 3) && target_description) {
+	      *prev_target_description = *target_description;
+	      prev_target_description_lineno = target_description_lineno;
+	      *target_description = xstrdup(&comment[3]);
+	      target_description_lineno = lineno;
+	  }
+      }
+      /* Cut off the line at the #.  */
+      *comment = '\0';
+  }
 }
 
 /* Execute a `undefine' directive.
@@ -1418,7 +1462,7 @@ do_define (char *name, enum variable_origin origin, struct ebuffer *ebuf)
                    && strneq (p, "endef", 5))
             {
               p += 5;
-              remove_comments (p);
+              remove_comments (p, NULL, NULL, 0);
               if (*(next_token (p)) != '\0')
                 error (&ebuf->floc,
                        _("extraneous text after `endef' directive"));
@@ -1844,6 +1888,7 @@ record_files (struct nameseq *filenames, const char *pattern,
               const char *pattern_percent, char *depstr,
               unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
+	      char *target_description,
               const struct floc *flocp)
 {
   struct commands *cmds;
@@ -1990,6 +2035,7 @@ record_files (struct nameseq *filenames, const char *pattern,
 	  /* Single-colon.  Combine this rule with the file's existing record,
 	     if any.  */
 	  f = enter_file (strcache_add (name), flocp);
+	  f->description = target_description;
 	  if (f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
@@ -2040,6 +2086,7 @@ record_files (struct nameseq *filenames, const char *pattern,
                    _("target file `%s' has both : and :: entries"), f->name);
 
 	  f = enter_file (strcache_add (name), flocp);
+	  f->description = target_description;
 	  /* If there was an existing entry and it was a double-colon entry,
 	     enter_file will have returned a new one, making it the prev
 	     pointer of the old one, and setting its double_colon pointer to

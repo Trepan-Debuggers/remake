@@ -38,6 +38,8 @@ struct file
 
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
+    const char *description;    /* Description of target taken from comment.
+				   Part after #:  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
     const char *stem;		/* Implicit stem, if an implicit
                                    rule has been used */

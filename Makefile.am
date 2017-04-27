@@ -101,8 +101,9 @@ make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
-noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h \
+noinst_HEADERS = commands.h dep.h filedef.h job.h main.h make.h rule.h \
+	        variable.h implicit.h \
+		debug.h getopt.h gettext.h hash.h implicit.h \
 		buildargv.h expand.h file.h function.h read.h vpath.h \
 		print.h trace.h types.h \
 		$(DEBUGGER_H)

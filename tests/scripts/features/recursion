@@ -3,6 +3,7 @@ $description = "Test recursion.";
 
 $details = "DETAILS";
 
+if (0) {
 # Test some basic recursion.
 run_make_test('
 all:
@@ -44,7 +45,7 @@ THE END
 #MAKE#[2]: Leaving directory `#PWD#'
 #MAKE#[1]: Leaving directory `#PWD#'
 #MAKE#: Leaving directory `#PWD#'"));
-
+};
 
 # Test command line overrides.
 run_make_test('
