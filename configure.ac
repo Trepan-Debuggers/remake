@@ -134,7 +134,7 @@ if test "$make_cv_file_timestamp_hi_res" = yes; then
 fi
 
 # Check for DOS-style pathnames.
-pds_AC_DOS_PATHS
+# pds_AC_DOS_PATHS
 
 # See if we have a standard version of gettimeofday().  Since actual
 # implementations can differ, just make sure we have the most common
@@ -287,7 +287,7 @@ else
    AC_MSG_RESULT(yes)
 fi
 
-AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"], 
+AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"],
      [Define this to be what you need to add to turn on shell tracing])
 
 AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
@@ -311,8 +311,8 @@ AC_TRY_RUN([
 int main(int argc, char **argv) {
   char *s = tilde_expand ("~");
   return 0;
-}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes; 
-     AC_DEFINE(HAVE_TILDE_EXPAND, [], 
+}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes;
+     AC_DEFINE(HAVE_TILDE_EXPAND, [],
      [Define this <readline/readline.h> defines tilde_expand()])],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
@@ -330,8 +330,8 @@ int main(int argc, char **argv) {
       rl_initialize ();
    hist_list = history_list();
   return 0;
-}], [AC_MSG_RESULT(yes); ac_have_history_list=yes; 
-     AC_DEFINE(HAVE_HISTORY_LIST, [], 
+}], [AC_MSG_RESULT(yes); ac_have_history_list=yes;
+     AC_DEFINE(HAVE_HISTORY_LIST, [],
      [Define this <readline/readline.h> defines history_list()])],
      [AC_MSG_RESULT(no); ac_have_history_list=no],
      [AC_MSG_RESULT(no); ac_have_history_list=no])
@@ -422,13 +422,34 @@ case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohan
               [Define to 1 to enable job server support in GNU make.]);;
 esac
 
+# If we want load support, we might need to link with export-dynamic.
+# See if we can figure it out.  Unfortunately this is very difficult.
+# For example passing -rdynamic to the SunPRO linker gives a warning
+# but succeeds and creates a shared object, not an executable!
+AS_IF([test "$make_cv_load" = yes], [
+  AC_MSG_CHECKING([If the linker accepts -Wl,--export-dynamic])
+  old_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS -Wl,--export-dynamic"
+  AC_LINK_IFELSE([AC_LANG_SOURCE([int main(){}])],
+    [AC_MSG_RESULT([yes])
+     AC_SUBST([AM_LDFLAGS], [-Wl,--export-dynamic])],
+    [AC_MSG_RESULT([no])
+     AC_MSG_CHECKING([If the linker accepts -rdynamic])
+     LDFLAGS="$old_LDFLAGS -rdynamic"
+     AC_LINK_IFELSE([AC_LANG_SOURCE([int main(){}])],
+       [AC_MSG_RESULT([yes])
+        AC_SUBST([AM_LDFLAGS], [-rdynamic])],
+       [AC_MSG_RESULT([no])])
+   ])
+  LDFLAGS="$old_LDFLAGS"
+])
+
 # if we have both lstat() and readlink() then we can support symlink
 # timechecks.
-case "$ac_cv_func_lstat/$ac_cv_func_readlink" in
-  yes/yes)
-    AC_DEFINE(MAKE_SYMLINKS, 1,
-              [Define to 1 to enable symbolic link timestamp checking.]);;
-esac
+AS_IF([test "$ac_cv_func_lstat" = yes && test "$ac_cv_func_readlink" = yes],
+  [ AC_DEFINE([MAKE_SYMLINKS], [1],
+              [Define to 1 to enable symbolic link timestamp checking.])
+])
 
 # Find the SCCS commands, so we can include them in our default rules.
 
@@ -566,7 +587,15 @@ esac
 
 
 # Specify what files are to be created.
-AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile w32/Makefile)
+AC_CONFIG_FILES([ \
+	Makefile \
+	glob/Makefile \
+	po/Makefile.in \
+	config/Makefile \
+        doc/Makefile \
+	unittest/Makefile \
+	w32/Makefile
+	])
 
 # OK, do it!
 

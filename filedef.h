@@ -124,7 +124,7 @@ struct file *lookup_file (const char *name);
   hash table, return that entry.  Some file fields are initialized on
   new entry.
  */
-extern struct file *enter_file (const char *psz_name, const floc_t *p_floc);
+extern file_t *enter_file (const char *psz_name, const floc_t *p_floc);
 
 struct dep *split_prereqs (char *prereqstr);
 struct dep *enter_prereqs (struct dep *prereqs, const char *stem);

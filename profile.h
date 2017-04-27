@@ -17,6 +17,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#ifndef PROFILE_H
+#define PROFILE_H
+
 #include <sys/time.h>
 #include "filedef.h"
 extern bool init_callgrind(const char *creator, char **argv);
@@ -24,3 +27,5 @@ extern void add_target(file_t *target, file_t *prev);
 extern void close_callgrind(const char *program_status);
 extern bool get_time(struct timeval *t);
 extern uint64_t time_diff(struct timeval *start_time, struct timeval *finish_time);
+
+#endif /*PROFILE_H*/

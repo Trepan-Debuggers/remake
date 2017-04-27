@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
+// #include "file_basic.h"
 
 #include <assert.h>
 
@@ -147,7 +148,7 @@ lookup_file (const char *name)
    new record so it should be constant or in the strcache etc.
  */
 
-struct file *
+file_t  *
 enter_file (const char *name, const floc_t *p_floc)
 {
   struct file *f;

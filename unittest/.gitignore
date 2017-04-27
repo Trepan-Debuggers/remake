@@ -1,0 +1,5 @@
+/Makefile
+/Makefile.in
+/test_profile
+/test_*.log
+/test_*.trs
