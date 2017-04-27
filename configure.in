@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[3.82+dbg0.8],[bashdb-remake@lists.sourceforge.net])
+AC_INIT([remake],[3.82+dbg0.9],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ(2.59)
 AC_REVISION([[$Id: configure.in,v 1.156 2010/07/28 05:39:50 psmith Exp $]])
@@ -296,16 +296,15 @@ AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
 #
 # Check for readline to see if we can add debugging support.
 #
-AC_ARG_WITH(readline, 
-	    [  --with-readline         enable readline (for debugger)], 
-	    have_readline=$withval, enable_readline=yes)
+AC_CHECK_HEADER(readline/readline.h, [have_readline=yes], [have_readline=no])
 
-AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
+if test "$have_readline" != yes; then
+   AC_MSG_ERROR([GNU Readline and its headers files are needed. See http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html])
+fi
 
-if test "$enable_readline" = yes; then
-   VL_LIB_READLINE
-   AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
-   AC_TRY_RUN([
+VL_LIB_READLINE
+AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
+AC_TRY_RUN([
 #include <stdio.h>
 #include <readline/readline.h>
 
@@ -317,13 +316,10 @@ int main(int argc, char **argv) {
      [Define this <readline/readline.h> defines tilde_expand()])],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
-fi
 
-if test "$enable_readline" = yes; then
-   VL_LIB_READLINE
-   AC_CHECK_LIB(readline, readline)
-   AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
-   AC_TRY_RUN([
+AC_CHECK_LIB(readline, readline)
+AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
+AC_TRY_RUN([
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -339,11 +335,6 @@ int main(int argc, char **argv) {
      [Define this <readline/readline.h> defines history_list()])],
      [AC_MSG_RESULT(no); ac_have_history_list=no],
      [AC_MSG_RESULT(no); ac_have_history_list=no])
-else 
-   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
-   AC_MSG_WARN([with trace support, but you won't be able enter the])
-   AC_MSG_WARN([debugger.])
-fi
 
 AC_SUBST(HAVE_READLINE)
 REMAKE_SOURCE_PATH="`pwd`"

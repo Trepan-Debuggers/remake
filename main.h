@@ -35,6 +35,12 @@ extern int no_shell_trace;
 
 extern int show_tasks_flag;
 
+/*! Nonzero gives a list of explicit target names and exits. Set by option
+  --targets
+ */
+
+extern int show_targets_flag;
+
 /*! Nonzero means use GNU readline in the debugger. */
 extern int use_readline_flag;
 
@@ -44,7 +50,7 @@ extern int unixy_shell;
 /**! The default value of SHELL and the shell that is used when issuing
    commands on targets.
 */
-extern char default_shell[];
+extern char *default_shell;
 
 /*! Print version information. */
 extern void print_version (void);

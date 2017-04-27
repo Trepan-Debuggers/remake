@@ -178,6 +178,6 @@ RETSIGTYPE debug_signal_handler (int sig);
 /*! Set the global db_level mask based on the command option list
   db_flags.
  */
-extern void decode_debug_flags (void);
+extern void decode_debug_flags (int debug_flag, stringlist_t *db_flags);
 
 #endif /*DEBUG_H*/

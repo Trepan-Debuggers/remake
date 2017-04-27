@@ -5,6 +5,9 @@
 # We like mondo-warnings!
 AM_CFLAGS += -Wall -Wextra -Wdeclaration-after-statement -Wshadow -Wpointer-arith -Wbad-function-cast
 
+MAKE_MAINTAINER_MODE := -DMAKE_MAINTAINER_MODE
+AM_CPPFLAGS += $(MAKE_MAINTAINER_MODE)
+
 # I want this one but I have to wait for the const cleanup!
 # -Wwrite-strings
 
@@ -135,6 +138,8 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 #   http://translation.sf.net/maint/
 #   ftp://tiger.informatik.hu-berlin.de/pub/po/maint/
 
+po_wget_flags =	--recursive --level=1 --no-directories --no-parent \
+		--no-check-certificate
 po_repo = http://translationproject.org/latest/make
 .PHONY: do-po-update po-update
 do-po-update:
@@ -142,7 +147,7 @@ do-po-update:
 	  && rm -rf "$$tmppo" \
 	  && mkdir "$$tmppo" \
 	  && (cd "$$tmppo" \
-		&& $(WGET) -r -l1 -nd --no-parent -A '*.po' $(po_repo)) \
+		&& $(WGET) $(po_wget_flags) -A '*.po' $(po_repo)) \
 	  && cp "$$tmppo"/*.po $(top_srcdir)/po && rm -rf "$$tmppo"
 	cd po && $(MAKE) update-po
 	$(MAKE) po-check

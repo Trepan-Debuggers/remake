@@ -1,3 +1,11 @@
+Version 3.82+dbg-0.9
+2012-10-3
+* More aggressive on showing --target descriptions
+* -X and -x are boolean options only use --trace and --debugger to supply
+  an optional parameter
+* readline headers are no longer optional
+* small packaging changes
+
 Version 3.82+dbg-0.8
 2011-10-27
 * Add --tasks descriptions
