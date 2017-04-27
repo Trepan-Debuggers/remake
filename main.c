@@ -18,6 +18,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "main.h"
+#include "globals.h"
+#include "profile.h"
 #include "dep.h"
 #include "filedef.h"
 #include "variable.h"
@@ -122,14 +124,7 @@ struct command_switch
 
 /* The recognized command switches.  */
 
-/* Nonzero means do not print commands to be executed (-s).  */
-
-int silent_flag;
-
-/* Nonzero means just touch the files
-   that would appear to need remaking (-t)  */
-
-int touch_flag;
+/* Synchronize output (--output-sync).  */
 
 /* Nonzero means just print what commands would need to be executed,
    don't actually execute them (-n).  */
@@ -138,19 +133,18 @@ int just_print_flag;
 
 /* Print debugging info (--debug).  */
 
-/*! If 1, we don't give additional error reporting information. */
-int no_extended_errors = 0;
-
 /*! If 1 same as --trace=normal */
 int tracing_flag;
 
-/*! If non-null, contains the type of tracing we are to do. 
+/*! If non-null, contains the type of tracing we are to do.
   This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
-/*! Nonzero means use GNU readline in the debugger. */
+/*! If true, show version information on entry. */
+bool b_show_version = false;
 
-int use_readline_flag = 
+/*! Nonzero means use GNU readline in the debugger. */
+int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
     1
 #else
@@ -158,31 +152,13 @@ int use_readline_flag =
 #endif
     ;
 
-/*! If nonzero, we are debugging after each "step" for that many times. 
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_stepping = 0;
-
-/*! If nonzero, we are debugging after each "next" for that many times. 
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_nexting = 0;
-
-/*! If nonzero, enter the debugger if we hit a fatal error.
-*/
-unsigned int debugger_on_error = 0;
-
 /*! If nonzero, we have requested some sort of debugging.
 */
 unsigned int debugger_enabled;
 
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
     giving a file directory location helps a debugger frontend
-    when we change directories. For regression tests it is helpful to 
+    when we change directories. For regression tests it is helpful to
     list just the basename part as that doesn't change from installation
     to installation. Users may have their preferences too.
 */
@@ -200,72 +176,19 @@ int suspend_flag = 0;
 
 /* Environment variables override makefile definitions.  */
 
-int env_overrides = 0;
-
-/* Nonzero means ignore status codes returned by commands
-   executed to remake files.  Just treat them all as successful (-i).  */
-
-int ignore_errors_flag = 0;
-
-/* Nonzero means don't remake anything, just print the data base
-   that results from reading the makefile (-p).  */
-
-int print_data_base_flag = 0;
-
-/* Nonzero means don't remake anything; just return a nonzero status
-   if the specified targets are not up to date (-q).  */
-
-int question_flag = 0;
-
-/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
-
-int no_builtin_rules_flag = 0;
-int no_builtin_variables_flag = 0;
-
 /* Nonzero means keep going even if remaking some file fails (-k).  */
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
-/* Nonzero means check symlink mtimes.  */
-
-int check_symlink_flag = 0;
-
-/* Nonzero means print directory before starting and when done (-w).  */
-
-int print_directory_flag = 0;
-
-/*!
-  Nonzero means ignore print_directory_flag and never print the directory.
-  This is necessary because print_directory_flag is set implicitly.  
-  Set by option --print-directory.
-*/
-
 int inhibit_print_directory_flag = 0;
-
-/*! Nonzero means print version information.  Set by option --version.
-*/
-
-int print_version_flag = 0;
 
 /*! Nonzero means --trace=noshell.  */
 
 int no_shell_trace = 0;
 
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --targets
- */
-
-int show_targets_flag = 0;
-
 /*! Nonzero gives a list of explicit target names that have commands
   associated with them and exits. Set by option --tasks
- */
-
-int show_tasks_flag = 0;
-
-/*! Nonzero gives a list of explicit target names that have commands
-   AND comments associated with them and exits. Set by option --task-comments
  */
 
 int show_task_comments_flag = 0;
@@ -338,7 +261,7 @@ static int print_usage_flag = 0;
               "fatal"     - enter on fatal errors
               "goal"      - set to enter debugger before updating goal
               "preread"   - set to enter debugger before reading makefile(s)
-              "preaction" - set to enter debugger before performing any 
+              "preaction" - set to enter debugger before performing any
                             actions(s)
               "full"     - "enter" + "error" + "fatal"
 */
@@ -365,10 +288,6 @@ int rebuilding_makefiles = 0;
 /* Remember the original value of the SHELL variable, from the environment.  */
 
 struct variable shell_var;
-
-/* This character introduces a command: it's the first char on the line.  */
-
-char cmd_prefix = '\t';
 
 /** This variable is trickery to force the above enum symbol values to
     be recorded in debug symbol tables. It is used to allow one refer
@@ -420,7 +339,7 @@ static const char *const usage[] =
     N_("\
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
-  --no-extended-errors         Do not give additional error reporting.\n"),
+  --no-extended-errors        Do not give additional error reporting.\n"),
     N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any recipe; just print them.\n"),
@@ -429,6 +348,8 @@ static const char *const usage[] =
                               Consider FILE to be very old and don't remake it.\n"),
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
+    N_("\
+  -P, --profile               Print profiling information for each target.\n"),
     N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
@@ -443,17 +364,17 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n"
-"                              have commands associated with them.\n"),
-/*
-    N_("\
-  --task-comments             Give list of explicitly-named targets which.\n"
-"                              have commands AND comments associated with them.\n"),
-*/
+  --tasks                     Give list of explicitly-named targets which\n\
+                              have commands associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
+  --trace                     Print tracing information.\n"),
+    N_("\
   -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
+                              \"full\". The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -521,6 +442,7 @@ static const struct command_switch switches[] =
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'o', filename, &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'P', flag, &profile_flag, 1, 1, 0, 0, 0, "profile" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -536,10 +458,10 @@ static const struct command_switch switches[] =
     { CHAR_MAX+6, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { 'x', flag, &tracing_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+7, string, (char *) &tracing_opts, 1, 1, 0, "normal", 
+    { CHAR_MAX+7, string, (char *) &tracing_opts, 1, 1, 0, "normal",
       0, "trace" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+8, string, (char *) &debugger_opts, 1, 1, 0, "preaction", 
+    { CHAR_MAX+8, string, (char *) &debugger_opts, 1, 1, 0, "preaction",
       0, "debugger" },
     { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
@@ -678,7 +600,7 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 #endif
 
 void
-decode_trace_flags (int b_tracing_flag, int b_no_shell_trace, 
+decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
 		    stringlist_t *ppsz_tracing_opts)
 {
   char trace_seen='\0';
@@ -686,10 +608,10 @@ decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
     db_level = DB_BASIC | DB_TRACE | DB_SHELL;
     trace_seen='x';
   }
-  
+
   if (b_no_shell_trace) {
     if (b_tracing_flag)
-      error (NILF, 
+      error (NILF,
              "warning: have -x flag which supercedes -y flag; -y flag ignored");
     else {
       db_level = DB_BASIC | DB_TRACE;
@@ -699,18 +621,18 @@ decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
 
   if (trace_seen != '\0') {
     if (tracing_opts)
-      error (NILF, 
+      error (NILF,
              "warning: have already seen -%c; --tracing options ignored",
           trace_seen);
     return;
   }
-  
+
   if (ppsz_tracing_opts) {
     const char **p;
     db_level |= (DB_TRACE | DB_SHELL);
     if (!ppsz_tracing_opts->list)
       db_level |= (DB_BASIC);
-    else 
+    else
       for (p = ppsz_tracing_opts->list; *p != 0; ++p) {
         if (0 == strcmp(*p, "command"))
           ;
@@ -1411,12 +1333,12 @@ main (int argc, char **argv, char **envp)
             b_debugger_preread  = true;
             db_level           |= DB_READ_MAKEFILES;
           }
-        
+
           if (0 == strcmp(*p, "goal")) {
             b_debugger_goal  = true;
             db_level           |= DB_UPDATE_GOAL;
           }
-        
+
           if ( 0 == strcmp(*p, "full") || b_debugger_preread
                || 0 == strcmp(*p, "preaction") ) {
             job_slots            =  1;
@@ -1428,7 +1350,7 @@ main (int argc, char **argv, char **envp)
              */
             db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
                               |   DB_MAKEFILES;
-          } 
+          }
           if ( 0 == strcmp(*p, "full")
                || 0 == strcmp(*p, "error") ) {
             debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
@@ -1437,16 +1359,16 @@ main (int argc, char **argv, char **envp)
           }
         }
 #ifndef HAVE_LIBREADLINE
-      error (NILF, 
+      error (NILF,
              "warning: you specified a debugger option, but you don't have readline support");
-      error (NILF, 
+      error (NILF,
              "debugger support compiled in. Debugger options will be ignored.");
 #endif
     }
   }
 
 
-  
+
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
@@ -1524,6 +1446,9 @@ main (int argc, char **argv, char **envp)
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
+
+
+  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
@@ -2454,15 +2379,15 @@ main (int argc, char **argv, char **envp)
     }
 
   if (show_tasks_flag || show_task_comments_flag) {
-      dbg_cmd_info_targets(show_task_comments_flag 
-                           ? INFO_TARGET_TASKS_WITH_COMMENTS 
+      dbg_cmd_info_targets(show_task_comments_flag
+                           ? INFO_TARGET_TASKS_WITH_COMMENTS
                            : INFO_TARGET_TASKS);
       die(0);
   } else if (show_targets_flag) {
       dbg_cmd_info_targets(INFO_TARGET_NAME);
       die(0);
   }
-  
+
   /* Update the goals.  */
 
   DB (DB_BASIC, (_("Updating goal targets....\n")));
@@ -3001,7 +2926,7 @@ define_makeflags (int all, int makefile)
           if (!*(int *) cs->value_ptr == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
-            ADD_FLAG (0, 0);
+	    if (cs->c != 'X') ADD_FLAG (0, 0);
           break;
 
         case positive_int:
@@ -3391,7 +3316,7 @@ die (int status)
       if (directory_before_chdir != 0)
         {
           /* If it fails we don't care: shut up GCC.  */
-          int _x;
+          int _x UNUSED;
           _x = chdir (directory_before_chdir);
         }
 
@@ -3404,6 +3329,27 @@ die (int status)
     print_cmdline();
   }
 
+  if (profile_flag) {
+    const char *status_str;
+    switch (status) {
+      case MAKE_SUCCESS:
+	status_str = "Normal program termination";
+	break;
+      case MAKE_TROUBLE:
+	status_str = "Platform failure termination";
+	break;
+      case MAKE_FAILURE:
+	status_str = "Failure program termination";
+	break;
+      case DEBUGGER_QUIT_RC:
+	status_str = "Debugger termination";
+	break;
+      default:
+	status_str = "";
+      }
+
+    close_callgrind(status_str);
+  }
   exit (status);
 }
 

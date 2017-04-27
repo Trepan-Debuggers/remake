@@ -1,7 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-# 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# Copyright (C) 1997-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -31,7 +30,7 @@ if WINDOWSENV
   W32LIB =	-Lw32 -lw32
 endif
 
-SUBDIRS =	glob config po doc $(MAYBE_W32)
+SUBDIRS =	glob config po doc $(MAYBE_W32) # unittest
 
 bin_PROGRAMS =	make
 
@@ -96,10 +95,10 @@ make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
 		strcache.c variable.c version.c vpath.c hash.c \
-		buildargv.c debug.c print.c trace.c \
+		buildargv.c debug.c globals.c profile.c print.c trace.c \
 	 	$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
+EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h main.h make.h rule.h \
 	        variable.h implicit.h \
@@ -148,7 +147,7 @@ MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
-make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES) 
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
 	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
@@ -221,7 +220,7 @@ check-loadavg: loadavg$(EXEEXT)
 
 # FIXME: doesn't work.
 ##: Run remake-specific tests using Ruby rspec
-#check-rspec: 
+#check-rspec:
 #	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
 
 # The loadavg function is invoked during "make check" to test getloadavg.

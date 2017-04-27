@@ -3,14 +3,14 @@
 
 #include <wordexp.h>
 
-static debug_return_t 
+static debug_return_t
 dbg_cmd_source(char *psz_filename)
 {
   if (psz_filename && *psz_filename) {
     wordexp_t p;
     FILE *p_source_file;
     char *psz_expanded_file;
-    
+
     wordexp(psz_filename, &p, 0);
     if (0 == p.we_wordc) {
       struct stat stat_buf;
@@ -20,19 +20,19 @@ dbg_cmd_source(char *psz_filename)
         return debug_cmd_error;
       }
       psz_expanded_file = psz_filename;
-      
+
     } else if (1 != p.we_wordc) {
       dbg_errmsg("Expansion of %s doesn't lead to a single filename. \n"
-                 "Got %d matches", 
+                 "Got %zu matches",
                  psz_filename, p.we_wordc);
       return debug_cmd_error;
-      
+
     } else {
       psz_expanded_file = p.we_wordv[0];
     }
-    
+
     p_source_file = fopen(psz_expanded_file, "r");
-    
+
     if (p_source_file != NULL) {
       debug_return_t debug_return = debug_readloop;
       char line[2048];
@@ -46,7 +46,7 @@ dbg_cmd_source(char *psz_filename)
         }
       fclose(p_source_file);
     } else
-      dbg_errmsg("error reading file %s (expanded to %s):\n\t%s", 
+      dbg_errmsg("error reading file %s (expanded to %s):\n\t%s",
                  psz_filename, psz_expanded_file, strerror(errno));
     wordfree(&p);
   }  else {
@@ -57,7 +57,7 @@ dbg_cmd_source(char *psz_filename)
 }
 
 static void
-dbg_cmd_source_init(unsigned int c) 
+dbg_cmd_source_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_source;
   short_command[c].use = _("source FILENAME");
@@ -65,7 +65,7 @@ dbg_cmd_source_init(unsigned int c)
 }
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

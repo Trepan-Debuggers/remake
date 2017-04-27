@@ -129,11 +129,6 @@ extern dep_t *read_makefiles;
 
 static unsigned int max_incl_len;
 
-/* The filename and pointer to line number of the
-   makefile currently being read in.  */
-
-const struct floc *reading_file = 0;
-
 /* The chain of makefiles read by read_makefile.  */
 struct dep *read_makefiles = NULL;
 
@@ -150,7 +145,7 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
-			  char *target_description, 
+			  char *target_description,
                           const struct floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
                                enum variable_origin origin,
@@ -158,7 +153,7 @@ static void record_target_var (struct nameseq *filenames, char *defn,
                                const struct floc *flocp);
 static enum make_word_type get_next_mword (char *buffer, char *delim,
                                            char **startp, unsigned int *length);
-static void remove_comments (char *line, char **description, 
+static void remove_comments (char *line, char **description,
                              char **prev_description, unsigned long lineno);
 static char *find_char_unquote (char *string, int stop1, int stop2,
                                 int blank, int ignorevars);
@@ -589,7 +584,7 @@ eval (struct ebuffer *ebuf, int set_default)
 					   of the file though, EOF
 					   signals the end of the
 					   target so we don't use
-					   prev_target_description. */ 
+					   prev_target_description. */
 
 #define record_waiting_files()						      \
   do									      \
@@ -723,7 +718,7 @@ eval (struct ebuffer *ebuf, int set_default)
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
       collapse_continuations (collapsed);
-      remove_comments (collapsed, &target_description, 
+      remove_comments (collapsed, &target_description,
 		       &prev_target_description, ebuf->floc.lineno);
 
       /* Get rid if starting space (including formfeed, vtab, etc.)  */

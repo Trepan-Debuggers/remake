@@ -224,9 +224,6 @@ pattern_search (struct file *file, int archive,
     = xmalloc (max_pattern_deps * sizeof (struct patdeps));
   struct patdeps *pat = deplist;
 
-  /* All the prerequisites actually found for a rule, after expansion.  */
-  struct dep *deps;
-
   /* Names of possible dependencies are constructed in this buffer.  */
   char *depname = alloca (namelen + max_pattern_dep_length);
 
@@ -796,10 +793,7 @@ pattern_search (struct file *file, int archive,
             /* This pattern rule does apply.  Stop looking for one.  */
             break;
 
-          /* This pattern rule does not apply. If some of its dependencies
-             succeeded, free the data structure describing them.  */
-          /* free_idep_chain (deps); */
-          deps = 0;
+          /* This pattern rule does not apply.  Keep looking.  */
         }
 
       /* If we found an applicable rule without intermediate files, don't try

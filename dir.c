@@ -583,7 +583,6 @@ static int
 dir_contents_file_exists_p (struct directory_contents *dir,
                             const char *filename)
 {
-  unsigned int hash;
   struct dirfile *df;
   struct dirent *d;
 #ifdef WINDOWS32
@@ -612,7 +611,6 @@ dir_contents_file_exists_p (struct directory_contents *dir,
   filename = vmsify (filename,0);
 #endif
 
-  hash = 0;
   if (filename != 0)
     {
       struct dirfile dirfile_key;

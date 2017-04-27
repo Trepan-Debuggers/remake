@@ -26,9 +26,9 @@ EXTRA_DIST = test1.mk test2.mk
 info_TEXINFOS =	remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
-MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf 
+MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf
 
-CLEANFILES = make*.html make*.info remake.html remake*.info
+CLEANFILES = make*.html make*.info remake.html remake*.info callgrind.out.*
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##
