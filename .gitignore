@@ -15,6 +15,7 @@
 /autom4te.cache
 /build.sh
 /build.sh.in
+/config
 /config.ami
 /config.h
 /config.h-vms
@@ -24,6 +25,7 @@
 /config.status
 /configh.dos
 /configure
+/debugger
 /loadavg
 /make
 /po-check-*
