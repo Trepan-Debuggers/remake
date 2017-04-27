@@ -33,7 +33,9 @@ endif
 
 SUBDIRS =	glob config po doc $(MAYBE_W32)
 
-bin_PROGRAMS =	make @MAKE_NAME@$(EXEEXT)
+bin_PROGRAMS =	make
+
+# PROGRAMS = @MAKE_NAME@$(EXEEXT) $(bin_PROGRAMS)
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
@@ -45,11 +47,15 @@ DEBUGGER_SRC = 	\
 		debugger/break.c \
 		debugger/cmd.c 	\
 		debugger/fns.c 	\
+		debugger/file2line.c 	\
+		debugger/msg.c 	\
 		debugger/stack.c
 
 DEBUGGER_H = \
 		debugger/break.h 		\
 		debugger/cmd.h 			\
+		debugger/fns.h 			\
+		debugger/msg.h 			\
 		debugger/command/break.h 	\
 		debugger/command/chdir.h  	\
 		debugger/command/comment.h 	\
@@ -74,14 +80,17 @@ DEBUGGER_H = \
 		debugger/command/shell.h	\
 		debugger/command/show.h		\
 		debugger/command/skip.h		\
+		debugger/command/source.h	\
 		debugger/command/step.h		\
 		debugger/command/target.h	\
 		debugger/command/up.h		\
 		debugger/command/where.h	\
 		debugger/command/write.h	\
+		debugger/file2line.h 	        \
 		debugger/fns.h 			\
 		debugger/info.h			\
-		debugger/stack.h
+		debugger/stack.h		\
+		debugger/subcmd.h
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
@@ -126,7 +135,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c \
-	        debugger/Makefile doc/test1.mk \
+	        debugger/Makefile \
 		NEWS.remake README.remake REMAKE.todo Rakefile
 
 # This is built during configure, but behind configure's back
@@ -140,8 +149,10 @@ MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
-@MAKE_NAME@$(EXEEXT): make$(EXEEXT)
-	$(LN_S) make$(EXEEXT) $@ 
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES) 
+	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
+	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 
 .PHONY: html
 
@@ -242,6 +253,8 @@ check-regression:
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
 
+%.short:
+	$(MAKE) $(@:.short=) 2>&1 >/dev/null
 
 # --------------- Maintainer's Section
 

@@ -91,7 +91,7 @@ $answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 $rm_command cleanit
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
          . $cleanit_error
-         ."$make_name: [clean2] Error $delete_error_code (ignored)\n"
+         ."work/features/errors.mk:4: [clean2] Error $delete_error_code (ignored)\n"
          . "\n"
          . "#0  clean2 at errors.mk:4
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

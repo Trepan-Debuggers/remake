@@ -35,4 +35,6 @@ extern int i_stack_pos;
 extern target_stack_node_t *p_stack;
 extern floc_stack_node_t   *p_floc_stack;
 
+extern debug_return_t dbg_adjust_frame(int i_amount, int b_absolute);
+
 #endif /* DBG_STACK_H */

@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* debugger command interface. */
 
-#include "make.h"
+#include "msg.h"
 #include "debug.h"
 #include "file.h"
 #include "print.h"
@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "expand.h"
 #include "debug.h"
+#include "file2line.h"
 
 #ifdef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -105,7 +106,7 @@ long_cmd_t commands[] = {
   { "down",     'D' },
   { "edit" ,    'e' },
   { "eval" ,    'E' },
-  { "examine" , 'x' },
+  { "expand" ,  'x' },
   { "finish"  , 'F' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
@@ -120,6 +121,7 @@ long_cmd_t commands[] = {
   { "setq"    , '"' },
   { "shell"   , '!' },
   { "show"    , 'S' },
+  { "source"  , '<' },
   { "skip"    , 'k' },
   { "step"    , 's' },
   { "target"  , 't' },
@@ -151,81 +153,6 @@ alias_cmd_t aliases[] = {
 
 
 short_cmd_t short_command[256] = { { NULL, '\0', '\0' }, };
-
-typedef struct {
-  const char *name;	/* name of subcommand command. */
-  const char *doc;	/* short description of subcommand */
-} subcommand_info_t;
-
-char *info_subcommands[] = {
-  "break",
-  "line",
-  "locals",
-  "files",
-  "frame",
-  "makefiles",
-  "program",
-  "rules",
-  "target",
-  "variables",
-  "warranty",
-  NULL
-};
-
-
-typedef struct {
-  const char *name;	/* name of subcommand command. */
-  const char *doc;	/* short description of subcommand */
-  void *var;	        /* address of variable setting. NULL if no
-			   setting. */
-  bool b_onoff;         /* True if on/off variable, false if int. 
-			   FIXME: generalize into enumeration.
-			 */
-} subcommand_var_info_t;
-
-subcommand_var_info_t show_subcommands[] = {
-  { "args",     "Show argument list to give program when it is started",
-    NULL, false},
-  { "basename", "Show if we are to show short or long filenames",
-    &basename_filenames, true},
-  { "commands", "Show the history of commands you typed.",
-    NULL, false},
-  { "debug",    "GNU Make debug mask (set via --debug or -d)",
-    &db_level, false},
-  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
-    &ignore_errors_flag, true},
-  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag",
-    &keep_going_flag,    true},
-  { "silent",        "Value of GNU Make --silent (or -s) flags",
-    &silent_flag,        true},
-  { "version",       "Show the version of GNU Make + dbg.",
-    NULL,                false},
-  { "warranty",      "Various kinds of warranty you do not have.",
-    NULL,                false},
-  { NULL, NULL, NULL,    false}
-};
-
-/* Documentation for help set, and help set xxx. Note the format has
-   been customized to make ddd work. In particular for "basename" it should
-   be 
-     set basename -- Set if were are to show shor or long filenames is off.
-   (or "is on").
-*/
-subcommand_var_info_t set_subcommands[] = {
-  { "basename", "Set if we are to show short or long filenames",
-    &basename_filenames, true},
-  { "debug",    "Set GNU Make debug mask (set via --debug or -d)",
-    &db_level, false},
-  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag",
-    &ignore_errors_flag, true},
-  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag",
-    &keep_going_flag,    true},
-  { "silent",        "Set value of GNU Make --silent (or -s) flags",
-    &silent_flag,        true},
-  { "variable",      "Set a GNU Make variable",
-    NULL,                false},
-  { NULL, NULL, NULL, false }
-};
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -281,25 +208,12 @@ find_command (const char *psz_name)
 #include "command/shell.h"
 #include "command/show.h"
 #include "command/skip.h"
+#include "command/source.h"
 #include "command/step.h"
 #include "command/target.h"
 #include "command/up.h"
 #include "command/where.h"
 #include "command/write.h"
-
-void 
-help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
-{
-  printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
-  if (p_subcmd->var) {
-    if (p_subcmd->b_onoff)
-      printf(" is %s.", 
-	     var_to_on_off(* (int *) p_subcmd->var));
-    else 
-      printf(" is %d.", *(int *)(p_subcmd->var));
-  }
-  printf("\n");
-}
 
 /* Needs to come after dbg_cmd_show */
 #include "command/help.h"
@@ -307,137 +221,40 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 static void 
 cmd_initialize(void) 
 {
-  dbg_cmd_break_init();
-  dbg_cmd_chdir_init();
-  dbg_cmd_continue_init();
-  dbg_cmd_delete_init();
-  dbg_cmd_down_init();
-  dbg_cmd_edit_init();
-  dbg_cmd_eval_init();
-  dbg_cmd_finish_init();
-
-  short_command['f'].func = &dbg_cmd_frame;
-  short_command['f'].use  = _("frame N");
-  short_command['f'].doc  = 
-    _("Move target frame to N; In contrast to \"up\" or \"down\",\n"
-      "\tthis sets to an absolute position. 0 is the top.");
-
-  short_command['h'].func = &dbg_cmd_help;
-  short_command['h'].use  = _("help [COMMAND]");
-  short_command['h'].doc = 
-    _("Display list of commands (i.e. this help text.)\n"		\
-      "\twith an command name, give only the help for that command.");
-
-  short_command['i'].func = &dbg_cmd_info;
-  short_command['i'].use = _("info [THING]");
-  short_command['i'].doc = 
-    _("Show the state of thing.\n" \
-      "\tIf no 'thing' is specified, show everything there is to show.");
-
-  short_command['k'].func = &dbg_cmd_skip;
-  short_command['k'].use = _("skip");
-  short_command['k'].doc = 
-    _("Skip execution of next command or action." );
-
-  short_command['l'].func = &dbg_cmd_list;
-  short_command['l'].use = _("list [TARGET]");
-  short_command['l'].doc = 
-    _("List target dependencies and commands. Without a target name we\n"
-"use the current target. A target name of '-' will use the parent target on\n"
-"the target stack.\n"
- );
-
-  dbg_cmd_next_init();
-
-  short_command['p'].func = &dbg_cmd_print;
-  short_command['p'].use = _("print {VARIABLE [attrs...]}");
-  short_command['p'].doc = 
-    _("Show a variable definition.\n"
-      "The value is shown with embedded\n"
-      "variable-references unexpanded. Don't include $ before a variable\n"
-      "name. See also \"examine\".\n\n"
-      "If no variable is supplied, we try to use the\n"
-      "last value given."				
-      );
-
-  dbg_cmd_pwd_init();
-
-  short_command['q'].func = &dbg_cmd_quit;
-  short_command['q'].use = _("quit [exit-status]");
-  short_command['q'].doc = 
-    _("Exit make. If a numeric argument is given, it will be the exit\n"
-      "status reported back. A status of 77 in a nested make will signals\n"
-      "termination in the parent. So if no numeric argument is given and\n"
-      "MAKELEVEL is 0, then status 0 is set; otherwise it is 77."
-      );
-
-  short_command['R'].func = &dbg_cmd_run;
-  short_command['R'].doc = _("Run Makefile from the beginning.\n"
-   "You may specify arguments to give it.\n" \
-   "With no arguments, uses arguments last specified (with \"run\")");
-  short_command['R'].use = _("run");
-
-  short_command['S'].func = &dbg_cmd_show;
-  short_command['S'].use = _("show [thing]");
-  short_command['S'].doc = 
-    _("Show the state of thing.\n" \
-      "If no 'thing' is specified, show everything there is to show.");
-
-  dbg_cmd_step_init();
-
-  short_command['t'].func = &dbg_cmd_target;
-  short_command['t'].use = _("target [target-name] [info1 [info2...]]");
-  short_command['t'].doc = 
-    _("Show information about a target.\n" 
-      "target information is printed.\n"
-      "The following attributes names can be given after a target name:\n"
-      "\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n"
-      "\t'previous', 'state', 'time', 'variables'\n"
-      "If no variable or target name is supplied, we try to use the\n"
-      "current target name.\n"				
-      );
-
-  short_command['T'].func = &dbg_cmd_where;
-  short_command['T'].use  = _("where");
-  short_command['T'].doc  = 
-    _("Print target stack or Makefile include stack.\n" \
-      "An argument specifies the maximum amount of entries to show.");
-
-  dbg_cmd_up_init();
-
-  short_command['w'].func = &dbg_cmd_write;
-  short_command['w'].use =  _("write [TARGET [FILENAME]]");
-  short_command['w'].doc  = 
-    _("writes the commands associated of a target to a file with MAKE\n"
-      "variables expanded. If no target given, the basename of the current\n"
-      "is used. If a filename is supplied it is used. If it is the string\n"
-      "\"here\", we write the output to stdout. If no filename is\n"
-      "given then create the filename by prepending a directory name to\n"
-      "the target name and then append \".sh\".");
-
-  short_command['x'].func = &dbg_cmd_expand;
-  short_command['x'].use =  _("examine STRING");
-  short_command['x'].doc  = 
-    _("Show string with internal variables references expanded. See also \n"
-      "\t\"print\".");
-
-  short_command['#'].func = &dbg_cmd_comment;
-  short_command['#'].use =  _("comment TEXT");
-  short_command['#'].doc  = 
-    _("Ignore this line.");
-
-  dbg_cmd_set_init();
-  dbg_cmd_shell_init();
-
-  short_command['"'].func = &dbg_cmd_setq;
-  short_command['"'].use =  _("setq *variable* VALUE");
-  short_command['"'].doc  = 
-    _("Set MAKE variable to value. Variable definitions\n"
-      "\tinside VALUE are not expanded before assignment occurs.");
+  dbg_cmd_break_init   ('b');
+  dbg_cmd_chdir_init   ('C');
+  dbg_cmd_continue_init('c');
+  dbg_cmd_delete_init  ('d');
+  dbg_cmd_down_init    ('D');
+  dbg_cmd_edit_init    ('e');
+  dbg_cmd_eval_init    ('E');
+  dbg_cmd_finish_init  ('F');
+  dbg_cmd_frame_init   ('f');
+  dbg_cmd_help_init    ('h');
+  dbg_cmd_info_init    ('i');
+  dbg_cmd_skip_init    ('k');
+  dbg_cmd_list_init    ('l');
+  dbg_cmd_next_init    ('n');
+  dbg_cmd_print_init   ('p');
+  dbg_cmd_pwd_init     ('P');
+  dbg_cmd_quit_init    ('q');
+  dbg_cmd_run_init     ('R');
+  dbg_cmd_source_init  ('<');
+  dbg_cmd_show_init    ('S');
+  dbg_cmd_step_init    ('s');
+  dbg_cmd_target_init  ('t');
+  dbg_cmd_up_init      ('u');
+  dbg_cmd_where_init   ('T');
+  dbg_cmd_write_init   ('w');
+  dbg_cmd_expand_init  ('x');
+  dbg_cmd_comment_init ('#');
+  dbg_cmd_set_init     ('=');
+  dbg_cmd_setq_init    ('"');
+  dbg_cmd_shell_init   ('!');
 }
 
 /* Execute a command line. */
-static debug_return_t
+extern debug_return_t
 execute_line (char *psz_line)
 {
   unsigned int i = 0;
@@ -454,7 +271,7 @@ execute_line (char *psz_line)
   }
   if (!command)
     {
-      fprintf (stderr, _("No such debugger command: %s.\n"), psz_word);
+      dbg_errmsg(_("No such debugger command: %s."), psz_word);
       return debug_readloop;
     }
 
@@ -470,7 +287,7 @@ execute_line (char *psz_line)
 
 /* Show history. */
 debug_return_t 
-dbg_cmd_show_command (char *psz_args)
+dbg_cmd_show_command (const char *psz_args)
 {
  /*
   if (!psz_arg || *psz_arg) {
@@ -483,7 +300,7 @@ dbg_cmd_show_command (char *psz_args)
   UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
   for (i=0; hist_list[i]; i++) {
-    printf("%5d  %s\n", i, hist_list[i]->line);
+    dbg_msg("%5d  %s", i, hist_list[i]->line);
   }
 #endif
   return debug_readloop;
@@ -495,7 +312,7 @@ dbg_cmd_show_command (char *psz_args)
 static debug_return_t dbg_cmd_set_var (char *psz_args, int expand) 
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    printf(_("You need to supply a variable name.\n"));
+    dbg_msg(_("You need to supply a variable name."));
   } else {
     variable_t *p_v;
     char *psz_varname = get_word(&psz_args);
@@ -512,7 +329,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       define_variable_in_set(p_v->name, u_len, psz_value,
 			     o_debugger, 0, NULL,
 			     &(p_v->fileinfo));
-      printf(_("Variable %s now has value '%s'\n"), psz_varname,
+      dbg_msg(_("Variable %s now has value '%s'"), psz_varname,
 	     psz_value);
     } else {
       try_without_dollar(psz_varname);
@@ -525,6 +342,9 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 
 #define PROMPT_LENGTH 300
 
+#include <setjmp.h>
+jmp_buf debugger_loop;
+
 /* Should be less that PROMPT_LENGTH / 2 - strlen("remake ") + log(history) 
    We will make it much less that since people can't count more than
    10 or so nested <<<<>>>>'s easily.
@@ -536,7 +356,8 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 			       debug_enter_reason_t reason)
 {
   debug_return_t debug_return = debug_readloop;
-  static int i_init = 0;
+  static bool b_init = false;
+  static bool b_readline_init = false;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
@@ -570,13 +391,18 @@ debug_return_t enter_debugger (target_stack_node_t *p,
         ;
       }
 
-  if (0 == i_init) {
 #ifdef HAVE_LIBREADLINE
-    rl_initialize ();
+  if (use_readline_flag && !b_readline_init) {
+      rl_initialize ();
+      using_history ();
+      add_history ("");
+      b_readline_init = true;
+  }
 #endif
+  if (!b_init) {
     cmd_initialize();
-    i_init = 1;
-    using_history ();
+    file2lines.ht_size = 0;
+    b_init = true;
   }
 
 
@@ -620,18 +446,18 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     } else if (-2 == errcode) {
       if (0 == makelevel) {
 	printf("\nMakefile terminated.\n");
-	printf("Use q to quit or R to restart\n");
+	dbg_msg("Use q to quit or R to restart");
       } else {
 	printf("\nMakefile finished at level %d. Use R to restart\n", 
 	       makelevel);
-	printf("the makefile at this level or 's', 'n', or 'F' to continue "
-	       "in parent\n");
+	dbg_msg("the makefile at this level or 's', 'n', or 'F' to continue "
+	       "in parent");
 	in_debugger = DEBUGGER_QUIT_RC;
       }
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
-      printf("***Exiting the debugger will exit make with exit code %d.\n", 
-	     errcode);
+      dbg_errmsg("Exiting the debugger will exit make with exit code %d.", 
+                 errcode);
     }
   }
 
@@ -643,28 +469,40 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     char prompt[PROMPT_LENGTH];
     char *line=NULL;
     char *s;
+
+    if (setjmp(debugger_loop))
+      dbg_errmsg("Internal error jumped back to debugger loop");
+    else {
     
-    snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
-	     open_depth, where_history(), close_depth);
-
 #ifdef HAVE_LIBREADLINE
-    line = readline (prompt);
-#else
-    printf("%s", prompt);
-    if (line == NULL) line = calloc(1, 2048);
-    gets(line);
+      if (use_readline_flag) {
+        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
+                 open_depth, where_history(), close_depth);
+        
+        line = readline (prompt);
+      } else 
 #endif
-
-    if ( line ) {
-      if ( *(s=stripwhite(line)) ) {
-	add_history (s);
-	debug_return=execute_line(s);
+        {
+          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
+                   close_depth);
+          printf("%s", prompt);
+          if (line == NULL) line = calloc(1, 2048);
+          line = fgets(line, 2048, stdin);
+          if (NULL != line) chomp(line);
+        }
+      
+      if ( line ) {
+        if ( *(s=stripwhite(line)) ) {
+          add_history (s);
+          debug_return=execute_line(s);
+        } else {
+          add_history ("step");
+          debug_return=dbg_cmd_step("");
+        }
+        free (line);
       } else {
-	debug_return=dbg_cmd_step("");
+        dbg_cmd_quit(NULL);
       }
-      free (line);
-    } else {
-      dbg_cmd_quit(NULL);
     }
   }
 

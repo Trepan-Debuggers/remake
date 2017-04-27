@@ -1,3 +1,35 @@
+Version 3.82+dbg-0.7
+2011-06-12 Fleetwood release
+* Add --tasks (akin to rake --tasks) option to list interesting targets
+  --targets is similar
+* Allow negative frame numbers to count from the other end
+* Output changes to make it easier for front-ends like the emacs-dbgr
+* builds better on OS's with various versions of GNU readline 
+
+Version 3.82+dbg-0.6
+2011-04-10
+* Allow breakpoints on line numbers. "info lines" shows
+  the lines.
+* List also allows line numbers now.
+* Remove duplicate stops in stepping and breakpoints
+* Help and error message text greatly improved
+* Documentation updated
+* break/continue *target* run fixed
+* "info files" more user friendly
+* Correct order-only target display
+* Recover from a fatal error when inside the debugger
+
+Version 3.82+dbg-0.5
+2011-04-01
+* Track updating goal targets and more targets in general
+* We track more target locations earlier and show that in tracing
+* Add debugger "source" command
+* Add --no-readline option to disable use of GNU Readline
+* variable names are expanded on "break" and "continue" target names
+* bug in history count fixed.
+* Update manual to reflect the various changes.
+* Don't unstall reremake
+
 Version 3.82+dbg-0.4
 2011-03-25
 

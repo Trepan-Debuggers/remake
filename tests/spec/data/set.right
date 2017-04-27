@@ -1,0 +1,24 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+implicit.Makefile:2	File `foo.x' does not exist.
+implicit.Makefile:11)
+bar: 
+remake<0> set
+set basename   -- Set if we are to show short or long filenames is off.
+set debug      -- Set GNU Make debug mask (set via --debug or -d) is 3361.
+set ignore-errors -- Set value of GNU Make --ignore-errors (or -i) flag is off.
+set keep-going -- Set value of GNU Make --keep-going (or -k) flag is off.
+set silent     -- Set value of GNU Make --silent (or -s) flags. is off.
+set variable   -- Set a GNU Make variable VARIABLE
+remake<1> set silent on
+silent is on.
+remake<2> set silent off
+silent is off.
+remake<3> set keep-going off
+keep-going is off.
+remake<4> expand $(word 2)
+remake: *** insufficient number of arguments (1) to function `word'.  Stop.
+** Internal error jumped back to debugger loop
+remake<5> quit
+remake: That's all, folks...

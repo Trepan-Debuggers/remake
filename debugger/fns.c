@@ -20,15 +20,15 @@ Boston, MA 02111-1307, USA.  */
 
 /* Helper routines for debugger command interface. */
 
-#include "config.h"
-#include "commands.h"
-#include "expand.h"
+#include "../rule.h"
+#include "../trace.h"
+#include "../commands.h"
+#include "../expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
 #include "print.h"
-#include "rule.h"
-#include "trace.h"
+#include "msg.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -70,6 +70,25 @@ floc_t  fake_floc;
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
+brkpt_mask_t 
+get_brkpt_option(const char *psz_break_type)
+{
+  if (is_abbrev_of (psz_break_type, "all", 1)) {
+    return BRK_ALL;
+  } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
+    return BRK_BEFORE_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "run", 1)) {
+    return BRK_AFTER_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "end", 1)) {
+    return BRK_AFTER_CMD;
+  } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
+    return BRK_TEMP;
+  } else {
+    dbg_errmsg("Unknown breakpoint modifier %s", psz_break_type);
+    return BRK_NONE;
+  }
+}
+
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
     integer found. The return value is true if parsing succeeded in
@@ -86,7 +105,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
     if (b_warn) 
-      printf("expecting %s to be an integer\n", psz_arg);
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *pi_result = i;
@@ -94,7 +113,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
 }
 
 bool
-get_uint(const char *psz_arg, unsigned int *result) 
+get_uint(const char *psz_arg, unsigned int *result, bool b_warn) 
 {
   unsigned int i;
   char *endptr;
@@ -103,7 +122,8 @@ get_uint(const char *psz_arg, unsigned int *result)
 
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
+    if (b_warn)
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *result = i;
@@ -271,7 +291,8 @@ static char *reason2str[] = {
     "rd",
     "!!",
     "--",
-    "++"
+    "++",
+    ":o"
 };
 
     
@@ -282,12 +303,11 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
-    printf("\n");
-    if (reason != DEBUG_NOT_GIVEN)
+    if (reason != DEBUG_NOT_GIVEN && reason != DEBUG_STACK_CHANGING)
       printf("%s ", reason2str[reason]);
     printf("(");
-    if ( !p_target_loc->filenm && !p_target_loc->lineno 
-	 && p_target->name ) {
+    if ( !p_target_loc->filenm && p_target_loc->lineno != 0 
+	 && p_target && p_target->name ) {
       /* We don't have file location info in the target floc, but we
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.
@@ -328,6 +348,8 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
     case DEBUG_BRKPT_BEFORE_PREREQ:
     case DEBUG_STEP_HIT:
       dbg_cmd_show_exp("$@: $+", true);
+      break;
+    case DEBUG_STACK_CHANGING:
       break;
     default:
       dbg_cmd_show_exp("$@", true);
@@ -452,6 +474,13 @@ rule_t *find_rule (const char *psz_name)
     }
   return NULL;
 }
+
+void chomp(char * line) 
+{
+  unsigned int len = strlen(line);
+  if (line[len-1] == '\n') line[len-1] = '\0';
+}
+
 
 void shell_rc_status(int rc) 
 {

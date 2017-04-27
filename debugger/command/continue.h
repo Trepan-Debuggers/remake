@@ -22,12 +22,38 @@ dbg_cmd_continue (char *psz_args)
 {
   if (psz_args && *psz_args) {
     char *psz_target = get_word(&psz_args);
-    file_t *p_target = lookup_file (psz_target);
+    file_t *p_target = NULL;
+    brkpt_mask_t i_brkpt_mask;
+
+    /** FIXME: DRY with code in break.h **/
+    if (p_stack && p_stack->p_target) {
+      char *psz_expanded_target = 
+        variable_expand_set(psz_target, p_stack->p_target->variables);
+      if (*psz_expanded_target) {
+        p_target = lookup_file(psz_expanded_target);
+      }
+    } else
+      p_target = lookup_file(psz_target);
+
     if (!p_target) {
       printf("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;
     }
-    if (!add_breakpoint(p_target, BRK_ALL|BRK_TEMP))
+
+    /* FIXME: Combine with code in continue. */
+    psz_args = get_word(&psz_args);
+    if (!(psz_args && *psz_args))
+      i_brkpt_mask = BRK_ALL;
+    else {
+      char *psz_break_type;
+      i_brkpt_mask = get_brkpt_option(psz_args);
+      while ((psz_break_type = get_word(&psz_args))) {
+        if (!(psz_break_type && *psz_break_type)) break;
+        i_brkpt_mask |= get_brkpt_option(psz_break_type) ;
+      }
+    }
+
+    if (!add_breakpoint(p_target, i_brkpt_mask|BRK_TEMP))
       return debug_cmd_error;
   } else  {
     db_level = 0;
@@ -39,14 +65,20 @@ dbg_cmd_continue (char *psz_args)
 };
 
 static void
-dbg_cmd_continue_init(void) 
+dbg_cmd_continue_init(unsigned int c) 
 {
-    short_command['c'].func = &dbg_cmd_continue;
-    short_command['c'].use  = _("continue [TARGET]");
-    short_command['c'].doc  = 
-	_("Continue executing debugged Makefile until another breakpoint\n"
-	  "or stopping point. If a target is given and valid we set a breakpoint at\n"
-	  "that target before continuing.");
+  short_command[c].func = &dbg_cmd_continue;
+  short_command[c].use  = _("continue [TARGET [all|run|prereq|end]*]");
+  short_command[c].doc  = 
+    _("Continue executing debugged Makefile until another breakpoint or\n"
+"stopping point. If a target is given and valid we set a temporary\n"
+"breakpoint at that target before continuing.\n"
+"\n"
+"When a target name is given, breakpoint properties can be given after\n"
+"the target name\n"
+"\n"
+"See also \"break\" and \"finish\".\n"
+);
 }
 
 /* 

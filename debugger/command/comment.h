@@ -24,3 +24,20 @@ dbg_cmd_comment (char *psz_args)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_comment_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_comment;
+  short_command[c].use  = _("comment TEXT");
+  short_command[c].doc  = 
+    _("Ignore this line.");
+}
+
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

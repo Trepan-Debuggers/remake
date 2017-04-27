@@ -39,3 +39,23 @@ dbg_cmd_expand (char *psz_string)
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_expand_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_expand;
+  short_command[c].use  = _("expand STRING");
+  short_command[c].doc  = 
+    _("Show string with internal variables references expanded. See also \n"
+      "\t\"print\".");
+}
+
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
+

@@ -1,19 +1,519 @@
+2011-04-25  rocky <rocky@gnu.org>
+
+	* Makefile.am, NEWS, debugger/command/info.h: If a target is phony,
+	then it doesn't have to have commands to be listed in --tasks.
+	Automake targets like "check" or "install" work this way.
+
+2011-04-21  rocky <rocky@gnu.org>
+
+	* debugger/stack.c: Allow frame <negative number> to count from the
+	other end.
+
+2011-04-19  rocky <rocky@gnu.org>
+
+	* debugger/fns.c, debugger/stack.c, print.c, print.h, trace.h: Show
+	frame number when switching frames.
+
+2011-04-19  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, debugger/command/down.h,
+	debugger/command/frame.h, debugger/command/info.h,
+	debugger/command/up.h, debugger/stack.c, debugger/stack.h: DRY
+	up/down/frame code.
+
+2011-04-18  rocky <rocky@gnu.org>
+
+	* implicit.h: Header for implicit C file
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/quit.h, tests/spec/data/.gitignore,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/info-target.right,
+	tests/spec/data/info-targets.right, tests/spec/data/list.right,
+	tests/spec/data/set.right, tests/spec/data/source.right,
+	tests/spec/data/step3.right: Add termination message. This helps
+	front-ends know we've quit.
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h: More futzing with --tasks
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, main.c, make.1,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/info-target.right,
+	tests/spec/data/info-targets.right, tests/spec/data/list.right,
+	tests/spec/data/set.right, tests/spec/data/source.right,
+	tests/spec/data/step3.right, trace.h: Separate make --targets from
+	make --tasks. Ditto for "info targets name" and "info targets
+	tasks".
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* htdocs/index.html: Change remake github to point to wiki,
+	sourceforge project, and not kshdb
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/command/info.h, main.c, make.1, trace.h: Add
+	options --targets and --tasks akin to "rake --tasks". May do more on
+	--tasks to filter out file names and suffix patterns leaving only
+	targets with commands in them.
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/frame.h, debugger/command/info.h,
+	tests/spec/data/info-targets.right, tests/spec/test-info-targets.rb: 
+	Add subopions to "info targets {position, name, all}. Sometimes we
+	just want the target names. This is a poor-man's "rake --tasks".
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: One more small doc correction
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: Remove one more bash reference
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* NEWS, doc/Makefile.am, doc/remake.texi: Update where to report
+	errors. Make html in remake.html directory, not remake .
+
+2011-04-13  rocky <rocky@gnu.org>
+
+	* configure.in: Dump version number
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* dep.h, main.c, read.c: make's tilde_expand renamed to
+	remake_tilde_expand so it doesn't conflict with GNU readline's
+	tilde_expand. Problem reported by Ron Sluiter for Solaris 10.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/fns.c, doc/remake.texi: Adminstrivia for
+	release
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* ChangeLog, NEWS, NEWS.remake, configure.in,
+	debugger/command/target.h: Get ready for release.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, print.c, tests/scripts/features/escape,
+	tests/scripts/features/include, tests/scripts/features/mult_rules,
+	tests/scripts/features/parallelism,
+	tests/scripts/features/patternrules,
+	tests/scripts/features/se_explicit,
+	tests/scripts/features/vpathplus, tests/scripts/functions/error,
+	tests/scripts/functions/eval, tests/scripts/functions/foreach,
+	tests/scripts/functions/word, tests/scripts/options/dash-k,
+	tests/scripts/options/dash-q, tests/scripts/options/general,
+	tests/scripts/options/symlinks,
+	tests/scripts/variables/DEFAULT_GOAL,
+	tests/scripts/variables/define, tests/scripts/variables/negative,
+	tests/scripts/variables/undefine: Improve some output text
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/help.h, debugger/command/info.h,
+	debugger/command/set.h, debugger/fns.c, remake.c,
+	tests/spec/data/break-all.right, tests/spec/data/set.right,
+	trace.c, trace.h: Remove duplicate stops in stepping and
+	breakpoints. Go over help yet again.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/command/setq.h: Update setq doc.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/cmd.h, debugger/command/set.h,
+	debugger/subcmd.h, tests/spec/data/set.right: Remove set variable
+	var-name. Use setq for that. Start to DRY set code.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/break.c, debugger/command/break.h,
+	debugger/command/continue.h, debugger/fns.c, debugger/fns.h, job.h,
+	types.h: continue.h: Add optional breakpoint properties for
+	"continue". fns.h, break.h: Start to dry breakpoint code although
+	more work is needed. types.h: Define breakpoint mask type job.h:
+	this field is *not* one bit!
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* debug.h, debugger/cmd.c, debugger/command/set.h,
+	debugger/command/show.h, job.c, print.c, print.h,
+	tests/spec/data/set.right, tests/spec/helper.rb,
+	tests/spec/test-continue.rb, tests/spec/test-info-rule.rb,
+	tests/spec/test-info-target.rb, tests/spec/test-norl.rb,
+	tests/spec/test-set.rb, tests/spec/test-source.rb,
+	tests/spec/test-step3.rb: Add setjmp/longjmp in debugger read loop.
+	Remove "set trace" for now. Start "set" tests. Specialize some rspec
+	describe's.
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, doc/test1.mk,
+	tests/spec/data/break-end.right, tests/spec/data/break-run.right,
+	trace.c: break <xx> run now works properly now.
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* file.c, tests/spec/data/info-target.right,
+	tests/spec/example/order-only.Makefile,
+	tests/spec/test-info-target.rb: Correct order-only display.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/target.h: Correct target option help
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/run.h,
+	debugger/command/set.h, debugger/command/show.h,
+	debugger/command/target.h, debugger/file2line.c, debugger/subcmd.h,
+	file.c, print.c: Start adding long help. Go over help system to make
+	more usable.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/cmd.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/quit.h,
+	debugger/command/set.h, debugger/command/show.h, debugger/subcmd.h,
+	tests/spec/helper.rb, tests/spec/test-continue.rb,
+	tests/spec/test-info-rule.rb, tests/spec/test-list.rb,
+	tests/spec/test-norl.rb, tests/spec/test-trace.rb: Add exit status
+	testing.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/break.c, debugger/cmd.c, debugger/command/break.h,
+	debugger/command/info.h, debugger/command/list.h,
+	debugger/command/set.h, debugger/command/show.h,
+	debugger/file2line.c, debugger/file2line.h, rule.c, rule.h,
+	tests/spec/data/info-rule.right, tests/spec/data/list.right: Prepare
+	for implicit rule pattern breakpoints. Prepare for longer subcommand
+	help. Correct "info rules" (short) help. Initialize file locations
+	for pre-defined rule patterns.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* rule.c, tests/spec/data/info-rule.right,
+	tests/spec/example/implicit.Makefile, tests/spec/test-info-rule.rb: 
+	Fix bug in print_rule_data_base which we see from "info rule".
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, job.c, tests/scripts/features/vpathplus: 
+	Improve location saving for implicit targets. break.h: suggests
+	"info lines"
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* doc/.gitignore, doc/Makefile.am: Some small changes.
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, doc/remake.texi: Small changes
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/info.h, debugger/file2line.c,
+	doc/Makefile.am, doc/remake.texi, tests/spec/helper.rb: Add "info
+	lines". Update reference guide to reflect recent changes and to add
+	more examples of output.
+
+2011-04-06  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/cmd.c, debugger/command/break.h,
+	debugger/command/finish.h, debugger/command/info.h,
+	debugger/command/list.h, debugger/command/next.h,
+	debugger/command/source.h, debugger/command/step.h,
+	debugger/command/up.h, debugger/file2line.c, debugger/file2line.h,
+	debugger/fns.c, debugger/fns.h, file.c, file.h,
+	tests/spec/data/list.right, tests/spec/data/remakerc,
+	tests/spec/data/source.right, tests/spec/helper.rb,
+	tests/spec/test-list.rb, tests/spec/test-source.rb: Add break
+	LINE-NUMBER and list LINE-NUMBER.
+
+2011-04-05  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, filedef.h, print.c, print.h, read.c: Save
+	number of lines for each read in file. Will be useful if we do
+	breakpoint by number. Revise "info files" output to be more useful.
+
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, debugger/fns.c, function.c, job.c,
+	main.c, print.c, remake.c, tests/spec/data/break-all.right,
+	tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/norl.right, tests/spec/data/step3.right, trace.h: 
+	Toward getting a debugger function working. More derefrencing
+	guards.
+
+2011-04-03  rocky <rocky@gnu.org>
+
+	* debugger/cmd.h: Remove another gcc warning
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/command/source.h: Work around cygwin's lack of a working
+	wordexp()
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c: Better --no-readline handling. Remove SEGV on EOF
+	in read.
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* Rakefile, debugger/command/info.h, make.1: Update manual page for
+	debugger/trace options. Change "info program" stopping reason text.
+	Add "rake install"
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/info.h,
+	debugger/command/source.h: Expand file name in source. Remove those
+	unused return value messages in fgets.
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/break.c, debugger/cmd.c, debugger/msg.c,
+	debugger/msg.h, tests/spec/data/break-expand.right: Start to use
+	specialized debugger output messages dbg_errmsg and dbg_msg
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/break.h,
+	debugger/command/continue.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/set.h,
+	debugger/command/show.h, doc/Makefile.am, make.h: Refactor help
+	subcommands and expand/fix help.
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* ChangeLog, debugger/cmd.c, debugger/command/help.h,
+	debugger/command/info.h, doc/remake.texi, print.c: Revise info help.
+	And make "info target" useable.
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* configure.in, debugger/command/info.h, file.c, file.h: Info
+	targets gives a list of targets rather that redo the "target"
+	command. Need more cleanup though
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, doc/remake.texi: Reread reference manual which is
+	a mistake because I find lots of errors. examine->expand. Will get a
+	SEGV of 0.5 without this change.
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* main.c: Revise bug reporting location
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* ChangeLog, main.c: Help option --readline is really --no-readline
+
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* tests/scripts/features/recursion, tests/scripts/variables/MAKE: In
+	tests, $make_path works better than #MAKEFILE# on cygwin.
+
+2011-03-31  rocky <rocky@gnu.org>
+
+	* ChangeLog, NEWS.remake: Get ready for release 0.5
+
+2011-03-31  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/comment.h,
+	debugger/command/expand.h, debugger/command/print.h,
+	debugger/command/pwd.h, debugger/command/quit.h,
+	debugger/command/run.h, debugger/command/set.h,
+	debugger/command/setq.h, debugger/command/shell.h,
+	debugger/command/show.h, debugger/command/source.h,
+	debugger/command/step.h, debugger/command/target.h,
+	debugger/command/up.h, debugger/command/where.h,
+	debugger/command/write.h: Finish revising command structure
+	initialization calls.
+
+2011-03-31  rocky <rocky@gnu.org>
+
+	* Makefile.am: Don't install reremake. Thanks to Rainer Müller for
+	pointing out the problem.
+
+2011-03-30  rocky <rocky@gnu.org>
+
+	* NEWS, configure.in, debugger/cmd.c, debugger/command/break.h,
+	debugger/command/chdir.h, debugger/command/continue.h,
+	debugger/command/delete.h, debugger/command/down.h,
+	debugger/command/edit.h, debugger/command/eval.h,
+	debugger/command/finish.h, debugger/command/frame.h,
+	debugger/command/help.h, debugger/command/info.h,
+	debugger/command/list.h, debugger/command/next.h,
+	debugger/command/skip.h, tests/spec/data/break-all.right,
+	tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/step3.right: Correct history count. Start revising
+	command init functions.
+
+2011-03-28  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c: And another instance
+
+2011-03-28  rocky <rocky@gnu.org>
+
+	* NEWS, NEWS.remake, debugger/command/source.h: Remove unused return
+	value warning
+
+2011-03-28  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/cmd.c, debugger/cmd.h,
+	debugger/command/list.h, debugger/command/source.h, debugger/fns.c,
+	debugger/fns.h, doc/remake.texi: Add debugger "source" command.
+	Update doc yet again.
+
+2011-03-28  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/continue.h, doc/remake.texi,
+	main.c, make.h, tests/spec/data/norl.right, tests/spec/test-norl.rb: 
+	Add --no-readline to avoid using GNU realine. remake.texi matches
+	fixed-up code  better which interestingly looks more like one of the
+	earlier versions.
+
+2011-03-27  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: Update sample sessions for the recent important
+	changes.
+
+2011-03-27  rocky <rocky@gnu.org>
+
+	* file.c, tests/scripts/features/errors,
+	tests/scripts/features/vpathplus, tests/scripts/options/dash-k,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/opt-x-trace.right,
+	tests/spec/data/opt-y-trace.right, tests/spec/data/step3.right,
+	tests/spec/helper.rb: Target location updated on each enter_file. So
+	file locations are showing up more on messages.
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* README.md: Update markdown readme
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* remake.c, tests/spec/data/break-all.right,
+	tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/step3.right, tests/spec/helper.rb: We now catch more
+	targets like the initial Makefile (and Makefil.in in autoconf).
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, debugger/command/continue.h,
+	tests/spec/data/break-expand.right,
+	tests/spec/example/test2.Makefile, tests/spec/test-break.rb: Expand
+	variables in targets for "break" and "continue".
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: More typos.
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* Makefile.am, doc/.gitignore, doc/Makefile.am, doc/remake.texi,
+	doc/test2.mk, tests/scripts/options/.gitignore: Much more aggressive
+	revision of tutorial and reference manual.
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* htdocs/index.html: Revise home page
+
+2011-03-26  rocky <rocky@gnu.org>
+
+	* configure.in, htdocs/.gitignore, htdocs/index.html: We're in dev
+	again. Include html home page.
+
 2011-03-25  rocky <rocky@gnu.org>
+
+	* Makefile.am: This time, for sure!
+
+2011-03-25  rocky <rocky@gnu.org>
+
+	* Makefile.am, README.remake: Update misc docs.
+
+2011-03-25  rocky <rocky@gnu.org>
+
+	* tests/spec/data/continue.right: Correct debugger check output.
+
+2011-03-25  rocky <rocky@gnu.org>
+
+	* ChangeLog, Makefile.am, NEWS, NEWS.remake, configure.in,
+	debugger/cmd.c, debugger/command/break.h,
+	debugger/command/finish.h, debugger/command/up.h, debugger/fns.c,
+	doc/.gitignore, doc/Makefile.am, doc/remake.texi, doc/test1.mk,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/break.right,
+	tests/spec/data/continue.right, tests/spec/data/step3.right: Allow
+	building debugger without readline. Correct finish help. Start to
+	revise remake doc. Lots of Administrivia to get ready for release
+	3.82+dbg-0.4
+
+2011-03-25  rocky <rockyb@gnu.org>
 
 	* README.mdb, README.remake: mdb -> remake
 
-2011-03-25  rocky <rocky@gnu.org>
+2011-03-25  rocky <rockyb@gnu.org>
 
 	* doc/remake.texi: Move over old remake manual.
 
-2011-03-25  rocky <rocky@gnu.org>
+2011-03-25  rocky <rockyb@gnu.org>
 
 	* tests/spec/data/break-all.right, tests/spec/data/break-end.right,
 	tests/spec/data/continue.right, tests/spec/data/opt-x-trace.right,
 	tests/spec/data/opt-y-trace.right, tests/spec/data/step3.right,
 	tests/spec/test-trace.rb: Correct debugger regression-test output
 
-2011-03-25  rocky <rocky@gnu.org>
+2011-03-25  rocky <rockyb@gnu.org>
 
 	* job.c, tests/scripts/features/echoing,
 	tests/scripts/features/errors, tests/scripts/features/order_only,
@@ -67,17 +567,17 @@
 	debugger/command/write.h, types.h: Handle "unsused parameter"
 	better. So we can reinstate passing args in commands.
 
-2011-03-24  rocky <rocky@gnu.org>
+2011-03-24  rocky <rockyb@gnu.org>
 
 	* Rakefile: Update Rakefile to run GNU make tests.
 
-2011-03-24  rocky <rocky@gnu.org>
+2011-03-24  rocky <rockyb@gnu.org>
 
 	* debugger/cmd.c, debugger/command/continue.h,
 	tests/spec/data/continue.right, tests/spec/test-continue.rb: Add
 	continue test.
 
-2011-03-24  rocky <rocky@gnu.org>
+2011-03-24  rocky <rockyb@gnu.org>
 
 	* debugger/cmd.c, debugger/command/break.h,
 	debugger/command/continue.h, debugger/command/finish.h,
@@ -115,7 +615,7 @@
 	tests/scripts/variables/undefine: Add argv[0] to command-line
 	invocation.
 
-2011-03-23  rocky <rocky@gnu.org>
+2011-03-23  rocky <rockyb@gnu.org>
 
 	* main.c, tests/scripts/features/mult_rules,
 	tests/scripts/functions/error, tests/scripts/functions/foreach,
@@ -126,7 +626,7 @@
 	Most of the output changes for showing the command-line options have
 	been resolved. Need to look over "silent" option errors.
 
-2011-03-23  rocky <rocky@gnu.org>
+2011-03-23  rocky <rockyb@gnu.org>
 
 	* tests/scripts/features/escape, tests/scripts/features/include,
 	tests/scripts/features/mult_rules,
@@ -140,18 +640,18 @@
 	failures because we give command-arguments now. No good dead
 	unpunished.
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* debug.h, debugger/cmd.h, main.c: Show "make" command flags before
 	exiting.
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* debugger/cmd.c, debugger/command/next.h, debugger/command/step.h,
 	remake.c, tests/spec/data/step3.right, tests/spec/test-step3.rb: 
 	Stepping now stops after target has been remade.
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* Rakefile, debugger/cmd.c, debugger/command/delete.h,
 	debugger/command/down.h, debugger/command/eval.h,
@@ -174,7 +674,7 @@
 
 	Merge branch 'master' of github.com:rocky/remake
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* debugger/break.c, debugger/break.h, debugger/cmd.h,
 	debugger/command/break.h, debugger/command/info.h, debugger/fns.c,
@@ -185,7 +685,7 @@
 
 	Merge branch 'master' of github.com:rocky/remake
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* tests/spec/data/break-end.right,
 	tests/spec/data/break-prereq.right,
@@ -193,20 +693,20 @@
 	tests/spec/test-break.rb: Start to add breakpoints types: all, run,
 	prerequisite, end
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* tests/spec/helper.rb, tests/spec/test-break.rb,
 	tests/spec/test-step3.rb, tests/spec/test-trace.rb: Add breakpoint
 	test. Start to DRY code.
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* Makefile.am, Rakefile, configure.in, tests/spec/data/step3.right,
 	tests/spec/helper.rb, tests/spec/test-step3.rb,
 	tests/spec/test-trace.rb: First test using the debugger. Add rake
 	task to run debugger tests.
 
-2011-03-22  rocky <rocky@gnu.org>
+2011-03-22  rocky <rockyb@gnu.org>
 
 	* tests/spec/.gitignore, tests/spec/data/.gitignore,
 	tests/spec/data/opt-x-trace.right,
@@ -216,31 +716,31 @@
 	test of --trace=noshell (-y) and make --trace test a little more
 	distinct.
 
-2011-03-21  rocky <rocky@gnu.org>
+2011-03-21  rocky <rockyb@gnu.org>
 
 	* tests/spec/.gitignore, tests/spec/data/.gitignore,
 	tests/spec/data/simple-trace.right,
 	tests/spec/example/triple.Makefile, tests/spec/test-trace.rb: Add
 	first rspec test.
 
-2011-03-21  rocky <rocky@gnu.org>
+2011-03-21  rocky <rockyb@gnu.org>
 
 	* debugger/cmd.c, debugger/cmd.h, debugger/command/down.h,
 	debugger/command/frame.h, debugger/command/info.h,
 	debugger/command/up.h, debugger/fns.c, debugger/fns.h, trace.h: Add
 	stopping event icons
 
-2011-03-21  rocky <rocky@gnu.org>
+2011-03-21  rocky <rockyb@gnu.org>
 
 	* remake.c, tests/scripts/features/vpathplus,
 	tests/scripts/options/dash-k: Simplify push/pop targets. Presumably
 	is more correct too.
 
-2011-03-21  rocky <rocky@gnu.org>
+2011-03-21  rocky <rockyb@gnu.org>
 
 	* README.md, README.textile: Try markdown
 
-2011-03-21  rocky <rocky@gnu.org>
+2011-03-21  rocky <rockyb@gnu.org>
 
 	* .deps/.gitignore, .gitignore, README.textile, doc/.gitignore,
 	maintMakefile, w32/.deps/.gitignore: Add README.textile for github.
@@ -469,7 +969,7 @@
 
 	* Makefile.am: Forgot to add missing files
 
-2010-11-30  rocky <rocky@gnu.org>
+2010-11-30  rocky <rockyb@gnu.org>
 
 	* configure.ac: Be more clear about what readline is needed for.
 
@@ -656,7 +1156,7 @@
 
 	* ChangeLog: What's up.
 
-2010-05-01  rocky <rocky@gnu.org>
+2010-05-01  rocky <rockyb@gnu.org>
 
 	* NEWS, po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po, po/fr.po,
 	po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po, po/ja.po,
@@ -674,32 +1174,32 @@
 	assume failed rm gives exit code 1. Solaris doesn't configure.ac:
 	get ready for release.
 
-2010-04-25  rocky <rocky@gnu.org>
+2010-04-25  rocky <rockyb@gnu.org>
 
 	* main.c: Administrivia
 
-2010-04-25  rocky <rocky@gnu.org>
+2010-04-25  rocky <rockyb@gnu.org>
 
 	* main.c: Remove duplicate help for --warn-undefined-variables.
 
-2010-04-25  rocky <rocky@gnu.org>
+2010-04-25  rocky <rockyb@gnu.org>
 
 	* ChangeLog, main.c: Remove useless  -V, --show-variables option.
 
-2010-04-22  rocky <rocky@gnu.org>
+2010-04-22  rocky <rockyb@gnu.org>
 
 	* debugger/fns.c: More Solaris tolerant with respect to strings.h
 
-2010-04-21  rocky <rocky@gnu.org>
+2010-04-21  rocky <rockyb@gnu.org>
 
 	* debugger/cmd.c: More solaris tolerance.
 
-2010-04-21  rocky <rocky@gnu.org>
+2010-04-21  rocky <rockyb@gnu.org>
 
 	* .gitignore, configure.ac, po/.gitignore: Possibly more Solaris
 	tolerance with respect to readline variation.
 
-2010-04-21  rocky <rocky@gnu.org>
+2010-04-21  rocky <rockyb@gnu.org>
 
 	* debugger/.gitignore, debugger/Makefile: Administrivia
 

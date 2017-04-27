@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 debug_return_t 
 dbg_cmd_frame(char *psz_frame) 
 {
-  int i, i_frame;
+  int i_frame;
 
   if (!psz_frame || !*psz_frame) {
     return debug_readloop;
@@ -28,46 +28,23 @@ dbg_cmd_frame(char *psz_frame)
     if (!get_int(psz_frame, &i_frame, true))
       return debug_readloop;
   }
-
-  i = i_frame + 1;
-
-  if (p_stack_top) {
-    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-      i--;
-      if (0 == i)
-	break;
-    }
-
-    if (0 != i) {
-      printf(_("Can't set frame to position %d; "
-	       "%d is the highest position.\n"),
-	     i_frame, i_frame - i);
-      return debug_readloop;
-    }
-    
-    i_stack_pos     = i_frame;
-    p_target_loc    = &(p_stack->p_target->floc);
-    
-    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
-  } else if (p_stack_floc_top) {
-    /* We have a Makefile stack */
-    for ( p_floc_stack=p_stack_floc_top; 
-	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
-      i--;
-      if (0 == i)
-	break;
-    }
-
-    if (0 != i) {
-      printf(_("Can't set frame to position %d; "
-	       "%d is the highest position.\n"),
-	     i_frame, i_frame - i);
-      return debug_readloop;
-    }
-    i_stack_pos     = i_frame;
-
-    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
-  }
-  
-  return debug_readloop;
+  return dbg_adjust_frame(i_frame, true);
 }
+
+static void
+dbg_cmd_frame_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_frame;
+  short_command[c].use  = _("frame N");
+  short_command[c].doc  = 
+    _("Move target frame to N; In contrast to \"up\" or \"down\",\n"
+      "\tthis sets to an absolute position. 0 is the top.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

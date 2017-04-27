@@ -34,11 +34,11 @@ dbg_cmd_chdir (char *psz_args)
 }
 
 static void
-dbg_cmd_chdir_init(void) 
+dbg_cmd_chdir_init(unsigned int c) 
 {
-  short_command['C'].func = &dbg_cmd_chdir;
-  short_command['C'].use  = _("cd DIR");
-  short_command['C'].doc  = 
+  short_command[c].func = &dbg_cmd_chdir;
+  short_command[c].use  = _("cd DIR");
+  short_command[c].doc  = 
     _("Set the working directory to DIR.");
 }
 

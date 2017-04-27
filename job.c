@@ -458,13 +458,13 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
              target_name, exit_code);
 #else
   if (exit_sig == 0)
-    err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
-	 _("*** [%s] Error %d"),
-	 target_name, exit_code);
+    err_with_stack(p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
+		   _("*** [%s] Error %d"),
+		   target_name, exit_code);
   else
-    err (p_call_stack, "*** [%s] %s%s",
-	 target_name, strsignal (exit_sig),
-	 coredump ? _(" (core dumped)") : "");
+    err_with_stack(p_call_stack, "*** [%s] %s%s",
+		   target_name, strsignal (exit_sig),
+		   coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
 
   /* If have enabled debugging but haven't entered the debugger above
@@ -1252,6 +1252,7 @@ start_job_command (child_t *child,
       goto next_command;
     }
 
+  p_stack_top = p_call_stack;
   if (i_debugger_stepping)
     enter_debugger(p_call_stack, child->file, 0, DEBUG_STEP_COMMAND);
 
@@ -1761,11 +1762,21 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
 
   /* The job is now primed.  Start it running.
      (This will notice if there is in fact no recipe.)  */
-  if (cmds->fileinfo.filenm)
+  if (cmds->fileinfo.filenm) {
     DB (DB_BASIC, (_("Invoking recipe from %s:%lu to update target `%s'.\n"),
                    cmds->fileinfo.filenm, cmds->fileinfo.lineno,
-                   c->file->name));
-  else
+                   file->name));
+    /* FIXME: The below is a sign that we need update location somewhere else
+     */
+    if (!file->floc.filenm) {
+	file->floc.filenm = cmds->fileinfo.filenm;
+	file->floc.lineno = cmds->fileinfo.lineno - 1;
+	if (!p_call_stack->p_target->floc.filenm) {
+	    p_call_stack->p_target->floc.filenm = file->floc.filenm;
+	    p_call_stack->p_target->floc.lineno = file->floc.lineno;
+	}
+    }
+  } else
     DB (DB_BASIC, (_("Invoking builtin recipe to update target `%s'.\n"),
                    c->file->name));
 

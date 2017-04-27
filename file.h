@@ -27,7 +27,10 @@ Boston, MA 02111-1307, USA.  */
 #define FILE_H
 
 #include "make.h"
+#include "types.h"
 #include "hash.h"
+
+extern struct hash_table files;
 
 /*! Free memory associated with p_file. */
 void    free_file  (file_t *p_file);
@@ -134,5 +137,4 @@ extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 
 /*! Expand and parse each dependency line. */
 extern void expand_deps (file_t *f);
-
 #endif /*FILE_H*/

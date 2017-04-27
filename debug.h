@@ -77,6 +77,9 @@ extern int db_level;
  */
 extern int in_debugger;
 
+#include <setjmp.h>
+extern jmp_buf debugger_loop;
+
 /** \brief The structure used to hold the list of strings given
     in command switches of a type that takes string arguments.  */
 struct stringlist

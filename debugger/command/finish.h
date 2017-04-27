@@ -25,7 +25,7 @@ dbg_cmd_finish(char *psz_amount)
   unsigned int i_amount=0;
   unsigned int i=0;
   if ('\0' != *psz_debugger_args) {
-    if (!get_uint(psz_amount, &i_amount))
+    if (!get_uint(psz_amount, &i_amount, true))
       return debug_readloop;
     
     if (p_stack_top) {
@@ -54,11 +54,11 @@ dbg_cmd_finish(char *psz_amount)
 }
 
 static void
-dbg_cmd_finish_init(void) 
+dbg_cmd_finish_init(unsigned int c) 
 {
-  short_command['F'].func = &dbg_cmd_finish;
-  short_command['F'].use  = _("finish [AMOUNT]");
-  short_command['F'].doc  = 
+  short_command[c].func = &dbg_cmd_finish;
+  short_command[c].use  = _("finish [AMOUNT]");
+  short_command[c].doc  = 
     _("Run (step out) until finishing AMOUNT target levels up.\n"
       "The default value is 0, or after commands have been run.\n" 
       );

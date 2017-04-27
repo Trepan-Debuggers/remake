@@ -63,14 +63,14 @@ file_hash_cmp (const void *x, const void *y)
 #ifndef	FILE_BUCKETS
 #define FILE_BUCKETS	1007
 #endif
-static struct hash_table files;
+struct hash_table files;
 
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,
-                or nil if there is none.
+                or NULL if there is none.
 */
 
 struct file *
@@ -179,8 +179,14 @@ enter_file (const char *name, const floc_t *p_floc)
   file_key.hname = name;
   file_slot = (struct file **) hash_find_slot (&files, &file_key);
   f = *file_slot;
-  if (! HASH_VACANT (f) && !f->double_colon)
+  if (! HASH_VACANT (f) && !f->double_colon) {
+    if (f->floc.filenm == '\0' && f->floc.lineno == 0 && p_floc &&
+	p_floc->filenm != '\0' && p_floc->lineno != 0) {
+      f->floc.filenm = strdup(p_floc->filenm);
+      f->floc.lineno = p_floc->lineno;
+    }
     return f;
+  }
 
   new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;
@@ -909,16 +915,14 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
     puts (_("# Not a target:"));
   printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
 
-  if (i_mask & PRINT_TARGET_DEPEND) {
-    
     /* Print all normal dependencies; note any order-only deps.  */
     for (d = p_target->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime)
-	printf (" %s", dep_name (d));
-      else if (! ood)
+      if (! d->ignore_mtime) {
+	if (i_mask & PRINT_TARGET_NONORDER)
+	  printf (" %s", dep_name (d));
+      } else if (! ood)
 	ood = d;
-  }
-  
+
   if (i_mask & PRINT_TARGET_ORDER) {
     /* Print order-only deps, if we have any.  */
     if (ood)
@@ -988,6 +992,8 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
 	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
 	break;
       case cs_not_started:
+	puts (_("#  Commands not yet started."));
+	break;
       case cs_finished:
 	switch (p_target->update_status)
 	  {

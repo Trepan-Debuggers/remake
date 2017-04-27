@@ -23,11 +23,34 @@ dbg_cmd_quit(char *psz_arg)
 {
   if (!psz_arg || !*psz_arg) {
     in_debugger = DEBUGGER_QUIT_RC;
+    dbg_msg("remake: That's all, folks...");
     die(DEBUGGER_QUIT_RC);
   } else {
-    int rc;
-    if (get_int(psz_arg, &rc, true)) 
+    int rc=0;
+    if (get_int(psz_arg, &rc, true)) {
+      dbg_msg("remake: That's all, folks...");
       die(rc);
+    }
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_quit_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_quit;
+  short_command[c].use = _("quit [exit-status]");
+  short_command[c].doc = 
+    _("Exit make. If a numeric argument is given, it will be the exit\n"
+      "status reported back. A status of 77 in a nested make will signals\n"
+      "termination in the parent. So if no numeric argument is given and\n"
+      "MAKELEVEL is 0, then status 0 is set; otherwise it is 77."
+      );
+}
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

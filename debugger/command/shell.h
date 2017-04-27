@@ -28,11 +28,11 @@ dbg_cmd_shell(char *psz_varname)
 }
 
 static void
-dbg_cmd_shell_init(void) 
+dbg_cmd_shell_init(unsigned int c) 
 {
-  short_command['!'].func = &dbg_cmd_shell;
-  short_command['!'].use =  _("shell STRING");
-  short_command['!'].doc  = 
+  short_command[c].func = &dbg_cmd_shell;
+  short_command[c].use =  _("shell STRING");
+  short_command[c].doc  = 
     _("Execute the rest of the line as a shell.");
 }
 

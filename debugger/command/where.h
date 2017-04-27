@@ -45,6 +45,16 @@ dbg_cmd_where (char *psz_amount)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_where_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_where;
+  short_command[c].use =  _("where");
+  short_command[c].doc  = 
+    _("Print target stack or Makefile include stack.\n" 
+      "An argument specifies the maximum amount of entries to show.");
+}
+
 
 /* 
  * Local variables:

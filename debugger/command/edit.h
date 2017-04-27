@@ -49,11 +49,11 @@ dbg_cmd_edit(char *psz_args)
 }
 
 static void
-dbg_cmd_edit_init(void) 
+dbg_cmd_edit_init(unsigned int c) 
 {
-  short_command['e'].func = &dbg_cmd_edit;
-  short_command['e'].use = _("edit");
-  short_command['e'].doc = 
+  short_command[c].func = &dbg_cmd_edit;
+  short_command[c].use = _("edit");
+  short_command[c].doc = 
     _("edit"
       ""
       "Enter an editor using the current location. "

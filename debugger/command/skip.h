@@ -23,3 +23,19 @@ dbg_cmd_skip (char *psz_arg)
   UNUSED_ARGUMENT(psz_arg);
   return skip_execution;
 }
+
+static void
+dbg_cmd_skip_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_skip;
+  short_command[c].use = _("skip");
+  short_command[c].doc = 
+    _("Skip execution of next command or action." );
+}
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

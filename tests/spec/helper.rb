@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'rspec'
+require 'tmpdir'
 module RemakeTestHelper
   unless defined?(SPEC_DIR)
     SPEC_DIR = File.dirname(__FILE__)
@@ -9,6 +10,9 @@ module RemakeTestHelper
     Filter_filename = Proc.new{|makefile_short, lines|
       lines.each do |line|
         line.gsub!(/^.*(#{makefile_short}\.Makefile:\d+)/,'\1')
+        line.gsub!(/ file .*(#{makefile_short})\.Makefile, line/,' file \1.Makefile, line')
+        line.gsub!(/^#  commands to execute \(from `.*#{makefile_short}/,
+                   "#  commands to execute (from `#{makefile_short}")
       end
     }
   end
@@ -21,9 +25,21 @@ module RemakeTestHelper
     expected_output = File.open(rightfile, 'r').readlines.map{|l| l.chomp}
     cmd = "#{MAKE_PROG} #{opts[:flags]} #{makefile}"
     cmd = "#{opts[:input]} | #{cmd}" if opts[:input]
-    lines = `#{cmd}`.split("\n")[6..-1]
+    lines = `#{cmd} 2>&1`.split("\n")[6..-1]
     opts[:filter].call(makefile_short, lines) if opts[:filter]
-    lines.should == expected_output
+    exit_status = opts[:exitstatus] || 77
+    if $?.exitstatus != exit_status
+      puts expected_output
+    end
+    $?.exitstatus.should == exit_status
+    unless opts[:no_check_output]
+      if lines != expected_output
+        File.open(Dir::tmpdir + "/#{test_name}.check", 'w') do |f|
+          lines.map {|l| f.puts(l) }
+        end
+      end
+      lines.should == expected_output
+    end
   end
 
 

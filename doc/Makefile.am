@@ -20,7 +20,10 @@ TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 TEXI2PDF = texi2dvi --pdf
 
-info_TEXINFOS =	make.texi remake.texi
+EXTRA_DIST = test1.mk test2.mk
+
+# info_TEXINFOS =	make.texi remake.texi
+info_TEXINFOS =	remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
 MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf 
@@ -31,9 +34,9 @@ CLEANFILES = make*.html make*.info remake.html remake*.info
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
-html: make_1.html
+html: remake_1.html
 
-make_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
-	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/make.texi
+remake_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
+	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/remake.texi --output remake.html
 
 .PHONY: html

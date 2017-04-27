@@ -31,24 +31,47 @@ dbg_cmd_break (char *psz_args)
     char *psz_target = get_word(&psz_args);
     char *psz_break_type; 
     file_t *p_target;
-    unsigned int i_brkpt_mask = BRK_ALL;
-    
-    p_target = lookup_file (psz_target);
+    unsigned int i_brkpt_mask = BRK_NONE;
+
+    /** FIXME: DRY with code in continue.h **/
+    if (p_stack && p_stack->p_target) {
+      unsigned int u_lineno=0;
+      f2l_entry_t entry_type;
+      if (get_uint(psz_target, &u_lineno, false)) {
+          p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
+                                              u_lineno, &entry_type);
+          if (F2L_TARGET == entry_type) {
+            if (!p_target) {
+              dbg_errmsg("Can't find target or pattern on line %s.\n" 
+                         "Use 'info lines' to get a list of breakpoint lines.", 
+                         psz_target);
+              return debug_cmd_error;
+            }
+          } else {
+            dbg_errmsg("No support of breakpoints on target patterns yet.");
+            return debug_cmd_error;
+          }
+      } else
+        p_target = 
+          lookup_file(variable_expand_set(psz_target, 
+                                            p_stack->p_target->variables));
+    } else {
+      p_target = lookup_file(psz_target);
+    }
+
     if (!p_target) {
-	printf("Can't find target %s; breakpoint not set.\n", psz_target);
+	dbg_errmsg("Can't find target %s; breakpoint not set.", psz_target);
 	return debug_cmd_error;
     }
-    psz_break_type = get_word(&psz_args);
-    if (is_abbrev_of (psz_break_type, "all", 1)) {
+
+    /* FIXME: Combine with code in continue. */
+    if (!(psz_args && *psz_args))
       i_brkpt_mask = BRK_ALL;
-    } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
-      i_brkpt_mask = BRK_BEFORE_PREREQ;
-    } else if (is_abbrev_of (psz_break_type, "run", 1)) {
-      i_brkpt_mask = BRK_BEFORE_PREREQ;
-    } else if (is_abbrev_of (psz_break_type, "end", 1)) {
-      i_brkpt_mask = BRK_AFTER_CMD;
-    } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
-      i_brkpt_mask |= BRK_TEMP;
+    else {
+      while ((psz_break_type = get_word(&psz_args))) {
+        if (!(psz_break_type && *psz_break_type)) break;
+        i_brkpt_mask |= get_brkpt_option(psz_break_type) ;
+      }
     }
     add_breakpoint(p_target, i_brkpt_mask);
   }
@@ -57,20 +80,22 @@ dbg_cmd_break (char *psz_args)
 };
 
 static void
-dbg_cmd_break_init(void) 
+dbg_cmd_break_init(unsigned int c) 
 {
-  short_command['b'].func = &dbg_cmd_break;
-  short_command['b'].use  = _("break TARGET [all|run|prereq]");
-  short_command['b'].doc  = _("Set a breakpoint at a target.\n"
-"With a target name, set a break before running commands\n"
-"of that target.  Without argument, list all breakpoints.\n"
-"There are 3 place where one may want to stop at:\n"
-"  before prerequisite checking (prereq)\n"
-"  after prerequisite checking but before running commands (run)\n"
-"  after target is complete (end)\n"
-                              );
+  short_command[c].func = &dbg_cmd_break;
+  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]*");
+  short_command[c].doc  = _("Set a breakpoint at a target.\n"
+"With a target name or a line number, set a break before running commands\n"
+"of that target or line number.  Without argument, list all breakpoints.\n"
+"There are 3 place where one may want to stop at and that name can\n"
+"be given as a last option. The stopping points are:\n"
+" - before prerequisite checking (prereq)\n"
+" - after prerequisite checking but before running commands (run)\n"
+" - after target is complete (end)\n"
+"\n"
+"To see a list of targets run \"info targets\"\n"
+"See also \"continue\".\n");
 }
-
 
 /* 
  * Local variables:

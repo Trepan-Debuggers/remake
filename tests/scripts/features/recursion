@@ -29,16 +29,16 @@ THE END
 #MAKE#: Leaving directory `#PWD#'"
                : "#MAKE#: Entering directory `#PWD#'
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#MAKEPATH# -f #MAKEFILE# foo
+$make_path -f #MAKEFILE# foo
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[1]: Entering directory `#PWD#'
-#MAKEPATH#
+$make_path
 MAKELEVEL = 1
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-#MAKEPATH# -f #MAKEFILE# last
+$make_path -f #MAKEFILE# last
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[2]: Entering directory `#PWD#'
-#MAKEPATH#
+$make_path
 MAKELEVEL = 2
 THE END
 #MAKE#[2]: Leaving directory `#PWD#'

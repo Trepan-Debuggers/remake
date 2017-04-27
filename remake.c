@@ -424,10 +424,14 @@ update_file_1 (struct file *file, unsigned int depth,
   int running = 0;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
-  p_call_stack = trace_push_target(p_call_stack, file, 0);
-  if (file->tracing & BRK_BEFORE_PREREQ) {
+  p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
+
+  /* We don't want to step into file dependencies when there are 
+     no associated commands. There or too often too many of them. 
+  */
+  if ( (i_debugger_stepping && file->cmds) ||
+       (file->tracing & BRK_BEFORE_PREREQ) )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
-  }
 
   if (file->updated)
     {
@@ -492,7 +496,7 @@ update_file_1 (struct file *file, unsigned int depth,
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
       DBF (DB_BASIC, _("File `%s' does not exist.\n"));
-      if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) {
+      if (i_debugger_nexting && file->cmds) {
 	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
       }
   } else if (ORDINARY_MTIME_MIN <= this_mtime && 

@@ -49,11 +49,11 @@ dbg_cmd_eval(char *psz_evalstring)
 }
 
 static void
-dbg_cmd_eval_init(void) 
+dbg_cmd_eval_init(unsigned int c) 
 {
-  short_command['E'].func = &dbg_cmd_eval;
-  short_command['E'].use  = _("eval STRING");
-  short_command['E'].doc  = _("parse and evaluate a string.");
+  short_command[c].func = &dbg_cmd_eval;
+  short_command[c].use  = _("eval STRING");
+  short_command[c].doc  = _("parse and evaluate a string.");
 
 }
 

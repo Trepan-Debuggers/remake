@@ -126,9 +126,9 @@ error (flocp, fmt, va_alist)
 
 void
 #if __STDC__ && HAVE_STDVARARGS
-err (target_stack_node_t *p_call, const char *fmt, ...)
+err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 #else
-err (p_call, fmt, va_alist)
+err_with_stack (p_call, fmt, va_alist)
      target_stack_node_t *p_call;
      const char *fmt;
      va_dcl
@@ -160,11 +160,15 @@ err (p_call, fmt, va_alist)
 
   putc ('\n', stderr);
   if (!no_extended_errors) {
-    if (p_call) 
+    if (p_call)  {
+      putc ('\n', stdout);
       print_target_stack(p_call, -1, MAX_STACK_SHOW);
-    else if (p_stack_floc_top)
+    } else if (p_stack_floc_top) {
+      putc ('\n', stdout);
       print_floc_stack(-1, MAX_STACK_SHOW);
+    }
   }
+  fflush (stdout);
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
     enter_debugger(p_call, p_target, -1, DEBUG_ERROR_HIT);
@@ -214,7 +218,8 @@ fatal (flocp, fmt, va_alist)
   case DEBUGGER_QUIT_RC:
     die(DEBUGGER_QUIT_RC);
   default:
-  case 1: ;
+  case 1: 
+    longjmp(debugger_loop, 0);
     break;
     
   }
@@ -361,7 +366,7 @@ print_target_prefix (const char *p_name)
   }
 }
 
-/*! Show a command before executing it. */
+/*! Show target information: location and name. */
 extern void 
 print_file_target_prefix (const file_t *p_target) 
 {
@@ -410,6 +415,50 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   return rc;
 }
 
+void
+print_target_stack_entry (const file_t *p_target, int i, int i_pos) 
+{
+  floc_t floc;
+  const char *psz_target_name = 
+    (p_target && p_target->name) ? p_target->name : "(null)";
+  
+  /* If we don't have a line recorded for the target,
+     but we do have one for the commands it runs,
+     use that.
+  */
+  if (p_target->floc.filenm) {
+    memcpy(&floc, &(p_target->floc), sizeof(floc_t));
+  } else if (p_target->cmds) {
+    memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+    /* HACK: is it okay to assume that the target is on the line
+       before the first command? Or should we list the line
+       that the command starts on - so we know we've faked the location?
+    */
+    floc.lineno--;
+  } else {
+    floc.filenm = NULL;
+  }
+  
+  if (floc.filenm) {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    printf ("#%u  %s at ", i, psz_target_name);
+    print_floc_prefix(&floc);
+  } else {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    if (p_target->phony)
+      printf ("#%u  %s (.PHONY target)", i, psz_target_name);
+    else 
+      printf ("#%u  %s at ??", i, psz_target_name);
+    
+  }
+  printf ("\n");
+}
+
+
 /*! Display the target stack. i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
@@ -417,46 +466,9 @@ extern void
 print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
   int i=0;
-  printf("\n");
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
-    floc_t floc;
-    file_t *p_target = p->p_target;
-
-    /* If we don't have a line recorded for the target,
-       but we do have one for the commands it runs,
-       use that.
-    */
-    if (p_target->floc.filenm) {
-      memcpy(&floc, &(p_target->floc), sizeof(floc_t));
-    } else if (p_target->cmds) {
-      memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
-      /* HACK: is it okay to assume that the target is on the line
-	 before the first command? Or should we list the line
-	 that the command starts on - so we know we've faked the location?
-      */
-      floc.lineno--;
-    } else {
-	floc.filenm = NULL;
-    }
-    
-    if (floc.filenm) {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      printf ("#%u  %s at ", i, p_target->name);
-      print_floc_prefix(&floc);
-    } else {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      if (p_target->phony)
-	printf ("#%u  %s (.PHONY target)", i, p_target->name);
-      else 
-	printf ("#%u  %s at ??", i, p_target->name);
-
-    }
-    printf ("\n");
+    print_target_stack_entry (p->p_target, i, i_pos);
   }
 }
 
@@ -488,30 +500,41 @@ void print_file (file_t *p_file)
   printf("File %s:\n", p_file->name);
   file_timestamp_sprintf (buf, p_file->last_mtime);
   printf("\tLast modified: %s\n",  buf);
-  file_timestamp_sprintf (buf, p_file->mtime_before_update);
-  printf("\tBefore update: %s\n",  buf);
+  if (p_file->mtime_before_update != p_file->last_mtime) {
+    file_timestamp_sprintf (buf, p_file->mtime_before_update);
+    printf("\tBefore update: %s\n",  buf);
+  }
+  printf("\tNumber of lines: %u\n",  p_file->nlines);
 }
 
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles(void)
+bool print_read_makefiles(const char *psz_filename)
 {
   dep_t *p_dep;
-  if (!read_makefiles) return;
-  for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
-    if (p_dep->file) {
-      if (p_dep != read_makefiles)
-	printf(", ");
-      printf("%s", p_dep->file->name);
+  if (!read_makefiles) return false;
+  if (NULL == psz_filename) {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file) {
+        print_file(p_dep->file);
+      }
+    }
+    return true;
+  } else {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file && 0 == strcmp(p_dep->file->name, psz_filename)) {
+        print_file(p_dep->file);
+        return true;
+      }
     }
   }
-  printf("\n");
+  return false;
 }
 
 /*! Print the command line used to invoke Make. */
 void print_cmdline (void) 
 {
   unsigned int i;
-  printf(_("Command-line arguments:"));
+  printf(_("Command-line invocation:"));
   printf("\n\t\"");
   if (global_argv[1]) {
     printf("%s", argv0);

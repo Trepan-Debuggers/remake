@@ -158,3 +158,25 @@ dbg_cmd_write(char *psz_args)
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_write_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_write;
+  short_command[c].use =  _("write [TARGET [FILENAME]]");
+  short_command[c].doc  = 
+    _("writes the commands associated of a target to a file with MAKE\n"
+      "variables expanded. If no target given, the basename of the current\n"
+      "is used. If a filename is supplied it is used. If it is the string\n"
+      "\"here\", we write the output to stdout. If no filename is\n"
+      "given then create the filename by prepending a directory name to\n"
+      "the target name and then append \".sh\".");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

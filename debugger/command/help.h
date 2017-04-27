@@ -19,6 +19,53 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Debugger help command. */
 
+
+void 
+dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
+		      subcommand_var_info_t *p_subcmd, bool full_info)
+{
+    if (full_info) {
+      const char *doc = p_subcmd->doc ? 
+	p_subcmd->doc : p_subcmd->short_doc;
+      printf("%s ", psz_subcmd_name);
+      printf("%s%s", p_subcmd->name, doc);
+    } else {
+      printf("%s ", psz_subcmd_name);
+      printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
+      if (p_subcmd->var) {
+	if (p_subcmd->b_onoff)
+	  printf(" is %s.", 
+		 var_to_on_off(* (int *) p_subcmd->var));
+	else 
+	  printf(" is %d.", *(int *)(p_subcmd->var));
+      }
+    }
+    
+    printf("\n");
+}
+
+debug_return_t 
+dbg_help_subcmd(const char *psz_subcmd_name, 
+		short_cmd_t *p_command, const char *psz_args, 
+		subcommand_var_info_t *subcommands)
+{
+    unsigned int i;
+    if (!psz_args || !*psz_args) {
+	printf("%s\n\n%s\n", p_command->use, p_command->doc);
+    } else {
+	for (i = 0; subcommands[i].name; i++) {
+	    if (is_abbrev_of(psz_args, subcommands[i].name, 
+			     subcommands[i].min_abbrev)) {
+		dbg_help_subcmd_entry(psz_subcmd_name, "%s%s",
+				      &(subcommands[i]), true);
+		return debug_readloop;
+	    }
+	}
+	printf("There is no \"%s %s\" command.\n", psz_subcmd_name, psz_args);
+    }
+    return debug_readloop;
+}
+
 debug_return_t 
 dbg_cmd_help(char *psz_args)
 {
@@ -46,59 +93,57 @@ dbg_cmd_help(char *psz_args)
       printf("\n");
     }
 
-    printf("\nReadline command line editing (emacs/vi mode) is available.\n");
-    printf("For more detailed help, type h <cmd> or consult "
-	   "online-documentation.\n");
+    printf("\nReadline command line editing (emacs/vi mode) is available.\n"
+"For more detailed help, type 'help COMAMND-NAME' or consult\n"
+"the online-documentation.\n");
     
   } else {
-    short_cmd_t *p_command;
-
-    if (1 == strlen(psz_args)) {
-      if ( NULL != short_command[(uint8_t)psz_args[0]].func ) 
-	p_command = &short_command[(uint8_t)psz_args[0]];
-      else
-	p_command = NULL;
-    } else {
-      char *psz_command = get_word(&psz_args);
-      p_command = find_command (psz_command);
-    }
-    if (p_command) {
-      if ( p_command->func == &dbg_cmd_info ) {
-	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
-	printf ("\tAvailable info subcommands are:\n\t");
-	for (i = 0; info_subcommands[i]; i++) {
-	  printf(" %s", info_subcommands[i]);
-	}
-	printf("\n");
-      } else if ( p_command->func == &dbg_cmd_show ) {
-	for (i = 0; show_subcommands[i].name; i++) {
-	  help_cmd_set_show("show %-15s -- %s", &(show_subcommands[i]));
-	}
-      } else if ( p_command->func == &dbg_cmd_set ) {
-	if (!psz_args || !*psz_args) {
-	  for (i = 0; set_subcommands[i].name; i++) {
-	    help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
-	  }
-	} else {
-	  for (i = 0; set_subcommands[i].name; i++) {
-	    if ( !strcmp(psz_args, set_subcommands[i].name) ) {
-	      help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
-	      return debug_readloop;
-	    }
-	  }
-	  printf("There is no \"set %s\" command.\n", psz_args);
-	}
-      } else {
-	printf("%s\n\n", p_command->use);
-	printf("%s\n", p_command->doc);
-      }
+      short_cmd_t *p_command;
+      char *psz_command = "";
       
-    } else {
-      printf("Undefined command %s. Try help for a list of commands\n", 
-	     psz_args);
-    }
+      if (1 == strlen(psz_args)) {
+	  if ( NULL != short_command[(uint8_t)psz_args[0]].func ) 
+	      p_command = &short_command[(uint8_t)psz_args[0]];
+	  else
+	      p_command = NULL;
+      } else {
+	  psz_command = get_word(&psz_args);
+	  p_command = find_command (psz_command);
+      }
+      if (p_command) {
+	  if ( p_command->func == &dbg_cmd_info ) {
+	      return dbg_help_subcmd("info", p_command, psz_args, info_subcommands);
+	  } else if ( p_command->func == &dbg_cmd_show ) {
+	      return dbg_help_subcmd("show", p_command, psz_args, show_subcommands);
+	  } else if ( p_command->func == &dbg_cmd_set ) {
+	      return dbg_help_subcmd("set", p_command, psz_args, set_subcommands);
+	  } else {
+	      printf("%s\n\n", p_command->use);
+	      printf("%s\n", p_command->doc);
+	  }
+      } else {
+	  printf("Undefined command `%s'. Try help for a list of commands.\n", 
+		 psz_command);
+      }
   }
   
   return debug_readloop;
 }
 
+static void
+dbg_cmd_help_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_help;
+  short_command[c].use  = _("help [COMMAND]");
+  short_command[c].doc  = 
+    _("Display list of commands (i.e. this help text.)\n"		\
+      "\twith an command name, give only the help for that command.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
