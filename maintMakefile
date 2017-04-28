@@ -150,7 +150,6 @@ do-po-update:
 		&& $(WGET) $(po_wget_flags) -A '*.po' $(po_repo)) \
 	  && cp "$$tmppo"/*.po $(top_srcdir)/po && rm -rf "$$tmppo"
 	cd po && $(MAKE) update-po
-	$(MAKE) po-check
 
 po-update:
 	[ -d "po" ] && $(MAKE) do-po-update
