@@ -14,7 +14,7 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "makeint.h"
+#include "make.h"
 
 #include <assert.h>
 
@@ -124,64 +124,6 @@ lookup_file (const char *name)
 #endif
 
   return f;
-}
-
-struct file *
-enter_file (const char *name)
-{
-  struct file *f;
-  struct file *new;
-  struct file **file_slot;
-  struct file file_key;
-
-  assert (*name != '\0');
-  assert (! verify_flag || strcache_iscached (name));
-
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  if (*name != '.')
-    {
-      const char *n;
-      char *lname, *ln;
-      lname = xstrdup (name);
-      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-        if (isupper ((unsigned char)*n))
-          *ln = tolower ((unsigned char)*n);
-        else
-          *ln = *n;
-
-      *ln = '\0';
-      name = strcache_add (lname);
-      free (lname);
-    }
-#endif
-
-  file_key.hname = name;
-  file_slot = (struct file **) hash_find_slot (&files, &file_key);
-  f = *file_slot;
-  if (! HASH_VACANT (f) && !f->double_colon)
-    {
-      f->builtin = 0;
-      return f;
-    }
-
-  new = xcalloc (sizeof (struct file));
-  new->name = new->hname = name;
-  new->update_status = us_none;
-
-  if (HASH_VACANT (f))
-    {
-      new->last = new;
-      hash_insert_at (&files, new, file_slot);
-    }
-  else
-    {
-      /* There is already a double-colon entry for this file.  */
-      new->double_colon = f;
-      f->last->prev = new;
-      f->last = new;
-    }
-
-  return new;
 }
 
 void
