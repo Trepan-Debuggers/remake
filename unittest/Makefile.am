@@ -17,3 +17,4 @@ check_PROGRAMS = test_profile
 TESTS = $(check_PROGRAMS)
 
 MOSTLYCLEANFILES = callgrind.out.*
+DISTCLEANFILES = mock.Po

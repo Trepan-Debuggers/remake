@@ -30,7 +30,7 @@ if WINDOWSENV
   W32LIB =	-Lw32 -lw32
 endif
 
-SUBDIRS =	glob config po doc $(MAYBE_W32) # unittest
+SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
 
 bin_PROGRAMS =	make
 
@@ -76,6 +76,7 @@ DEBUGGER_H = \
 		debugger/command/run.h		\
 		debugger/command/set.h		\
 		debugger/command/setq.h		\
+		debugger/command/setqx.h	\
 		debugger/command/shell.h	\
 		debugger/command/show.h		\
 		debugger/command/skip.h		\
@@ -91,17 +92,44 @@ DEBUGGER_H = \
 		debugger/stack.h		\
 		debugger/subcmd.h
 
-make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
-		function.c getopt.c getopt1.c implicit.c job.c main.c \
-		misc.c read.c remake.c $(remote) rule.c signame.c \
+make_SOURCES =	ar.c \
+	        arscan.c \
+	        commands.c \
+	        default.c \
+                dir.c \
+                expand.c \
+                file.c \
+                file_basic.c \
+		function.c \
+                getopt.c \
+                getopt1.c \
+                implicit.c \
+	        job.c \
+	        main.c \
+		misc.c \
+                read.c \
+                remake.c \
+                $(remote) \
+                rule.c \
+                signame.c \
 		strcache.c variable.c version.c vpath.c hash.c \
 		buildargv.c debug.c globals.c profile.c print.c trace.c \
 	 	$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
+EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c mock.h
 
-noinst_HEADERS = commands.h dep.h filedef.h job.h main.h make.h rule.h \
-	        variable.h implicit.h \
+noinst_HEADERS = commands.h \
+                dep.h \
+                filedef.h \
+                file_basic.h \
+                implicit.h \
+                globals.h \
+                job.h \
+                main.h \
+                make.h \
+                profile.h \
+                rule.h \
+	        variable.h \
 		debug.h getopt.h gettext.h hash.h implicit.h \
 		buildargv.h expand.h file.h function.h read.h vpath.h \
 		print.h trace.h types.h \
@@ -138,7 +166,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 
 # This is built during configure, but behind configure's back
 
-DISTCLEANFILES = build.sh
+DISTCLEANFILES = build.sh unittest/mock.Po
 
 MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 

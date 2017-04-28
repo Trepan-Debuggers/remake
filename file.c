@@ -69,80 +69,6 @@ struct hash_table files;
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
-/* Access the hash table of all file records.
-   lookup_file  given a name, return the struct file * for that name,
-                or NULL if there is none.
-*/
-
-struct file *
-lookup_file (const char *name)
-{
-  struct file *f;
-  struct file file_key;
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  char *lname;
-#endif
-
-  assert (*name != '\0');
-
-  /* This is also done in parse_file_seq, so this is redundant
-     for names read from makefiles.  It is here for names passed
-     on the command line.  */
-#ifdef VMS
-# ifndef WANT_CASE_SENSITIVE_TARGETS
-  if (*name != '.')
-    {
-      const char *n;
-      char *ln;
-      lname = xstrdup (name);
-      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-        *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
-      *ln = '\0';
-      name = lname;
-    }
-# endif
-
-  while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
-      name += 2;
-#endif
-  while (name[0] == '.'
-#ifdef HAVE_DOS_PATHS
-	 && (name[1] == '/' || name[1] == '\\')
-#else
-	 && name[1] == '/'
-#endif
-	 && name[2] != '\0')
-    {
-      name += 2;
-      while (*name == '/'
-#ifdef HAVE_DOS_PATHS
-	     || *name == '\\'
-#endif
-	     )
-	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-	++name;
-    }
-
-  if (*name == '\0')
-    /* It was all slashes after a dot.  */
-#if defined(VMS)
-    name = "[]";
-#elif defined(_AMIGA)
-    name = "";
-#else
-    name = "./";
-#endif
-
-  file_key.hname = name;
-  f = hash_find_item (&files, &file_key);
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  if (*name != '.')
-    free (lname);
-#endif
-
-  return f;
-}
-
 /* Look up a file record for file NAME and return it.
    Create a new record if one doesn't exist.  NAME will be stored in the
    new record so it should be constant or in the strcache etc.
@@ -1168,12 +1094,6 @@ build_target_list (char *value)
     }
 
   return value;
-}
-
-void
-init_hash_files (void)
-{
-  hash_init (&files, 1000, file_hash_1, file_hash_2, file_hash_cmp);
 }
 
 /* EOF */
