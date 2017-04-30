@@ -2,8 +2,8 @@
 Summary: GNU Make with comprehensible tracing and a debugger
 Name: remake
 Epoch: 1
-Version: 3.82
-Release: 19%{?dist}
+Version: 3.82+dbg1.0
+Release: 20%{?dist}
 License: GPLv3
 Group: Development/Tools
 URL: http://bashdb.sf.net/remake/

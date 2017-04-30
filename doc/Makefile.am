@@ -16,9 +16,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-TEXI2HTML = texi2html
-TEXI2HTML_FLAGS = -split_chapter
-TEXI2PDF = texi2dvi --pdf
+# TEXI2HTML = texi2html
+# TEXI2HTML_FLAGS = -split_chapter
+# TEXI2PDF = texi2dvi --pdf
 
 EXTRA_DIST = test1.mk test2.mk
 
@@ -34,9 +34,9 @@ CLEANFILES = make*.html make*.info remake.html remake*.info callgrind.out.*
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
-html: remake_1.html
+html-local: remake_1.html
 
 remake_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
 	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/remake.texi --output remake.html
 
-.PHONY: html
+.PHONY: html-local

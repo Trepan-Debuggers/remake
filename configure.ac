@@ -34,6 +34,7 @@ AC_CONFIG_HEADERS([config.h])
 # When we update gettext to 0.18.3 or better we can add it again.
 AM_INIT_AUTOMAKE([subdir-objects 1.11.1 silent-rules foreign -Wall])
 AM_MAINTAINER_MODE
+AM_PROG_AR
 
 # Checks for programs.
 AC_USE_SYSTEM_EXTENSIONS

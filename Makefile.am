@@ -172,7 +172,7 @@ MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 
 # Forward targets
 
-html:
+html-local:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
 make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
@@ -180,7 +180,7 @@ make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
 	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 
-.PHONY: html
+.PHONY: html-local
 
 # --------------- Internationalization Section
 
