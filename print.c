@@ -335,16 +335,16 @@ print_target_stack_entry (const file_t *p_target, int i, int i_pos)
     if (i_pos != -1) {
       printf("%s", (i == i_pos) ? "=>" : "  ");
     }
-    printf ("#%u  %s at ", i, psz_target_name);
+    printf ("#%d  %s at ", i, psz_target_name);
     print_floc_prefix(&floc);
   } else {
     if (i_pos != -1) {
       printf("%s", (i == i_pos) ? "=>" : "  ");
     }
     if (p_target->phony)
-      printf ("#%u  %s (.PHONY target)", i, psz_target_name);
+      printf ("#%d  %s (.PHONY target)", i, psz_target_name);
     else
-      printf ("#%u  %s at ??", i, psz_target_name);
+      printf ("#%d  %s at ??", i, psz_target_name);
 
   }
   printf ("\n");
@@ -377,7 +377,7 @@ print_floc_stack (int i_pos, int i_max)
     if (i_pos != -1) {
       printf("%s", (i == i_pos) ? "=>" : "  ");
     }
-    printf ("#%u  ", i);
+    printf ("#%d  ", i);
     if (p->p_floc->filenm) {
       print_floc_prefix(p->p_floc);
     }

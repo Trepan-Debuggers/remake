@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 static debug_return_t
 dbg_cmd_edit(char *psz_args)
 {
-  char *editor;
+  const char *editor;
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
       editor = "/bin/ex";

@@ -106,7 +106,7 @@ static FILE *callgrind_fd;
 #define CALLGRIND_PREAMBLE_TEMPLATE1 "version: 1\n\
 creator: %s\n"
 
-#define CALLGRIND_PREAMBLE_TEMPLATE2 "pid: %u\n\
+#define CALLGRIND_PREAMBLE_TEMPLATE2 "pid: %d\n\
 \n\
 desc: Trigger: %s\n\
 desc: Node: Targets\n\

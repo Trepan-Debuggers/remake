@@ -1419,7 +1419,7 @@ func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
   debug_return_t rc;
   static char buffer[10];
   rc = enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
-  snprintf(buffer, sizeof(buffer), "%d", rc);
+  snprintf(buffer, sizeof(buffer), "%u", rc);
   o = buffer;
   return o;
 }

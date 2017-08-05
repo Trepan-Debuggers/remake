@@ -211,7 +211,7 @@ dbg_cmd_info_program()
   printf(_("Program invocation:\n"));
   printf("\t");
   dbg_print_invocation();
-  printf(_("Recursion level: %d\n"), makelevel);
+  printf(_("Recursion level: %u\n"), makelevel);
   dbg_cmd_info_line();
   switch (last_stop_reason)
     {

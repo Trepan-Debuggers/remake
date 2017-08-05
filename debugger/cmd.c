@@ -287,7 +287,7 @@ dbg_cmd_show_command (const char *psz_args)
   UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
   for (i=0; hist_list[i]; i++) {
-    dbg_msg("%5d  %s", i, hist_list[i]->line);
+    dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
 #endif
   return debug_readloop;
@@ -403,7 +403,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
   /* Set initial frame position reporting area: 0 is bottom. */
   p_target_loc    = NULL;
-  psz_target_name = "";
+  psz_target_name = (char *) "";
   i_stack_pos      = 0;
 
   p_stack = p_stack_top = p;
@@ -443,7 +443,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	printf("\nMakefile terminated.\n");
 	dbg_msg("Use q to quit or R to restart");
       } else {
-	printf("\nMakefile finished at level %d. Use R to restart\n",
+	printf("\nMakefile finished at level %u. Use R to restart\n",
 	       makelevel);
 	dbg_msg("the makefile at this level or 's', 'n', or 'F' to continue "
 	       "in parent");
@@ -492,7 +492,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
           debug_return=execute_line(s);
         } else {
           add_history ("step");
-          debug_return=dbg_cmd_step("");
+          debug_return=dbg_cmd_step((char *) "");
         }
         free (line);
       } else {

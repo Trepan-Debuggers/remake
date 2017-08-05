@@ -46,9 +46,9 @@ dbg_cmd_finish(char *psz_amount)
     return continue_execution;
   } else {
     if (i > i_amount)
-      printf("Target level %d not found\n", i_amount);
+      printf("Target level %u not found\n", i_amount);
     else
-      printf("Level %d is too large; maximum value is %d.\n",
+      printf("Level %u is too large; maximum value is %u.\n",
              i_amount, i-1);
   }
 

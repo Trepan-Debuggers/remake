@@ -266,24 +266,24 @@ void
 print_db_level(debug_level_mask_t e_debug_level)
 {
   if (e_debug_level & DB_BASIC)
-    printf("Basic tracing (0x%x)\n", DB_BASIC);
+    printf("Basic tracing (0x%x)\n", (unsigned int) DB_BASIC);
   if (e_debug_level & DB_TRACE)
-    printf("Tracing (0x%x)\n", DB_TRACE);
+    printf("Tracing (0x%x)\n", (unsigned int) DB_TRACE);
   if (e_debug_level & DB_VERBOSE)
-    printf("Verbose Tracing (0x%x)\n", DB_VERBOSE);
+    printf("Verbose Tracing (0x%x)\n", (unsigned int) DB_VERBOSE);
   if (e_debug_level & DB_SHELL)
-    printf("Tracing shell commands 0x%x\n", DB_SHELL);
+    printf("Tracing shell commands 0x%x\n", (unsigned int) DB_SHELL);
   if (e_debug_level & DB_MAKEFILES)
-    printf("Tracing Rebuilding Makefiles 0x%x\n", DB_MAKEFILES);
+    printf("Tracing Rebuilding Makefiles 0x%x\n", (unsigned int) DB_MAKEFILES);
   if (e_debug_level & DB_UPDATE_GOAL)
-    printf("Tracing Goal target updates 0x%x\n", DB_MAKEFILES);
+    printf("Tracing Goal target updates 0x%x\n", (unsigned int) DB_MAKEFILES);
   if (e_debug_level & DB_UPDATE_GOAL)
-    printf("Tracing reading Makefiles 0x%x\n", DB_READ_MAKEFILES);
+    printf("Tracing reading Makefiles 0x%x\n", (unsigned int) DB_READ_MAKEFILES);
   if (e_debug_level & DB_CALL)
-    printf("Tracing function call and returns 0x%x\n", DB_CALL);
+    printf("Tracing function call and returns 0x%x\n", (unsigned int) DB_CALL);
 }
 
-static char *reason2str[] = {
+static const char *reason2str[] = {
     "->",
     "..",
     "<-",
@@ -347,12 +347,12 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
     {
     case DEBUG_BRKPT_BEFORE_PREREQ:
     case DEBUG_STEP_HIT:
-      dbg_cmd_show_exp("$@: $+", true);
+      dbg_cmd_show_exp((char *) "$@: $+", true);
       break;
     case DEBUG_STACK_CHANGING:
       break;
     default:
-      dbg_cmd_show_exp("$@", true);
+      dbg_cmd_show_exp((char *) "$@", true);
       break;
     }
 }
@@ -379,7 +379,7 @@ stripwhite (char *string)
 }
 
 /* Show if i_bool is "on" or "off" */
-char *
+const char *
 var_to_on_off(int i_bool)
 {
   return i_bool ? "on" : "off";

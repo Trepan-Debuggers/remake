@@ -77,7 +77,7 @@ add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
             p_target->name);
   }
   p_target->tracing = brkpt_mask;
-  printf(_("Breakpoint %d on target %s, mask 0x%02x"), i_breakpoints,
+  printf(_("Breakpoint %u on target %s, mask 0x%02x"), i_breakpoints,
          p_target->name, brkpt_mask);
   if (p_target->floc.filenm)
     dbg_msg(": file %s, line %lu.", p_target->floc.filenm,
@@ -105,8 +105,8 @@ remove_breakpoint (unsigned int i)
     return false;
   }
   if (i > i_breakpoints) {
-    dbg_msg(_("Breakpoint number %d is too high. "
-	   "%d is the highest breakpoint number."), i, i_breakpoints);
+    dbg_msg(_("Breakpoint number %u is too high. "
+	   "%u is the highest breakpoint number."), i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
@@ -125,7 +125,7 @@ remove_breakpoint (unsigned int i)
 
       if (p->p_target->tracing) {
 	p->p_target->tracing = BRK_NONE;
-	dbg_msg(_("Breakpoint %d on target %s cleared"),
+	dbg_msg(_("Breakpoint %u on target %s cleared"),
 	       i, p->p_target->name);
 	free(p);
 	return true;
@@ -136,7 +136,7 @@ remove_breakpoint (unsigned int i)
 	return false;
       }
     } else {
-      dbg_msg(_("No Breakpoint number %d set."), i);
+      dbg_msg(_("No Breakpoint number %u set."), i);
       return false;
     }
   }
@@ -155,7 +155,7 @@ list_breakpoints (void)
 
   dbg_msg(  "Num Type           Disp Enb Mask Target  Location");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep   y 0x%02x %s",
+    printf("%3u breakpoint     keep   y 0x%02x %s",
 	   p->i_num,
 	   p->brkpt_mask,
            p->p_target->name);

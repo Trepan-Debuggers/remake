@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 1993-2016 Free Software Foundation, Inc.
+# Copyright (C) 1993-2017 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # Copyright (C) 2008, 2011, 2014 rocky@gnu.org
 #
@@ -78,7 +78,7 @@ AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h \
-                  sys/select.h])
+                  sys/select.h sys/file.h])
 
 AM_PROG_CC_C_O
 AC_C_CONST
@@ -141,7 +141,7 @@ AS_IF([test "$ac_cv_func_gettimeofday" = yes],
             [Define to 1 if you have a standard gettimeofday function])
 ])
 
-AC_CHECK_FUNCS([strdup strndup mkstemp mktemp fdopen fileno \
+AC_CHECK_FUNCS([strdup strndup umask mkstemp mktemp fdopen fileno \
                 dup dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 getrlimit setrlimit setvbuf pipe strerror strsignal \
@@ -170,21 +170,27 @@ AC_FUNC_VPRINTF
 AC_FUNC_CLOSEDIR_VOID
 
 # See if the user wants to add (or not) GNU Guile support
-PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([guile], [AS_HELP_STRING([--with-guile],
             [Support GNU Guile for embedded scripting])])
 
-# For some strange reason, at least on Ubuntu, each version of Guile
-# comes with it's own PC file so we have to specify them as individual
-# packages.  Ugh.
-AS_IF([test "x$with_guile" != xno],
-[ PKG_CHECK_MODULES([GUILE], [guile-2.0], [have_guile=yes],
-  [PKG_CHECK_MODULES([GUILE], [guile-1.8], [have_guile=yes],
-    [have_guile=no])])
-])
+# Annoyingly, each version of Guile comes with it's own PC file so we have to
+# specify them as individual packages.  Ugh.
+PKG_PROG_PKG_CONFIG
 
-AS_IF([test "$have_guile" = yes],
-      [AC_DEFINE([HAVE_GUILE], [1], [Embed GNU Guile support])])
+AS_IF([test "x$with_guile" != xno],
+[ guile_versions="2.2 2.0 1.8"
+  guile_version=no
+  have_guile=no
+  AC_MSG_CHECKING([for GNU Guile])
+  for v in $guile_versions; do
+    PKG_CHECK_EXISTS([guile-$v], [guile_version=$v; have_guile=yes; break], [])
+  done
+  AC_MSG_RESULT([$guile_version])
+  if test "$have_guile" = yes; then
+    PKG_CHECK_MODULES(GUILE, [guile-$guile_version])
+    AC_DEFINE([HAVE_GUILE], [1], [Embed GNU Guile support])
+  fi
+])
 
 AM_CONDITIONAL([HAVE_GUILE], [test "$have_guile" = yes])
 

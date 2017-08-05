@@ -94,7 +94,7 @@ extern void print_debugger_location(const file_t *p_target,
 extern char *stripwhite (char *string);
 
 /*! Show if i_bool is "on" or "off" */
-extern char *var_to_on_off(int i_bool);
+extern const char *var_to_on_off(int i_bool);
 
 /*! Show a expression. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.

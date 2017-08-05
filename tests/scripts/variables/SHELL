@@ -64,11 +64,25 @@ my $script = 'true; true';
 my $flags = '-xc';
 my $out = `/bin/sh $flags '$script' 2>&1`;
 
-run_make_test(qq!
+setup_for_test();
+open(MAKEFILE,"> $makefile");
+print MAKEFILE qq{
 .SHELLFLAGS = $flags
 all: ; \@$script
-!,
-              '', $out);
+};
+
+my $answer = qq|$out#MAKEFILE#:3: recipe for target 'all' failed
++#MAKEFILE#:3: *** [all] Error $err
+
+#0 all at #MAKEFILE#:3
+|;
+
+$logfile = &get_logfile;
+run_make_with_options($makefile, '', $logfile, 512);
+
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s:^#0  all at .*work/variables/:#0 all at work/variables/:gm;
+&compare_output_string($answer, $slurp, $logfile);
 
 # Do it again but add spaces to SHELLFLAGS
 
