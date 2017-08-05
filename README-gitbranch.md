@@ -1,4 +1,4 @@
-This branch track changes to the the GNU Make 3.82 release.
+This branch track changes to the GNU Make 3.82 release.
 
 There are git tags in this branch for remake releases, e.g.
 
