@@ -10,8 +10,8 @@
     CFLAGS       => '-g -O2',
     CPP          => 'gcc -E',
     CPPFLAGS     => '',
-    GUILE_CFLAGS => '-pthread -I/usr/include/guile/2.0  ',
-    GUILE_LIBS   => '-lguile-2.0 -lgc  ',
+    GUILE_CFLAGS => '-pthread -I/usr/include/guile/2.0',
+    GUILE_LIBS   => '-lguile-2.0 -lgc',
     LDFLAGS      => '',
     LIBS         => '-ldl '
 );

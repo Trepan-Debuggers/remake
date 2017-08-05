@@ -1,5 +1,5 @@
 /* Interface to 'ar' archives for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 
 This file is part of GNU Make.
 
@@ -73,7 +73,7 @@ static long int
 ar_member_date_1 (int desc UNUSED, const char *mem, int truncated,
                   long int hdrpos UNUSED, long int datapos UNUSED,
                   long int size UNUSED, long int date,
-                  int uid UNUSED, int gid UNUSED, int mode UNUSED,
+                  int uid UNUSED, int gid UNUSED, unsigned int mode UNUSED,
                   const void *name)
 {
   return ar_name_equal (name, mem, truncated) ? date : 0;
@@ -198,7 +198,7 @@ static long int
 ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
                long int hdrpos UNUSED, long int datapos UNUSED,
                long int size UNUSED, long int date UNUSED, int uid UNUSED,
-               int gid UNUSED, int mode UNUSED, const void *arg)
+               int gid UNUSED, unsigned int mode UNUSED, const void *arg)
 {
   struct ar_glob_state *state = (struct ar_glob_state *)arg;
 
@@ -224,7 +224,7 @@ ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
 static int
-glob_pattern_p (const char *pattern, int quote)
+ar_glob_pattern_p (const char *pattern, int quote)
 {
   const char *p;
   int opened = 0;
@@ -267,7 +267,7 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
 #ifdef VMS
   char *vms_member_pattern;
 #endif
-  if (! glob_pattern_p (member_pattern, 1))
+  if (! ar_glob_pattern_p (member_pattern, 1))
     return 0;
 
   /* Scan the archive for matches.

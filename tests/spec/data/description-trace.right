@@ -1,4 +1,0 @@
-all	# This is the main target
-check	# test things
-dist	# Build distribution
-foo

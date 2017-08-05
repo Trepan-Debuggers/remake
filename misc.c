@@ -1,5 +1,5 @@
 /* Miscellaneous generic support functions for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -91,12 +91,13 @@ collapse_continuations (char *line)
         {
           /* Backslash/newline handling:
              In traditional GNU make all trailing whitespace, consecutive
-             backslash/newlines, and any leading whitespace on the next line
-             is reduced to a single space.
+             backslash/newlines, and any leading non-newline whitespace on the
+             next line is reduced to a single space.
              In POSIX, each backslash/newline and is replaced by a space.  */
-          in = next_token (in);
+          while (ISBLANK (*in))
+            ++in;
           if (! posix_pedantic)
-            while (out > line && isblank ((unsigned char)out[-1]))
+            while (out > line && ISBLANK (out[-1]))
               --out;
           *out++ = ' ';
         }
@@ -314,8 +315,7 @@ lindex (const char *s, const char *limit, int c)
 char *
 end_of_token (const char *s)
 {
-  while (! STOP_SET (*s, MAP_BLANK|MAP_NUL))
-    ++s;
+  END_OF_TOKEN (s);
   return (char *)s;
 }
 
@@ -324,8 +324,7 @@ end_of_token (const char *s)
 char *
 next_token (const char *s)
 {
-  while (isblank ((unsigned char)*s))
-    ++s;
+  NEXT_TOKEN (s);
   return (char *)s;
 }
 
@@ -377,19 +376,6 @@ copy_dep_chain (const struct dep *d)
   return firstnew;
 }
 
-/* Free a chain of 'struct dep'.  */
-
-void
-free_dep_chain (struct dep *d)
-{
-  while (d != 0)
-    {
-      struct dep *df = d;
-      d = d->next;
-      free_dep (df);
-    }
-}
-
 /* Free a chain of struct nameseq.
    For struct dep chains use free_dep_chain.  */
 
@@ -400,7 +386,7 @@ free_ns_chain (struct nameseq *ns)
     {
       struct nameseq *t = ns;
       ns = ns->next;
-      free (t);
+      free_ns (t);
     }
 }
 

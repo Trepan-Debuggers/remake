@@ -99,15 +99,12 @@ ok:
 	\@$sleep_command 4
 	\@echo Ok done",
               '-rR -j5', "Fail
-#MAKEFILE#:6: recipe for target 'fail.1' failed
-#MAKE#: *** [fail.1] Error 1
+#MAKE#: *** [#MAKEFILE#:8: fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
 Fail
-#MAKEFILE#:6: recipe for target 'fail.2' failed
-#MAKE#: *** [fail.2] Error 1
+#MAKE#: *** [#MAKEFILE#:8: fail.2] Error 1
 Fail
-#MAKEFILE#:6: recipe for target 'fail.3' failed
-#MAKE#: *** [fail.3] Error 1
+#MAKE#: *** [#MAKEFILE#:8: fail.3] Error 1
 Ok done",
              512);
 
@@ -214,3 +211,7 @@ rmfiles('file1', 'file2', 'file3', 'file4');
 # rmfiles(qw(dependfile output));
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

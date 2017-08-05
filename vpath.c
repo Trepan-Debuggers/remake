@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -52,7 +52,7 @@ static struct vpath *gpaths;
    variable.  */
 
 void
-build_vpath_lists ()
+build_vpath_lists (void)
 {
   register struct vpath *new = 0;
   register struct vpath *old, *nexto;
@@ -208,7 +208,7 @@ construct_vpath_list (char *pattern, char *dirpath)
 #endif
 
   /* Skip over any initial separators and blanks.  */
-  while (*dirpath == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*dirpath))
+  while (STOP_SET (*dirpath, MAP_BLANK|MAP_PATHSEP))
     ++dirpath;
 
   /* Figure out the maximum number of VPATH entries and put it in
@@ -218,7 +218,7 @@ construct_vpath_list (char *pattern, char *dirpath)
   maxelem = 2;
   p = dirpath;
   while (*p != '\0')
-    if (*p++ == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
+    if (STOP_SET (*p++, MAP_BLANK|MAP_PATHSEP))
       ++maxelem;
 
   vpath = xmalloc (maxelem * sizeof (const char *));
@@ -244,7 +244,7 @@ construct_vpath_list (char *pattern, char *dirpath)
 #else
              && *p != PATH_SEPARATOR_CHAR
 #endif
-             && !isblank ((unsigned char)*p))
+             && !ISBLANK (*p))
         ++p;
 
       len = p - v;
@@ -266,7 +266,7 @@ construct_vpath_list (char *pattern, char *dirpath)
         }
 
       /* Skip over separators and blanks between entries.  */
-      while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
+      while (STOP_SET (*p, MAP_BLANK|MAP_PATHSEP))
         ++p;
     }
 
@@ -387,6 +387,10 @@ selective_vpath_search (struct vpath *path, const char *file,
         {
 #ifndef VMS
           *p++ = '/';
+#else
+          /* VMS: if this is not in VMS format, treat as Unix format */
+          if ((*p != ':') && (*p != ']') && (*p != '>'))
+            *p++ = '/';
 #endif
           memcpy (p, file, name_dplen);
           p += name_dplen;
@@ -400,6 +404,15 @@ selective_vpath_search (struct vpath *path, const char *file,
       /* Now add the name-within-directory at the end of NAME.  */
 #ifndef VMS
       if (p != name && p[-1] != '/')
+        {
+          *p = '/';
+          memcpy (p + 1, filename, flen + 1);
+        }
+      else
+#else
+      /* VMS use a slash if no directory terminator present */
+      if (p != name && p[-1] != '/' && p[-1] != ':' &&
+          p[-1] != '>' && p[-1] != ']')
         {
           *p = '/';
           memcpy (p + 1, filename, flen + 1);
@@ -449,17 +462,20 @@ selective_vpath_search (struct vpath *path, const char *file,
              See if it actually exists.  */
 
 #ifdef VMS
-          exists_in_cache = exists = dir_file_exists_p (vpath[i], filename);
-#else
-          /* Clobber a null into the name at the last slash.
-             Now NAME is the name of the directory to look in.  */
-          *p = '\0';
-
-          /* We know the directory is in the hash table now because either
-             construct_vpath_list or the code just above put it there.
-             Does the file we seek exist in it?  */
-          exists_in_cache = exists = dir_file_exists_p (name, filename);
+          /* For VMS syntax just use the original vpath */
+          if (*p != '/')
+            exists_in_cache = exists = dir_file_exists_p (vpath[i], filename);
+          else
 #endif
+            {
+              /* Clobber a null into the name at the last slash.
+                 Now NAME is the name of the directory to look in.  */
+              *p = '\0';
+              /* We know the directory is in the hash table now because either
+                 construct_vpath_list or the code just above put it there.
+                 Does the file we seek exist in it?  */
+              exists_in_cache = exists = dir_file_exists_p (name, filename);
+            }
         }
 
       if (exists)
@@ -475,6 +491,10 @@ selective_vpath_search (struct vpath *path, const char *file,
 #ifndef VMS
           /* Put the slash back in NAME.  */
           *p = '/';
+#else
+          /* If the slash was removed, put it back */
+          if (*p == 0)
+            *p = '/';
 #endif
 
           if (exists_in_cache)  /* Makefile-mentioned file need not exist.  */

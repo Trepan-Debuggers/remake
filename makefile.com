@@ -74,8 +74,9 @@ $ endif
 $ filelist = "alloca ar arscan commands default dir expand file function " + -
              "guile hash implicit job load main misc read remake " + -
              "remote-stub rule output signame variable version " + -
-             "vmsfunctions vmsify vpath " + -
-	     "[.glob]glob [.glob]fnmatch getopt1 getopt strcache"
+             "vmsfunctions vmsify vpath vms_progname vms_exit " + -
+	     "vms_export_symbol [.glob]glob [.glob]fnmatch getopt1 " + -
+             "getopt strcache"
 $!
 $ copy config.h-vms config.h
 $ n=0
@@ -131,6 +132,7 @@ $!-----------------------------------------------------------------------------
 $!
 $ compileit : subroutine
 $ ploc = f$locate("]",p1)
+$! filnam = p1
 $ if ploc .lt. f$length(p1)
 $ then
 $   objdir = f$extract(0, ploc+1, p1)
@@ -139,14 +141,15 @@ $ else
 $   objdir := []
 $   write optf objdir+p1
 $ endif
-$ cc'ccopt'/include=([],[.glob])/obj='objdir' -
-  /define=("allocated_variable_expand_for_file=alloc_var_expand_for_file","unlink=remove","HAVE_CONFIG_H","VMS") -
+$ cc'ccopt'/nested=none/include=([],[.glob])/obj='objdir' -
+  /define=("allocated_variable_expand_for_file=alloc_var_expand_for_file",-
+  "unlink=remove","HAVE_CONFIG_H","VMS") -
   'p1'
 $ exit
 $ endsubroutine : compileit
 $!
 $!-----------------------------------------------------------------------------
-$!Copyright (C) 1996-2014 Free Software Foundation, Inc.
+$!Copyright (C) 1996-2016 Free Software Foundation, Inc.
 $!This file is part of GNU Make.
 $!
 $!GNU Make is free software; you can redistribute it and/or modify it under

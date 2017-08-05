@@ -1,6 +1,6 @@
 # -*-Makefile-*- to build GNU make on VMS
 #
-# Copyright (C) 1996-2014 Free Software Foundation, Inc.
+# Copyright (C) 1996-2016 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -32,9 +32,12 @@ CP = copy
 #
 
 ifeq ($(CC),cc)
-CFLAGS = $(defines) /include=([],[.glob])/prefix=(all,except=(glob,globfree))/standard=relaxed/warn=(disable=questcompare)
+cinclude = /nested=none/include=([],[.glob])
+cprefix = /prefix=(all,except=(glob,globfree))
+cwarn = /standard=relaxed/warn=(disable=questcompare)
+CFLAGS = $(defines) $(cinclude)$(cprefix)$(cwarn)
 else
-CFLAGS = $(defines) /include=([],[.glob])
+CFLAGS = $(defines) $(cinclude)
 endif
 #LDFLAGS = /deb
 LDFLAGS =
@@ -93,13 +96,14 @@ guile = ,guile.obj
 objs = commands.obj,job.obj,output.obj,dir.obj,file.obj,misc.obj,hash.obj,\
        load.obj,main.obj,read.obj,remake.obj,rule.obj,implicit.obj,\
        default.obj,variable.obj,expand.obj,function.obj,strcache.obj,\
-       vpath.obj,version.obj$(guile)\
-       $(ARCHIVES)$(ALLOCA)$(extras)$(getopt)$(glob)
+       vpath.obj,version.obj,vms_progname.obj,vms_exit.obj,\
+       vms_export_symbol.obj$(guile)$(ARCHIVES)$(extras)$(getopt)$(glob)
 
 srcs = commands.c job.c output.c dir.c file.c misc.c guile.c hash.c \
 	load.c main.c read.c remake.c rule.c implicit.c \
 	default.c variable.c expand.c function.c strcache.c \
-	vpath.c version.c vmsfunctions.c vmsify.c $(ARCHIVES_SRC) $(ALLOCASRC) \
+	vpath.c version.c vmsfunctions.c vmsify.c vms_progname.c vms_exit.c \
+	vms_export_symbol.c $(ARCHIVES_SRC) $(ALLOCASRC) \
 	commands.h dep.h filedef.h job.h output.h makeint.h rule.h variable.h
 
 
@@ -168,6 +172,9 @@ vmsfunctions.obj: vmsfunctions.c makeint.h config.h gnumake.h gettext.h \
 vmsify.obj: vmsify.c
 vpath.obj: vpath.c makeint.h config.h gnumake.h gettext.h filedef.h hash.h \
      variable.h
+vms_progname.obj: vms_progname.c
+vms_exit.obj: vms_exit.c
+vms_export_symbol.obj: vms_export_symbol.c
 
 config.h: config.h-vms
 	$(CP) $< $@

@@ -1,5 +1,5 @@
 /* Definitions for Windows process invocation.
-Copyright (C) 1996-2014 Free Software Foundation, Inc.
+Copyright (C) 1996-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -32,11 +32,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 EXTERN_DECL(HANDLE process_init, (VOID_DECL));
 EXTERN_DECL(HANDLE process_init_fd, (HANDLE stdinh, HANDLE stdouth,
-        HANDLE stderrh));
+                                     HANDLE stderrh));
 EXTERN_DECL(long process_begin, (HANDLE proc, char **argv, char **envp,
-        char *exec_path, char *as_user));
+                                 char *exec_path, char *as_user));
 EXTERN_DECL(long process_pipe_io, (HANDLE proc, char *stdin_data,
-        int stdin_data_len));
+                                   int stdin_data_len));
 EXTERN_DECL(long process_file_io, (HANDLE proc));
 EXTERN_DECL(void process_cleanup, (HANDLE proc));
 EXTERN_DECL(HANDLE process_wait_for_any, (int block, DWORD* pdwWaitStatus));
@@ -45,6 +45,7 @@ EXTERN_DECL(HANDLE process_easy, (char** argv, char** env,
                                   int outfd, int errfd));
 EXTERN_DECL(BOOL process_kill, (HANDLE proc, int signal));
 EXTERN_DECL(int process_used_slots, (VOID_DECL));
+EXTERN_DECL(DWORD process_set_handles, (HANDLE *handles));
 
 /* support routines */
 EXTERN_DECL(long process_errno, (HANDLE proc));
@@ -57,15 +58,5 @@ EXTERN_DECL(int process_outcnt, (HANDLE proc));
 EXTERN_DECL(int process_errcnt, (HANDLE proc));
 EXTERN_DECL(void process_pipes, (HANDLE proc, int pipes[3]));
 EXTERN_DECL(void process_noinherit, (int fildes));
-
-/* jobserver routines */
-EXTERN_DECL(int open_jobserver_semaphore, (const char* name));
-EXTERN_DECL(int create_jobserver_semaphore, (int tokens));
-EXTERN_DECL(void free_jobserver_semaphore, (VOID_DECL));
-EXTERN_DECL(int acquire_jobserver_semaphore, (VOID_DECL));
-EXTERN_DECL(int release_jobserver_semaphore, (VOID_DECL));
-EXTERN_DECL(int has_jobserver_semaphore, (VOID_DECL));
-EXTERN_DECL(char* get_jobserver_semaphore_name, (VOID_DECL));
-EXTERN_DECL(int wait_for_semaphore_or_child_process, (VOID_DECL));
 
 #endif

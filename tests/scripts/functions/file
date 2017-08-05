@@ -115,4 +115,47 @@ x:;@cat file.out
 
 unlink('file.out');
 
+# Reading files
+run_make_test(q!
+$(file >file.out,A = foo)
+X1 := $(file <file.out)
+$(file >>file.out,B = bar)
+$(eval $(file <file.out))
+
+x:;@echo '$(X1)'; echo '$(A)'; echo '$(B)'
+!,
+              '', "A = foo\nfoo\nbar\n");
+
+unlink('file.out');
+
+# Reading from non-existent file
+run_make_test(q!
+X1 := $(file <file.out)
+x:;@echo '$(X1)';
+!,
+              '', "\n");
+
+# Extra arguments in read mode
+run_make_test(q!
+X1 := $(file <file.out,foo)
+x:;@echo '$(X1)';
+!,
+              '', "#MAKEFILE#:2: *** file: too many arguments.  Stop.\n", 512);
+
+
+# Missing filename
+run_make_test('$(file >)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+run_make_test('$(file >>)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+run_make_test('$(file <)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+# Bad call
+
+run_make_test('$(file foo)', '',
+              "#MAKEFILE#:1: *** file: invalid file operation: foo.  Stop.\n", 512);
+
 1;

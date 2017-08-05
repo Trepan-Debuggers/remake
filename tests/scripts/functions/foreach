@@ -53,8 +53,26 @@ $(foreach x,FOREACH,$(eval $(value mktarget)))',
               '',
               'FOREACH');
 
+# Allow variable names with trailing space
+run_make_test(q!
+$(foreach \
+  a \
+, b c d \
+, $(info $a))
+all:;@:
+!,
+              "", "b\nc\nd\n");
 
-# TEST 2: Check some error conditions.
+# Allow empty variable names.  We still expand the body.
+
+run_make_test('
+x = $(foreach ,1 2 3,a)
+y := $x
+
+all: ; @echo $y',
+              '', "a a a\n");
+
+# Check some error conditions.
 
 run_make_test('
 x = $(foreach )
@@ -66,12 +84,12 @@ all: ; @echo $y',
               512);
 
 run_make_test('
-x = $(foreach )
+x = $(foreach x,y)
 y := $x
 
 all: ; @echo $y',
               '',
-              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function 'foreach'.  Stop.",
+              "#MAKEFILE#:2: *** insufficient number of arguments (2) to function 'foreach'.  Stop.",
               512);
 
 1;

@@ -86,8 +86,7 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
-$makefile:16: recipe for target 'notarget.b' failed
-$make_name: *** [notarget.b] Error 1
+$make_name: *** [$makefile:16: notarget.b] Error 1
 ";
 
 &compare_output($answer,&get_logfile(1));
@@ -127,3 +126,7 @@ rm inter.c
 unlink @touchedfiles unless $keep;
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

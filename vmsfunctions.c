@@ -1,5 +1,5 @@
 /* VMS functions
-Copyright (C) 1996-2014 Free Software Foundation, Inc.
+Copyright (C) 1996-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -118,7 +118,7 @@ closedir (DIR *dir)
       struct FAB *dfab = &dir->fab;
       struct NAM *dnam = (struct NAM *)(dfab->fab$l_nam);
       if (dnam != NULL)
-	free (dnam->nam$l_esa);
+        free (dnam->nam$l_esa);
       free (dnam);
       free (dir);
     }

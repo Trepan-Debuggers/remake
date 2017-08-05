@@ -12,7 +12,49 @@ if (!$parallel_jobs) {
   return -1;
 }
 
-# Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
+# Shorthand
+my $np = '--no-print-directory';
+
+# Simple test of MAKEFLAGS settings
+run_make_test(q!
+SHOW = $(patsubst --jobserver-auth=%,--jobserver-auth=<auth>,$(MAKEFLAGS))
+recurse: ; @echo $@: "/$(SHOW)/"; $(MAKE) -f #MAKEFILE# all
+all:;@echo $@: "/$(SHOW)/"
+!,
+              "-j2 $np", "recurse: /-j2 --jobserver-auth=<auth> $np/\nall: /-j2 --jobserver-auth=<auth> $np/\n");
+
+# Setting parallelism with the environment
+# Command line should take precedence over the environment
+$extraENV{MAKEFLAGS} = "-j2 $np";
+run_make_test(q!
+SHOW = $(patsubst --jobserver-auth=%,--jobserver-auth=<auth>,$(MAKEFLAGS))
+recurse: ; @echo $@: "/$(SHOW)/"; $(MAKE) -f #MAKEFILE# all
+all:;@echo $@: "/$(SHOW)/"
+!,
+              '', "recurse: /-j2 --jobserver-auth=<auth> $np/\nall: /-j2 --jobserver-auth=<auth> $np/\n");
+delete $extraENV{MAKEFLAGS};
+
+# Test override of -jN
+$extraENV{MAKEFLAGS} = "-j9 $np";
+run_make_test(q!
+SHOW = $(patsubst --jobserver-auth=%,--jobserver-auth=<auth>,$(MAKEFLAGS))
+recurse: ; @echo $@: "/$(SHOW)/"; $(MAKE) -j3 -f #MAKEFILE# recurse2
+recurse2: ; @echo $@: "/$(SHOW)/"; $(MAKE) -f #MAKEFILE# all
+all:;@echo $@: "/$(SHOW)/"
+!,
+              "-j2 $np", "recurse: /-j2 --jobserver-auth=<auth> $np/\n#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nrecurse2: /-j3 --jobserver-auth=<auth> $np/\nall: /-j3 --jobserver-auth=<auth> $np/\n");
+delete $extraENV{MAKEFLAGS};
+
+# Test override of -jN with -j
+run_make_test(q!
+SHOW = $(patsubst --jobserver-auth=%,--jobserver-auth=<auth>,$(MAKEFLAGS))
+recurse: ; @echo $@: "/$(SHOW)/"; $(MAKE) -j -f #MAKEFILE# recurse2
+recurse2: ; @echo $@: "/$(SHOW)/"; $(MAKE) -f #MAKEFILE# all
+all:;@echo $@: "/$(SHOW)/"
+!,
+              "-j2 $np", "recurse: /-j2 --jobserver-auth=<auth> $np/\n#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nrecurse2: /-j $np/\nall: /-j $np/\n");
+
+# Don't put --jobserver-auth into a re-exec'd MAKEFLAGS.
 # We can't test this directly because there's no way a makefile can
 # show the value of MAKEFLAGS we were re-exec'd with.  We can intuit it
 # by looking for "disabling jobserver mode" warnings; we should only
@@ -34,7 +76,7 @@ inc.mk:
 #	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
 	@echo 'FOO = bar' > $@
 !,
-              '--no-print-directory -j2', "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
+              "$np -j2", "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
 
 unlink('inc.mk');
 
@@ -52,10 +94,14 @@ close(MAKEFILE);
 run_make_test(q!
 default: ; @ #MAKEPATH# -f Makefile2
 !,
-              '-j2 --no-print-directory',
+              "-j2 $np",
 "#MAKE#[1]: warning: jobserver unavailable: using -j1.  Add '+' to parent make rule.
 #MAKE#[1]: Nothing to be done for 'foo'.");
 
 rmfiles('Makefile2');
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

@@ -1,5 +1,5 @@
 /* Definitions of dependency data structures for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -14,9 +14,21 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+
+/* Structure used in chains of names, for parsing and globbing.  */
+
+#define NAMESEQ(_t)     \
+    _t *next;           \
+    const char *name
+
+struct nameseq
+  {
+    NAMESEQ (struct nameseq);
+  };
+
 /* Flag bits for the second argument to 'read_makefile'.
-   These flags are saved in the 'changed' field of each
-   'struct dep' in the chain returned by 'read_all_makefiles'.  */
+   These flags are saved in the 'flags' field of each
+   'struct goaldep' in the chain returned by 'read_all_makefiles'.  */
 
 #define RM_NO_DEFAULT_GOAL      (1 << 0) /* Do not set default goal.  */
 #define RM_INCLUDED             (1 << 1) /* Search makefile search path.  */
@@ -25,33 +37,36 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define RM_NOFLAG               0
 
 /* Structure representing one dependency of a file.
-   Each struct file's 'deps' points to a chain of these,
-   chained through the 'next'. 'stem' is the stem for this
-   dep line of static pattern rule or NULL.
+   Each struct file's 'deps' points to a chain of these, through 'next'.
+   'stem' is the stem for this dep line of static pattern rule or NULL.  */
 
-   Note that the first two words of this match a struct nameseq.  */
+#define DEP(_t)                                 \
+    NAMESEQ (_t);                               \
+    struct file *file;                          \
+    const char *stem;                           \
+    unsigned short flags : 8;                   \
+    unsigned short changed : 1;                 \
+    unsigned short ignore_mtime : 1;            \
+    unsigned short staticpattern : 1;           \
+    unsigned short need_2nd_expansion : 1
 
 struct dep
   {
-    struct dep *next;
-    const char *name;
-    const char *stem;
-    struct file *file;
-    unsigned int changed : 8;
-    unsigned int ignore_mtime : 1;
-    unsigned int staticpattern : 1;
-    unsigned int need_2nd_expansion : 1;
-    unsigned int dontcare : 1;
+    DEP (struct dep);
   };
 
+/* Structure representing one goal.
+   The goals to be built constitute a chain of these, chained through 'next'.
+   'stem' is not used, but it's simpler to include and ignore it.  */
 
-/* Structure used in chains of names, for parsing and globbing.  */
-
-struct nameseq
+struct goaldep
   {
-    struct nameseq *next;
-    const char *name;
+    DEP (struct goaldep);
+    unsigned short error;
+    floc floc;
   };
+
+/* Options for parsing lists of filenames.  */
 
 #define PARSEFS_NONE    0x0000
 #define PARSEFS_NOSTRIP 0x0001
@@ -78,15 +93,39 @@ char *tilde_expand (const char *name);
 struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigned int size);
 #endif
 
-#define dep_name(d)     ((d)->name == 0 ? (d)->file->name : (d)->name)
+#define dep_name(d)        ((d)->name ? (d)->name : (d)->file->name)
 
-#define alloc_dep()     (xcalloc (sizeof (struct dep)))
-#define free_ns(_n)     free (_n)
-#define free_dep(_d)    free_ns (_d)
+#define alloc_seq_elt(_t)   xcalloc (sizeof (_t))
+void free_ns_chain (struct nameseq *n);
+
+#if defined(MAKE_MAINTAINER_MODE) && defined(__GNUC__)
+/* Use inline to get real type-checking.  */
+#define SI static inline
+SI struct nameseq *alloc_ns()      { return alloc_seq_elt (struct nameseq); }
+SI struct dep *alloc_dep()         { return alloc_seq_elt (struct dep); }
+SI struct goaldep *alloc_goaldep() { return alloc_seq_elt (struct goaldep); }
+
+SI void free_ns(struct nameseq *n)      { free (n); }
+SI void free_dep(struct dep *d)         { free_ns ((struct nameseq *)d); }
+SI void free_goaldep(struct goaldep *g) { free_dep ((struct dep *)g); }
+
+SI void free_dep_chain(struct dep *d)      { free_ns_chain((struct nameseq *)d); }
+SI void free_goal_chain(struct goaldep *g) { free_dep_chain((struct dep *)g); }
+#else
+# define alloc_ns()          alloc_seq_elt (struct nameseq)
+# define alloc_dep()         alloc_seq_elt (struct dep)
+# define alloc_goaldep()     alloc_seq_elt (struct goaldep)
+
+# define free_ns(_n)         free (_n)
+# define free_dep(_d)        free_ns (_d)
+# define free_goaldep(_g)    free_dep (_g)
+
+# define free_dep_chain(_d)  free_ns_chain ((struct nameseq *)(_d))
+# define free_goal_chain(_g) free_ns_chain ((struct nameseq *)(_g))
+#endif
 
 struct dep *copy_dep_chain (const struct dep *d);
-void free_dep_chain (struct dep *d);
-void free_ns_chain (struct nameseq *n);
-struct dep *read_all_makefiles (const char **makefiles);
-void eval_buffer (char *buffer, const gmk_floc *floc);
-enum update_status update_goal_chain (struct dep *goals);
+
+struct goaldep *read_all_makefiles (const char **makefiles);
+void eval_buffer (char *buffer, const floc *floc);
+enum update_status update_goal_chain (struct goaldep *goals);

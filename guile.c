@@ -1,5 +1,5 @@
 /* GNU Guile interface for GNU Make.
-Copyright (C) 2011-2014 Free Software Foundation, Inc.
+Copyright (C) 2011-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -140,7 +140,7 @@ func_guile (const char *funcname UNUSED, unsigned int argc UNUSED, char **argv)
 /* We could send the flocp to define_new_function(), but since guile is
    "kind of" built-in, that didn't seem so useful.  */
 int
-guile_gmake_setup (const gmk_floc *flocp UNUSED)
+guile_gmake_setup (const floc *flocp UNUSED)
 {
   /* Create a make function "guile".  */
   gmk_add_function ("guile", func_guile, 0, 1, GMK_FUNC_DEFAULT);
@@ -151,7 +151,7 @@ guile_gmake_setup (const gmk_floc *flocp UNUSED)
 #else
 
 int
-guile_gmake_setup (const gmk_floc *flocp UNUSED)
+guile_gmake_setup (const floc *flocp UNUSED)
 {
   return 1;
 }

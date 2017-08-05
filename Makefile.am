@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997-2014 Free Software Foundation, Inc.
+# Copyright (C) 1997-2016 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -16,8 +16,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
-ACLOCAL_AMFLAGS	=  -I config
+AUTOMAKE_OPTIONS = dist-bzip2 silent-rules std-options
+ACLOCAL_AMFLAGS = -I config
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -26,6 +26,9 @@ if WINDOWSENV
   MAYBE_W32 =	w32
   W32INC =	-I $(top_srcdir)/w32/include
   W32LIB =	-Lw32 -lw32
+  ossrc =
+else
+  ossrc =	posixos.c
 endif
 
 SUBDIRS =	glob config po doc $(MAYBE_W32)
@@ -41,14 +44,14 @@ endif
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c guile.c implicit.c job.c load.c \
-		loadapi.c main.c misc.c output.c read.c remake.c rule.c \
-		signame.c strcache.c variable.c version.c vpath.c hash.c \
-		$(remote)
+		loadapi.c main.c misc.c $(ossrc) output.c read.c remake.c \
+		rule.c signame.c strcache.c variable.c version.c vpath.c \
+		hash.c $(remote)
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h makeint.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h output.h
+		debug.h getopt.h gettext.h hash.h output.h os.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 		$(GUILE_LIBS)
@@ -71,7 +74,7 @@ endif
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS) \
+EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
 		README.customs README.OS2 \
 		SCOPTIONS SMakefile \
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
@@ -79,7 +82,8 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		README.VMS makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c \
+		vmsdir.h vmsfunctions.c vmsify.c vms_exit.c vms_progname.c \
+		vms_export_symbol.c vms_export_symbol_test.com \
 		gmk-default.scm gmk-default.h
 
 # This is built during configure, but behind configure's back
@@ -125,8 +129,8 @@ guile.$(OBJEXT): gmk-default.h
 gmk-default.h: $(srcdir)/gmk-default.scm
 	(echo 'static const char *const GUILE_module_defn = " '\\ \
 	  && sed -e 's/;.*//' -e '/^[ \t]*$$/d' -e 's/"/\\"/g' -e 's/$$/ \\/' \
-	         $(srcdir)/gmk-default.scm \
-          && echo '";') > $@
+		 $(srcdir)/gmk-default.scm \
+	  && echo '";') > $@
 
 # --------------- Local DIST Section
 
@@ -174,6 +178,7 @@ MAKETESTFLAGS =
 
 check-regression: tests/config-flags.pm
 	@if test -f '$(srcdir)/tests/run_make_tests'; then \
+	  ulimit -n 128; \
 	  if $(PERL) -v >/dev/null 2>&1; then \
 	    case `cd '$(srcdir)'; pwd` in `pwd`) : ;; \
 	      *) test -d tests || mkdir tests; \
@@ -188,9 +193,9 @@ check-regression: tests/config-flags.pm
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \
-	 else \
+	else \
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
-	 fi
+	fi
 
 
 # --------------- Maintainer's Section

@@ -310,4 +310,6 @@ foo     bar
 hi
 foo     bar');
 
+run_make_test('x:;@-exit 1', '', "#MAKE#: [#MAKEFILE#:1: x] Error 1 (ignored)\n");
+
 1;

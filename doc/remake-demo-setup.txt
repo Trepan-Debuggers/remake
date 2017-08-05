@@ -1,0 +1,6 @@
+cd /tmp/remake/doc 
+## emacs --geometry=800x600 ~/.emacs ??
+font DejaVu Sans Mono-11
+Edit title.txt
+M-x load-library dbgr
+

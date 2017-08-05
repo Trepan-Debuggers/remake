@@ -3,7 +3,7 @@ $! config_flags_pm.com  - Build config-flags.pm on VMS.
 $!
 $! Just good enough to run the self tests for now.
 $!
-$! Copyright (C) 2014 Free Software Foundation, Inc.
+$! Copyright (C) 2014-2016 Free Software Foundation, Inc.
 $! This file is part of GNU Make.
 $!
 $! GNU Make is free software; you can redistribute it and/or modify it under

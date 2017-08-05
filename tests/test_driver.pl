@@ -5,7 +5,7 @@
 # Written 91-12-02 through 92-01-01 by Stephen McGee.
 # Modified 92-02-11 through 92-02-22 by Chris Arthur to further generalize.
 #
-# Copyright (C) 1991-2014 Free Software Foundation, Inc.
+# Copyright (C) 1991-2016 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under

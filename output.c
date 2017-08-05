@@ -1,5 +1,5 @@
 /* Output to stdout / stderr for GNU make
-Copyright (C) 2013-2014 Free Software Foundation, Inc.
+Copyright (C) 2013-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -46,7 +46,7 @@ unsigned int stdio_traced = 0;
 
 #define OUTPUT_ISSET(_out) ((_out)->out >= 0 || (_out)->err >= 0)
 
-#ifdef HAVE_FCNTL
+#ifdef HAVE_FCNTL_H
 # define STREAM_OK(_s) ((fcntl (fileno (_s), F_GETFD) != -1) || (errno != EBADF))
 #else
 # define STREAM_OK(_s) 1
@@ -174,7 +174,7 @@ static sync_handle_t sync_handle = -1;
 
 /* Set up the sync handle.  Disables output_sync on error.  */
 static int
-sync_init ()
+sync_init (void)
 {
   int combined_output = 0;
 
@@ -283,7 +283,7 @@ release_semaphore (void *sem)
 /* Returns a file descriptor to a temporary file.  The file is automatically
    closed/deleted on exit.  Don't use a FILE* stream.  */
 int
-output_tmpfd ()
+output_tmpfd (void)
 {
   int fd = -1;
   FILE *tfile = tmpfile ();
@@ -344,7 +344,7 @@ setup_tmpfile (struct output *out)
   /* If we failed to create a temp file, disable output sync going forward.  */
  error:
   output_close (out);
-  output_sync = 0;
+  output_sync = OUTPUT_SYNC_NONE;
 }
 
 /* Synchronize the output of jobs in -j mode to keep the results of
@@ -441,7 +441,7 @@ output_tmpfile (char **name, const char *template)
 
 # ifdef HAVE_FDOPEN
   /* Can't use mkstemp(), but guard against a race condition.  */
-  fd = open (*name, O_CREAT|O_EXCL|O_WRONLY, 0600);
+  EINTRLOOP (fd, open (*name, O_CREAT|O_EXCL|O_WRONLY, 0600));
   if (fd == -1)
     return 0;
   return fdopen (fd, "w");
@@ -558,7 +558,7 @@ output_close (struct output *out)
 
 /* We're about to generate output: be sure it's set up.  */
 void
-output_start ()
+output_start (void)
 {
 #ifndef NO_OUTPUT_SYNC
   /* If we're syncing output make sure the temporary file is set up.  */
@@ -640,7 +640,7 @@ message (int prefix, size_t len, const char *fmt, ...)
 /* Print an error message.  */
 
 void
-error (const gmk_floc *flocp, size_t len, const char *fmt, ...)
+error (const floc *flocp, size_t len, const char *fmt, ...)
 {
   va_list args;
   char *p;
@@ -651,7 +651,7 @@ error (const gmk_floc *flocp, size_t len, const char *fmt, ...)
   p = get_buffer (len);
 
   if (flocp && flocp->filenm)
-    sprintf (p, "%s:%lu: ", flocp->filenm, flocp->lineno);
+    sprintf (p, "%s:%lu: ", flocp->filenm, flocp->lineno + flocp->offset);
   else if (makelevel == 0)
     sprintf (p, "%s: ", program);
   else
@@ -671,7 +671,7 @@ error (const gmk_floc *flocp, size_t len, const char *fmt, ...)
 /* Print an error message and exit.  */
 
 void
-fatal (const gmk_floc *flocp, size_t len, const char *fmt, ...)
+fatal (const floc *flocp, size_t len, const char *fmt, ...)
 {
   va_list args;
   const char *stop = _(".  Stop.\n");
@@ -683,7 +683,7 @@ fatal (const gmk_floc *flocp, size_t len, const char *fmt, ...)
   p = get_buffer (len);
 
   if (flocp && flocp->filenm)
-    sprintf (p, "%s:%lu: *** ", flocp->filenm, flocp->lineno);
+    sprintf (p, "%s:%lu: *** ", flocp->filenm, flocp->lineno + flocp->offset);
   else if (makelevel == 0)
     sprintf (p, "%s: *** ", program);
   else

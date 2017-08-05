@@ -4,7 +4,7 @@ $! This is a wrapper for the GNU make perl test programs on VMS.
 $!
 $! Parameter "-help" for description on how to use described below.
 $!
-$! Copyright (C) 2014 Free Software Foundation, Inc.
+$! Copyright (C) 2014-2016 Free Software Foundation, Inc.
 $! This file is part of GNU Make.
 $!
 $! GNU Make is free software; you can redistribute it and/or modify it under
@@ -238,18 +238,18 @@ $!
 $ if no_gnv .or. no_perl then exit 44
 $!
 $!
-$ make := $bin:make.exe
 $ default = f$environment("DEFAULT")
+$ default_dev = f$element(0, ":", default) + ":"
 $ this = f$environment("PROCEDURE")
 $ on error then goto all_error
-$ set default 'f$parse(this,,,"DEVICE")''f$parse(this,,,"DIRECTORY")'
+$ set default 'default_dev''f$parse(this,,,"DIRECTORY")'
 $!
 $! Need to make sure that the config-flags.pm exists.
 $ if f$search("config-flags.pm") .eqs. ""
 $ then
 $   @config_flags_pm.com
 $ endif
-$ define/user bin 'default',gnv$gnu:[bin]
+$ define/user bin 'default_dev'[-],gnv$gnu:[bin]
 $ define/user decc$filename_unix_noversion enable
 $ define/user decc$filename_unix_report enable
 $ define/user decc$readdir_dropdotnotype enable

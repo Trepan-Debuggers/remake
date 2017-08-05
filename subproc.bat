@@ -1,5 +1,5 @@
 @echo off
-rem Copyright (C) 1996-2014 Free Software Foundation, Inc.
+rem Copyright (C) 1996-2016 Free Software Foundation, Inc.
 rem This file is part of GNU Make.
 rem
 rem GNU Make is free software; you can redistribute it and/or modify it under
@@ -20,4 +20,5 @@ set MAKE=%2
 set MAKEFILE=%1
 if x%2 == x set MAKE=nmake
 %MAKE% /f %MAKEFILE%
+if ERRORLEVEL 1 exit /B
 cd ..\..

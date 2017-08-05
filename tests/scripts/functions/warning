@@ -52,14 +52,32 @@ $answer = "Some stuff\n$makefile:10: warning is maybe\nhi\n";
 # Test #4
 
 &run_make_with_options($makefile, "WARNING4=definitely", &get_logfile, 0);
-$answer = "Some stuff\n$makefile:14: warning is definitely\nhi\nthere\n";
+$answer = "Some stuff\n$makefile:15: warning is definitely\nhi\nthere\n";
 &compare_output($answer,&get_logfile(1));
+
+# Test linenumber offset
+
+run_make_test(q!
+all: one two
+	$(warning in $@ line 3)
+	@true
+	$(warning in $@ line 5)
+
+one two:
+	$(warning in $@ line 8)
+	@true
+	$(warning in $@ line 10)
+!,
+              '', "#MAKEFILE#:8: in one line 8
+#MAKEFILE#:10: in one line 10
+#MAKEFILE#:8: in two line 8
+#MAKEFILE#:10: in two line 10
+#MAKEFILE#:3: in all line 3
+#MAKEFILE#:5: in all line 5\n");
 
 # This tells the test driver that the perl test script executed properly.
 1;
 
-
-
-
-
-
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

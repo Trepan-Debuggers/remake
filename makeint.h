@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -95,8 +95,13 @@ char *alloca ();
 extern int errno;
 #endif
 
-#ifndef isblank
-# define isblank(c)     ((c) == ' ' || (c) == '\t')
+#ifdef __VMS
+/* In strict ANSI mode, VMS compilers should not be defining the
+   VMS macro.  Define it here instead of a bulk edit for the correct code.
+ */
+# ifndef VMS
+#  define VMS
+# endif
 #endif
 
 #ifdef  HAVE_UNISTD_H
@@ -127,6 +132,10 @@ extern int errno;
 
 #ifndef HAVE_SA_RESTART
 # define SA_RESTART 0
+#endif
+
+#ifdef HAVE_VFORK_H
+# include <vfork.h>
 #endif
 
 #ifdef  HAVE_LIMITS_H
@@ -201,6 +210,13 @@ unsigned int get_path_max (void);
 # include <perror.h>
 /* Needed to use alloca on VMS.  */
 # include <builtins.h>
+
+extern int vms_use_mcr_command;
+extern int vms_always_use_cmd_file;
+extern int vms_gnv_shell;
+extern int vms_comma_separator;
+extern int vms_legacy_behavior;
+extern int vms_unix_simulation;
 #endif
 
 #ifndef __attribute__
@@ -325,21 +341,6 @@ char *strsignal (int signum);
 #define N_(msgid)           gettext_noop (msgid)
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
-/* Handle other OSs.
-   To overcome an issue parsing paths in a DOS/Windows environment when
-   built in a unix based environment, override the PATH_SEPARATOR_CHAR
-   definition unless being built for Cygwin. */
-#if defined(HAVE_DOS_PATHS) && !defined(__CYGWIN__)
-# undef PATH_SEPARATOR_CHAR
-# define PATH_SEPARATOR_CHAR ';'
-#elif !defined(PATH_SEPARATOR_CHAR)
-# if defined (VMS)
-#  define PATH_SEPARATOR_CHAR ','
-# else
-#  define PATH_SEPARATOR_CHAR ':'
-# endif
-#endif
-
 /* This is needed for getcwd() and chdir(), on some W32 systems.  */
 #if defined(HAVE_DIRECT_H)
 # include <direct.h>
@@ -375,7 +376,7 @@ extern int unixy_shell;
 # endif
 
 /* Include only the minimal stuff from windows.h.   */
-#define WIN32_LEAN_AND_MEAN
+# define WIN32_LEAN_AND_MEAN
 #endif  /* WINDOWS32 */
 
 #define ANY_SET(_v,_m)  (((_v)&(_m)) != 0)
@@ -383,7 +384,7 @@ extern int unixy_shell;
 
 #define MAP_NUL         0x0001
 #define MAP_BLANK       0x0002
-#define MAP_SPACE       0x0004
+#define MAP_NEWLINE     0x0004
 #define MAP_COMMENT     0x0008
 #define MAP_SEMI        0x0010
 #define MAP_EQUALS      0x0020
@@ -406,7 +407,40 @@ extern int unixy_shell;
 # define MAP_VMSCOMMA   0x0000
 #endif
 
-#define STOP_SET(_v,_m) ANY_SET (stopchar_map[(unsigned char)(_v)],(_m))
+#define MAP_SPACE       (MAP_BLANK|MAP_NEWLINE)
+
+/* Handle other OSs.
+   To overcome an issue parsing paths in a DOS/Windows environment when
+   built in a unix based environment, override the PATH_SEPARATOR_CHAR
+   definition unless being built for Cygwin. */
+#if defined(HAVE_DOS_PATHS) && !defined(__CYGWIN__)
+# undef PATH_SEPARATOR_CHAR
+# define PATH_SEPARATOR_CHAR ';'
+# define MAP_PATHSEP    MAP_SEMI
+#elif !defined(PATH_SEPARATOR_CHAR)
+# if defined (VMS)
+#  define PATH_SEPARATOR_CHAR (vms_comma_separator ? ',' : ':')
+#  define MAP_PATHSEP    (vms_comma_separator ? MAP_COMMA : MAP_SEMI)
+# else
+#  define PATH_SEPARATOR_CHAR ':'
+#  define MAP_PATHSEP    MAP_COLON
+# endif
+#elif PATH_SEPARATOR_CHAR == ':'
+# define MAP_PATHSEP     MAP_COLON
+#elif PATH_SEPARATOR_CHAR == ';'
+# define MAP_PATHSEP     MAP_SEMI
+#elif PATH_SEPARATOR_CHAR == ','
+# define MAP_PATHSEP     MAP_COMMA
+#else
+# error "Unknown PATH_SEPARATOR_CHAR"
+#endif
+
+#define STOP_SET(_v,_m) ANY_SET(stopchar_map[(unsigned char)(_v)],(_m))
+
+#define ISBLANK(c)      STOP_SET((c),MAP_BLANK)
+#define ISSPACE(c)      STOP_SET((c),MAP_SPACE)
+#define NEXT_TOKEN(s)   while (ISSPACE (*(s))) ++(s)
+#define END_OF_TOKEN(s) while (! STOP_SET (*(s), MAP_SPACE|MAP_NUL)) ++(s)
 
 #if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 # define SET_STACK_SIZE
@@ -416,7 +450,9 @@ extern int unixy_shell;
 extern struct rlimit stack_limit;
 #endif
 
-#define NILF ((gmk_floc *)0)
+#include <glob.h>
+
+#define NILF ((floc *)0)
 
 #define CSTRLEN(_s)           (sizeof (_s)-1)
 #define STRING_SIZE_TUPLE(_s) (_s), CSTRLEN(_s)
@@ -424,20 +460,30 @@ extern struct rlimit stack_limit;
 /* The number of bytes needed to represent the largest integer as a string.  */
 #define INTSTR_LENGTH         CSTRLEN ("18446744073709551616")
 
+#define DEFAULT_TTYNAME "true"
 #ifdef HAVE_TTYNAME
 # define TTYNAME(_f) ttyname (_f)
 #else
-# define TTYNAME(_f) "true"
+# define TTYNAME(_f) DEFAULT_TTYNAME
 #endif
 
 
+
+/* Specify the location of elements read from makefiles.  */
+typedef struct
+  {
+    const char *filenm;
+    unsigned long lineno;
+    unsigned long offset;
+  } floc;
+
 const char *concat (unsigned int, ...);
 void message (int prefix, size_t length, const char *fmt, ...)
               __attribute__ ((__format__ (__printf__, 3, 4)));
-void error (const gmk_floc *flocp, size_t length, const char *fmt, ...)
+void error (const floc *flocp, size_t length, const char *fmt, ...)
             __attribute__ ((__format__ (__printf__, 3, 4)));
-void fatal (const gmk_floc *flocp, size_t length, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 3, 4)));
+void fatal (const floc *flocp, size_t length, const char *fmt, ...)
+            __attribute__ ((noreturn, __format__ (__printf__, 3, 4)));
 
 #define O(_t,_a,_f)           _t((_a), 0, (_f))
 #define OS(_t,_a,_f,_s)       _t((_a), strlen (_s), (_f), (_s))
@@ -483,7 +529,8 @@ time_t ar_member_date (const char *);
 typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
                                       long int hdrpos, long int datapos,
                                       long int size, long int date, int uid,
-                                      int gid, int mode, const void *arg);
+                                      int gid, unsigned int mode,
+                                      const void *arg);
 
 long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
 int ar_name_equal (const char *name, const char *mem, int truncated);
@@ -497,6 +544,8 @@ int file_exists_p (const char *);
 int file_impossible_p (const char *);
 void file_impossible (const char *);
 const char *dir_name (const char *);
+void print_dir_data_base (void);
+void dir_setup_glob (glob_t *);
 void hash_init_directories (void);
 
 void define_default_variables (void);
@@ -519,20 +568,21 @@ void child_access (void);
 
 char *strip_whitespace (const char **begpp, const char **endpp);
 
+void show_goal_error (void);
+
 /* String caching  */
 void strcache_init (void);
 void strcache_print_stats (const char *prefix);
 int strcache_iscached (const char *str);
 const char *strcache_add (const char *str);
 const char *strcache_add_len (const char *str, unsigned int len);
-int strcache_setbufsize (unsigned int size);
 
 /* Guile support  */
-int guile_gmake_setup (const gmk_floc *flocp);
+int guile_gmake_setup (const floc *flocp);
 
 /* Loadable object support.  Sets to the strcached name of the loaded file.  */
-typedef int (*load_func_t)(const gmk_floc *flocp);
-int load_file (const gmk_floc *flocp, const char **filename, int noerror);
+typedef int (*load_func_t)(const floc *flocp);
+int load_file (const floc *flocp, const char **filename, int noerror);
 void unload_file (const char *name);
 
 /* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
@@ -545,16 +595,16 @@ long int atol ();
 long int lseek ();
 # endif
 
-#endif  /* Not GNU C library or POSIX.  */
-
-#ifdef  HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
+# ifdef  HAVE_GETCWD
+#  if !defined(VMS) && !defined(__DECC)
 char *getcwd ();
-# endif
-#else
+#  endif
+# else
 char *getwd ();
-# define getcwd(buf, len)       getwd (buf)
-#endif
+#  define getcwd(buf, len)       getwd (buf)
+# endif
+
+#endif  /* Not GNU C library or POSIX.  */
 
 #if !HAVE_STRCASECMP
 # if HAVE_STRICMP
@@ -583,10 +633,11 @@ int strncasecmp (const char *s1, const char *s2, int n);
 #define OUTPUT_SYNC_TARGET  2
 #define OUTPUT_SYNC_RECURSE 3
 
-extern const gmk_floc *reading_file;
-extern const gmk_floc **expanding_var;
-
+/* Non-GNU systems may not declare this in unistd.h.  */
 extern char **environ;
+
+extern const floc *reading_file;
+extern const floc **expanding_var;
 
 extern unsigned short stopchar_map[];
 
@@ -598,6 +649,8 @@ extern int warn_undefined_variables_flag, trace_flag, posix_pedantic;
 extern int not_parallel, second_expansion, clock_skew_detected;
 extern int rebuilding_makefiles, one_shell, output_sync, verify_flag;
 
+extern const char *default_shell;
+
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
 
@@ -607,8 +660,6 @@ extern int batch_mode_shell;
 extern char cmd_prefix;
 
 extern unsigned int job_slots;
-extern int job_fds[2];
-extern int job_rfd;
 #ifndef NO_FLOAT
 extern double max_load_average;
 #else
@@ -622,9 +673,45 @@ extern const char *program;
 #endif
 
 #ifdef VMS
-const char *vms_command(const char *argv0);
-const char *vms_progname(const char *argv0);
+const char *vms_command (const char *argv0);
+const char *vms_progname (const char *argv0);
+
+void vms_exit (int);
+# define _exit(foo) vms_exit(foo)
+# define exit(foo) vms_exit(foo)
+
+extern char *program_name;
+
+void
+set_program_name (const char *arv0);
+
+int
+need_vms_symbol (void);
+
+int
+create_foreign_command (const char *command, const char *image);
+
+int
+vms_export_dcl_symbol (const char *name, const char *value);
+
+int
+vms_putenv_symbol (const char *string);
+
+void
+vms_restore_symbol (const char *string);
+
 #endif
+
+void remote_setup (void);
+void remote_cleanup (void);
+int start_remote_job_p (int);
+int start_remote_job (char **, char **, int, int *, int *, int *);
+int remote_status (int *, int *, int *, int);
+void block_remote_children (void);
+void unblock_remote_children (void);
+int remote_kill (int id, int sig);
+void print_variable_data_base (void);
+void print_vpath_data_base (void);
 
 extern char *starting_directory;
 extern unsigned int makelevel;
@@ -643,18 +730,9 @@ extern int handling_fatal_signal;
 #endif
 
 
-#ifdef VMS
-/* These are the VMS __posix_exit compliant exit codes, constructed out of
-   STS$M_INHIB_MSG, C facility code, a POSIX condition code mask, MAKE_NNN<<3 and
-   the coresponding VMS severity, here STS$K_SUCCESS and STS$K_ERROR. */
-#  define MAKE_SUCCESS 0x1035a001
-#  define MAKE_TROUBLE 0x1035a00a
-#  define MAKE_FAILURE 0x1035a012
-#else
-#  define MAKE_SUCCESS 0
-#  define MAKE_TROUBLE 1
-#  define MAKE_FAILURE 2
-#endif
+#define MAKE_SUCCESS 0
+#define MAKE_TROUBLE 1
+#define MAKE_FAILURE 2
 
 /* Set up heap debugging library dmalloc.  */
 

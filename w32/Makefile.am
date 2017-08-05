@@ -1,5 +1,5 @@
 # Makefile.am to create libw32.a for mingw32 host.
-# Copyright (C) 1997-2014 Free Software Foundation, Inc.
+# Copyright (C) 1997-2016 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -20,6 +20,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 noinst_LIBRARIES = libw32.a
 
 libw32_a_SOURCES =  subproc/misc.c subproc/sub_proc.c subproc/w32err.c \
-		    compat/posixfcn.c pathstuff.c
+		    compat/posixfcn.c pathstuff.c w32os.c
 
 libw32_a_CPPFLAGS = -I$(srcdir)/include -I$(srcdir)/subproc -I$(top_srcdir)

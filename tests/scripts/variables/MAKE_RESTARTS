@@ -11,7 +11,6 @@ include foo.x
 foo.x: ; @touch $@
 ',
               '', 'MAKE_RESTARTS=
-#MAKEFILE#:4: foo.x: No such file or directory
 MAKE_RESTARTS=1');
 
 rmfiles('foo.x');
@@ -26,9 +25,7 @@ foo.x: ; @echo "include bar.x" > $@
 bar.x: ; @touch $@
 ',
               '', 'MAKE_RESTARTS=
-#MAKEFILE#:4: foo.x: No such file or directory
 MAKE_RESTARTS=1
-foo.x:1: bar.x: No such file or directory
 MAKE_RESTARTS=2');
 
 rmfiles('foo.x', 'bar.x');
@@ -47,9 +44,7 @@ foo.x: ; @echo "include bar.x" > $@
 bar.x: ; @touch $@
 ',
               '', "MAKE_RESTARTS=
-#MAKEFILE#:8: foo.x: No such file or directory
 MAKE_RESTARTS=1
-foo.x:1: bar.x: No such file or directory
 MAKE_RESTARTS=2
 recurse MAKE_RESTARTS=
 #MAKE#[1]: Entering directory '#PWD#'
@@ -60,3 +55,7 @@ all MAKE_RESTARTS=
 rmfiles('foo.x', 'bar.x');
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

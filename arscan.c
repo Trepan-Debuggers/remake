@@ -1,5 +1,5 @@
 /* Library function for scanning an archive file.
-Copyright (C) 1987-2014 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -38,12 +38,18 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <ssdef.h>
 #include <stsdef.h>
 #include <rmsdef.h>
-globalvalue unsigned int LBR$_HDRTRUNC;
 
-#if __DECC
+/* This symbol should be present in lbrdef.h. */
+#ifndef LBR$_HDRTRUNC
+#pragma extern_model save
+#pragma extern_model globalvalue
+extern unsigned int LBR$_HDRTRUNC;
+#pragma extern_model restore
+#endif
+
 #include <unixlib.h>
 #include <lbr$routines.h>
-#endif
+
 const char *
 vmsify (const char *name, int type);
 
@@ -414,7 +420,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #ifdef SARMAG
   {
     char buf[SARMAG];
-    register int nread = read (desc, buf, SARMAG);
+    int nread;
+    EINTRLOOP (nread, read (desc, buf, SARMAG));
     if (nread != SARMAG || memcmp (buf, ARMAG, SARMAG))
       {
         (void) close (desc);
@@ -424,8 +431,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #else
 #ifdef AIAMAG
   {
-    register int nread = read (desc, &fl_header, FL_HSZ);
-
+    int nread;
+    EINTRLOOP (nread, read (desc, &fl_header, FL_HSZ));
     if (nread != FL_HSZ)
       {
         (void) close (desc);
@@ -436,17 +443,20 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
        re-read the header into the "big" structure. */
     if (!memcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
       {
+        off_t o;
+
         big_archive = 1;
 
         /* seek back to beginning of archive */
-        if (lseek (desc, 0, 0) < 0)
+        EINTRLOOP (o, lseek (desc, 0, 0));
+        if (o < 0)
           {
             (void) close (desc);
             return -2;
           }
 
         /* re-read the header into the "big" structure */
-        nread = read (desc, &fl_header_big, FL_HSZ_BIG);
+        EINTRLOOP (nread, read (desc, &fl_header_big, FL_HSZ_BIG));
         if (nread != FL_HSZ_BIG)
           {
             (void) close (desc);
@@ -469,7 +479,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #else
     unsigned short int buf;
 #endif
-    register int nread = read (desc, &buf, sizeof (buf));
+    int nread;
+    EINTRLOOP (nread, read (desc, &buf, sizeof (buf)));
     if (nread != sizeof (buf) || buf != ARMAG)
       {
         (void) close (desc);
@@ -536,10 +547,12 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
         int long_name = 0;
 #endif
         long int eltsize;
-        int eltmode;
+        unsigned int eltmode;
         long int fnval;
+        off_t o;
 
-        if (lseek (desc, member_offset, 0) < 0)
+        EINTRLOOP (o, lseek (desc, member_offset, 0));
+        if (o < 0)
           {
             (void) close (desc);
             return -2;
@@ -551,8 +564,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #ifdef AIAMAGBIG
         if (big_archive)
           {
-            nread = read (desc, &member_header_big,
-                          AR_MEMHDR_SZ(member_header_big) );
+            EINTRLOOP (nread, read (desc, &member_header_big,
+                                    AR_MEMHDR_SZ(member_header_big)));
 
             if (nread != AR_MEMHDR_SZ(member_header_big))
               {
@@ -561,7 +574,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
               }
 
             sscanf (member_header_big.ar_namlen, "%4d", &name_len);
-            nread = read (desc, name, name_len);
+            EINTRLOOP (nread, read (desc, name, name_len));
 
             if (nread != name_len)
               {
@@ -583,8 +596,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
         else
 #endif
           {
-            nread = read (desc, &member_header,
-                          AR_MEMHDR_SZ(member_header) );
+            EINTRLOOP (nread, read (desc, &member_header,
+                                    AR_MEMHDR_SZ(member_header)));
 
             if (nread != AR_MEMHDR_SZ(member_header))
               {
@@ -593,7 +606,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
               }
 
             sscanf (member_header.ar_namlen, "%4d", &name_len);
-            nread = read (desc, name, name_len);
+            EINTRLOOP (nread, read (desc, name, name_len));
 
             if (nread != name_len)
               {
@@ -621,7 +634,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
                        eltmode, arg);
 
 #else   /* Not AIAMAG.  */
-        nread = read (desc, &member_header, AR_HDR_SIZE);
+        EINTRLOOP (nread, read (desc, &member_header, AR_HDR_SIZE));
         if (nread == 0)
           /* No data left means end of file; that is OK.  */
           break;
@@ -690,7 +703,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
               int namesize = atoi (name + 3);
 
               name = alloca (namesize + 1);
-              nread = read (desc, name, namesize);
+              EINTRLOOP (nread, read (desc, name, namesize));
               if (nread != namesize)
                 {
                   close (desc);
@@ -761,7 +774,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
             char *limit;
 
             namemap = alloca (eltsize);
-            nread = read (desc, namemap, eltsize);
+            EINTRLOOP (nread, read (desc, namemap, eltsize));
             if (nread != eltsize)
               {
                 (void) close (desc);
@@ -859,7 +872,7 @@ static long int
 ar_member_pos (int desc UNUSED, const char *mem, int truncated,
                long int hdrpos, long int datapos UNUSED, long int size UNUSED,
                long int date UNUSED, int uid UNUSED, int gid UNUSED,
-               int mode UNUSED, const void *name)
+               unsigned int mode UNUSED, const void *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -879,7 +892,8 @@ ar_member_touch (const char *arname, const char *memname)
   long int pos = ar_scan (arname, ar_member_pos, memname);
   int fd;
   struct ar_hdr ar_hdr;
-  int i;
+  off_t o;
+  int r;
   unsigned int ui;
   struct stat statbuf;
 
@@ -888,28 +902,32 @@ ar_member_touch (const char *arname, const char *memname)
   if (!pos)
     return 1;
 
-  fd = open (arname, O_RDWR, 0666);
+  EINTRLOOP (fd, open (arname, O_RDWR, 0666));
   if (fd < 0)
     return -3;
   /* Read in this member's header */
-  if (lseek (fd, pos, 0) < 0)
+  EINTRLOOP (o, lseek (fd, pos, 0));
+  if (o < 0)
     goto lose;
-  if (AR_HDR_SIZE != read (fd, &ar_hdr, AR_HDR_SIZE))
+  EINTRLOOP (r, read (fd, &ar_hdr, AR_HDR_SIZE));
+  if (r != AR_HDR_SIZE)
     goto lose;
   /* Write back the header, thus touching the archive file.  */
-  if (lseek (fd, pos, 0) < 0)
+  EINTRLOOP (o, lseek (fd, pos, 0));
+  if (o < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
+  EINTRLOOP (r, write (fd, &ar_hdr, AR_HDR_SIZE));
+  if (r != AR_HDR_SIZE)
     goto lose;
   /* The file's mtime is the time we we want.  */
-  EINTRLOOP (i, fstat (fd, &statbuf));
-  if (i < 0)
+  EINTRLOOP (r, fstat (fd, &statbuf));
+  if (r < 0)
     goto lose;
 #if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(WINDOWS32)
   /* Advance member's time to that time */
   for (ui = 0; ui < sizeof ar_hdr.ar_date; ui++)
     ar_hdr.ar_date[ui] = ' ';
-  sprintf (TOCHAR (ar_hdr.ar_date), "%ld", (long int) statbuf.st_mtime);
+  sprintf (TOCHAR (ar_hdr.ar_date), "%lu", (long unsigned) statbuf.st_mtime);
 #ifdef AIAMAG
   ar_hdr.ar_date[strlen (ar_hdr.ar_date)] = ' ';
 #endif
@@ -917,17 +935,19 @@ ar_member_touch (const char *arname, const char *memname)
   ar_hdr.ar_date = statbuf.st_mtime;
 #endif
   /* Write back this member's header */
-  if (lseek (fd, pos, 0) < 0)
+  EINTRLOOP (o, lseek (fd, pos, 0));
+  if (o < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
+  EINTRLOOP (r, write (fd, &ar_hdr, AR_HDR_SIZE));
+  if (r != AR_HDR_SIZE)
     goto lose;
   close (fd);
   return 0;
 
  lose:
-  i = errno;
+  r = errno;
   close (fd);
-  errno = i;
+  errno = r;
   return -3;
 }
 #endif
@@ -937,7 +957,8 @@ ar_member_touch (const char *arname, const char *memname)
 long int
 describe_member (int desc, const char *name, int truncated,
                  long int hdrpos, long int datapos, long int size,
-                 long int date, int uid, int gid, int mode, const void *arg)
+                 long int date, int uid, int gid, unsigned int mode,
+                 const void *arg)
 {
   extern char *ctime ();
 

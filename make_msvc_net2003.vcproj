@@ -235,6 +235,9 @@
 					RelativePath=".\w32\pathstuff.c">
 				</File>
 				<File
+					RelativePath=".\w32\w32os.c">
+				</File>
+				<File
 					RelativePath=".\w32\subproc\sub_proc.c">
 				</File>
 				<File

@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "os.h"
 #include "filedef.h"
 #include "dep.h"
 #include "variable.h"
@@ -47,18 +48,41 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef _AMIGA
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
+#ifdef VMS
+int vms_use_mcr_command = 0;
+int vms_always_use_cmd_file = 0;
+int vms_gnv_shell = 0;
+int vms_legacy_behavior = 0;
+int vms_comma_separator = 0;
+int vms_unix_simulation = 0;
+int vms_report_unix_paths = 0;
 
-void init_dir (void);
-void remote_setup (void);
-void remote_cleanup (void);
-RETSIGTYPE fatal_error_signal (int sig);
+/* Evaluates if a VMS environment option is set, only look at first character */
+static int
+get_vms_env_flag (const char *name, int default_value)
+{
+char * value;
+char x;
 
-void print_variable_data_base (void);
-void print_dir_data_base (void);
-void print_rule_data_base (void);
-void print_vpath_data_base (void);
+  value = getenv (name);
+  if (value == NULL)
+    return default_value;
 
-void verify_file_data_base (void);
+  x = toupper (value[0]);
+  switch (x)
+    {
+    case '1':
+    case 'T':
+    case 'E':
+      return 1;
+      break;
+    case '0':
+    case 'F':
+    case 'D':
+      return 0;
+    }
+}
+#endif
 
 #if defined HAVE_WAITPID || defined HAVE_WAIT3
 # define HAVE_WAIT_NOHANG
@@ -223,27 +247,28 @@ struct rlimit stack_limit;
 #endif
 
 
-/* Number of job slots (commands that can be run at once).  */
+/* Number of job slots for parallelism.  */
 
-unsigned int job_slots = 1;
-unsigned int default_job_slots = 1;
+unsigned int job_slots;
+
+#define INVALID_JOB_SLOTS (-1)
 static unsigned int master_job_slots = 0;
+static int arg_job_slots = INVALID_JOB_SLOTS;
+
+static const int default_job_slots = INVALID_JOB_SLOTS;
 
 /* Value of job_slots that means no limit.  */
 
-static unsigned int inf_jobs = 0;
+static const int inf_jobs = 0;
 
-/* File descriptors for the jobs pipe.  */
+/* Authorization for the jobserver.  */
 
-char *jobserver_fds = 0;
-
-int job_fds[2] = { -1, -1 };
-int job_rfd = -1;
+static char *jobserver_auth = NULL;
 
 /* Handle for the mutex used on Windows to synchronize output of our
    children under -O.  */
 
-char *sync_mutex = 0;
+char *sync_mutex = NULL;
 
 /* Maximum load average at which multiple jobs will be run.
    Negative values mean unlimited, while zero means limit to
@@ -423,7 +448,7 @@ static const struct command_switch switches[] =
     { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'I', filename, &include_directories, 1, 1, 0, 0, 0,
       "include-dir" },
-    { 'j', positive_int, &job_slots, 1, 1, 0, &inf_jobs, &default_job_slots,
+    { 'j', positive_int, &arg_job_slots, 1, 1, 0, &inf_jobs, &default_job_slots,
       "jobs" },
 #ifndef NO_FLOAT
     { 'l', floating, &max_load_average, 1, 1, 0, &default_load_average,
@@ -438,7 +463,7 @@ static const struct command_switch switches[] =
 
     /* These are long-style options.  */
     { CHAR_MAX+1, strlist, &db_flags, 1, 1, 0, "basic", 0, "debug" },
-    { CHAR_MAX+2, string, &jobserver_fds, 1, 1, 0, 0, 0, "jobserver-fds" },
+    { CHAR_MAX+2, string, &jobserver_auth, 1, 1, 0, 0, 0, "jobserver-auth" },
     { CHAR_MAX+3, flag, &trace_flag, 1, 1, 0, 0, 0, "trace" },
     { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
@@ -466,7 +491,7 @@ static struct option long_option_aliases[] =
 
 /* List of goal targets.  */
 
-static struct dep *goals, *lastgoal;
+static struct goaldep *goals, *lastgoal;
 
 /* List of variables which were defined on the command line
    (or, equivalently, in MAKEFLAGS).  */
@@ -565,7 +590,7 @@ struct output make_sync;
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
 
-#ifdef  POSIX
+#ifdef POSIX
 sigset_t fatal_signal_set;
 #else
 # ifdef HAVE_SIGSETMASK
@@ -608,7 +633,7 @@ initialize_global_hash_tables (void)
    Each element is true if we should stop parsing on that character.  */
 
 static void
-initialize_stopchar_map ()
+initialize_stopchar_map (void)
 {
   int i;
 
@@ -626,21 +651,25 @@ initialize_stopchar_map ()
   stopchar_map[(int)'-'] = MAP_USERFUNC;
   stopchar_map[(int)'_'] = MAP_USERFUNC;
 
+  stopchar_map[(int)' '] = MAP_BLANK;
+  stopchar_map[(int)'\t'] = MAP_BLANK;
+
   stopchar_map[(int)'/'] = MAP_DIRSEP;
 #if defined(VMS)
-  stopchar_map[(int)']'] = MAP_DIRSEP;
+  stopchar_map[(int)':'] |= MAP_DIRSEP;
+  stopchar_map[(int)']'] |= MAP_DIRSEP;
+  stopchar_map[(int)'>'] |= MAP_DIRSEP;
 #elif defined(HAVE_DOS_PATHS)
-  stopchar_map[(int)'\\'] = MAP_DIRSEP;
+  stopchar_map[(int)'\\'] |= MAP_DIRSEP;
 #endif
 
   for (i = 1; i <= UCHAR_MAX; ++i)
     {
-      if (isblank(i))
-        stopchar_map[i] = MAP_BLANK;
-      if (isspace(i))
-        stopchar_map[i] |= MAP_SPACE;
-      if (isalnum(i))
-        stopchar_map[i] = MAP_USERFUNC;
+      if (isspace (i) && NONE_SET (stopchar_map[i], MAP_BLANK))
+        /* Don't mark blank characters as newline characters.  */
+        stopchar_map[i] |= MAP_NEWLINE;
+      else if (isalnum (i))
+        stopchar_map[i] |= MAP_USERFUNC;
     }
 }
 
@@ -759,6 +788,9 @@ decode_debug_flags (void)
 static void
 decode_output_sync_flags (void)
 {
+#ifdef NO_OUTPUT_SYNC
+  output_sync = OUTPUT_SYNC_NONE;
+#else
   if (output_sync_option)
     {
       if (streq (output_sync_option, "none"))
@@ -776,6 +808,7 @@ decode_output_sync_flags (void)
 
   if (sync_mutex)
     RECORD_SYNC_MUTEX (sync_mutex);
+#endif
 }
 
 #ifdef WINDOWS32
@@ -1017,6 +1050,14 @@ msdos_return_to_initial_directory (void)
 }
 #endif  /* __MSDOS__ */
 
+static void
+reset_jobserver (void)
+{
+  jobserver_clear ();
+  free (jobserver_auth);
+  jobserver_auth = NULL;
+}
+
 #ifdef _AMIGA
 int
 main (int argc, char **argv)
@@ -1027,10 +1068,11 @@ main (int argc, char **argv, char **envp)
 {
   static char *stdin_nm = 0;
   int makefile_status = MAKE_SUCCESS;
-  struct dep *read_files;
+  struct goaldep *read_files;
   PATH_VAR (current_directory);
   unsigned int restarts = 0;
   unsigned int syncing = 0;
+  int argv_slots;
 #ifdef WINDOWS32
   const char *unix_path = NULL;
   const char *windows32_path = NULL;
@@ -1190,14 +1232,58 @@ main (int argc, char **argv, char **envp)
             }
         }
 #endif
-      if (program == 0)
 #ifdef VMS
-        program = vms_progname(argv[0]);
+      set_program_name (argv[0]);
+      program = program_name;
+      {
+        const char *shell;
+        char pwdbuf[256];
+        char *pwd;
+        shell = getenv ("SHELL");
+        if (shell != NULL)
+          vms_gnv_shell = 1;
+
+        /* Need to know if CRTL set to report UNIX paths.  Use getcwd as
+           it works on all versions of VMS. */
+        pwd = getcwd(pwdbuf, 256);
+        if (pwd[0] == '/')
+          vms_report_unix_paths = 1;
+
+        vms_use_mcr_command = get_vms_env_flag ("GNV$MAKE_USE_MCR", 0);
+
+        vms_always_use_cmd_file = get_vms_env_flag ("GNV$MAKE_USE_CMD_FILE", 0);
+
+        /* Legacy behavior is on VMS is older behavior that needed to be
+           changed to be compatible with standard make behavior.
+           For now only completely disable when running under a Bash shell.
+           TODO: Update VMS built in recipes and macros to not need this
+           behavior, at which time the default may change. */
+        vms_legacy_behavior = get_vms_env_flag ("GNV$MAKE_OLD_VMS",
+                                                !vms_gnv_shell);
+
+        /* VMS was changed to use a comma separator in the past, but that is
+           incompatible with built in functions that expect space separated
+           lists.  Allow this to be selectively turned off. */
+        vms_comma_separator = get_vms_env_flag ("GNV$MAKE_COMMA",
+                                                vms_legacy_behavior);
+
+        /* Some Posix shell syntax options are incompatible with VMS syntax.
+           VMS requires double quotes for strings and escapes quotes
+           differently.  When this option is active, VMS will try
+           to simulate Posix shell simulations instead of using
+           VMS DCL behavior. */
+        vms_unix_simulation = get_vms_env_flag ("GNV$MAKE_SHELL_SIM",
+                                                !vms_legacy_behavior);
+
+      }
+      if (need_vms_symbol () && !vms_use_mcr_command)
+        create_foreign_command (program_name, argv[0]);
 #else
+      if (program == 0)
         program = argv[0];
-#endif
       else
         ++program;
+#endif
     }
 
   /* Set up to access user data (files).  */
@@ -1234,6 +1320,7 @@ main (int argc, char **argv, char **envp)
   /* define_variable_cname (".TARGETS", "", o_default, 0)->special = 1; */
   define_variable_cname (".RECIPEPREFIX", "", o_default, 0)->special = 1;
   define_variable_cname (".SHELLFLAGS", "-c", o_default, 0);
+  define_variable_cname (".LOADED", "", o_default, 0);
 
   /* Set up .FEATURES
      Use a separate variable because define_variable_cname() is a macro and
@@ -1381,13 +1468,6 @@ main (int argc, char **argv, char **envp)
 
   decode_env_switches (STRING_SIZE_TUPLE ("MAKEFLAGS"));
 
-  /* In output sync mode we need to sync any output generated by reading the
-     makefiles, such as in $(info ...) or stderr from $(shell ...) etc.  */
-
-  syncing = make_sync.syncout = (output_sync == OUTPUT_SYNC_LINE
-                                 || output_sync == OUTPUT_SYNC_TARGET);
-  OUTPUT_SET (&make_sync);
-
 #if 0
   /* People write things like:
         MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
@@ -1395,19 +1475,41 @@ main (int argc, char **argv, char **envp)
   decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
 
-  decode_switches (argc, (const char **)argv, 0);
+  /* In output sync mode we need to sync any output generated by reading the
+     makefiles, such as in $(info ...) or stderr from $(shell ...) etc.  */
 
-    /* Set a variable specifying whether stdout/stdin is hooked to a TTY.  */
+  syncing = make_sync.syncout = (output_sync == OUTPUT_SYNC_LINE
+                                 || output_sync == OUTPUT_SYNC_TARGET);
+  OUTPUT_SET (&make_sync);
+
+  /* Remember the job slots set through the environment vs. command line.  */
+  {
+    int env_slots = arg_job_slots;
+    arg_job_slots = INVALID_JOB_SLOTS;
+
+    decode_switches (argc, (const char **)argv, 0);
+    argv_slots = arg_job_slots;
+
+    if (arg_job_slots == INVALID_JOB_SLOTS)
+      arg_job_slots = env_slots;
+  }
+
+  /* Set a variable specifying whether stdout/stdin is hooked to a TTY.  */
 #ifdef HAVE_ISATTY
-    if (isatty (fileno (stdout)))
-      if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMOUT")))
-        define_variable_cname ("MAKE_TERMOUT", TTYNAME (fileno (stdout)),
+  if (isatty (fileno (stdout)))
+    if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMOUT")))
+      {
+        const char *tty = TTYNAME (fileno (stdout));
+        define_variable_cname ("MAKE_TERMOUT", tty ? tty : DEFAULT_TTYNAME,
                                o_default, 0)->export = v_export;
-
-    if (isatty (fileno (stderr)))
-      if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMERR")))
-        define_variable_cname ("MAKE_TERMERR", TTYNAME (fileno (stderr)),
+      }
+  if (isatty (fileno (stderr)))
+    if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMERR")))
+      {
+        const char *tty = TTYNAME (fileno (stderr));
+        define_variable_cname ("MAKE_TERMERR", tty ? tty : DEFAULT_TTYNAME,
                                o_default, 0)->export = v_export;
+      }
 #endif
 
   /* Reset in case the switches changed our minds.  */
@@ -1507,94 +1609,52 @@ main (int argc, char **argv, char **envp)
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
 
-#ifdef MAKE_JOBSERVER
-  /* If the jobserver-fds option is seen, make sure that -j is reasonable.
-     This can't be usefully set in the makefile, and we want to verify the
-     FDs are valid before any other aspect of make has a chance to start
-     using them for something else.  */
+  /* Set up the job_slots value and the jobserver.  This can't be usefully set
+     in the makefile, and we want to verify the authorization is valid before
+     make has a chance to start using it for something else.  */
 
-  if (jobserver_fds)
+  if (jobserver_auth)
     {
-      /* Make sure the jobserver option has the proper format.  */
-      const char *cp = jobserver_fds;
-
-#ifdef WINDOWS32
-      if (! open_jobserver_semaphore (cp))
+      if (argv_slots == INVALID_JOB_SLOTS)
         {
-          DWORD err = GetLastError ();
-          const char *estr = map_windows32_error_to_string (err);
-          fatal (NILF, strlen (cp) + INTSTR_LENGTH + strlen (estr),
-                 _("internal error: unable to open jobserver semaphore '%s': (Error %ld: %s)"),
-                 cp, err, estr);
+          if (jobserver_parse_auth (jobserver_auth))
+            {
+              /* Success!  Use the jobserver.  */
+              job_slots = 0;
+              goto job_setup_complete;
+            }
+
+          O (error, NILF, _("warning: jobserver unavailable: using -j1.  Add '+' to parent make rule."));
+          arg_job_slots = 1;
         }
-      DB (DB_JOBS, (_("Jobserver client (semaphore %s)\n"), cp));
-#else
-      if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
-        OS (fatal, NILF,
-            _("internal error: invalid --jobserver-fds string '%s'"), cp);
 
-      DB (DB_JOBS,
-          (_("Jobserver client (fds %d,%d)\n"), job_fds[0], job_fds[1]));
-#endif
+      /* The user provided a -j setting on the command line: use it.  */
+      else if (!restarts)
+        /* If restarts is >0 we already printed this message.  */
+        O (error, NILF,
+           _("warning: -jN forced in submake: disabling jobserver mode."));
 
-      /* The combination of a pipe + !job_slots means we're using the
-         jobserver.  If !job_slots and we don't have a pipe, we can start
-         infinite jobs.  If we see both a pipe and job_slots >0 that means the
-         user set -j explicitly.  This is broken; in this case obey the user
-         (ignore the jobserver pipe for this make) but print a message.
-         If we've restarted, we already printed this the first time.  */
-
-      if (job_slots > 0)
-        {
-          if (! restarts)
-            O (error, NILF,
-               _("warning: -jN forced in submake: disabling jobserver mode."));
-        }
-#ifndef WINDOWS32
-#ifdef HAVE_FCNTL
-# define FD_OK(_f) ((fcntl ((_f), F_GETFD) != -1) || (errno != EBADF))
-#else
-# define FD_OK(_f) 1
-#endif
-      /* Create a duplicate pipe, that will be closed in the SIGCHLD
-         handler.  If this fails with EBADF, the parent has closed the pipe
-         on us because it didn't think we were a submake.  If so, print a
-         warning then default to -j1.  */
-      else if (!FD_OK (job_fds[0]) || !FD_OK (job_fds[1])
-               || (job_rfd = dup (job_fds[0])) < 0)
-        {
-          if (errno != EBADF)
-            pfatal_with_name (_("dup jobserver"));
-
-          O (error, NILF,
-             _("warning: jobserver unavailable: using -j1.  Add '+' to parent make rule."));
-          job_slots = 1;
-          job_fds[0] = job_fds[1] = -1;
-        }
-#endif
-
-      if (job_slots > 0)
-        {
-#ifdef WINDOWS32
-          free_jobserver_semaphore ();
-#else
-          if (job_fds[0] >= 0)
-            close (job_fds[0]);
-          if (job_fds[1] >= 0)
-            close (job_fds[1]);
-#endif
-          job_fds[0] = job_fds[1] = -1;
-
-          free (jobserver_fds);
-          jobserver_fds = 0;
-        }
+      /* We failed to use our parent's jobserver.  */
+      reset_jobserver ();
+      job_slots = (unsigned int)arg_job_slots;
     }
-#endif
+  else if (arg_job_slots == INVALID_JOB_SLOTS)
+    /* The default is one job at a time.  */
+    job_slots = 1;
+  else
+    /* Use whatever was provided.  */
+    job_slots = (unsigned int)arg_job_slots;
+
+ job_setup_complete:
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
+
 #ifdef VMS
-  define_variable_cname("MAKE_COMMAND", vms_command(argv[0]), o_default, 0);
+  if (vms_use_mcr_command)
+    define_variable_cname ("MAKE_COMMAND", vms_command (argv[0]), o_default, 0);
+  else
+    define_variable_cname ("MAKE_COMMAND", program, o_default, 0);
 #else
   define_variable_cname ("MAKE_COMMAND", argv[0], o_default, 0);
 #endif
@@ -1646,6 +1706,9 @@ main (int argc, char **argv, char **envp)
          a reference to this hidden variable is written instead. */
       define_variable_cname ("MAKEOVERRIDES", "${-*-command-variables-*-}",
                              o_env, 1);
+#ifdef VMS
+      vms_export_dcl_symbol ("MAKEOVERRIDES", "${-*-command-variables-*-}");
+#endif
     }
 
   /* If there were -C flags, move ourselves about.  */
@@ -1742,7 +1805,7 @@ main (int argc, char **argv, char **envp)
                  _("Makefile from standard input specified twice."));
 
 #ifdef VMS
-# define DEFAULT_TMPDIR     "sys$scratch:"
+# define DEFAULT_TMPDIR     "/sys$scratch/"
 #else
 # ifdef P_tmpdir
 #  define DEFAULT_TMPDIR    P_tmpdir
@@ -1806,7 +1869,7 @@ main (int argc, char **argv, char **envp)
     }
 
 #ifndef __EMX__ /* Don't use a SIGCHLD handler for OS/2 */
-#if defined(MAKE_JOBSERVER) || !defined(HAVE_WAIT_NOHANG)
+#if !defined(HAVE_WAIT_NOHANG) || defined(MAKE_JOBSERVER)
   /* Set up to handle children dying.  This must be done before
      reading in the makefiles so that 'shell' function calls will work.
 
@@ -1814,13 +1877,12 @@ main (int argc, char **argv, char **envp)
      functionality here and rely on the signal handler and counting
      children.
 
-     If we're using the jobs pipe we need a signal handler so that
-     SIGCHLD is not ignored; we need it to interrupt the read(2) of the
-     jobserver pipe in job.c if we're waiting for a token.
+     If we're using the jobs pipe we need a signal handler so that SIGCHLD is
+     not ignored; we need it to interrupt the read(2) of the jobserver pipe if
+     we're waiting for a token.
 
      If none of these are true, we don't need a signal handler at all.  */
   {
-    RETSIGTYPE child_handler (int sig);
 # if defined SIGCHLD
     bsd_signal (SIGCHLD, child_handler);
 # endif
@@ -1828,6 +1890,18 @@ main (int argc, char **argv, char **envp)
     bsd_signal (SIGCLD, child_handler);
 # endif
   }
+
+#ifdef HAVE_PSELECT
+  /* If we have pselect() then we need to block SIGCHLD so it's deferred.  */
+  {
+    sigset_t block;
+    sigemptyset (&block);
+    sigaddset (&block, SIGCHLD);
+    if (sigprocmask (SIG_SETMASK, &block, NULL) < 0)
+      pfatal_with_name ("sigprocmask(SIG_SETMASK, SIGCHLD)");
+  }
+#endif
+
 #endif
 #endif
 
@@ -1900,7 +1974,7 @@ main (int argc, char **argv, char **envp)
     no_default_sh_exe = !find_and_set_default_shell (NULL);
 #endif /* WINDOWS32 */
 
-#if defined (__MSDOS__) || defined (__EMX__)
+#if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
   /* We need to know what kind of shell we will be using.  */
   {
     extern int _is_unixy_shell (const char *_path);
@@ -1964,7 +2038,7 @@ main (int argc, char **argv, char **envp)
   }
 
 #if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
-  if (job_slots != 1
+  if (arg_job_slots != 1
 # ifdef __EMX__
       && _osmode != OS2_MODE /* turn off -j if we are in DOS mode */
 # endif
@@ -1973,73 +2047,40 @@ main (int argc, char **argv, char **envp)
       O (error, NILF,
          _("Parallel jobs (-j) are not supported on this platform."));
       O (error, NILF, _("Resetting to single job (-j1) mode."));
-      job_slots = 1;
+      arg_job_slots = job_slots = 1;
     }
 #endif
 
-#ifdef MAKE_JOBSERVER
-  /* If we have >1 slot but no jobserver-fds, then we're a top-level make.
-     Set up the pipe and install the fds option for our children.  */
+  /* If we have >1 slot at this point, then we're a top-level make.
+     Set up the jobserver.
 
-  if (job_slots > 1)
+     Every make assumes that it always has one job it can run.  For the
+     submakes it's the token they were given by their parent.  For the top
+     make, we just subtract one from the number the user wants.  */
+
+  if (job_slots > 1 && jobserver_setup (job_slots - 1))
     {
-#ifdef WINDOWS32
-      /* sub_proc.c cannot wait for more than MAXIMUM_WAIT_OBJECTS objects
-       * and one of them is the job-server semaphore object.  Limit the
-       * number of available job slots to (MAXIMUM_WAIT_OBJECTS - 1). */
+      /* Fill in the jobserver_auth for our children.  */
+      jobserver_auth = jobserver_get_auth ();
 
-      if (job_slots >= MAXIMUM_WAIT_OBJECTS)
+      if (jobserver_auth)
         {
-          job_slots = MAXIMUM_WAIT_OBJECTS - 1;
-          DB (DB_JOBS, (_("Jobserver slots limited to %d\n"), job_slots));
+          /* We're using the jobserver so set job_slots to 0.  */
+          master_job_slots = job_slots;
+          job_slots = 0;
         }
-
-      if (! create_jobserver_semaphore (job_slots - 1))
-        {
-          DWORD err = GetLastError ();
-          const char *estr = map_windows32_error_to_string (err);
-          ONS (fatal, NILF,
-               _("creating jobserver semaphore: (Error %ld: %s)"), err, estr);
-        }
-#else
-      char c = '+';
-
-      if (pipe (job_fds) < 0 || (job_rfd = dup (job_fds[0])) < 0)
-        pfatal_with_name (_("creating jobs pipe"));
-#endif
-
-      /* Every make assumes that it always has one job it can run.  For the
-         submakes it's the token they were given by their parent.  For the
-         top make, we just subtract one from the number the user wants.  We
-         want job_slots to be 0 to indicate we're using the jobserver.  */
-
-      master_job_slots = job_slots;
-
-#ifdef WINDOWS32
-      /* We're using the jobserver so set job_slots to 0. */
-      job_slots = 0;
-#else
-      while (--job_slots)
-        {
-          int r;
-
-          EINTRLOOP (r, write (job_fds[1], &c, 1));
-          if (r != 1)
-            pfatal_with_name (_("init jobserver pipe"));
-        }
-#endif
-
-      /* Fill in the jobserver_fds for our children.  */
-
-#ifdef WINDOWS32
-      jobserver_fds = xmalloc (MAX_PATH + 1);
-      strcpy (jobserver_fds, get_jobserver_semaphore_name ());
-#else
-      jobserver_fds = xmalloc ((INTSTR_LENGTH * 2) + 2);
-      sprintf (jobserver_fds, "%d,%d", job_fds[0], job_fds[1]);
-#endif
     }
-#endif
+
+  /* If we're not using parallel jobs, then we don't need output sync.
+     This is so people can enable output sync in GNUMAKEFLAGS or similar, but
+     not have it take effect unless parallel builds are enabled.  */
+  if (syncing && job_slots == 1)
+    {
+      OUTPUT_UNSET ();
+      output_close (&make_sync);
+      syncing = 0;
+      output_sync = OUTPUT_SYNC_NONE;
+    }
 
 #ifndef MAKE_SYMLINKS
   if (check_symlink_flag)
@@ -2053,7 +2094,7 @@ main (int argc, char **argv, char **envp)
 
   define_makeflags (1, 0);
 
-  /* Make each 'struct dep' point at the 'struct file' for the file
+  /* Make each 'struct goaldep' point at the 'struct file' for the file
      depended on.  Also do magic for special targets.  */
 
   snap_deps ();
@@ -2124,18 +2165,14 @@ main (int argc, char **argv, char **envp)
       char **aargv = NULL;
       const char **nargv;
       int nargc;
-      int orig_db_level = db_level;
       enum update_status status;
-
-      if (! ISDB (DB_MAKEFILES))
-        db_level = DB_NONE;
 
       DB (DB_BASIC, (_("Updating makefiles....\n")));
 
       /* Remove any makefiles we don't want to try to update.
          Also record the current modtimes so we can compare them later.  */
       {
-        register struct dep *d, *last;
+        register struct goaldep *d, *last;
         last = 0;
         d = read_files;
         while (d != 0)
@@ -2164,13 +2201,14 @@ main (int argc, char **argv, char **envp)
                         last->next = d->next;
 
                       /* Free the storage.  */
-                      free_dep (d);
+                      free_goaldep (d);
 
                       d = last == 0 ? read_files : last->next;
 
                       break;
                     }
                 }
+
             if (f == NULL || !f->double_colon)
               {
                 makefile_mtimes = xrealloc (makefile_mtimes,
@@ -2186,18 +2224,26 @@ main (int argc, char **argv, char **envp)
       /* Set up 'MAKEFLAGS' specially while remaking makefiles.  */
       define_makeflags (1, 1);
 
-      rebuilding_makefiles = 1;
-      status = update_goal_chain (read_files);
-      rebuilding_makefiles = 0;
+      {
+        int orig_db_level = db_level;
+
+        if (! ISDB (DB_MAKEFILES))
+          db_level = DB_NONE;
+
+        rebuilding_makefiles = 1;
+        status = update_goal_chain (read_files);
+        rebuilding_makefiles = 0;
+
+        db_level = orig_db_level;
+      }
 
       switch (status)
         {
         case us_question:
           /* The only way this can happen is if the user specified -q and asked
-           * for one of the makefiles to be remade as a target on the command
-           * line.  Since we're not actually updating anything with -q we can
-           * treat this as "did nothing".
-           */
+             for one of the makefiles to be remade as a target on the command
+             line.  Since we're not actually updating anything with -q we can
+             treat this as "did nothing".  */
 
         case us_none:
           /* Did nothing.  */
@@ -2212,7 +2258,7 @@ main (int argc, char **argv, char **envp)
                in updating or could not be found at all.  */
             int any_failed = 0;
             unsigned int i;
-            struct dep *d;
+            struct goaldep *d;
 
             for (i = 0, d = read_files; d != 0; ++i, d = d->next)
               {
@@ -2229,7 +2275,7 @@ main (int argc, char **argv, char **envp)
                         any_remade |= (file_mtime_no_search (d->file)
                                        != makefile_mtimes[i]);
                       }
-                    else if (! (d->changed & RM_DONTCARE))
+                    else if (! (d->flags & RM_DONTCARE))
                       {
                         FILE_TIMESTAMP mtime;
                         /* The update failed and this makefile was not
@@ -2244,13 +2290,13 @@ main (int argc, char **argv, char **envp)
                   }
                 else
                   /* This makefile was not found at all.  */
-                  if (! (d->changed & RM_DONTCARE))
+                  if (! (d->flags & RM_DONTCARE))
                     {
                       const char *dnm = dep_name (d);
                       size_t l = strlen (dnm);
 
                       /* This is a makefile we care about.  See how much.  */
-                      if (d->changed & RM_INCLUDED)
+                      if (d->flags & RM_INCLUDED)
                         /* An included makefile.  We don't need to die, but we
                            do want to complain.  */
                         error (NILF, l,
@@ -2332,11 +2378,6 @@ main (int argc, char **argv, char **envp)
 
           ++restarts;
 
-          /* If we're re-exec'ing the first make, put back the number of
-             job slots so define_makefiles() will get it right.  */
-          if (master_job_slots)
-            job_slots = master_job_slots;
-
           if (ISDB (DB_BASIC))
             {
               const char **p;
@@ -2344,6 +2385,7 @@ main (int argc, char **argv, char **envp)
               for (p = nargv; *p != 0; ++p)
                 printf (" %s", *p);
               putchar ('\n');
+              fflush (stdout);
             }
 
 #ifndef _AMIGA
@@ -2355,6 +2397,9 @@ main (int argc, char **argv, char **envp)
                   {
                     *p = alloca (40);
                     sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
+#ifdef VMS
+                    vms_putenv_symbol (*p);
+#endif
                   }
                 else if (strneq (*p, "MAKE_RESTARTS=", CSTRLEN ("MAKE_RESTARTS=")))
                   {
@@ -2390,10 +2435,6 @@ main (int argc, char **argv, char **envp)
           fflush (stdout);
           fflush (stderr);
 
-          /* Close the dup'd jobserver pipe if we opened one.  */
-          if (job_rfd >= 0)
-            close (job_rfd);
-
 #ifdef _AMIGA
           exec_command (nargv);
           exit (0);
@@ -2407,8 +2448,7 @@ main (int argc, char **argv, char **envp)
                termination. */
             int pid;
             int r;
-            pid = child_execute_job (FD_STDIN, FD_STDOUT, FD_STDERR,
-                                     nargv, environ);
+            pid = child_execute_job (NULL, 1, nargv, environ);
 
             /* is this loop really necessary? */
             do {
@@ -2423,8 +2463,6 @@ main (int argc, char **argv, char **envp)
           free (aargv);
           break;
         }
-
-      db_level = orig_db_level;
 
       /* Free the makefile mtimes.  */
       free (makefile_mtimes);
@@ -2494,7 +2532,7 @@ main (int argc, char **argv, char **envp)
 
           if (f)
             {
-              goals = alloc_dep ();
+              goals = alloc_goaldep ();
               goals->file = f;
             }
         }
@@ -2529,8 +2567,7 @@ main (int argc, char **argv, char **envp)
         makefile_status = MAKE_TROUBLE;
         break;
       case us_failed:
-        /* Updating failed.  POSIX.2 specifies exit status >1 for this;
-           but in VMS, there is only success and failure.  */
+        /* Updating failed.  POSIX.2 specifies exit status >1 for this; */
         makefile_status = MAKE_FAILURE;
         break;
     }
@@ -2626,6 +2663,31 @@ handle_non_switch_argument (const char *arg, int env)
     /* Ignore plain '-' for compatibility.  */
     return;
 
+#ifdef VMS
+  {
+    /* VMS DCL quoting can result in foo="bar baz" showing up here.
+       Need to remove the double quotes from the value. */
+    char * eq_ptr;
+    char * new_arg;
+    eq_ptr = strchr (arg, '=');
+    if ((eq_ptr != NULL) && (eq_ptr[1] == '"'))
+      {
+         int len;
+         int seg1;
+         int seg2;
+         len = strlen(arg);
+         new_arg = alloca(len);
+         seg1 = eq_ptr - arg + 1;
+         strncpy(new_arg, arg, (seg1));
+         seg2 = len - seg1 - 1;
+         strncpy(&new_arg[seg1], &eq_ptr[2], seg2);
+         new_arg[seg1 + seg2] = 0;
+         if (new_arg[seg1 + seg2 - 1] == '"')
+           new_arg[seg1 + seg2 - 1] = 0;
+         arg = new_arg;
+      }
+  }
+#endif
   v = try_variable_definition (0, arg, o_command, 0);
   if (v != 0)
     {
@@ -2656,12 +2718,12 @@ handle_non_switch_argument (const char *arg, int env)
 
       if (goals == 0)
         {
-          goals = alloc_dep ();
+          goals = alloc_goaldep ();
           lastgoal = goals;
         }
       else
         {
-          lastgoal->next = alloc_dep ();
+          lastgoal->next = alloc_goaldep ();
           lastgoal = lastgoal->next;
         }
 
@@ -2940,7 +3002,7 @@ decode_env_switches (const char *envar, unsigned int len)
   value = variable_expand (varref);
 
   /* Skip whitespace, and check for an empty value.  */
-  value = next_token (value);
+  NEXT_TOKEN (value);
   len = strlen (value);
   if (len == 0)
     return;
@@ -2963,14 +3025,14 @@ decode_env_switches (const char *envar, unsigned int len)
     {
       if (*value == '\\' && value[1] != '\0')
         ++value;                /* Skip the backslash.  */
-      else if (isblank ((unsigned char)*value))
+      else if (ISBLANK (*value))
         {
           /* End of the word.  */
           *p++ = '\0';
           argv[++argc] = p;
           do
             ++value;
-          while (isblank ((unsigned char)*value));
+          while (ISBLANK (*value));
           continue;
         }
       *p++ = *value++;
@@ -3001,7 +3063,7 @@ quote_for_env (char *out, const char *in)
     {
       if (*in == '$')
         *out++ = '$';
-      else if (isblank ((unsigned char)*in) || *in == '\\')
+      else if (ISBLANK (*in) || *in == '\\')
         *out++ = '\\';
       *out++ = *in++;
     }
@@ -3068,7 +3130,7 @@ define_makeflags (int all, int makefile)
 
         case flag:
         case flag_off:
-          if (!*(int *) cs->value_ptr == (cs->type == flag_off)
+          if ((!*(int *) cs->value_ptr) == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
             ADD_FLAG (0, 0);
@@ -3276,7 +3338,7 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright"), so it hardly seems worth it.  */
 
-  printf ("%sCopyright (C) 1988-2014 Free Software Foundation, Inc.\n",
+  printf ("%sCopyright (C) 1988-2016 Free Software Foundation, Inc.\n",
           precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
@@ -3294,7 +3356,7 @@ print_version (void)
 /* Print a bunch of information about this and that.  */
 
 static void
-print_data_base ()
+print_data_base (void)
 {
   time_t when = time ((time_t *) 0);
 
@@ -3321,13 +3383,7 @@ clean_jobserver (int status)
      have written all our tokens so do that now.  If tokens are left
      after any other error code, that's bad.  */
 
-#ifdef WINDOWS32
-  if (has_jobserver_semaphore () && jobserver_tokens)
-#else
-  char token = '+';
-
-  if (job_fds[0] != -1 && jobserver_tokens)
-#endif
+  if (jobserver_enabled() && jobserver_tokens)
     {
       if (status != 2)
         ON (error, NILF,
@@ -3336,18 +3392,7 @@ clean_jobserver (int status)
       else
         /* Don't write back the "free" token */
         while (--jobserver_tokens)
-          {
-#ifdef WINDOWS32
-            if (! release_jobserver_semaphore ())
-              perror_with_name ("release_jobserver_semaphore", "");
-#else
-            int r;
-
-            EINTRLOOP (r, write (job_fds[1], &token, 1));
-            if (r != 1)
-              perror_with_name ("write", "");
-#endif
-          }
+          jobserver_release (0);
     }
 
 
@@ -3356,36 +3401,14 @@ clean_jobserver (int status)
   if (master_job_slots)
     {
       /* We didn't write one for ourself, so start at 1.  */
-      unsigned int tcnt = 1;
+      unsigned int tokens = 1 + jobserver_acquire_all ();
 
-#ifdef WINDOWS32
-      while (acquire_jobserver_semaphore ())
-          ++tcnt;
-#else
-      /* Close the write side, so the read() won't hang.  */
-      close (job_fds[1]);
-
-      while (read (job_fds[0], &token, 1) == 1)
-        ++tcnt;
-#endif
-
-      if (tcnt != master_job_slots)
+      if (tokens != master_job_slots)
         ONN (error, NILF,
              "INTERNAL: Exiting with %u jobserver tokens available; should be %u!",
-             tcnt, master_job_slots);
+             tokens, master_job_slots);
 
-#ifdef WINDOWS32
-      free_jobserver_semaphore ();
-#else
-      close (job_fds[0]);
-#endif
-
-      /* Clean out jobserver_fds so we don't pass this information to any
-         sub-makes.  Also reset job_slots since it will be put on the command
-         line, not in MAKEFLAGS.  */
-      job_slots = default_job_slots;
-      free (jobserver_fds);
-      jobserver_fds = 0;
+      reset_jobserver ();
     }
 }
 

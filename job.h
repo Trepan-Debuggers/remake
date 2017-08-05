@@ -1,5 +1,5 @@
 /* Definitions for managing subprocesses in GNU Make.
-Copyright (C) 1992-2014 Free Software Foundation, Inc.
+Copyright (C) 1992-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -24,7 +24,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* How to set close-on-exec for a file descriptor.  */
 
-#if !defined F_SETFD
+#if !defined(F_SETFD) || !defined(F_GETFD)
 # ifdef WINDOWS32
 #  define CLOSE_ON_EXEC(_d)  process_noinherit(_d)
 # else
@@ -99,6 +99,7 @@ struct child
     char *comname;              /* Temporary command file name */
     int efn;                    /* Completion event flag number */
     int cstatus;                /* Completion status */
+    int vms_launch_status;      /* non-zero if lib$spawn, etc failed */
 #endif
 
     unsigned int  command_line; /* Index into command_lines.  */
@@ -108,11 +109,14 @@ struct child
     unsigned int  noerror:1;    /* Nonzero if commands contained a '-'.  */
     unsigned int  good_stdin:1; /* Nonzero if this child has a good stdin.  */
     unsigned int  deleted:1;    /* Nonzero if targets have been deleted.  */
+    unsigned int  recursive:1;  /* Nonzero for recursive command ('+' etc.)  */
     unsigned int  dontcare:1;   /* Saved dontcare flag.  */
   };
 
 extern struct child *children;
 
+/* A signal handler for SIGCHLD, if needed.  */
+RETSIGTYPE child_handler (int sig);
 int is_bourne_compatible_shell(const char *path);
 void new_job (struct file *file);
 void reap_children (int block, int err);
@@ -120,20 +124,16 @@ void start_waiting_jobs (void);
 
 char **construct_command_argv (char *line, char **restp, struct file *file,
                                int cmd_flags, char** batch_file);
+
 #ifdef VMS
-int child_execute_job (char *argv, struct child *child);
+int child_execute_job (struct child *child, char *argv);
 #else
 # define FD_STDIN       (fileno (stdin))
 # define FD_STDOUT      (fileno (stdout))
 # define FD_STDERR      (fileno (stderr))
-# if defined(__EMX__)
-int child_execute_job (int stdin_fd, int stdout_fd, int stderr_fd,
-                       char **argv, char **envp);
-# else
-void child_execute_job (int stdin_fd, int stdout_fd, int stderr_fd,
-                        char **argv, char **envp) __attribute__ ((noreturn));
-# endif
+int child_execute_job (struct output *out, int good_stdin, char **argv, char **envp);
 #endif
+
 #ifdef _AMIGA
 void exec_command (char **argv) __attribute__ ((noreturn));
 #elif defined(__EMX__)

@@ -110,8 +110,7 @@ $(dir)/foo.bar:
 
 ',
 "dir=$dir",
-"#MAKEFILE#:6: recipe for target '$dir/foo.bar' failed
-#MAKE#: *** [$dir/foo.bar] Error 1",
+"#MAKE#: *** [#MAKEFILE#:6: $dir/foo.bar] Error 1",
 512);
 
 unlink("$dir/foo.bar");
@@ -223,3 +222,7 @@ all: foo.x foo-mt.x
 
 # This tells the test driver that the perl test script executed properly.
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

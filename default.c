@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -131,10 +131,47 @@ static struct pspec default_terminal_rules[] =
 static const char *default_suffix_rules[] =
   {
 #ifdef VMS
+    ".o",
+    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".obj",
+    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".s",
+    "$(LINK.s) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".S",
+    "$(LINK.S) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".c",
+    "$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".cc",
+    "$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".C",
+    "$(LINK.C) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".cpp",
+    "$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".f",
+    "$(LINK.f) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".m",
+    "$(LINK.m) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".p",
+    "$(LINK.p) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".F",
+    "$(LINK.F) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".r",
+    "$(LINK.r) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".mod",
+    "$(COMPILE.mod) -o $@ -e $@ $^",
+
+    ".def.sym",
+    "$(COMPILE.def) -o $@ $<",
+
+    ".sh",
+    "copy $< >$@",
+
     ".obj.exe",
     "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
     ".mar.exe",
     "$(COMPILE.mar) $^ \n $(LINK.obj) $(subst .mar,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
+    ".s.o",
+    "$(COMPILE.s) -o $@ $<",
     ".s.exe",
     "$(COMPILE.s) $^ \n $(LINK.obj) $(subst .s,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
     ".c.exe",
@@ -204,6 +241,27 @@ static const char *default_suffix_rules[] =
 
     ".tex.dvi",
     "$(TEX) $<",
+
+    ".cpp.o",
+    "$(COMPILE.cpp) $(OUTPUT_OPTION) $<",
+    ".f.o",
+    "$(COMPILE.f) $(OUTPUT_OPTION) $<",
+    ".m.o",
+    "$(COMPILE.m) $(OUTPUT_OPTION) $<",
+    ".p.o",
+    "$(COMPILE.p) $(OUTPUT_OPTION) $<",
+    ".r.o",
+    "$(COMPILE.r) $(OUTPUT_OPTION) $<",
+    ".mod.o",
+    "$(COMPILE.mod) -o $@ $<",
+
+    ".c.ln",
+    "$(LINT.c) -C$* $<",
+    ".y.ln",
+    "$(YACC.y) $< \n rename y_tab.c $@",
+
+    ".l.ln",
+    "@$(RM) $*.c\n $(LEX.l) $< > $*.c\n$(LINT.c) -i $*.c -o $@\n $(RM) $*.c",
 
 #else /* ! VMS */
 
@@ -413,19 +471,44 @@ static const char *default_variables[] =
     "LDLIBS", "",
 #endif
 
+    "LINK.o", "$(LD) $(LDFLAGS)",
     "LINK.obj", "$(LD) $(LDFLAGS)",
 #ifndef GCC_IS_NATIVE
     "CXXLINK.obj", "$(CXXLD) $(LDFLAGS)",
     "COMPILE.cxx", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
 #endif
     "COMPILE.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "LINK.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "COMPILE.m", "$(OBJC) $(OBJCFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+    "LINK.m", "$(OBJC) $(OBJCFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "COMPILE.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "COMPILE.C", "$(COMPILE.cc)",
+    "COMPILE.cpp", "$(COMPILE.cc)",
+    "LINK.C", "$(LINK.cc)",
+    "LINK.cpp", "$(LINK.cc)",
     "YACC.y", "$(YACC) $(YFLAGS)",
     "LEX.l", "$(LEX) $(LFLAGS)",
+    "YACC.m", "$(YACC) $(YFLAGS)",
+    "LEX.m", "$(LEX) $(LFLAGS) -t",
     "COMPILE.for", "$(FC) $(FFLAGS) $(TARGET_ARCH)",
+    "COMPILE.f", "$(FC) $(FFLAGS) $(TARGET_ARCH) -c",
+    "LINK.f", "$(FC) $(FFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
+    "COMPILE.F", "$(FC) $(FFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+    "LINK.F", "$(FC) $(FFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
+    "COMPILE.r", "$(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -c",
+    "LINK.r", "$(FC) $(FFLAGS) $(RFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "COMPILE.pas", "$(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "COMPILE.def", "$(M2C) $(M2FLAGS) $(DEFFLAGS) $(TARGET_ARCH)",
+    "COMPILE.mod", "$(M2C) $(M2FLAGS) $(MODFLAGS) $(TARGET_ARCH)",
+    "COMPILE.p", "$(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+    "LINK.p", "$(PC) $(PFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "COMPILE.mar", "$(MACRO) $(MACROFLAGS)",
     "COMPILE.s", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
+    "LINK.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_MACH)",
+    "COMPILE.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c",
+    "PREPROCESS.S", "$(CC) -E $(CPPFLAGS)",
+    "PREPROCESS.F", "$(FC) $(FFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -F",
+    "PREPROCESS.r", "$(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -F",
     "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
 
     "MV", "rename/new_version",
@@ -519,10 +602,21 @@ static const char *default_variables[] =
     "COMPILE.m", "$(OBJC) $(OBJCFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
     "LINK.m", "$(OBJC) $(OBJCFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "COMPILE.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+#ifndef HAVE_CASE_INSENSITIVE_FS
+    /* On case-insensitive filesystems, treat *.C files as *.c files,
+       to avoid erroneously compiling C sources as C++, which will
+       probably fail.  */
     "COMPILE.C", "$(COMPILE.cc)",
+#else
+    "COMPILE.C", "$(COMPILE.c)",
+#endif
     "COMPILE.cpp", "$(COMPILE.cc)",
     "LINK.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
+#ifndef HAVE_CASE_INSENSITIVE_FS
     "LINK.C", "$(LINK.cc)",
+#else
+    "LINK.C", "$(LINK.c)",
+#endif
     "LINK.cpp", "$(LINK.cc)",
     "YACC.y", "$(YACC) $(YFLAGS)",
     "LEX.l", "$(LEX) $(LFLAGS) -t",

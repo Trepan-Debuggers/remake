@@ -74,4 +74,13 @@ build-y: build-x
 ',
               '-q build-y', "#MAKE#: *** No rule to make target 'build-stamp-2', needed by 'build-arch'.  Stop.\n", 512);
 
+# TEST 9 : Savannah bug # 47151
+# Make sure we exit with 1 when invoking a recursive make
+run_make_test('
+foo: bar ; echo foo
+bar: ; @$(MAKE) -f #MAKEFILE# baz
+baz: ; echo baz
+',
+              '-q foo', '', 256);
+
 1;

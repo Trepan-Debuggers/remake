@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -26,12 +26,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 #if VMS
-# define FILE_LIST_SEPARATOR ','
+# define FILE_LIST_SEPARATOR (vms_comma_separator ? ',' : ' ')
 #else
 # define FILE_LIST_SEPARATOR ' '
 #endif
-
-int remote_kill (int id, int sig);
 
 #ifndef HAVE_UNISTD_H
 int getpid ();
@@ -411,10 +409,10 @@ chop_commands (struct commands *cmds)
 
   for (idx = 0; idx < nlines; ++idx)
     {
-      int flags = 0;
+      unsigned char flags = 0;
       const char *p = lines[idx];
 
-      while (isblank (*p) || *p == '-' || *p == '@' || *p == '+')
+      while (ISBLANK (*p) || *p == '-' || *p == '@' || *p == '+')
         switch (*(p++))
           {
           case '+':
@@ -451,7 +449,7 @@ execute_file_commands (struct file *file)
      the commands are nothing but whitespace.  */
 
   for (p = file->cmds->commands; *p != '\0'; ++p)
-    if (!isspace ((unsigned char)*p) && *p != '-' && *p != '@')
+    if (!ISSPACE (*p) && *p != '-' && *p != '@' && *p != '+')
       break;
   if (*p == '\0')
     {

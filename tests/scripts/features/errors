@@ -30,7 +30,7 @@ open(MAKEFILE,"> $makefile");
 print MAKEFILE "clean:\n"
               ."\t-$rm_command cleanit\n"
               ."\t$rm_command foo\n"
-	      ."clean2: \n"
+              ."clean2: \n"
               ."\t$rm_command cleanit\n"
               ."\t$rm_command foo\n";
 
@@ -50,8 +50,7 @@ $delete_error_code = $? >> 8;
 
 $answer = "$rm_command cleanit
 $cleanit_error
-$makefile:2: recipe for target 'clean' failed
-$make_name: [clean] Error $delete_error_code (ignored)
+$make_name: [$makefile:2: clean] Error $delete_error_code (ignored)
 $rm_command foo\n";
 
 &run_make_with_options($makefile,"",&get_logfile);
@@ -78,8 +77,7 @@ if (!$vos)
 
 $answer = "$rm_command cleanit
 $cleanit_error
-$makefile:5: recipe for target 'clean2' failed
-$make_name: [clean2] Error $delete_error_code (ignored)
+$make_name: [$makefile:5: clean2] Error $delete_error_code (ignored)
 $rm_command foo\n";
 
 &run_make_with_options($makefile,"clean2 -i",&get_logfile);
@@ -92,4 +90,18 @@ if (!$vos) {
    &compare_output($answer,&get_logfile(1));
 }
 
+# Test that error line offset works
+
+run_make_test(q!
+all:
+	@echo hi
+	@echo there
+	@exit 1
+!,
+              '', "hi\nthere\n#MAKE#: *** [#MAKEFILE#:5: all] Error 1", 512);
+
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

@@ -11,7 +11,7 @@
 #                         [-make <make prog>]
 #                        (and others)
 
-# Copyright (C) 1992-2014 Free Software Foundation, Inc.
+# Copyright (C) 1992-2016 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -140,6 +140,7 @@ sub subst_make_string
 sub run_make_test
 {
   local ($makestring, $options, $answer, $err_code, $timeout) = @_;
+  my @call = caller;
 
   # If the user specified a makefile string, create a new makefile to contain
   # it.  If the first value is not defined, use the last one (if there is
@@ -171,7 +172,7 @@ sub run_make_test
   }
 
   run_make_with_options($makefile, $options, &get_logfile(0),
-                        $err_code, $timeout);
+                        $err_code, $timeout, @call);
   &compare_output($answer, &get_logfile(1));
 
   $old_makefile = $makefile;
@@ -180,7 +181,8 @@ sub run_make_test
 
 # The old-fashioned way...
 sub run_make_with_options {
-  local ($filename,$options,$logname,$expected_code,$timeout) = @_;
+  my ($filename,$options,$logname,$expected_code,$timeout,@call) = @_;
+  @call = caller unless @call;
   local($code);
   local($command) = $make_path;
 
@@ -231,7 +233,11 @@ sub run_make_with_options {
     $command .= " $options";
   }
 
-  $command_string = "$command\n";
+  $command_string = "";
+  if (@call) {
+      $command_string = "#$call[1]:$call[2]\n";
+  }
+  $command_string .= "$command\n";
 
   if ($valgrind) {
     print VALGRIND "\n\nExecuting: $command\n";
@@ -359,6 +365,12 @@ sub set_more_defaults
    elsif ($osname =~ m%OS/2%) {
      $port_type = 'OS/2';
    }
+
+   # VMS has a GNV Unix mode or a DCL mode.
+   # The SHELL environment variable should not be defined in VMS-DCL mode.
+   elsif ($osname eq 'VMS' && !defined $ENV{"SHELL"}) {
+     $port_type = 'VMS-DCL';
+   }
    # Everything else, right now, is UNIX.  Note that we should integrate
    # the VOS support into this as well and get rid of $vos; we'll do
    # that next time.
@@ -377,6 +389,7 @@ sub set_more_defaults
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
    if ($osname eq 'VMS') {
+     $port_type = 'VMS-DCL' unless defined $ENV{"SHELL"};
      # On VMS pre-setup make to be found with simply 'make'.
      $make_path = 'make';
    } else {
@@ -457,6 +470,8 @@ sub set_more_defaults
    %FEATURES = map { $_ => 1 } split /\s+/, `sh -c "echo '\\\$(info \\\$(.FEATURES))' | $make_path -f- 2>/dev/null"`;
 
    # Set up for valgrind, if requested.
+
+   $make_command = $make_path;
 
    if ($valgrind) {
      my $args = $valgrind_args;

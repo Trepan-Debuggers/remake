@@ -1,5 +1,5 @@
 /* Target file management for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -57,9 +57,6 @@ file_hash_cmp (const void *x, const void *y)
                           ((struct file const *) y)->hname);
 }
 
-#ifndef FILE_BUCKETS
-#define FILE_BUCKETS    1007
-#endif
 static struct hash_table files;
 
 /* Whether or not .SECONDARY with no prerequisites was given.  */
@@ -75,8 +72,11 @@ lookup_file (const char *name)
 {
   struct file *f;
   struct file file_key;
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
+#ifdef VMS
+  int want_vmsify;
+#ifndef WANT_CASE_SENSITIVE_TARGETS
   char *lname;
+#endif
 #endif
 
   assert (*name != '\0');
@@ -85,6 +85,7 @@ lookup_file (const char *name)
      for names read from makefiles.  It is here for names passed
      on the command line.  */
 #ifdef VMS
+   want_vmsify = (strpbrk (name, "]>:^") != NULL);
 # ifndef WANT_CASE_SENSITIVE_TARGETS
   if (*name != '.')
     {
@@ -99,6 +100,8 @@ lookup_file (const char *name)
 # endif
 
   while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
+      name += 2;
+  while (name[0] == '<' && name[1] == '>' && name[2] != '\0')
       name += 2;
 #endif
   while (name[0] == '.'
@@ -120,15 +123,19 @@ lookup_file (const char *name)
     }
 
   if (*name == '\0')
-    /* It was all slashes after a dot.  */
-#if defined(VMS)
-    name = "[]";
-#elif defined(_AMIGA)
-    name = "";
+    {
+      /* It was all slashes after a dot.  */
+#if defined(_AMIGA)
+      name = "";
 #else
-    name = "./";
+      name = "./";
 #endif
-
+#if defined(VMS)
+      /* TODO - This section is probably not needed. */
+      if (want_vmsify)
+        name = "[]";
+#endif
+    }
   file_key.hname = name;
   f = hash_find_item (&files, &file_key);
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)

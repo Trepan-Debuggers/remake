@@ -53,6 +53,8 @@ sub output_sync_set {
 
 @syncfiles = qw(mksync.foo mksync.foo_start mksync.bar mksync.bar_start);
 
+$tmout = 30;
+
 output_sync_clean();
 mkdir('foo', 0777);
 mkdir('bar', 0777);
@@ -140,7 +142,7 @@ bar: start
 bar: end
 baz: start
 baz: end
-#MAKE#[1]: Leaving directory '#PWD#/bar'\n", 0, 6);
+#MAKE#[1]: Leaving directory '#PWD#/bar'\n", 0, $tmout);
 
 # Test per-target synchronization.
 # Note we have to sleep again here after starting the foo makefile before
@@ -171,7 +173,7 @@ foo: end
 #MAKE#[1]: Entering directory '#PWD#/bar'
 baz: start
 baz: end
-#MAKE#[1]: Leaving directory '#PWD#/bar'\n", 0, 6);
+#MAKE#[1]: Leaving directory '#PWD#/bar'\n", 0, $tmout);
 
 # Rerun but this time suppress the directory tracking
 unlink(@syncfiles);
@@ -183,7 +185,7 @@ bar: end
 foo: start
 foo: end
 baz: start
-baz: end\n", 0, 6);
+baz: end\n", 0, $tmout);
 
 # Test that messages from make itself are enclosed with
 # "Entering/Leaving directory" messages.
@@ -204,11 +206,9 @@ bar: end
 #MAKE#[1]: Entering directory '#PWD#/foo'
 foo-fail: start
 foo-fail: end
-Makefile:20: recipe for target 'foo-fail' failed
-#MAKE#[1]: *** [foo-fail] Error 1
+#MAKE#[1]: *** [Makefile:23: foo-fail] Error 1
 #MAKE#[1]: Leaving directory '#PWD#/foo'
-#MAKEFILE#:4: recipe for target 'make-foo-fail' failed
-#MAKE#: *** [make-foo-fail] Error 2\n",
+#MAKE#: *** [#MAKEFILE#:4: make-foo-fail] Error 2\n",
 512);
 
 # Test the per-job synchronization.
@@ -238,7 +238,7 @@ bar: end
 #MAKE#[1]: Leaving directory '#PWD#/bar'
 #MAKE#[1]: Entering directory '#PWD#/foo'
 foo: end
-#MAKE#[1]: Leaving directory '#PWD#/foo'\n", 0, 6);
+#MAKE#[1]: Leaving directory '#PWD#/foo'\n", 0, $tmout);
 
 
 # Remove temporary directories and contents.
@@ -326,7 +326,7 @@ run_make_test(qq!
 all: t1
 t1: ; -\@\$(MAKE) -f $m1
 !,
-              "-j -Oline", "#MAKE#[1]: Entering directory '#PWD#'\nd1 stderr\nd1 stdout\n$m1:3: *** d1 failed.  Stop.\n#MAKE#[1]: Leaving directory '#PWD#'\n#MAKEFILE#:3: recipe for target 't1' failed\n#MAKE#: [t1] Error 2 (ignored)\n");
+              "-j -Oline", "#MAKE#[1]: Entering directory '#PWD#'\nd1 stderr\nd1 stdout\n$m1:3: *** d1 failed.  Stop.\n#MAKE#[1]: Leaving directory '#PWD#'\n#MAKE#: [#MAKEFILE#:3: t1] Error 2 (ignored)\n");
 
 rmfiles($m1);
 
@@ -336,6 +336,14 @@ run_make_test(q!
 foo: $(OBJS) ; echo $(or $(filter %.o,$^),$(error fail))
 !,
               '-O', "#MAKEFILE#:2: *** fail.  Stop.\n", 512);
+
+# SV 47365: Make sure exec failure error messages are shown
+# Is "127" not always the same everywhere?  We may have to detect it?
+
+run_make_test(q!
+all:: ; @./foo bar baz
+!,
+              '-O', "#MAKE#: ./foo: Command not found\n#MAKE#: *** [#MAKEFILE#:2: all] Error 127\n", 512);
 
 # This tells the test driver that the perl test script executed properly.
 1;

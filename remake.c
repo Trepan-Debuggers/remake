@@ -1,5 +1,5 @@
 /* Basic dependency engine for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -37,8 +37,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <io.h>
 #endif
 
-extern int try_implicit_rule (struct file *file, unsigned int depth);
-
 
 /* The test for circular dependencies is based on the 'updating' bit in
    'struct file'.  However, double colon targets have separate 'struct
@@ -54,6 +52,10 @@ extern int try_implicit_rule (struct file *file, unsigned int depth);
 
 /* Incremented when a command is started (under -n, when one would be).  */
 unsigned int commands_started = 0;
+
+/* Set to the goal dependency.  Mostly needed for remaking makefiles.  */
+static struct goaldep *goal_list;
+static struct dep *goal_dep;
 
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
@@ -77,31 +79,22 @@ static const char *library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr);
    one goal whose 'changed' member is nonzero is successfully made.  */
 
 enum update_status
-update_goal_chain (struct dep *goals)
+update_goal_chain (struct goaldep *goaldeps)
 {
   int t = touch_flag, q = question_flag, n = just_print_flag;
   enum update_status status = us_none;
 
-#define MTIME(file) (rebuilding_makefiles ? file_mtime_no_search (file) \
-                     : file_mtime (file))
-
   /* Duplicate the chain so we can remove things from it.  */
 
-  goals = copy_dep_chain (goals);
+  struct dep *goals = copy_dep_chain ((struct dep *)goaldeps);
 
-  {
-    /* Clear the 'changed' flag of each goal in the chain.
-       We will use the flag below to notice when any commands
-       have actually been run for a target.  When no commands
-       have been run, we give an "up to date" diagnostic.  */
-
-    struct dep *g;
-    for (g = goals; g != 0; g = g->next)
-      g->changed = 0;
-  }
+  goal_list = rebuilding_makefiles ? goaldeps : NULL;
 
   /* All files start with the considered bit 0, so the global value is 1.  */
   considered = 1;
+
+#define MTIME(file) (rebuilding_makefiles ? file_mtime_no_search (file) \
+                     : file_mtime (file))
 
   /* Update all the goals until they are all finished.  */
 
@@ -125,6 +118,8 @@ update_goal_chain (struct dep *goals)
           struct file *file;
           int stop = 0, any_not_updated = 0;
 
+          goal_dep = g;
+
           for (file = g->file->double_colon ? g->file->double_colon : g->file;
                file != NULL;
                file = file->prev)
@@ -132,7 +127,7 @@ update_goal_chain (struct dep *goals)
               unsigned int ocommands_started;
               enum update_status fail;
 
-              file->dontcare = g->dontcare;
+              file->dontcare = ANY_SET (g->flags, RM_DONTCARE);
 
               check_renamed (file);
               if (rebuilding_makefiles)
@@ -268,6 +263,30 @@ update_goal_chain (struct dep *goals)
   return status;
 }
 
+/* If we're rebuilding an included makefile that failed, and we care
+   about errors, show an error message the first time.  */
+
+void
+show_goal_error (void)
+{
+  struct goaldep *goal;
+
+  if ((goal_dep->flags & (RM_INCLUDED|RM_DONTCARE)) != RM_INCLUDED)
+    return;
+
+  for (goal = goal_list; goal; goal = goal->next)
+    if (goal_dep->file == goal->file)
+      {
+        if (goal->error)
+          {
+            OSS (error, &goal->floc, "%s: %s",
+                 goal->file->name, strerror ((int)goal->error));
+            goal->error = 0;
+          }
+        return;
+      }
+}
+
 /* If FILE is not up to date, execute the commands for it.
    Return 0 if successful, non-0 if unsuccessful;
    but with some flag settings, just call 'exit' if unsuccessful.
@@ -301,7 +320,7 @@ update_file (struct file *file, unsigned int depth)
             && !f->dontcare && f->no_diag))
         {
           DBF (DB_VERBOSE, _("Pruning file '%s'.\n"));
-          return f->command_state == cs_finished ? f->update_status : 0;
+          return f->command_state == cs_finished ? f->update_status : us_success;
         }
     }
 
@@ -325,12 +344,9 @@ update_file (struct file *file, unsigned int depth)
 
       if (f->command_state == cs_running
           || f->command_state == cs_deps_running)
-        {
-          /* Don't run the other :: rules for this
-             file until this rule is finished.  */
-          status = us_success;
-          break;
-        }
+        /* Don't run other :: rules for this target until
+           this rule is finished.  */
+        return us_success;
 
       if (new > status)
         status = new;
@@ -349,7 +365,7 @@ update_file (struct file *file, unsigned int depth)
           {
             enum update_status new = update_file (d->file, depth + 1);
             if (new > status)
-              new = status;
+              status = new;
           }
       }
 
@@ -380,29 +396,28 @@ complain (struct file *file)
 
   if (d == 0)
     {
+      show_goal_error ();
+
       /* Didn't find any dependencies to complain about. */
       if (file->parent)
         {
           size_t l = strlen (file->name) + strlen (file->parent->name) + 4;
+          const char *m = _("%sNo rule to make target '%s', needed by '%s'%s");
 
           if (!keep_going_flag)
-            fatal (NILF, l,
-                   _("%sNo rule to make target '%s', needed by '%s'%s"),
-                   "", file->name, file->parent->name, "");
+            fatal (NILF, l, m, "", file->name, file->parent->name, "");
 
-          error (NILF, l, _("%sNo rule to make target '%s', needed by '%s'%s"),
-                 "*** ", file->name, file->parent->name, ".");
+          error (NILF, l, m, "*** ", file->name, file->parent->name, ".");
         }
       else
         {
           size_t l = strlen (file->name) + 4;
+          const char *m = _("%sNo rule to make target '%s'%s");
 
           if (!keep_going_flag)
-            fatal (NILF, l,
-                   _("%sNo rule to make target '%s'%s"), "", file->name, "");
+            fatal (NILF, l, m, "", file->name, "");
 
-          error (NILF, l,
-                 _("%sNo rule to make target '%s'%s"), "*** ", file->name, ".");
+          error (NILF, l, m, "*** ", file->name, ".");
         }
 
       file->no_diag = 0;
@@ -1158,8 +1173,9 @@ touch_file (struct file *file)
   else
 #endif
     {
-      int fd = open (file->name, O_RDWR | O_CREAT, 0666);
+      int fd;
 
+      EINTRLOOP (fd, open (file->name, O_RDWR | O_CREAT, 0666));
       if (fd < 0)
         TOUCH_ERROR ("touch: open: ");
       else
@@ -1172,18 +1188,24 @@ touch_file (struct file *file)
           if (e < 0)
             TOUCH_ERROR ("touch: fstat: ");
           /* Rewrite character 0 same as it already is.  */
-          if (read (fd, &buf, 1) < 0)
+          EINTRLOOP (e, read (fd, &buf, 1));
+          if (e < 0)
             TOUCH_ERROR ("touch: read: ");
-          if (lseek (fd, 0L, 0) < 0L)
-            TOUCH_ERROR ("touch: lseek: ");
-          if (write (fd, &buf, 1) < 0)
+          {
+            off_t o;
+            EINTRLOOP (o, lseek (fd, 0L, 0));
+            if (o < 0L)
+              TOUCH_ERROR ("touch: lseek: ");
+          }
+          EINTRLOOP (e, write (fd, &buf, 1));
+          if (e < 0)
             TOUCH_ERROR ("touch: write: ");
-          /* If file length was 0, we just
-             changed it, so change it back.  */
+
+          /* If file length was 0, we just changed it, so change it back.  */
           if (statbuf.st_size == 0)
             {
               (void) close (fd);
-              fd = open (file->name, O_RDWR | O_TRUNC, 0666);
+              EINTRLOOP (fd, open (file->name, O_RDWR | O_TRUNC, 0666));
               if (fd < 0)
                 TOUCH_ERROR ("touch: open: ");
             }
@@ -1249,6 +1271,7 @@ FILE_TIMESTAMP
 f_mtime (struct file *file, int search)
 {
   FILE_TIMESTAMP mtime;
+  int propagate_timestamp;
 
   /* File's mtime is not known; must get it from the system.  */
 
@@ -1325,6 +1348,8 @@ f_mtime (struct file *file, int search)
               || (file->name[0] == '-' && file->name[1] == 'l'
                   && (name = library_search (file->name, &mtime)) != 0))
             {
+              int name_len;
+
               if (mtime != UNKNOWN_MTIME)
                 /* vpath_search and library_search store UNKNOWN_MTIME
                    if they didn't need to do a stat call for their work.  */
@@ -1333,7 +1358,14 @@ f_mtime (struct file *file, int search)
               /* If we found it in VPATH, see if it's in GPATH too; if so,
                  change the name right now; if not, defer until after the
                  dependencies are updated. */
-              if (gpath_search (name, strlen (name) - strlen (file->name) - 1))
+#ifndef VMS
+              name_len = strlen (name) - strlen (file->name) - 1;
+#else
+              name_len = strlen (name) - strlen (file->name);
+              if (name[name_len - 1] == '/')
+                  name_len--;
+#endif
+              if (gpath_search (name, name_len))
                 {
                   rename_file (file, name);
                   check_renamed (file);
@@ -1416,10 +1448,13 @@ f_mtime (struct file *file, int search)
         }
     }
 
-  /* Store the mtime into all the entries for this file.  */
+  /* Store the mtime into all the entries for this file for which it is safe
+     to do so: avoid propagating timestamps to double-colon rules that haven't
+     been examined so they're run or not based on the pre-update timestamp.  */
   if (file->double_colon)
     file = file->double_colon;
 
+  propagate_timestamp = file->updated;
   do
     {
       /* If this file is not implicit but it is intermediate then it was
@@ -1431,7 +1466,8 @@ f_mtime (struct file *file, int search)
           && !file->tried_implicit && file->intermediate)
         file->intermediate = 0;
 
-      file->last_mtime = mtime;
+      if (file->updated == propagate_timestamp)
+        file->last_mtime = mtime;
       file = file->prev;
     }
   while (file != 0);

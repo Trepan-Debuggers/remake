@@ -7,9 +7,12 @@ $description = "Make sure make exits with an error if fopen fails.";
 # since it's hard to know what it will be, exactly.
 # See Savannah bug #27374.
 
+# Use a longer-than-normal timeout: some systems have more FDs available?
+# We also set ulimit -n 512 in check-regression in Makefile.am, which see.
+# See Savannah bug #42390.
 run_make_test(q!
 include $(lastword $(MAKEFILE_LIST))
 !,
-              '', undef, 512);
+              '', undef, 512, 300);
 
 1;

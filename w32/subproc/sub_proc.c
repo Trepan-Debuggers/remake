@@ -1,5 +1,5 @@
 /* Process handling for Windows.
-Copyright (C) 1996-2014 Free Software Foundation, Inc.
+Copyright (C) 1996-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -61,124 +61,26 @@ static sub_process *proc_array[MAXIMUM_WAIT_OBJECTS];
 static int proc_index = 0;
 static int fake_exits_pending = 0;
 
-/* Windows jobserver implementation variables */
-static char jobserver_semaphore_name[MAX_PATH + 1];
-static HANDLE jobserver_semaphore = NULL;
 
-/* Open existing jobserver semaphore */
-int open_jobserver_semaphore(const char* name)
-{
-    jobserver_semaphore = OpenSemaphore(
-        SEMAPHORE_ALL_ACCESS,   // Semaphore access setting
-        FALSE,                  // Child processes DON'T inherit
-        name);                  // Semaphore name
-
-    if (jobserver_semaphore == NULL)
-        return 0;
-
-    return 1;
-}
-
-/* Create new jobserver semaphore */
-int create_jobserver_semaphore(int tokens)
-{
-    sprintf(jobserver_semaphore_name, "gmake_semaphore_%d", _getpid());
-
-    jobserver_semaphore = CreateSemaphore(
-        NULL,                           // Use default security descriptor
-        tokens,                         // Initial count
-        tokens,                         // Maximum count
-        jobserver_semaphore_name);      // Semaphore name
-
-    if (jobserver_semaphore == NULL)
-        return 0;
-
-    return 1;
-}
-
-/* Close jobserver semaphore */
-void free_jobserver_semaphore()
-{
-    if (jobserver_semaphore != NULL)
-    {
-        CloseHandle(jobserver_semaphore);
-        jobserver_semaphore = NULL;
-    }
-}
-
-/* Decrement semaphore count */
-int acquire_jobserver_semaphore()
-{
-    DWORD dwEvent = WaitForSingleObject(
-        jobserver_semaphore,    // Handle to semaphore
-        0);                     // DON'T wait on semaphore
-
-    return (dwEvent == WAIT_OBJECT_0);
-}
-
-/* Increment semaphore count */
-int release_jobserver_semaphore()
-{
-    BOOL bResult = ReleaseSemaphore(
-        jobserver_semaphore,    // handle to semaphore
-        1,                      // increase count by one
-        NULL);                  // not interested in previous count
-
-    return (bResult);
-}
-
-int has_jobserver_semaphore()
-{
-    return (jobserver_semaphore != NULL);
-}
-
-char* get_jobserver_semaphore_name()
-{
-    return (jobserver_semaphore_name);
-}
-
-/* Wait for either the jobserver semaphore to become signalled or one of our
- * child processes to terminate.
+/*
+ * Fill a HANDLE list with handles to wait for.
  */
-int wait_for_semaphore_or_child_process()
+DWORD
+process_set_handles(HANDLE *handles)
 {
-    HANDLE handles[MAXIMUM_WAIT_OBJECTS];
-    DWORD dwHandleCount = 1;
-    DWORD dwEvent;
+    DWORD count = 0;
     int i;
 
-    /* Add jobserver semaphore to first slot. */
-    handles[0] = jobserver_semaphore;
-
     /* Build array of handles to wait for */
-    for (i = 0; i < proc_index; i++)
-    {
+    for (i = 0; i < proc_index; i++) {
         /* Don't wait on child processes that have already finished */
         if (fake_exits_pending && proc_array[i]->exit_code)
             continue;
 
-        handles[dwHandleCount++] = (HANDLE) proc_array[i]->pid;
+        handles[count++] = (HANDLE) proc_array[i]->pid;
     }
 
-    dwEvent = WaitForMultipleObjects(
-        dwHandleCount,  // number of objects in array
-        handles,        // array of objects
-        FALSE,          // wait for any object
-        INFINITE);      // wait until object is signalled
-
-    switch(dwEvent)
-    {
-      case WAIT_FAILED:
-        return -1;
-
-      case WAIT_OBJECT_0:
-        /* Indicate that the semaphore was signalled */
-        return 1;
-
-      default:
-        /* Assume that one or more of the child processes terminated. */
-        return 0;
-    }
+    return count;
 }
 
 /*
@@ -721,9 +623,26 @@ process_begin(
                 if (!shell_name
                     && batch_file_with_spaces(exec_fname)
                     && _stricmp(exec_path, argv[0]) == 0) {
+                        char *new_argv, *p;
+                        char **argvi;
+                        int arglen, i;
                         pass_null_exec_path = 1;
+                        /* Rewrite argv[] replacing argv[0] with exec_fname.  */
+                        for (argvi = argv + 1, arglen = strlen(exec_fname) + 1;
+                             *argvi;
+                             argvi++) {
+                                arglen += strlen(*argvi) + 1;
+                        }
+                        new_argv = xmalloc(arglen);
+                        p = strcpy(new_argv, exec_fname) + strlen(exec_fname) + 1;
+                        for (argvi = argv + 1, i = 1; *argvi; argvi++, i++) {
+                                strcpy(p, *argvi);
+                                argv[i] = p;
+                                p += strlen(*argvi) + 1;
+                        }
+                        argv[i] = NULL;
                         free (argv[0]);
-                        argv[0] = xstrdup(exec_fname);
+                        argv[0] = new_argv;
                 }
                 command_line = make_command_line( shell_name, exec_fname, argv);
         }
@@ -736,14 +655,15 @@ process_begin(
 
         if (envp) {
                 if (arr2envblk(envp, &envblk, &envsize_needed) == FALSE) {
-                        pproc->last_err = 0;
                         pproc->lerrno = E_NO_MEM;
                         free( command_line );
-                        if (pproc->last_err == ERROR_INVALID_PARAMETER
+                        if ((pproc->last_err == ERROR_INVALID_PARAMETER
+                             || pproc->last_err == ERROR_MORE_DATA)
                             && envsize_needed > 32*1024) {
                                 fprintf (stderr, "CreateProcess failed, probably because environment is too large (%d bytes).\n",
                                          envsize_needed);
                         }
+                        pproc->last_err = 0;
                         return(-1);
                 }
         }
@@ -757,6 +677,7 @@ process_begin(
         /*
          *  Set up inherited stdin, stdout, stderr for child
          */
+        memset(&startInfo, '\0', sizeof(startInfo));
         GetStartupInfo(&startInfo);
         startInfo.dwFlags = STARTF_USESTDHANDLES;
         startInfo.lpReserved = 0;

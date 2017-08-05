@@ -39,3 +39,7 @@ jump Works: MAKEFLAGS=e --no-print-directory
 print Works: MAKEFLAGS=e --no-print-directory');
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

@@ -1,5 +1,5 @@
 /* API for GNU Make dynamic objects.
-Copyright (C) 2013-2014 Free Software Foundation, Inc.
+Copyright (C) 2013-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -37,17 +37,29 @@ gmk_free (char *s)
 /* Evaluate a buffer as make syntax.
    Ideally eval_buffer() will take const char *, but not yet.  */
 void
-gmk_eval (const char *buffer, const gmk_floc *floc)
+gmk_eval (const char *buffer, const gmk_floc *gfloc)
 {
   /* Preserve existing variable buffer context.  */
   char *pbuf;
   unsigned int plen;
   char *s;
+  floc fl;
+  floc *flp;
+
+  if (gfloc)
+    {
+      fl.filenm = gfloc->filenm;
+      fl.lineno = gfloc->lineno;
+      fl.offset = 0;
+      flp = &fl;
+    }
+  else
+    flp = NULL;
 
   install_variable_buffer (&pbuf, &plen);
 
   s = xstrdup (buffer);
-  eval_buffer (s, floc);
+  eval_buffer (s, flp);
   free (s);
 
   restore_variable_buffer (pbuf, plen);

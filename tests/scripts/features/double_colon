@@ -151,8 +151,7 @@ two');
 
 unlink('result','one','two');
 
-# TEST 10: check for proper backslash handling
-#          Savannah bug #33399
+# TEST 10: SV 33399 : check for proper backslash handling
 
 run_make_test('
 a\ xb :: ; @echo one
@@ -160,5 +159,47 @@ a\ xb :: ; @echo two
 ',
               '', "one\ntwo\n");
 
+# Test 11: SV 44742 : All double-colon rules should be run in parallel build.
+
+run_make_test('result :: 01
+	@echo update
+	@touch $@
+result :: 02
+	@echo update
+	@touch $@
+result :: 03
+	@echo update
+	@touch $@
+result :: 04
+	@echo update
+	@touch $@
+result :: 05
+	@echo update
+	@touch $@
+01 02 03 04 05:
+	@touch 01 02 03 04 05
+',
+              '-j10 result', "update\nupdate\nupdate\nupdate\nupdate\n");
+
+unlink('result', '01', '02', '03', '04', '05');
+
+# Test 12: SV 44742 : Double-colon rules with parallelism
+
+run_make_test('
+root: all
+	echo root
+all::
+	echo all_one
+all:: 3
+	echo all_two
+%:
+	sleep $*
+',
+              '-rs -j2 1 2 root', "all_one\nall_two\nroot\n");
+
 # This tells the test driver that the perl test script executed properly.
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

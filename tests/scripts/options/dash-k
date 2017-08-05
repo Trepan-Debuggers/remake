@@ -42,7 +42,7 @@ close(MAKEFILE);
                "$workdir${pathsep}command.h",
                "$workdir${pathsep}commands.c","$workdir${pathsep}display.c",
                "$workdir${pathsep}buffer.h",
-	       "$workdir${pathsep}command.c");
+               "$workdir${pathsep}command.c");
 
 &touch(@files_to_touch);
 
@@ -92,8 +92,7 @@ close(MAKEFILE);
 &run_make_with_options($makefile2, "-k", &get_logfile, $error_code);
 
 $answer = "exit 1
-$makefile2:9: recipe for target 'foo.o' failed
-$make_name: *** [foo.o] Error 1
+$make_name: *** [$makefile2:9: foo.o] Error 1
 $make_name: Target 'all' not remade because of errors.\n";
 
 &compare_output($answer, &get_logfile(1));

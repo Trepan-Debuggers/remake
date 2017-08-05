@@ -3,7 +3,7 @@ NOTE: getopt is now part of the C library, so if you don't know what
 "Keep this file name-space clean" means, talk to drepper@gnu.org
 before changing it!
 
-Copyright (C) 1987-2014 Free Software Foundation, Inc.
+Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
 NOTE: The canonical source of this file is maintained with the GNU C Library.
 Bugs can be reported to bug-glibc@gnu.org.

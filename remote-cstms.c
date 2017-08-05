@@ -3,7 +3,7 @@
    Please do not send bug reports or questions about it to
    the Make maintainers.
 
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -222,7 +222,7 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
     fflush (stderr);
   }
 
-  pid = fork ();
+  pid = vfork ();
   if (pid < 0)
     {
       /* The fork failed!  */

@@ -1,5 +1,5 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -115,8 +115,8 @@ subst_expand (char *o, const char *text, const char *subst, const char *replace,
       /* If we're substituting only by fully matched words,
          or only at the ends of words, check that this case qualifies.  */
       if (by_word
-          && ((p > text && !isblank ((unsigned char)p[-1]))
-              || ! STOP_SET (p[slen], MAP_BLANK|MAP_NUL)))
+          && ((p > text && !ISSPACE (p[-1]))
+              || ! STOP_SET (p[slen], MAP_SPACE|MAP_NUL)))
         /* Struck out.  Output the rest of the string that is
            no longer to be replaced.  */
         o = variable_buffer_output (o, subst, slen);
@@ -566,10 +566,12 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
       if (is_notdir || p >= p2)
         {
 #ifdef VMS
-          o = variable_buffer_output (o, ",", 1);
-#else
-          o = variable_buffer_output (o, " ", 1);
+          if (vms_comma_separator)
+            o = variable_buffer_output (o, ",", 1);
+          else
 #endif
+          o = variable_buffer_output (o, " ", 1);
+
           doneany = 1;
         }
     }
@@ -596,7 +598,7 @@ func_basename_dir (char *o, char **argv, const char *funcname)
   int stop = MAP_DIRSEP | (is_basename ? MAP_DOT : 0) | MAP_NUL;
 #ifdef VMS
   /* As in func_notdir_suffix ... */
-  char *vms_p3 = alloca(strlen(p3) + 1);
+  char *vms_p3 = alloca (strlen(p3) + 1);
   int i;
   for (i = 0; p3[i]; i++)
     if (p3[i] == ',')
@@ -624,7 +626,13 @@ func_basename_dir (char *o, char **argv, const char *funcname)
 #endif
       else if (is_dir)
 #ifdef VMS
-        o = variable_buffer_output (o, "[]", 2);
+        {
+          extern int vms_report_unix_paths;
+          if (vms_report_unix_paths)
+            o = variable_buffer_output (o, "./", 2);
+          else
+            o = variable_buffer_output (o, "[]", 2);
+        }
 #else
 #ifndef _AMIGA
       o = variable_buffer_output (o, "./", 2);
@@ -637,10 +645,12 @@ func_basename_dir (char *o, char **argv, const char *funcname)
         o = variable_buffer_output (o, p2, len);
 
 #ifdef VMS
-      o = variable_buffer_output (o, ",", 1);
-#else
-      o = variable_buffer_output (o, " ", 1);
+      if (vms_comma_separator)
+        o = variable_buffer_output (o, ",", 1);
+      else
 #endif
+        o = variable_buffer_output (o, " ", 1);
+
       doneany = 1;
     }
 
@@ -745,9 +755,9 @@ func_words (char *o, char **argv, const char *funcname UNUSED)
 char *
 strip_whitespace (const char **begpp, const char **endpp)
 {
-  while (*begpp <= *endpp && isspace ((unsigned char)**begpp))
+  while (*begpp <= *endpp && ISSPACE (**begpp))
     (*begpp) ++;
-  while (*endpp >= *begpp && isspace ((unsigned char)**endpp))
+  while (*endpp >= *begpp && ISSPACE (**endpp))
     (*endpp) --;
   return (char *)*begpp;
 }
@@ -860,8 +870,12 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
   unsigned int len;
   struct variable *var;
 
+  /* Clean up the variable name by removing whitespace.  */
+  char *vp = next_token (varname);
+  end_of_token (vp)[0] = '\0';
+
   push_new_variable_scope ();
-  var = define_variable (varname, strlen (varname), "", o_automatic, 0);
+  var = define_variable (vp, strlen (vp), "", o_automatic, 0);
 
   /* loop through LIST,  put the value in VAR and expand BODY */
   while ((p = find_next_token (&list_iterator, &len)) != 0)
@@ -1071,10 +1085,9 @@ func_strip (char *o, char **argv, const char *funcname UNUSED)
       int i=0;
       const char *word_start;
 
-      while (isspace ((unsigned char)*p))
-        ++p;
+      NEXT_TOKEN (p);
       word_start = p;
-      for (i=0; *p != '\0' && !isspace ((unsigned char)*p); ++p, ++i)
+      for (i=0; *p != '\0' && !ISSPACE (*p); ++p, ++i)
         {}
       if (!i)
         break;
@@ -1440,10 +1453,23 @@ fold_newlines (char *buffer, unsigned int *length, int trim_newlines)
   *length = last_nonnl - buffer;
 }
 
+pid_t shell_function_pid = 0;
+static int shell_function_completed;
 
+void
+shell_completed (int exit_code, int exit_sig)
+{
+  char buf[256];
 
-int shell_function_pid = 0, shell_function_completed;
+  shell_function_pid = 0;
+  if (exit_sig == 0 && exit_code == 127)
+    shell_function_completed = -1;
+  else
+    shell_function_completed = 1;
 
+  sprintf (buf, "%d", exit_code);
+  define_variable_cname (".SHELLSTATUS", buf, o_override, 0);
+}
 
 #ifdef WINDOWS32
 /*untested*/
@@ -1592,8 +1618,7 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   extern int dos_command_running, dos_status;
 
   /* Make sure not to bother processing an empty line.  */
-  while (isblank ((unsigned char)*text))
-    ++text;
+  NEXT_TOKEN (text);
   if (*text == '\0')
     return 0;
 
@@ -1623,14 +1648,15 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
         errno = EINTR;
       else if (errno == 0)
         errno = ENOMEM;
-      shell_function_completed = -1;
+      if (fpipe)
+        pclose (fpipe);
+      shell_completed (127, 0);
     }
   else
     {
       pipedes[0] = fileno (fpipe);
       *pidp = 42; /* Yes, the Meaning of Life, the Universe, and Everything! */
       errno = e;
-      shell_function_completed = 1;
     }
   return fpipe;
 }
@@ -1689,7 +1715,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
 #endif
       return o;
     }
-#endif
+#endif /* !__MSDOS__ */
 
   /* Using a target environment for 'shell' loses in cases like:
        export var = $(shell echo foobie)
@@ -1709,7 +1735,8 @@ func_shell_base (char *o, char **argv, int trim_newlines)
   if (reading_file && reading_file->filenm)
     {
       char *p = alloca (strlen (reading_file->filenm)+11+4);
-      sprintf (p, "%s:%lu: ", reading_file->filenm, reading_file->lineno);
+      sprintf (p, "%s:%lu: ", reading_file->filenm,
+               reading_file->lineno + reading_file->offset);
       error_prefix = p;
     }
   else
@@ -1728,6 +1755,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
       perror_with_name (error_prefix, "pipe");
       return o;
     }
+
 #elif defined(WINDOWS32)
   windows32_openpipe (pipedes, errfd, &pid, command_argv, envp);
   /* Restore the value of just_print_flag.  */
@@ -1736,11 +1764,11 @@ func_shell_base (char *o, char **argv, int trim_newlines)
   if (pipedes[0] < 0)
     {
       /* Open of the pipe failed, mark as failed execution.  */
-      shell_function_completed = -1;
+      shell_completed (127, 0);
       perror_with_name (error_prefix, "pipe");
       return o;
     }
-  else
+
 #else
   if (pipe (pipedes) < 0)
     {
@@ -1748,115 +1776,113 @@ func_shell_base (char *o, char **argv, int trim_newlines)
       return o;
     }
 
-# ifdef __EMX__
-  /* close some handles that are unnecessary for the child process */
+  /* Close handles that are unnecessary for the child process.  */
   CLOSE_ON_EXEC(pipedes[1]);
   CLOSE_ON_EXEC(pipedes[0]);
-  /* Never use fork()/exec() here! Use spawn() instead in exec_command() */
-  pid = child_execute_job (FD_STDIN, pipedes[1], errfd, command_argv, envp);
-  if (pid < 0)
-    perror_with_name (error_prefix, "spawn");
-# else /* ! __EMX__ */
-  pid = fork ();
-  if (pid < 0)
-    perror_with_name (error_prefix, "fork");
-  else if (pid == 0)
-    {
-#  ifdef SET_STACK_SIZE
-      /* Reset limits, if necessary.  */
-      if (stack_limit.rlim_cur)
-       setrlimit (RLIMIT_STACK, &stack_limit);
-#  endif
-      child_execute_job (FD_STDIN, pipedes[1], errfd, command_argv, envp);
-    }
-  else
-# endif
-#endif
-    {
-      /* We are the parent.  */
-      char *buffer;
-      unsigned int maxlen, i;
-      int cc;
 
-      /* Record the PID for reap_children.  */
-      shell_function_pid = pid;
+  {
+    struct output out;
+    out.syncout = 1;
+    out.out = pipedes[1];
+    out.err = errfd;
+
+    pid = child_execute_job (&out, 1, command_argv, envp);
+  }
+
+  if (pid < 0)
+    {
+      perror_with_name (error_prefix, "fork");
+      return o;
+    }
+#endif
+
+  {
+    char *buffer;
+    unsigned int maxlen, i;
+    int cc;
+
+    /* Record the PID for reap_children.  */
+    shell_function_pid = pid;
 #ifndef  __MSDOS__
-      shell_function_completed = 0;
+    shell_function_completed = 0;
 
-      /* Free the storage only the child needed.  */
-      free (command_argv[0]);
-      free (command_argv);
+    /* Free the storage only the child needed.  */
+    free (command_argv[0]);
+    free (command_argv);
 
-      /* Close the write side of the pipe.  We test for -1, since
-         pipedes[1] is -1 on MS-Windows, and some versions of MS
-         libraries barf when 'close' is called with -1.  */
-      if (pipedes[1] >= 0)
-        close (pipedes[1]);
+    /* Close the write side of the pipe.  We test for -1, since
+       pipedes[1] is -1 on MS-Windows, and some versions of MS
+       libraries barf when 'close' is called with -1.  */
+    if (pipedes[1] >= 0)
+      close (pipedes[1]);
 #endif
 
-      /* Set up and read from the pipe.  */
+    /* Set up and read from the pipe.  */
 
-      maxlen = 200;
-      buffer = xmalloc (maxlen + 1);
+    maxlen = 200;
+    buffer = xmalloc (maxlen + 1);
 
-      /* Read from the pipe until it gets EOF.  */
-      for (i = 0; ; i += cc)
-        {
-          if (i == maxlen)
-            {
-              maxlen += 512;
-              buffer = xrealloc (buffer, maxlen + 1);
-            }
+    /* Read from the pipe until it gets EOF.  */
+    for (i = 0; ; i += cc)
+      {
+        if (i == maxlen)
+          {
+            maxlen += 512;
+            buffer = xrealloc (buffer, maxlen + 1);
+          }
 
-          EINTRLOOP (cc, read (pipedes[0], &buffer[i], maxlen - i));
-          if (cc <= 0)
-            break;
-        }
-      buffer[i] = '\0';
+        EINTRLOOP (cc, read (pipedes[0], &buffer[i], maxlen - i));
+        if (cc <= 0)
+          break;
+      }
+    buffer[i] = '\0';
 
-      /* Close the read side of the pipe.  */
+    /* Close the read side of the pipe.  */
 #ifdef  __MSDOS__
-      if (fpipe)
-        (void) pclose (fpipe);
+    if (fpipe)
+      {
+        int st = pclose (fpipe);
+        shell_completed (st, 0);
+      }
 #else
-      (void) close (pipedes[0]);
+    (void) close (pipedes[0]);
 #endif
 
-      /* Loop until child_handler or reap_children()  sets
-         shell_function_completed to the status of our child shell.  */
-      while (shell_function_completed == 0)
-        reap_children (1, 0);
+    /* Loop until child_handler or reap_children()  sets
+       shell_function_completed to the status of our child shell.  */
+    while (shell_function_completed == 0)
+      reap_children (1, 0);
 
-      if (batch_filename)
-        {
-          DB (DB_VERBOSE, (_("Cleaning up temporary batch file %s\n"),
-                           batch_filename));
-          remove (batch_filename);
-          free (batch_filename);
-        }
-      shell_function_pid = 0;
+    if (batch_filename)
+      {
+        DB (DB_VERBOSE, (_("Cleaning up temporary batch file %s\n"),
+                         batch_filename));
+        remove (batch_filename);
+        free (batch_filename);
+      }
+    shell_function_pid = 0;
 
-      /* The child_handler function will set shell_function_completed
-         to 1 when the child dies normally, or to -1 if it
-         dies with status 127, which is most likely an exec fail.  */
+    /* shell_completed() will set shell_function_completed to 1 when the
+       child dies normally, or to -1 if it dies with status 127, which is
+       most likely an exec fail.  */
 
-      if (shell_function_completed == -1)
-        {
-          /* This likely means that the execvp failed, so we should just
-             write the error message in the pipe from the child.  */
-          fputs (buffer, stderr);
-          fflush (stderr);
-        }
-      else
-        {
-          /* The child finished normally.  Replace all newlines in its output
-             with spaces, and put that in the variable output buffer.  */
-          fold_newlines (buffer, &i, trim_newlines);
-          o = variable_buffer_output (o, buffer, i);
-        }
+    if (shell_function_completed == -1)
+      {
+        /* This likely means that the execvp failed, so we should just
+           write the error message in the pipe from the child.  */
+        fputs (buffer, stderr);
+        fflush (stderr);
+      }
+    else
+      {
+        /* The child finished normally.  Replace all newlines in its output
+           with spaces, and put that in the variable output buffer.  */
+        fold_newlines (buffer, &i, trim_newlines);
+        o = variable_buffer_output (o, buffer, i);
+      }
 
-      free (buffer);
-    }
+    free (buffer);
+  }
 
   return o;
 }
@@ -1950,7 +1976,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
 }
 #endif  /* _AMIGA */
 
-char *
+static char *
 func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
   return func_shell_base (o, argv, 1);
@@ -1979,8 +2005,7 @@ func_not (char *o, char **argv, char *funcname UNUSED)
 {
   const char *s = argv[0];
   int result = 0;
-  while (isspace ((unsigned char)*s))
-    s++;
+  NEXT_TOKEN (s);
   result = ! (*s);
   o = variable_buffer_output (o,  result ? "1" : "", result);
   return o;
@@ -2184,29 +2209,70 @@ func_file (char *o, char **argv, const char *funcname UNUSED)
           mode = "a";
           ++fn;
         }
-      fn = next_token (fn);
+      NEXT_TOKEN (fn);
 
-      fp = fopen (fn, mode);
+      if (fn[0] == '\0')
+        O (fatal, *expanding_var, _("file: missing filename"));
+
+      ENULLLOOP (fp, fopen (fn, mode));
       if (fp == NULL)
-        {
-          const char *err = strerror (errno);
-          OSS (fatal, reading_file, _("open: %s: %s"), fn, err);
-        }
+        OSS (fatal, reading_file, _("open: %s: %s"), fn, strerror (errno));
+
       if (argv[1])
         {
           int l = strlen (argv[1]);
           int nl = l == 0 || argv[1][l-1] != '\n';
 
           if (fputs (argv[1], fp) == EOF || (nl && fputc ('\n', fp) == EOF))
-            {
-              const char *err = strerror (errno);
-              OSS (fatal, reading_file, _("write: %s: %s"), fn, err);
-            }
+            OSS (fatal, reading_file, _("write: %s: %s"), fn, strerror (errno));
         }
-      fclose (fp);
+      if (fclose (fp))
+        OSS (fatal, reading_file, _("close: %s: %s"), fn, strerror (errno));
+    }
+  else if (fn[0] == '<')
+    {
+      char *preo = o;
+      FILE *fp;
+
+      ++fn;
+      NEXT_TOKEN (fn);
+      if (fn[0] == '\0')
+        O (fatal, *expanding_var, _("file: missing filename"));
+
+      if (argv[1])
+        O (fatal, *expanding_var, _("file: too many arguments"));
+
+      ENULLLOOP (fp, fopen (fn, "r"));
+      if (fp == NULL)
+        {
+          if (errno == ENOENT)
+            return o;
+          OSS (fatal, reading_file, _("open: %s: %s"), fn, strerror (errno));
+        }
+
+      while (1)
+        {
+          char buf[1024];
+          size_t l = fread (buf, 1, sizeof (buf), fp);
+          if (l > 0)
+            o = variable_buffer_output (o, buf, l);
+
+          if (ferror (fp))
+            if (errno != EINTR)
+              OSS (fatal, reading_file, _("read: %s: %s"), fn, strerror (errno));
+          if (feof (fp))
+            break;
+        }
+      if (fclose (fp))
+        OSS (fatal, reading_file, _("close: %s: %s"), fn, strerror (errno));
+
+      /* Remove trailing newline.  */
+      if (o > preo && o[-1] == '\n')
+        if (--o > preo && o[-1] == '\r')
+          --o;
     }
   else
-    OS (fatal, reading_file, _("Invalid file operation: %s"), fn);
+    OS (fatal, *expanding_var, _("file: invalid file operation: %s"), fn);
 
   return o;
 }
@@ -2379,7 +2445,8 @@ handle_function (char **op, const char **stringp)
   /* We found a builtin function.  Find the beginning of its arguments (skip
      whitespace after the name).  */
 
-  beg = next_token (beg + entry_p->len);
+  beg += entry_p->len;
+  NEXT_TOKEN (beg);
 
   /* Find the end of the function invocation, counting nested use of
      whichever kind of parens we use.  Since we're looking, count commas
@@ -2479,7 +2546,6 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 {
   static int max_args = 0;
   char *fname;
-  char *cp;
   char *body;
   int flen;
   int i;
@@ -2487,16 +2553,9 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   const struct function_table_entry *entry_p;
   struct variable *v;
 
-  /* There is no way to define a variable with a space in the name, so strip
-     leading and trailing whitespace as a favor to the user.  */
-  fname = argv[0];
-  while (isspace ((unsigned char)*fname))
-    ++fname;
-
-  cp = fname + strlen (fname) - 1;
-  while (cp > fname && isspace ((unsigned char)*cp))
-    --cp;
-  cp[1] = '\0';
+  /* Clean up the name of the variable to be invoked.  */
+  fname = next_token (argv[0]);
+  end_of_token (fname)[0] = '\0';
 
   /* Calling nothing is a no-op */
   if (*fname == '\0')
@@ -2575,7 +2634,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 }
 
 void
-define_new_function (const gmk_floc *flocp, const char *name,
+define_new_function (const floc *flocp, const char *name,
                      unsigned int min, unsigned int max, unsigned int flags,
                      gmk_func_ptr func)
 {
@@ -2595,10 +2654,10 @@ define_new_function (const gmk_floc *flocp, const char *name,
     OS (fatal, flocp, _("Function name too long: %s"), name);
   if (min > 255)
     ONS (fatal, flocp,
-         _("Invalid minimum argument count (%d) for function %s"), min, name);
+         _("Invalid minimum argument count (%u) for function %s"), min, name);
   if (max > 255 || (max && max < min))
     ONS (fatal, flocp,
-         _("Invalid maximum argument count (%d) for function %s"), max, name);
+         _("Invalid maximum argument count (%u) for function %s"), max, name);
 
   ent = xmalloc (sizeof (struct function_table_entry));
   ent->name = name;

@@ -56,7 +56,7 @@ load testload.so
 POST := $(.LOADED)
 all: ; @echo pre=$(PRE) post=$(POST) $(TESTLOAD)
 !,
-              '', "pre= post=testload.so implicit\n");
+              '--warn-undefined-variables', "pre= post=testload.so implicit\n");
 
 # TEST 2
 # Load using an explicit function

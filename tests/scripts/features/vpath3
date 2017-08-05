@@ -17,6 +17,12 @@ my @files_to_touch = ("a1${pathsep}lib1.a",
                       "b3${pathsep}lib3.so");
 &touch(@files_to_touch);
 
+my $answer = "a1${pathsep}lib1.a a1${pathsep}libc.a " .
+             "a2${pathsep}lib2.a lib3.a\n";
+if ($port_type eq 'VMS-DCL') {
+    $answer =~ s/ /,/g;
+}
+
 run_make_test('
 vpath %.h b3
 vpath %.a a1
@@ -25,7 +31,7 @@ vpath % a2 b2
 vpath % b3
 all: -l1 -lc -l2 -l3; @echo $^
 ',
-              '', "a1${pathsep}lib1.a a1${pathsep}libc.a a2${pathsep}lib2.a lib3.a\n");
+              '', $answer);
 
 unlink(@files_to_touch);
 for my $d (@dirs_to_make) {

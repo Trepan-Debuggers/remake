@@ -1,5 +1,5 @@
 /* Definitions for using pattern rules in GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -55,3 +55,4 @@ void install_pattern_rule (struct pspec *p, int terminal);
 void create_pattern_rule (const char **targets, const char **target_percents,
                           unsigned int num, int terminal, struct dep *deps,
                           struct commands *commands, int override);
+void print_rule_data_base (void);
