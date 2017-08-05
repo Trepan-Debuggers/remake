@@ -781,8 +781,11 @@ file_exists_p (const char *name)
   const char *slash;
 
 #ifndef NO_ARCHIVES
-  if (ar_name (name))
-    return ar_member_date (name) != (time_t) -1;
+  {
+    time_t member_date;
+    if (ar_name (name))
+      return ar_member_date (name, &member_date);
+  }
 #endif
 
   dirend = strrchr (name, '/');
@@ -1168,6 +1171,8 @@ print_dir_data_base (void)
 }
 
 /* Hooks for globbing.  */
+
+#include <glob.h>
 
 /* Structure describing state of iterating through a directory hash table.  */
 

@@ -14,11 +14,15 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "types.h"
 #include "makeint.h"
+#include "globals.h"
+#include "debugger/cmd.h"
 
 #include <assert.h>
 
 #include "job.h"
+#include "print.h"
 #include "debug.h"
 #include "filedef.h"
 #include "commands.h"
@@ -26,6 +30,14 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "os.h"
 
 #include <string.h>
+
+#if defined (HAVE_LINUX_BINFMTS_H) && defined (HAVE_SYS_USER_H)
+#include <sys/user.h>
+#include <linux/binfmts.h>
+#endif
+#ifndef PAGE_SIZE
+# define PAGE_SIZE (sysconf(_SC_PAGESIZE))
+#endif
 
 /* Default shell to use.  */
 #ifdef WINDOWS32
@@ -212,10 +224,12 @@ int getloadavg (double loadavg[], int nelem);
 #endif
 
 static void free_child (struct child *);
-static void start_job_command (struct child *child);
+static void start_job_command (struct child *child,
+			       target_stack_node_t *p_call_stack);
 static int load_too_high (void);
 static int job_next_command (struct child *);
-static int start_waiting_job (struct child *);
+static int start_waiting_job (child_t *c,
+			      target_stack_node_t *p_call_stack);
 
 /* Chain of all live (or recently deceased) children.  */
 
@@ -467,14 +481,14 @@ is_bourne_compatible_shell (const char *path)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (struct child *child,
-             int exit_code, int exit_sig, int coredump, int ignored)
+child_error (child_t *p_child, target_stack_node_t *p_call_stack,
+	     int exit_code, int exit_sig, int coredump, int ignored)
 {
   const char *pre = "*** ";
   const char *post = "";
   const char *dump = "";
-  const struct file *f = child->file;
-  const floc *flocp = &f->cmds->fileinfo;
+  const struct file *f = p_child->file;
+  const gmk_floc *flocp = &f->cmds->fileinfo;
   const char *nm;
   size_t l;
 
@@ -501,21 +515,27 @@ child_error (struct child *child,
 
   l = strlen (pre) + strlen (nm) + strlen (f->name) + strlen (post);
 
-  OUTPUT_SET (&child->output);
+  OUTPUT_SET (&p_child->output);
 
   show_goal_error ();
 
   if (exit_sig == 0)
-    error (NILF, l + INTSTR_LENGTH,
-           _("%s[%s: %s] Error %d%s"), pre, nm, f->name, exit_code, post);
+    err_with_stack(p_call_stack, ignored ? _("[%s] Error %d%s") :
+		   _("*** [%s] Error %d"),
+		   f->name, exit_code, post);
   else
-    {
-      const char *s = strsignal (exit_sig);
-      error (NILF, l + strlen (s) + strlen (dump),
-             "%s[%s: %s] %s%s%s", pre, nm, f->name, s, dump, post);
-    }
+    err_with_stack(p_call_stack, "*** [%s] %s%s",
+		   f->name, strsignal (exit_sig), dump);
 
   OUTPUT_UNSET ();
+
+  /* If have enabled debugging but haven't entered the debugger above
+     because we haven't set to debug on error, enter the debugger now.
+     FIXME: Add be another variable/option to control entry here as
+     well?
+   */
+  if (! (debugger_on_error & DEBUGGER_ON_ERROR) && debugger_enabled )
+    enter_debugger(p_call_stack, p_child->file, exit_code, DEBUG_ERROR_HIT);
 }
 
 
@@ -555,7 +575,7 @@ extern pid_t shell_function_pid;
    print an error message first.  */
 
 void
-reap_children (int block, int err)
+reap_children (int block, int err, target_stack_node_t *p_call_stack)
 {
 #ifndef WINDOWS32
   WAIT_T status;
@@ -856,6 +876,14 @@ reap_children (int block, int err)
 
       dontcare = c->dontcare;
 
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	if (job_slots_used > 0) --job_slots_used;
+	c->file->update_status = 0;
+	free_child (c);
+	in_debugger = DEBUGGER_QUIT_RC;
+	die(DEBUGGER_QUIT_RC);
+      }
+
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
@@ -863,7 +891,7 @@ reap_children (int block, int err)
           static int delete_on_error = -1;
 
           if (!dontcare && child_failed == MAKE_FAILURE)
-            child_error (c, exit_code, exit_sig, coredump, 0);
+	    child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
 
           c->file->update_status = child_failed == MAKE_FAILURE ? us_failed : us_question;
           if (delete_on_error == -1)
@@ -879,7 +907,7 @@ reap_children (int block, int err)
           if (child_failed)
             {
               /* The commands failed, but we don't care.  */
-              child_error (c, exit_code, exit_sig, coredump, 1);
+	      child_error (c, p_call_stack, exit_code, exit_sig, coredump, 1);
               child_failed = 0;
             }
 
@@ -907,7 +935,7 @@ reap_children (int block, int err)
                      Also, start_remote_job may need state set up
                      by start_remote_job_p.  */
                   c->remote = start_remote_job_p (0);
-                  start_job_command (c);
+                  start_job_command (c, p_call_stack);
                   /* Fatal signals are left blocked in case we were
                      about to put that child on the chain.  But it is
                      already there, so it is safe for a fatal signal to
@@ -968,16 +996,37 @@ reap_children (int block, int err)
       else
         lastc->next = c->next;
 
-      free_child (c);
+      {
+	/* Save file info in case we need to use it in the debugger
+	 */
+	file_t file;
 
-      unblock_sigs ();
+	memcpy(&file, c->file, sizeof(file_t));
 
-      /* If the job failed, and the -k flag was not given, die,
-         unless we are already in the process of dying.  */
-      if (!err && child_failed && !dontcare && !keep_going_flag &&
-          /* fatal_error_signal will die with the right signal.  */
-          !handling_fatal_signal)
-        die (child_failed);
+	free_child (c);
+
+	unblock_sigs ();
+
+	/* Debugger "quit" takes precedence over --ignore-errors
+	   --keep-going, etc.
+	*/
+	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	  if (job_slots_used > 0) --job_slots_used;
+	  in_debugger = DEBUGGER_QUIT_RC;
+	  die(DEBUGGER_QUIT_RC);
+	}
+
+	/* If the job failed, and the -k flag was not given, die,
+	   unless we are already in the process of dying.  */
+	if (!err && child_failed && !dontcare && !keep_going_flag &&
+	    /* fatal_error_signal will die with the right signal.  */
+	    !handling_fatal_signal) {
+	    if ( (debugger_on_error & DEBUGGER_ON_FATAL)
+		 || i_debugger_stepping || i_debugger_nexting )
+		enter_debugger(p_call_stack, &file, 2, DEBUG_ERROR_HIT);
+	    die (child_failed);
+	}
+      }
 
       /* Only block for one child.  */
       block = 0;
@@ -1066,7 +1115,8 @@ unblock_sigs (void)
    it can be cleaned up in the event of a fatal signal.  */
 
 static void
-start_job_command (struct child *child)
+start_job_command (child_t *child,
+		   target_stack_node_t *p_call_stack)
 {
   int flags;
   char *p;
@@ -1229,7 +1279,7 @@ start_job_command (struct child *child)
 #endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
-        start_job_command (child);
+	start_job_command (child, p_call_stack);
       else
         {
           /* No more commands.  Make sure we're "running"; we might not be if
@@ -1259,9 +1309,26 @@ start_job_command (struct child *child)
 #endif
 
   /* Print the command if appropriate.  */
-  if (just_print_flag || trace_flag
-      || (!(flags & COMMANDS_SILENT) && !silent_flag))
-    OS (message, 0, "%s", p);
+  {
+    bool print_it =
+	(just_print_flag
+	 || (!(flags & COMMANDS_SILENT) && !silent_flag)
+	 || (db_level & DB_SHELL));
+
+    if (print_it) {
+	if (db_level & DB_SHELL) {
+	    char pid_str[20] = ">>";
+	    if (job_slots != 1)
+		snprintf(pid_str, sizeof(pid_str), "%d", child->pid);
+	    OS (message, 0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>%s>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+		pid_str);
+	    OS (message, 0, "%s", p);
+	    OS (message, 0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<%s<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
+		job_slots != 1 ? pid_str : "<<");
+	} else
+	    OS (message, 0, "%s", p);
+    }
+  }
 
   /* Tell update_goal_chain that a command has been started on behalf of
      this target.  It is important that this happens here and not in
@@ -1312,6 +1379,10 @@ start_job_command (struct child *child)
 
   /* We're sure we're going to invoke a command: set up the output.  */
   output_start ();
+
+  p_stack_top = p_call_stack;
+  if (i_debugger_stepping)
+    enter_debugger(p_call_stack, child->file, 0, DEBUG_STEP_COMMAND);
 
   /* Flush the output streams so they won't have things written twice.  */
 
@@ -1544,7 +1615,7 @@ start_job_command (struct child *child)
    the load was too high and the child was put on the 'waiting_jobs' chain.  */
 
 static int
-start_waiting_job (struct child *c)
+start_waiting_job (struct child *c, target_stack_node_t *p_call_stack)
 {
   struct file *f = c->file;
 
@@ -1572,7 +1643,7 @@ start_waiting_job (struct child *c)
     }
 
   /* Start the first command; reap_children will run later command lines.  */
-  start_job_command (c);
+  start_job_command (c, p_call_stack);
 
   switch (f->command_state)
     {
@@ -1608,7 +1679,7 @@ start_waiting_job (struct child *c)
 /* Create a 'struct child' for FILE and start its commands running.  */
 
 void
-new_job (struct file *file)
+new_job (struct file *file, target_stack_node_t *p_call_stack)
 {
   struct commands *cmds = file->cmds;
   struct child *c;
@@ -1617,10 +1688,10 @@ new_job (struct file *file)
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
-  start_waiting_jobs ();
+  start_waiting_jobs (p_call_stack);
 
   /* Reap any children that might have finished recently.  */
-  reap_children (0, 0);
+  reap_children (0, 0, p_call_stack);
 
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
@@ -1756,7 +1827,7 @@ new_job (struct file *file)
 
   if (job_slots != 0)
     while (job_slots_used == job_slots)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
 #ifdef MAKE_JOBSERVER
   /* If we are controlling multiple jobs make sure we have a token before
@@ -1787,11 +1858,11 @@ new_job (struct file *file)
         jobserver_pre_acquire ();
 
         /* Reap anything that's currently waiting.  */
-        reap_children (0, 0);
+        reap_children (0, 0, p_call_stack);
 
         /* Kick off any jobs we have waiting for an opportunity that
            can run now (i.e., waiting for load). */
-        start_waiting_jobs ();
+        start_waiting_jobs (p_call_stack);
 
         /* If our "free" slot is available, use it; we don't need a token.  */
         if (!jobserver_tokens)
@@ -1800,7 +1871,7 @@ new_job (struct file *file)
         /* There must be at least one child already, or we have no business
            waiting for a token. */
         if (!children)
-          O (fatal, NILF, "INTERNAL: no children as we go to sleep on read\n");
+	  fatal_err(p_call_stack, "INTERNAL: no children as we go to sleep on read");
 
         /* Get a token.  */
         got_token = jobserver_acquire (waiting_jobs != NULL);
@@ -1819,7 +1890,7 @@ new_job (struct file *file)
 
   /* Trace the build.
      Use message here so that changes to working directories are logged.  */
-  if (trace_flag)
+  if (db_level & DB_SHELL)
     {
       char *newer = allocated_variable_expand_for_file ("$?", c->file);
       const char *nm;
@@ -1843,15 +1914,28 @@ new_job (struct file *file)
       free (newer);
     }
 
+  /* FIXME: The below is a sign that we need update location somewhere else
+   */
+  if (cmds->fileinfo.filenm) {
+    if (!file->floc.filenm) {
+      file->floc.filenm = cmds->fileinfo.filenm;
+      file->floc.lineno = cmds->fileinfo.lineno - 1;
+      if (!p_call_stack->p_target->floc.filenm) {
+	  p_call_stack->p_target->floc.filenm = file->floc.filenm;
+	  p_call_stack->p_target->floc.lineno = file->floc.lineno;
+      }
+    }
+  }
+
   /* The job is now primed.  Start it running.
      (This will notice if there is in fact no recipe.)  */
-  start_waiting_job (c);
+  (void) start_waiting_job (c, p_call_stack);
 
   if (job_slots == 1 || not_parallel)
     /* Since there is only one job slot, make things run linearly.
        Wait for the child to die, setting the state to 'cs_finished'.  */
     while (file->command_state == cs_running)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
   OUTPUT_UNSET ();
   return;
@@ -1989,7 +2073,7 @@ load_too_high (void)
 /* Start jobs that are waiting for the load to be lower.  */
 
 void
-start_waiting_jobs (void)
+start_waiting_jobs (target_stack_node_t *p_call_stack)
 {
   struct child *job;
 
@@ -1999,7 +2083,7 @@ start_waiting_jobs (void)
   do
     {
       /* Check for recently deceased descendants.  */
-      reap_children (0, 0);
+      reap_children (0, 0, NULL);
 
       /* Take a job off the waiting list.  */
       job = waiting_jobs;
@@ -2008,7 +2092,7 @@ start_waiting_jobs (void)
       /* Try to start that job.  We break out of the loop as soon
          as start_waiting_job puts one back on the waiting list.  */
     }
-  while (start_waiting_job (job) && waiting_jobs != 0);
+  while (start_waiting_job (job, p_call_stack) && waiting_jobs != 0);
 
   return;
 }
@@ -2398,6 +2482,15 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                                  const char *shellflags, const char *ifs,
                                  int flags, char **batch_filename UNUSED)
 {
+#ifdef MAX_ARG_STRLEN
+    static char eval_line[] = "eval\\ \\\"set\\ x\\;\\ shift\\;\\ ";
+#define ARG_NUMBER_DIGITS 5
+#define EVAL_LEN (sizeof(eval_line)-1 + shell_len + 4                   \
+                  + (7 + ARG_NUMBER_DIGITS) * 2 * line_len / (MAX_ARG_STRLEN - 2))
+#else
+#define EVAL_LEN 0
+#endif
+
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
      We call 'system' for anything that requires ''slow'' processing,
@@ -2939,6 +3032,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 #ifdef WINDOWS32
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 #endif
+    char *args_ptr;
 
 # ifdef __EMX__ /* is this necessary? */
     if (!unixy_shell && shellflags)
@@ -3105,7 +3199,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       }
 
     new_line = xmalloc ((shell_len*2) + 1 + sflags_len + 1
-                        + (line_len*2) + 1);
+                        + (line_len*2) + 1 + EVAL_LEN);
     ap = new_line;
     /* Copy SHELL, escaping any characters special to the shell.  If
        we don't escape them, construct_command_argv_internal will
@@ -3125,6 +3219,30 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 #ifdef WINDOWS32
     command_ptr = ap;
 #endif
+
+#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
+    if (unixy_shell && line_len > MAX_ARG_STRLEN)
+      {
+       unsigned j;
+       memcpy (ap, eval_line, sizeof (eval_line) - 1);
+       ap += sizeof (eval_line) - 1;
+       for (j = 1; j <= 2 * line_len / (MAX_ARG_STRLEN - 2); j++)
+         ap += sprintf (ap, "\\$\\{%u\\}", j);
+       *ap++ = '\\';
+       *ap++ = '"';
+       *ap++ = ' ';
+       /* Copy only the first word of SHELL to $0.  */
+       for (p = shell; *p != '\0'; ++p)
+         {
+           if (isspace ((unsigned char)*p))
+             break;
+           *ap++ = *p;
+         }
+       *ap++ = ' ';
+      }
+#endif
+    args_ptr = ap;
+
     for (p = line; *p != '\0'; ++p)
       {
         if (restp != NULL && *p == '\n')
@@ -3172,6 +3290,14 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
           }
 #endif
         *ap++ = *p;
+#if !defined (WINDOWS32) && defined (MAX_ARG_STRLEN)
+       if (unixy_shell && line_len > MAX_ARG_STRLEN &&
+	   (ap - args_ptr > (long) MAX_ARG_STRLEN - 2))
+         {
+           *ap++ = ' ';
+           args_ptr = ap;
+         }
+#endif
       }
     if (ap == new_line + shell_len + sflags_len + 2)
       {

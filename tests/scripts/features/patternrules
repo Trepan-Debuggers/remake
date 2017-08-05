@@ -99,7 +99,10 @@ unlink("$dir/foo.c");
 # TEST #3: make sure precious flag is set properly for targets
 #          that are built via implicit rules (Savannah bug #13218).
 #
-run_make_test('
+
+setup_for_test();
+open(MAKEFILE,"> $makefile");
+print MAKEFILE '
 .DELETE_ON_ERROR:
 
 .PRECIOUS: %.bar

@@ -151,6 +151,11 @@ sub toplevel
 
   $makeENV{LC_ALL} = 'C';
 
+  # HACK. On Debian, ar is now compiled with determinism, which makes
+  # make tests fail. Pass in the U modifier to revert that behaviour change
+  # If ar has not been changed, this should be a no-op.
+  $makeENV{ARFLAGS} = 'rvU';
+
   # Replace the environment with the new one
   #
   %origENV = %ENV unless $^O eq 'VMS';
@@ -914,6 +919,68 @@ sub compare_output
     &run_command_with_output(&get_difffile,$command);
   }
 
+  return 0;
+}
+
+sub compare_output_string
+{
+  my($answer,$slurp,$logfile) = @_;
+  my($answer_matched) = (0);
+
+  print "Comparing Output ........ " if $debug;
+
+  $slurp = subst_make_string($slurp);
+  $answer = subst_make_string($answer);
+
+  # For make, get rid of any time skew error before comparing--too bad this
+  # has to go into the "generic" driver code :-/
+  $slurp =~ s/^.*modification time .*in the future.*\n//gm;
+  $slurp =~ s/^.*Clock skew detected.*\n//gm;
+
+  ++$tests_run;
+
+  if ($slurp eq $answer) {
+    $answer_matched = 1;
+  } else {
+    # See if it is a slash or CRLF problem
+    my ($answer_mod) = $answer;
+
+    $answer_mod =~ tr,\\,/,;
+    $answer_mod =~ s,\r\n,\n,gs;
+
+    $slurp =~ tr,\\,/,;
+    $slurp =~ s,\r\n,\n,gs;
+
+    $answer_matched = ($slurp eq $answer_mod);
+  }
+
+  if ($answer_matched && $test_passed)
+  {
+    print "ok\n" if $debug;
+    ++$tests_passed;
+    return 1;
+  }
+
+  if (! $answer_matched) {
+      if ($debug) {
+	  print "DIFFERENT OUTPUT\n";
+	  print "+++1:\n$answer\n";
+	  print "+++2:\n$slurp\n";
+      }
+
+    &create_file (&get_basefile, $answer);
+
+    print "\nCreating Difference File ...\n" if $debug;
+
+    # Create the difference file
+
+    open(LOGFILE, ">$logfile") && print(LOGFILE $slurp) && close(LOGFILE);
+
+    local($command) = "diff -c " . &get_basefile . " " . $logfile;
+    &run_command_with_output(&get_difffile,$command);
+  }
+
+  $suite_passed = 0;
   return 0;
 }
 

@@ -20,8 +20,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 
 
-char *remote_description = 0;
-
 /* Call once at startup even if no commands are run.  */
 
 void

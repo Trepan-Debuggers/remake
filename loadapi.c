@@ -43,8 +43,8 @@ gmk_eval (const char *buffer, const gmk_floc *gfloc)
   char *pbuf;
   unsigned int plen;
   char *s;
-  floc fl;
-  floc *flp;
+  gmk_floc fl;
+  gmk_floc *flp;
 
   if (gfloc)
     {

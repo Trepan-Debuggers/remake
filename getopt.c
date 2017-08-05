@@ -682,11 +682,12 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
 		    fprintf (stderr,
 		     _("%s: option '--%s' doesn't allow an argument\n"),
 		     argv[0], pfound->name);
-		   else
+		   else {
 		    /* +option or -option */
 		    fprintf (stderr,
 		     _("%s: option '%c%s' doesn't allow an argument\n"),
 		     argv[0], argv[optind - 1][0], pfound->name);
+		   }
 
 		  nextchar += strlen (nextchar);
 

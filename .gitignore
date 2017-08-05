@@ -1,7 +1,9 @@
 *.a
 *.o
+*~
 .deps
-/*~
+/*.log
+/.Tpo
 /.dep_segment
 /ABOUT-NLS
 /ChangeLog
@@ -18,6 +20,7 @@
 /autom4te.cache
 /build.sh
 /build.sh.in
+/config
 /config.ami
 /config.h
 /config.h-vms
@@ -29,10 +32,13 @@
 /configure
 /debian/remake.debhelper.log
 /loadavg
+/main.h
 /make
 /po-check-*
 /remake
 /remake-*.tar.bz2
 /remake-*.tar.gz
 /stamp-h1
+/test-profile
 /tmp
+callgrind.out.*

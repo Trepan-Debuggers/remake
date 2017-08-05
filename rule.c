@@ -368,6 +368,8 @@ install_pattern_rule (struct pspec *p, int terminal)
   r->lens[0] = strlen (p->target);
   r->targets[0] = p->target;
   r->suffixes[0] = find_percent_cached (&r->targets[0]);
+  r->floc.filenm = NULL;
+  r->floc.lineno = 0;
   assert (r->suffixes[0] != NULL);
   ++r->suffixes[0];
 
@@ -455,6 +457,15 @@ create_pattern_rule (const char **targets, const char **target_percents,
   r->suffixes = target_percents;
   r->lens = xmalloc (n * sizeof (unsigned int));
 
+  r->tracing = BRK_NONE;
+  if (commands) {
+      r->floc.filenm = commands->fileinfo.filenm;
+      r->floc.lineno = commands->fileinfo.lineno - 1;
+  } else {
+    r->floc.filenm = NULL;
+    r->floc.lineno = 0;
+  }
+
   for (i = 0; i < n; ++i)
     {
       r->lens[i] = strlen (targets[i]);
@@ -466,10 +477,9 @@ create_pattern_rule (const char **targets, const char **target_percents,
     r->terminal = terminal;
 }
 
-/* Print the data base of rules.  */
-
-static void                     /* Useful to call from gdb.  */
-print_rule (struct rule *r)
+/*! Show information about a given rule. Useful from the debugger or gdb.  */
+void
+print_rule (rule_t *r, bool b_verbose)
 {
   unsigned int i;
 
@@ -483,12 +493,15 @@ print_rule (struct rule *r)
 
   print_prereqs (r->deps);
 
+  putchar ('\n');
+  if (!b_verbose) return;
   if (r->cmds != 0)
-    print_commands (r->cmds);
+    print_commands (NULL, r->cmds, false);
 }
 
+/* Print the data base of rules.  */
 void
-print_rule_data_base (void)
+print_rule_data_base (bool b_verbose)
 {
   unsigned int rules, terminal;
   struct rule *r;
@@ -500,12 +513,16 @@ print_rule_data_base (void)
     {
       ++rules;
 
-      putchar ('\n');
-      print_rule (r);
+      print_rule (r, b_verbose);
 
       if (r->terminal)
         ++terminal;
     }
+
+  if (!b_verbose) {
+    printf("\n");
+    return;
+  }
 
   if (rules == 0)
     puts (_("\n# No implicit rules."));

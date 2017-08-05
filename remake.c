@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
+#include "profile.h"
+#include "debugger/cmd.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -60,12 +63,16 @@ static struct dep *goal_dep;
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
 
-static enum update_status update_file (struct file *file, unsigned int depth);
-static enum update_status update_file_1 (struct file *file, unsigned int depth);
+static enum update_status update_file (struct file *file, unsigned int depth,
+				       target_stack_node_t *p_call_stack);
+static enum update_status update_file_1 (struct file *file, unsigned int depth,
+					 target_stack_node_t *p_call_stack);
 static enum update_status check_dep (struct file *file, unsigned int depth,
-                                     FILE_TIMESTAMP this_mtime, int *must_make);
+                                     FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+				     target_stack_node_t *p_call_stack);
 static enum update_status touch_file (struct file *file);
-static void remake_file (struct file *file);
+static void remake_file (struct file *file,
+			 target_stack_node_t *p_call_stack);
 static FILE_TIMESTAMP name_mtime (const char *name);
 static const char *library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr);
 
@@ -104,11 +111,11 @@ update_goal_chain (struct goaldep *goaldeps)
 
       /* Start jobs that are waiting for the load to go down.  */
 
-      start_waiting_jobs ();
+      start_waiting_jobs (NULL);
 
       /* Wait for a child to die.  */
 
-      reap_children (1, 0);
+      reap_children (1, 0, NULL);
 
       lastgoal = 0;
       g = goals;
@@ -147,7 +154,7 @@ update_goal_chain (struct goaldep *goaldeps)
                  actually run.  */
               ocommands_started = commands_started;
 
-              fail = update_file (file, rebuilding_makefiles ? 1 : 0);
+	      fail = update_file (file, rebuilding_makefiles ? 1 : 0, NULL);
               check_renamed (file);
 
               /* Set the goal's 'changed' flag if any commands were started
@@ -220,11 +227,14 @@ update_goal_chain (struct goaldep *goaldeps)
                      any commands were actually started for this goal.  */
                   && file->update_status == us_success && !g->changed
                   /* Never give a message under -s or -q.  */
-                  && !silent_flag && !question_flag)
+                  && !silent_flag && !question_flag) {
                 OS (message, 1, ((file->phony || file->cmds == 0)
                                  ? _("Nothing to be done for '%s'.")
                                  : _("'%s' is up to date.")),
                     file->name);
+		if ( debugger_enabled && b_debugger_goal )
+		  enter_debugger(NULL, file, -2, DEBUG_GOAL_UPDATED_HIT);
+	      }
 
               /* This goal is finished.  Remove it from the chain.  */
               if (lastgoal == 0)
@@ -300,7 +310,8 @@ show_goal_error (void)
    each is considered in turn.  */
 
 static enum update_status
-update_file (struct file *file, unsigned int depth)
+update_file (struct file *file, unsigned int depth,
+	     target_stack_node_t *p_call_stack)
 {
   enum update_status status = us_success;
   struct file *f;
@@ -332,7 +343,7 @@ update_file (struct file *file, unsigned int depth)
 
       f->considered = considered;
 
-      new = update_file_1 (f, depth);
+      new = update_file_1 (f, depth, p_call_stack);
       check_renamed (f);
 
       /* Clean up any alloca() used during the update.  */
@@ -363,7 +374,7 @@ update_file (struct file *file, unsigned int depth)
 
         for (d = f->deps; d != 0; d = d->next)
           {
-            enum update_status new = update_file (d->file, depth + 1);
+	      enum update_status new = update_file (d->file, depth + 1, p_call_stack);
             if (new > status)
               status = new;
           }
@@ -424,11 +435,26 @@ complain (struct file *file)
     }
 }
 
+#define PROFILE_TIME					       \
+  if (profile_flag && !time_error) {			       \
+    time_error = time_error || get_time(&finish_time);	       \
+    file->elapsed_time = time_diff(&start_time, &finish_time); \
+    if (p_call_stack->p_parent)				       \
+      add_target(file, p_call_stack->p_parent->p_target);      \
+  }
+
+#define INCR_PROFILE_TIME					\
+  if (profile_flag && !time_error) {				\
+    time_error = time_error || get_time(&finish_time);		\
+    file->elapsed_time += time_diff(&start_time, &finish_time); \
+  }
+
 /* Consider a single 'struct file' and update it as appropriate.
    Return 0 on success, or non-0 on failure.  */
 
 static enum update_status
-update_file_1 (struct file *file, unsigned int depth)
+update_file_1 (struct file *file, unsigned int depth,
+               target_stack_node_t *p_call_stack)
 {
   enum update_status dep_status = us_success;
   FILE_TIMESTAMP this_mtime;
@@ -437,8 +463,22 @@ update_file_1 (struct file *file, unsigned int depth)
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
+  struct timeval finish_time;
+  struct timeval start_time;
+  bool time_error = false;
+
+  if (profile_flag)
+    time_error = time_error || get_time(&start_time);
 
   DBF (DB_VERBOSE, _("Considering target file '%s'.\n"));
+  p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
+
+  /* We don't want to step into file dependencies when there are
+     no associated commands. There or too often too many of them.
+  */
+  if ( (i_debugger_stepping && file->cmds) ||
+       (file->tracing & BRK_BEFORE_PREREQ) )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
 
   if (file->updated)
     {
@@ -458,6 +498,8 @@ update_file_1 (struct file *file, unsigned int depth)
         }
 
       DBF (DB_VERBOSE, _("File '%s' was considered already.\n"));
+      INCR_PROFILE_TIME;
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -468,9 +510,13 @@ update_file_1 (struct file *file, unsigned int depth)
       break;
     case cs_running:
       DBF (DB_VERBOSE, _("Still updating file '%s'.\n"));
+      INCR_PROFILE_TIME;
+      trace_pop_target(p_call_stack);
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
+      INCR_PROFILE_TIME;
+      trace_pop_target(p_call_stack);
       return file->update_status;
     default:
       abort ();
@@ -498,9 +544,12 @@ update_file_1 (struct file *file, unsigned int depth)
   this_mtime = file_mtime (file);
   check_renamed (file);
   noexist = this_mtime == NONEXISTENT_MTIME;
-  if (noexist)
+  if (noexist) {
     DBF (DB_BASIC, _("File '%s' does not exist.\n"));
-  else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
+    if (i_debugger_nexting && file->cmds) {
+	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
+    }
+  } else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
            && file->low_resolution_time)
     {
       /* Avoid spurious rebuilds due to low resolution time stamps.  */
@@ -585,7 +634,8 @@ update_file_1 (struct file *file, unsigned int depth)
               d->file->dontcare = file->dontcare;
             }
 
-          new = check_dep (d->file, depth, this_mtime, &maybe_make);
+          new = check_dep (d->file, depth, this_mtime, &maybe_make,
+				   p_call_stack);
           if (new > dep_status)
             dep_status = new;
 
@@ -652,7 +702,7 @@ update_file_1 (struct file *file, unsigned int depth)
                not prune it.  */
             d->file->considered = !considered;
 
-            new = update_file (d->file, depth);
+            new = update_file (d->file, depth, p_call_stack);
             if (new > dep_status)
               dep_status = new;
 
@@ -689,11 +739,16 @@ update_file_1 (struct file *file, unsigned int depth)
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file '%s'.\n"));
 
+  if ( file->tracing & BRK_AFTER_PREREQ )
+    enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
+
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
       DBF (DB_VERBOSE, _("The prerequisites of '%s' are being made.\n"));
+      INCR_PROFILE_TIME;
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -708,12 +763,14 @@ update_file_1 (struct file *file, unsigned int depth)
       --depth;
 
       DBF (DB_VERBOSE, _("Giving up on target file '%s'.\n"));
+      PROFILE_TIME;
 
       if (depth == 0 && keep_going_flag
           && !just_print_flag && !question_flag)
         OS (error, NILF,
             _("Target '%s' not remade because of errors."), file->name);
 
+      trace_pop_target(p_call_stack);
       return dep_status;
     }
 
@@ -828,12 +885,15 @@ update_file_1 (struct file *file, unsigned int depth)
          VPATH filename if we found one.  hfile will be either the
          local name if no VPATH or the VPATH name if one was found.  */
 
+      PROFILE_TIME;
+
       while (file)
         {
           file->name = file->hname;
           file = file->prev;
         }
 
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -848,11 +908,15 @@ update_file_1 (struct file *file, unsigned int depth)
     }
 
   /* Now, take appropriate actions to remake the file.  */
-  remake_file (file);
+  remake_file (file, p_call_stack);
 
   if (file->command_state != cs_finished)
     {
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
+      if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
+	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+      PROFILE_TIME;
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -872,6 +936,11 @@ update_file_1 (struct file *file, unsigned int depth)
     }
 
   file->updated = 1;
+  if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+  PROFILE_TIME;
+
+  trace_pop_target(p_call_stack);
   return file->update_status;
 }
 
@@ -1019,7 +1088,8 @@ notice_finished_file (struct file *file)
 
 static enum update_status
 check_dep (struct file *file, unsigned int depth,
-           FILE_TIMESTAMP this_mtime, int *must_make_ptr)
+           FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+	   target_stack_node_t *p_call_stack)
 {
   struct file *ofile;
   struct dep *d;
@@ -1037,7 +1107,7 @@ check_dep (struct file *file, unsigned int depth,
       /* If this is a non-intermediate file, update it and record whether it
          is newer than THIS_MTIME.  */
       FILE_TIMESTAMP mtime;
-      dep_status = update_file (file, depth);
+      dep_status = update_file (file, depth, p_call_stack);
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
@@ -1120,7 +1190,7 @@ check_dep (struct file *file, unsigned int depth,
 
               d->file->parent = file;
               maybe_make = *must_make_ptr;
-              new = check_dep (d->file, depth, this_mtime, &maybe_make);
+              new = check_dep (d->file, depth, this_mtime, &maybe_make, p_call_stack);
               if (new > dep_status)
                 dep_status = new;
 
@@ -1221,7 +1291,7 @@ touch_file (struct file *file)
    Return the status from executing FILE's commands.  */
 
 static void
-remake_file (struct file *file)
+remake_file (file_t *file, target_stack_node_t *p_call_stack)
 {
   if (file->cmds == 0)
     {
@@ -1247,7 +1317,7 @@ remake_file (struct file *file)
       /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
         {
-          execute_file_commands (file);
+          execute_file_commands (file, p_call_stack);
           return;
         }
 
@@ -1282,6 +1352,7 @@ f_mtime (struct file *file, int search)
 
       char *arname, *memname;
       struct file *arfile;
+      int found;
       time_t member_date;
 
       /* Find the archive's name.  */
@@ -1329,10 +1400,15 @@ f_mtime (struct file *file, int search)
         /* The archive doesn't exist, so its members don't exist either.  */
         return NONEXISTENT_MTIME;
 
-      member_date = ar_member_date (file->hname);
-      mtime = (member_date == (time_t) -1
-               ? NONEXISTENT_MTIME
-               : file_timestamp_cons (file->hname, member_date, 0));
+      found = ar_member_date (file->hname, &member_date);
+      if (found && member_date == (time_t) 0)
+        {
+              OSS (error, NILF,
+                   _("Warning: Archive '%s' seems to have been created in deterministic mode. '%s' will always be updated. Please consider passing the U flag to ar to avoid the problem."),
+                   arfile->name, memname);
+
+        }
+      mtime = found ? file_timestamp_cons (file->hname, member_date, 0) : NONEXISTENT_MTIME;
     }
   else
 #endif

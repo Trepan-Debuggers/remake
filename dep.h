@@ -14,8 +14,10 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef REMAKE_DEP_H
+#define REMAKE_DEP_H
 
-/* Structure used in chains of names, for parsing and globbing.  */
+#include "gnumake.h"
 
 #define NAMESEQ(_t)     \
     _t *next;           \
@@ -37,8 +39,11 @@ struct nameseq
 #define RM_NOFLAG               0
 
 /* Structure representing one dependency of a file.
-   Each struct file's 'deps' points to a chain of these, through 'next'.
-   'stem' is the stem for this dep line of static pattern rule or NULL.  */
+   Each struct file's 'deps' points to a chain of these,
+   chained through the 'next'. 'stem' is the stem for this
+   dep line of static pattern rule or NULL.
+
+   Note that the first two words of this match a struct nameseq.  */
 
 #define DEP(_t)                                 \
     NAMESEQ (_t);                               \
@@ -63,10 +68,8 @@ struct goaldep
   {
     DEP (struct goaldep);
     unsigned short error;
-    floc floc;
+    gmk_floc floc;
   };
-
-/* Options for parsing lists of filenames.  */
 
 #define PARSEFS_NONE    0x0000
 #define PARSEFS_NOSTRIP 0x0001
@@ -87,15 +90,17 @@ void *parse_file_seq (char **stringp, unsigned int size,
                       int stopmap, const char *prefix, int flags);
 #endif
 
-char *tilde_expand (const char *name);
+char *remake_tilde_expand (const char *name);
 
 #ifndef NO_ARCHIVES
 struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigned int size);
 #endif
 
-#define dep_name(d)        ((d)->name ? (d)->name : (d)->file->name)
+#define dep_name(d)     ((d)->name == 0 ? (d)->file->name : (d)->name)
 
 #define alloc_seq_elt(_t)   xcalloc (sizeof (_t))
+
+struct dep *copy_dep_chain (const struct dep *d);
 void free_ns_chain (struct nameseq *n);
 
 #if defined(MAKE_MAINTAINER_MODE) && defined(__GNUC__)
@@ -127,5 +132,11 @@ SI void free_goal_chain(struct goaldep *g) { free_dep_chain((struct dep *)g); }
 struct dep *copy_dep_chain (const struct dep *d);
 
 struct goaldep *read_all_makefiles (const char **makefiles);
-void eval_buffer (char *buffer, const floc *floc);
+
+/*! The chain of makefiles read by read_makefile.  */
+struct goaldep *read_makefiles;
+
+void eval_buffer (char *buffer, const gmk_floc *floc);
 enum update_status update_goal_chain (struct goaldep *goals);
+
+#endif /*REMAKE_DEP_H*/

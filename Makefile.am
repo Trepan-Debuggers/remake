@@ -16,8 +16,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = dist-bzip2 silent-rules std-options
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 silent-rules std-options check-news
 ACLOCAL_AMFLAGS = -I config
+
+transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -31,7 +33,7 @@ else
   ossrc =	posixos.c
 endif
 
-SUBDIRS =	glob config po doc $(MAYBE_W32)
+SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
 
 bin_PROGRAMS =	make
 include_HEADERS = gnumake.h
@@ -42,16 +44,84 @@ else
   remote =	remote-stub.c
 endif
 
-make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
-		function.c getopt.c getopt1.c guile.c implicit.c job.c load.c \
-		loadapi.c main.c misc.c $(ossrc) output.c read.c remake.c \
-		rule.c signame.c strcache.c variable.c version.c vpath.c \
-		hash.c $(remote)
+DEBUGGER_SRC = 	\
+		debugger/break.c \
+		debugger/cmd.c 	\
+		debugger/fns.c 	\
+		debugger/file2line.c 	\
+		debugger/msg.c 	\
+		debugger/stack.c
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
+DEBUGGER_H = \
+		debugger/break.h 		\
+		debugger/cmd.h 			\
+		debugger/fns.h 			\
+		debugger/msg.h 			\
+		debugger/command/break.h 	\
+		debugger/command/chdir.h  	\
+		debugger/command/comment.h 	\
+		debugger/command/continue.h	\
+		debugger/command/delete.h 	\
+		debugger/command/down.h 	\
+		debugger/command/edit.h 	\
+		debugger/command/eval.h 	\
+		debugger/command/expand.h	\
+		debugger/command/finish.h	\
+		debugger/command/frame.h	\
+		debugger/command/help.h		\
+		debugger/command/info.h		\
+		debugger/command/list.h		\
+		debugger/command/next.h		\
+		debugger/command/print.h	\
+		debugger/command/pwd.h		\
+		debugger/command/quit.h		\
+		debugger/command/run.h		\
+		debugger/command/set.h		\
+		debugger/command/setq.h		\
+		debugger/command/setqx.h	\
+		debugger/command/shell.h	\
+		debugger/command/show.h		\
+		debugger/command/skip.h		\
+		debugger/command/source.h	\
+		debugger/command/step.h		\
+		debugger/command/target.h	\
+		debugger/command/up.h		\
+		debugger/command/where.h	\
+		debugger/command/write.h	\
+		debugger/file2line.h 	        \
+		debugger/fns.h 			\
+		debugger/info.h			\
+		debugger/stack.h		\
+		debugger/subcmd.h
 
-noinst_HEADERS = commands.h dep.h filedef.h job.h makeint.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h output.h os.h
+make_SOURCES =	alloc.c ar.c arscan.c \
+		buildargv.c commands.c default.c \
+                debug.c dir.c \
+                expand.c file_basic.c file.c function.c \
+                getopt.c getopt1.c globals.c guile.c \
+                hash.c implicit.c job.c \
+                load.c loadapi.c \
+                main.c misc.c $(ossrc) \
+	        profile.c print.c \
+                output.c \
+                read.c remake.c rule.c \
+                signame.c strcache.c \
+	        trace.c variable.c version.c vpath.c \
+		$(remote) \
+		$(DEBUGGER_SRC)
+
+EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
+
+noinst_HEADERS = buildargv.h commands.h \
+                 debug.h debugger.h dep.h expand.h \
+                 file_basic.h filedef.h \
+	         getopt.h gettext.h globals.h hash.h implicit.h \
+                 job.h main.h make.h makeint.h mock.h \
+                 os.h output.h \
+                 print.h profile.h \
+                 read.h rule.h \
+                 trace.h types.h variable.h  vpath.h \
+		 $(DEBUGGER_H)
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 		$(GUILE_LIBS)
@@ -75,20 +145,38 @@ endif
 # Extra stuff to include in the distribution.
 
 EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
-		README.customs README.OS2 \
+		README.customs \
 		SCOPTIONS SMakefile \
-		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
-		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
+		Makefile.ami make.lnk  \
+		onfigure.bat dosbuild.bat config.dos \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		README.VMS makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c vms_exit.c vms_progname.c \
-		vms_export_symbol.c vms_export_symbol_test.com \
-		gmk-default.scm gmk-default.h
+		makefile.vms makefile.com config.h-vms \
+		vmsdir.h vmsfunctions.c vmsify.c  \
+		test.com \
+		gmk-default.scm gmk-default.h \
+	        debugger/Makefile \
+		NEWS.remake README.remake REMAKE.todo Rakefile
+
 
 # This is built during configure, but behind configure's back
 
 DISTCLEANFILES = build.sh
+
+MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
+
+# Forward targets
+
+html-local:
+	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+#: Make (re)make
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
+	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
+	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+
+.PHONY: html
 
 # --------------- Internationalization Section
 
@@ -110,6 +198,7 @@ inst_setgid = @NEED_SETGID@
 #
 inst_group = @KMEM_GROUP@
 
+#: install executables (e.g. remake)
 install-exec-local:
 	@if $(inst_setgid); then \
 	   app=$(DESTDIR)$(bindir)/`echo $(bin_PROGRAMS)|sed '$(transform)'`; \
@@ -123,18 +212,19 @@ install-exec-local:
 	   fi; \
 	 else true; fi
 
-# --------------- Generate the Guile default module content
+# ---------------
+#: Generate the Guile default module content
 
 guile.$(OBJEXT): gmk-default.h
 gmk-default.h: $(srcdir)/gmk-default.scm
 	(echo 'static const char *const GUILE_module_defn = " '\\ \
 	  && sed -e 's/;.*//' -e '/^[ \t]*$$/d' -e 's/"/\\"/g' -e 's/$$/ \\/' \
-		 $(srcdir)/gmk-default.scm \
-	  && echo '";') > $@
+	         $(srcdir)/gmk-default.scm \
+          && echo '";') > $@
 
 # --------------- Local DIST Section
 
-# Install the w32 and tests subdirectories
+#: Install the w32 and tests subdirectories
 #
 dist-hook:
 	(cd $(srcdir); \
@@ -156,11 +246,17 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
+#: Check internal load average routine against 'uptime'
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime
 	@echo The GNU load average checking code thinks:
 	-./loadavg$(EXEEXT)
+
+# FIXME: doesn't work.
+##: Run remake-specific tests using Ruby rspec
+#check-rspec:
+#	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 check_PROGRAMS = loadavg
@@ -176,6 +272,7 @@ loadavg_LDADD = @GETLOADAVG_LIBS@
 #
 MAKETESTFLAGS =
 
+#: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
 	@if test -f '$(srcdir)/tests/run_make_tests'; then \
 	  ulimit -n 128; \
@@ -197,12 +294,22 @@ check-regression: tests/config-flags.pm
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	fi
 
+%.short:
+	$(MAKE) $(@:.short=) 2>&1 >/dev/null
 
 # --------------- Maintainer's Section
 
 # Tell automake that I haven't forgotten about this file and it will be
 # created before we build a distribution (see maintMakefile in the Git
 # distribution).
+
+if MAINTAINER_MODE
+
+#: create ChangeLog for distirbution from 'git log'
+ChangeLog:
+	git log --pretty --numstat --summary | $(GIT2CL) > $@
+
+endif
 
 README:
 

@@ -17,9 +17,16 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Structure that gives the commands to make a file
    and information about where these commands came from.  */
 
+#ifndef REMAKE_COMMANDS_H
+#define REMAKE_COMMANDS_H
+
+#include "makeint.h"
+#include "filedef.h"
+#include "trace.h"
+
 struct commands
   {
-    floc fileinfo;              /* Where commands were defined.  */
+    gmk_floc fileinfo;          /* Where commands were defined.  */
     char *commands;             /* Commands text.  */
     char **command_lines;       /* Commands chopped up into lines.  */
     unsigned char *lines_flags; /* One set of flag bits for each line.  */
@@ -35,8 +42,32 @@ struct commands
 #define COMMANDS_NOERROR        4 /* No errors: -.  */
 
 RETSIGTYPE fatal_error_signal (int sig);
-void execute_file_commands (struct file *file);
-void print_commands (const struct commands *cmds);
+/*!
+  Execute the commands to remake P_FILE.  If they are currently
+  executing, return or have already finished executing, just return.
+  Otherwise, fork off a child process to run the first command line
+  in the sequence.
+
+  @param p_file  pointer to file to remake.
+
+  @param p_call_stack pointer to current target call stack. This is
+  passed down for information reporting.
+
+*/
+extern void execute_file_commands (file_t *p_file,
+				   target_stack_node_t *p_call_stack);
+
+/*!
++  Print out the commands.
++
++  @param p_cmds location of commands to print out.
++  @param p_target used to set automatic variables if it is non-null.
++  @param b_expand if true, expand the commands to remove MAKE variables.
++*/
+extern void print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand);
+
 void delete_child_targets (struct child *child);
 void chop_commands (struct commands *cmds);
 void set_file_variables (struct file *file);
+
+#endif /*REMAKE_COMMANDS_H*/

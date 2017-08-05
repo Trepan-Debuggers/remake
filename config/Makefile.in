@@ -143,7 +143,8 @@ am__can_run_installinfo = \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in ar-lib compile config.guess \
-	config.rpath config.sub depcomp install-sh missing
+	config.rpath config.sub depcomp install-sh mdate-sh missing \
+	texinfo.tex
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -170,6 +171,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GETLOADAVG_LIBS = @GETLOADAVG_LIBS@
 GETTEXT_MACRO_VERSION = @GETTEXT_MACRO_VERSION@
+GIT2CL = @GIT2CL@
 GLOBINC = @GLOBINC@
 GLOBLIB = @GLOBLIB@
 GMSGFMT = @GMSGFMT@
@@ -177,6 +179,7 @@ GMSGFMT_015 = @GMSGFMT_015@
 GREP = @GREP@
 GUILE_CFLAGS = @GUILE_CFLAGS@
 GUILE_LIBS = @GUILE_LIBS@
+HAVE_READLINE = @HAVE_READLINE@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -190,11 +193,15 @@ LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBINTL = @LTLIBINTL@
 LTLIBOBJS = @LTLIBOBJS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MAKE_HOST = @MAKE_HOST@
+MAKE_NAME = @MAKE_NAME@
+MAKE_NAME_UPPER = @MAKE_NAME_UPPER@
 MKDIR_P = @MKDIR_P@
 MSGFMT = @MSGFMT@
 MSGFMT_015 = @MSGFMT_015@
@@ -215,7 +222,10 @@ PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REMAKE_SOURCE_PATH = @REMAKE_SOURCE_PATH@
 REMOTE = @REMOTE@
+RSPEC = @RSPEC@
+RUBY = @RUBY@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -280,7 +290,7 @@ top_srcdir = @top_srcdir@
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -304,9 +314,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 tags TAGS:
