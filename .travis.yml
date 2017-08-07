@@ -1,8 +1,9 @@
+dist: trusty
 language: C
 
 install:
   # Prerequisites
-  - "sudo apt-get install autopoint libreadline-dev wget texinfo"
+  - "sudo apt-get install autopoint libreadline-dev wget texinfo gettext"
 
 # run the tests
 script: autoreconf -i && ./configure && make update && (cd doc && make stamp-vti) && make && make check

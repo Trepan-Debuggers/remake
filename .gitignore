@@ -25,7 +25,10 @@
 /config.h.in
 /config.log
 /config.status
-/configh.dos
+/config/*.m4
+/config/Makefile
+/config.dos
+/config/test-driver
 /configure
 /debian/remake.debhelper.log
 /loadavg
