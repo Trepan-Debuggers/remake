@@ -1,5 +1,5 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988-2014 Free Software Foundation, Inc.
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -23,11 +23,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "debug.h"
 #include "debugger/cmd.h"
-
-#ifdef _AMIGA
-#include "amiga.h"
-#endif
-
 
 struct function_table_entry
   {
@@ -567,11 +562,7 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
 
       if (is_notdir || p >= p2)
         {
-#ifdef VMS
-          o = variable_buffer_output (o, ",", 1);
-#else
           o = variable_buffer_output (o, " ", 1);
-#endif
           doneany = 1;
         }
     }
@@ -596,20 +587,7 @@ func_basename_dir (char *o, char **argv, const char *funcname)
   int is_basename = funcname[0] == 'b';
   int is_dir = !is_basename;
   int stop = MAP_DIRSEP | (is_basename ? MAP_DOT : 0) | MAP_NUL;
-#ifdef VMS
-  /* As in func_notdir_suffix ... */
-  char *vms_p3 = alloca(strlen(p3) + 1);
-  int i;
-  for (i = 0; p3[i]; i++)
-    if (p3[i] == ',')
-      vms_p3[i] = ' ';
-    else
-      vms_p3[i] = p3[i];
-  vms_p3[i] = p3[i];
-  while ((p2 = find_next_token((const char**) &vms_p3, &len)) != 0)
-#else
   while ((p2 = find_next_token (&p3, &len)) != 0)
-#endif
     {
       const char *p = p2 + len - 1;
       while (p >= p2 && ! STOP_SET (*p, stop))
@@ -625,24 +603,12 @@ func_basename_dir (char *o, char **argv, const char *funcname)
         o = variable_buffer_output (o, p2, 2);
 #endif
       else if (is_dir)
-#ifdef VMS
-        o = variable_buffer_output (o, "[]", 2);
-#else
-#ifndef _AMIGA
-      o = variable_buffer_output (o, "./", 2);
-#else
-      ; /* Just a nop...  */
-#endif /* AMIGA */
-#endif /* !VMS */
+	o = variable_buffer_output (o, "./", 2);
       else
         /* The entire name is the basename.  */
         o = variable_buffer_output (o, p2, len);
-
-#ifdef VMS
-      o = variable_buffer_output (o, ",", 1);
-#else
       o = variable_buffer_output (o, " ", 1);
-#endif
+
       doneany = 1;
     }
 
