@@ -143,7 +143,6 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		SCOPTIONS SMakefile \
 		make.lnk  NMakefile  \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		vmsdir.h vmsfunctions.c vmsify.c \
 		gmk-default.scm gmk-default.h \
 	        debugger/Makefile \
 		NEWS.remake README.remake REMAKE.todo Rakefile
