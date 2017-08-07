@@ -79,7 +79,5 @@ signame.c
 strcache.c
 variable.c
 variable.h
-vmsfunctions.c
-vmsjobs.c
 vpath.c
 w32/w32os.c
