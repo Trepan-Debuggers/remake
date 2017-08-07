@@ -3119,7 +3119,7 @@ define_makeflags (int all, int makefile)
 
         case flag:
         case flag_off:
-          if (!*(int *) cs->value_ptr == (cs->type == flag_off)
+          if ((!*(int *) cs->value_ptr) == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
 	    if (cs->c != 'X') ADD_FLAG (0, 0);
