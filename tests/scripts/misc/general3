@@ -310,6 +310,10 @@ foo     bar
 hi
 foo     bar');
 
-run_make_test('x:;@-exit 1', '', "#MAKE#: [#MAKEFILE#:1: x] Error 1 (ignored)\n");
+run_make_test('x:;@-exit 1', '',
+"work/misc/general3.mk.10:1: [x] Error 1 (ignored)
+
+#0  x at $fullworkdir/general3.mk.10:1
+");
 
 1;

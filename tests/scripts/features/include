@@ -206,15 +206,12 @@ rmfiles('inc1');
 
 # Included file has a prerequisite that fails to build
 
-chomp(my $work_dir = `pwd`);
-$work_dir .= '/work/features';
-
 my $answer = "exit 1
 work/features/include.mk.13:3: inc1: No such file or directory
 work/features/include.mk.13:5: *** [foo] Error 1
 
-#0  foo at $work_dir/include.mk.13:5
-#1  inc1 at $work_dir/include.mk.13:4
+#0  foo at $fullworkdir/include.mk.13:5
+#1  inc1 at $fullworkdir/include.mk.13:4
 ";
 
 run_make_test(q!

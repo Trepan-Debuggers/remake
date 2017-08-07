@@ -38,9 +38,6 @@ print MAKEFILE "clean:\n"
 
 close(MAKEFILE);
 
-chomp(my $work_dir = `pwd`);
-$work_dir .= '/work/features';
-
 &touch("foo");
 
 unlink("cleanit");
@@ -55,7 +52,7 @@ $answer = "$rm_command cleanit
 $cleanit_error
 work/features/errors.mk:1: [clean] Error $delete_error_code (ignored)
 
-#0  clean at $work_dir/errors.mk:1
+#0  clean at $fullworkdir/errors.mk:1
 $rm_command foo
 ";
 
@@ -85,7 +82,7 @@ $answer = "$rm_command cleanit
 $cleanit_error
 work/features/errors.mk:4: [clean2] Error $delete_error_code (ignored)
 
-#0  clean2 at $work_dir/errors.mk:4
+#0  clean2 at $fullworkdir/errors.mk:4
 $rm_command foo\n";
 
 &run_make_with_options($makefile,"clean2 -i",&get_logfile);
@@ -104,7 +101,7 @@ $answer = "hi
 there
 work/features/errors.mk:2: *** [all] Error 1
 
-#0  all at $work_dir/errors.mk:2
+#0  all at $fullworkdir/errors.mk:2
 ";
 
 run_make_test(q!

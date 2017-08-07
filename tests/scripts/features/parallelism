@@ -99,12 +99,15 @@ ok:
 	\@$sleep_command 4
 	\@echo Ok done",
               '-rR -j5', "Fail
-#MAKE#: *** [#MAKEFILE#:8: fail.1] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
 Fail
-#MAKE#: *** [#MAKEFILE#:8: fail.2] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.2] Error 1
 Fail
-#MAKE#: *** [#MAKEFILE#:8: fail.3] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.3] Error 1
 Ok done",
              512);
 

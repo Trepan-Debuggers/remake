@@ -90,7 +90,6 @@ EOF
 close(MAKEFILE);
 
 my $answer = "exit 1
- $makefile2:9: recipe for target 'foo.o' failed
 $makefile2:9: *** [foo.o] Error 1
 
 #0  foo.o at work/options/dash-k.mk.1:9
@@ -104,7 +103,7 @@ my $logfile = &get_logfile;
 &run_make_with_options($makefile2, "-k", $logfile, $error_code);
 my $slurp = &read_file_into_string ($logfile);
 $slurp =~ s{at .*work/options/}{at work/options/}gm;
-+&compare_output_string($answer, $slurp, $logfile);
+&compare_output_string($answer, $slurp, $logfile);
 
 # TEST -- make sure we keep the error code if we can't create an included
 # makefile.

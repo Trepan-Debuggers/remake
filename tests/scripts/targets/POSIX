@@ -22,8 +22,7 @@ all: ; \@$script
 };
 
 my $out = `/bin/sh $flags '$script' 2>&1`;
-my $answer = qq{#MAKEFILE#:4: recipe for target 'all' failed
-#MAKEFILE#:4: *** [all] Error $err
+my $answer = qq{#MAKEFILE#:4: *** [all] Error $err
 
 #0 all at #MAKEFILE#:4
 };
