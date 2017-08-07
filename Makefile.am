@@ -104,7 +104,7 @@ make_SOURCES =	alloc.c ar.c arscan.c \
 	$(remote) \
 	$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
+EXTRA_make_SOURCES = remote-stub.c remote-cstms.c mock.c
 
 noinst_HEADERS = buildargv.h commands.h \
 	debug.h debugger.h dep.h expand.h \
