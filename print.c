@@ -106,9 +106,12 @@ err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
     p_floc   = &(p_target->floc);
   }
 
-  if (p_floc && p_floc->filenm)
-    fprintf (stderr, "%s:%lu: ", p_floc->filenm, p_floc->lineno);
-  else {
+  if (p_floc) {
+    if (!p_floc->filenm)
+      fprintf (stderr, "<builtin>");
+    else
+      fprintf (stderr, "%s:%lu: ", p_floc->filenm, p_floc->lineno + p_floc->offset);
+  } else {
     err_log_working_directory ();
     if (makelevel == 0)
       fprintf (stderr, "%s: ", program);

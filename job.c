@@ -476,10 +476,10 @@ static void
 child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 	     int exit_code, int exit_sig, int coredump, int ignored)
 {
+  const char *pre = "*** ";
   const char *post = "";
   const char *dump = "";
   const struct file *f = p_child->file;
-  const gmk_floc *flocp = &f->cmds->fileinfo;
 
   if (ignored && silent_flag)
     return;
@@ -489,13 +489,8 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 
   if (ignored)
     {
+      pre = "";
       post = _(" (ignored)");
-    }
-
-  if (flocp->filenm)
-    {
-      char *a = alloca (strlen (flocp->filenm) + 1 + 11 + 1);
-      sprintf (a, "%s:%lu", flocp->filenm, flocp->lineno + flocp->offset);
     }
 
   OUTPUT_SET (&p_child->output);
@@ -503,12 +498,12 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
   show_goal_error ();
 
   if (exit_sig == 0)
-    err_with_stack(p_call_stack, ignored ? _("[%s] Error %d%s") :
-		   _("*** [%s] Error %d"),
-		   f->name, exit_code, post);
+    err_with_stack(p_call_stack,
+		   _("%s[%s] Error %d%s"),
+		   pre, f->name, exit_code, post);
   else
-    err_with_stack(p_call_stack, "*** [%s] %s%s",
-		   f->name, strsignal (exit_sig), dump);
+    err_with_stack(p_call_stack, "%s[%s] %s%s%s",
+		   pre, f->name, strsignal (exit_sig), dump, post);
 
   OUTPUT_UNSET ();
 
@@ -1793,8 +1788,14 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
       if (out != in)
         memmove (out, in, strlen (in) + 1);
 
-      /* Finally, expand the line.  */
+      /* Finally, expand the line, keeping track of the line number
+	 within that command block.  */
       cmds->fileinfo.offset = i;
+      if (p_call_stack && p_call_stack->p_target) {
+	gmk_floc *p_floc  = &(p_call_stack->p_target->floc);
+	p_floc->offset = i;
+      }
+
       lines[i] = allocated_variable_expand_for_file (cmds->command_lines[i],
                                                      file);
     }
@@ -1854,7 +1855,7 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
         /* There must be at least one child already, or we have no business
            waiting for a token. */
         if (!children)
-	  fatal_err(p_call_stack, "INTERNAL: no children as we go to sleep on read");
+	  fatal_err(p_call_stack, "INTERNAL: no children as we go to sleep on read\n");
 
         /* Get a token.  */
         got_token = jobserver_acquire (waiting_jobs != NULL);
