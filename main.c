@@ -1168,58 +1168,10 @@ main (int argc, const char **argv, char **envp)
             }
         }
 #endif
-#ifdef VMS
-      set_program_name (argv[0]);
-      program = program_name;
-      {
-        const char *shell;
-        char pwdbuf[256];
-        char *pwd;
-        shell = getenv ("SHELL");
-        if (shell != NULL)
-          vms_gnv_shell = 1;
-
-        /* Need to know if CRTL set to report UNIX paths.  Use getcwd as
-           it works on all versions of VMS. */
-        pwd = getcwd(pwdbuf, 256);
-        if (pwd[0] == '/')
-          vms_report_unix_paths = 1;
-
-        vms_use_mcr_command = get_vms_env_flag ("GNV$MAKE_USE_MCR", 0);
-
-        vms_always_use_cmd_file = get_vms_env_flag ("GNV$MAKE_USE_CMD_FILE", 0);
-
-        /* Legacy behavior is on VMS is older behavior that needed to be
-           changed to be compatible with standard make behavior.
-           For now only completely disable when running under a Bash shell.
-           TODO: Update VMS built in recipes and macros to not need this
-           behavior, at which time the default may change. */
-        vms_legacy_behavior = get_vms_env_flag ("GNV$MAKE_OLD_VMS",
-                                                !vms_gnv_shell);
-
-        /* VMS was changed to use a comma separator in the past, but that is
-           incompatible with built in functions that expect space separated
-           lists.  Allow this to be selectively turned off. */
-        vms_comma_separator = get_vms_env_flag ("GNV$MAKE_COMMA",
-                                                vms_legacy_behavior);
-
-        /* Some Posix shell syntax options are incompatible with VMS syntax.
-           VMS requires double quotes for strings and escapes quotes
-           differently.  When this option is active, VMS will try
-           to simulate Posix shell simulations instead of using
-           VMS DCL behavior. */
-        vms_unix_simulation = get_vms_env_flag ("GNV$MAKE_SHELL_SIM",
-                                                !vms_legacy_behavior);
-
-      }
-      if (need_vms_symbol () && !vms_use_mcr_command)
-        create_foreign_command (program_name, argv[0]);
-#else
       if (program == 0)
         program = argv[0];
       else
         ++program;
-#endif
     }
 
   /* Set up to access user data (files).  */
