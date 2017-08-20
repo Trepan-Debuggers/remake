@@ -110,7 +110,9 @@ my $err = $? >> 8;
 run_make_test(qq!
 .SHELLFLAGS = $flags
 all: ; \@$script
-!,
-              '', "$out#MAKE#: *** [#MAKEFILE#:3: all] Error $err\n", 512);
+1!,
+              '', "$out#MAKEFILE#:3 *** [all] Error $err
+
+#f0 all at $fullworkdir/SHELL.mk.6:3", 512);
 
 1;

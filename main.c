@@ -2164,7 +2164,7 @@ main (int argc, const char **argv, char **envp)
       int nargc;
       enum update_status status;
 
-      DB (DB_BASIC, (_("Updating makefiles....\n")));
+      DB (DB_BASIC, (_("Updating makefiles...\n")));
 
       /* Remove any makefiles we don't want to try to update.
          Also record the current modtimes so we can compare them later.  */
@@ -2558,7 +2558,7 @@ main (int argc, const char **argv, char **envp)
 
   /* Update the goals.  */
 
-  DB (DB_BASIC, (_("Updating goal targets....\n")));
+  DB (DB_BASIC, (_("Updating goal targets...\n")));
 
   {
     switch (update_goal_chain (goals))
