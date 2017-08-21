@@ -63,18 +63,6 @@ $perl_name = $^X;
 %extraENV = ();
 
 sub vms_get_process_logicals {
-  # Sorry for the long note here, but to keep this test running on
-  # VMS, it is needed to be understood.
-  #
-  # Perl on VMS by default maps the %ENV array to the system wide logical
-  # name table.
-  #
-  # This is a very large dynamically changing table.
-  # On Linux, this would be the equivalent of a table that contained
-  # every mount point, temporary pipe, and symbolic link on every
-  # file system.  You normally do not have permission to clear or replace it,
-  # and if you did, the results would be catastrophic.
-  #
   # On VMS, added/changed %ENV items show up in the process logical
   # name table.  So to track changes, a copy of it needs to be captured.
 
@@ -90,12 +78,7 @@ sub vms_get_process_logicals {
 }
 
 # %origENV is the caller's original environment
-if ($^O ne 'VMS') {
-  %origENV = %ENV;
-} else {
-  my $proc_env = vms_get_process_logicals;
-  %origENV = %{$proc_env};
-}
+%origENV = %ENV;
 
 sub resetENV
 {
@@ -103,25 +86,11 @@ sub resetENV
   # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
   # want to require that here, so just delete each one individually.
 
-  if ($^O ne 'VMS') {
-    foreach $v (keys %ENV) {
-      delete $ENV{$v};
-    }
-
-    %ENV = %makeENV;
-  } else {
-    my $proc_env = vms_get_process_logicals();
-    my %delta = %{$proc_env};
-    foreach my $v (keys %delta) {
-      if (exists $origENV{$v}) {
-        if ($origENV{$v} ne $delta{$v}) {
-          $ENV{$v} = $origENV{$v};
-        }
-      } else {
-        delete $ENV{$v};
-      }
-    }
+  foreach $v (keys %ENV) {
+    delete $ENV{$v};
   }
+
+  %ENV = %makeENV;
 
   foreach $v (keys %extraENV) {
     $ENV{$v} = $extraENV{$v};
@@ -158,7 +127,7 @@ sub toplevel
 
   # Replace the environment with the new one
   #
-  %origENV = %ENV unless $^O eq 'VMS';
+  %origENV = %ENV;
 
   resetENV();
 
@@ -191,25 +160,6 @@ sub toplevel
   &set_more_defaults;  # suite-defined
 
   &print_banner;
-
-  if ($osname eq 'VMS' && $cwdslash eq "")
-  {
-    # Porting this script to VMS revealed a small bug in opendir() not
-    # handling search lists correctly when the directory only exists in
-    # one of the logical_devices.  Need to find the first directory in
-    # the search list, as that is where things will be written to.
-    my @dirs = split("/", $pwd);
-
-    my $logical_device = $ENV{$dirs[1]};
-    if ($logical_device =~ /([A-Za-z0-9_]+):(:?.+:)+/)
-    {
-        # A search list was found.  Grab the first logical device
-        # and use it instead of the search list.
-        $dirs[1]=$1;
-        my $lcl_pwd = join('/', @dirs);
-        $workpath = $lcl_pwd . '/' . $workdir
-    }
-  }
 
   if (-d $workpath)
   {
@@ -312,13 +262,6 @@ sub get_osname
 {
   # Set up an initial value.  In perl5 we can do it the easy way.
   $osname = defined($^O) ? $^O : '';
-
-  if ($osname eq 'VMS')
-  {
-    $vos = 0;
-    $pathsep = "/";
-    return;
-  }
 
   # Find a path to Perl
 
@@ -518,7 +461,11 @@ sub run_all_tests
 
 	chomp($fulltestdir = `pwd`);
 	$testcat = dirname($testname);
-	$fullworkdir = "$fulltestdir$pathsep$workpath$pathsep$testcat";
+	if ($^O eq 'cygwin') {
+	    $fullworkdir = "$workpath$pathsep$testcat";
+	} else {
+	    $fullworkdir = "$fulltestdir$pathsep$workpath$pathsep$testcat";
+	}
 	# Leave enough space in the extensions to append a number, even
         # though it needs to fit into 8+3 limits.
         if ($short_filenames) {
@@ -534,7 +481,6 @@ sub run_all_tests
             $runext = 'run';
             $extext = '.';
         }
-        $extext = '_' if $^O eq 'VMS';
         $log_filename = "$testpath.$logext";
         $diff_filename = "$testpath.$diffext";
         $base_filename = "$testpath.$baseext";
@@ -776,121 +722,6 @@ sub compare_output
           $slurp_mod =~ s,\r\n,\n,gs;
 
           $answer_matched = ($slurp_mod eq $answer_mod);
-          if ($^O eq 'VMS') {
-
-            # VMS has extra blank lines in output sometimes.
-            # Ticket #41760
-            if (!$answer_matched) {
-              $slurp_mod =~ s/\n\n+/\n/gm;
-              $slurp_mod =~ s/\A\n+//g;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS adding a "Waiting for unfinished jobs..."
-            # Remove it for now to see what else is going on.
-            if (!$answer_matched) {
-              $slurp_mod =~ s/^.+\*\*\* Waiting for unfinished jobs.+$//m;
-              $slurp_mod =~ s/\n\n/\n/gm;
-              $slurp_mod =~ s/^\n+//gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS wants target device to exist or generates an error,
-            # Some test tagets look like VMS devices and trip this.
-            if (!$answer_matched) {
-              $slurp_mod =~ s/^.+\: no such device or address.*$//gim;
-              $slurp_mod =~ s/\n\n/\n/gm;
-              $slurp_mod =~ s/^\n+//gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS error message has a different case
-            if (!$answer_matched) {
-              $slurp_mod =~ s/no such file /No such file /gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS is putting comas instead of spaces in output
-            if (!$answer_matched) {
-              $slurp_mod =~ s/,/ /gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS Is sometimes adding extra leading spaces to output?
-            if (!$answer_matched) {
-               my $slurp_mod = $slurp_mod;
-               $slurp_mod =~ s/^ +//gm;
-               $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS port not handling POSIX encoded child status
-            # Translate error case it for now.
-            if (!$answer_matched) {
-              $slurp_mod =~ s/0x1035a00a/1/gim;
-              $answer_matched = 1 if $slurp_mod =~ /\Q$answer_mod\E/i;
-
-            }
-            if (!$answer_matched) {
-              $slurp_mod =~ s/0x1035a012/2/gim;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # Tests are using a UNIX null command, temp hack
-            # until this can be handled by the VMS port.
-            # ticket # 41761
-            if (!$answer_matched) {
-              $slurp_mod =~ s/^.+DCL-W-NOCOMD.*$//gim;
-              $slurp_mod =~ s/\n\n+/\n/gm;
-              $slurp_mod =~ s/^\n+//gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-            # Tests are using exit 0;
-            # this generates a warning that should stop the make, but does not
-            if (!$answer_matched) {
-              $slurp_mod =~ s/^.+NONAME-W-NOMSG.*$//gim;
-              $slurp_mod =~ s/\n\n+/\n/gm;
-              $slurp_mod =~ s/^\n+//gm;
-              $answer_matched = ($slurp_mod eq $answer_mod);
-            }
-
-            # VMS is sometimes adding single quotes to output?
-            if (!$answer_matched) {
-              my $noq_slurp_mod = $slurp_mod;
-              $noq_slurp_mod =~ s/\'//gm;
-              $answer_matched = ($noq_slurp_mod eq $answer_mod);
-
-              # And missing an extra space in output
-              if (!$answer_matched) {
-                $noq_answer_mod = $answer_mod;
-                $noq_answer_mod =~ s/\h\h+/ /gm;
-                $answer_matched = ($noq_slurp_mod eq $noq_answer_mod);
-              }
-
-              # VMS adding ; to end of some lines.
-              if (!$answer_matched) {
-                $noq_slurp_mod =~ s/;\n/\n/gm;
-                $answer_matched = ($noq_slurp_mod eq $noq_answer_mod);
-              }
-
-              # VMS adding trailing space to end of some quoted lines.
-              if (!$answer_matched) {
-                $noq_slurp_mod =~ s/\h+\n/\n/gm;
-                $answer_matched = ($noq_slurp_mod eq $noq_answer_mod);
-              }
-
-              # And VMS missing leading blank line
-              if (!$answer_matched) {
-                $noq_answer_mod =~ s/\A\n//g;
-                $answer_matched = ($noq_slurp_mod eq $noq_answer_mod);
-              }
-
-              # Unix double quotes showing up as single quotes on VMS.
-              if (!$answer_matched) {
-                $noq_answer_mod =~ s/\"//g;
-                $answer_matched = ($noq_slurp_mod eq $noq_answer_mod);
-              }
-            }
-          }
 
           # If it still doesn't match, see if the answer might be a regex.
           if (!$answer_matched && $answer =~ m,^/(.+)/$,) {
@@ -1048,7 +879,7 @@ sub detach_default_output
   @OUTSTACK or error("default output stack has flown under!\n", 1);
 
   close(STDOUT);
-  close(STDERR) unless $^O eq 'VMS';
+  close(STDERR);
 
 
   open (STDOUT, '>&', pop @OUTSTACK) or error("ddo: $! duping STDOUT\n", 1);
@@ -1066,30 +897,6 @@ sub _run_command
   resetENV();
 
   eval {
-      if ($^O eq 'VMS') {
-          local $SIG{ALRM} = sub {
-              my $e = $ERRSTACK[0];
-              print $e "\nTest timed out after $test_timeout seconds\n";
-              die "timeout\n"; };
-#          alarm $test_timeout;
-          system(@_);
-          my $severity = ${^CHILD_ERROR_NATIVE} & 7;
-          $code = 0;
-          if (($severity & 1) == 0) {
-              $code = 512;
-          }
-
-          # Get the vms status.
-          my $vms_code = ${^CHILD_ERROR_NATIVE};
-
-          # Remove the print status bit
-          $vms_code &= ~0x10000000;
-
-          # Posix code translation.
-          if (($vms_code & 0xFFFFF000) == 0x35a000) {
-              $code = (($vms_code & 0xFFF) >> 3) * 256;
-          }
-      } else {
           my $pid = fork();
           if (! $pid) {
               exec(@_) or die "Cannot execute $_[0]\n";
@@ -1098,8 +905,7 @@ sub _run_command
           alarm $test_timeout;
           waitpid($pid, 0) > 0 or die "No such pid: $pid\n";
           $code = $?;
-      }
-      alarm 0;
+	  alarm 0;
   };
   if ($@) {
       # The eval failed.  If it wasn't SIGALRM then die.
@@ -1122,7 +928,6 @@ sub run_command
   print "\nrun_command: @_\n" if $debug;
   my $code = _run_command(@_);
   print "run_command returned $code.\n" if $debug;
-  print "vms status = ${^CHILD_ERROR_NATIVE}\n" if $debug and $^O eq 'VMS';
   return $code;
 }
 
@@ -1144,7 +949,6 @@ sub run_command_with_output
   $err and die $err;
 
   print "run_command_with_output returned $code.\n" if $debug;
-  print "vms status = ${^CHILD_ERROR_NATIVE}\n" if $debug and $^O eq 'VMS';
   return $code;
 }
 
@@ -1204,15 +1008,7 @@ sub remove_directory_tree_inner
     }
     else
     {
-      if ($^O ne 'VMS')
-      {
-        unlink $object || return 0;
-      }
-      else
-      {
-        # VMS can have multiple versions of a file.
-        1 while unlink $object;
-      }
+      unlink $object || return 0;
     }
   }
   closedir ($dirhandle);
