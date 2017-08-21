@@ -114,7 +114,7 @@ EXTRA_make_SOURCES = remote-stub.c remote-cstms.c mock.c
 
 noinst_HEADERS = buildargv.h commands.h \
                  debug.h debugger.h dep.h expand.h \
-                 file_basic.h filedef.h \
+                 file.h file_basic.h filedef.h function.h \
 	         getopt.h gettext.h globals.h hash.h implicit.h \
                  job.h main.h make.h makeint.h mock.h \
                  os.h output.h \
@@ -148,12 +148,8 @@ EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
 		README.customs \
 		SCOPTIONS SMakefile \
 		Makefile.ami make.lnk  \
-		onfigure.bat dosbuild.bat config.dos \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c  \
-		test.com \
 		gmk-default.scm gmk-default.h \
 	        debugger/Makefile \
 		NEWS.remake README.remake REMAKE.todo Rakefile
