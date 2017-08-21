@@ -29,20 +29,12 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "getopt.h"
 
 #include <assert.h>
-#ifdef _AMIGA
-# include <dos/dos.h>
-# include <proto/dos.h>
-#endif
 #ifdef WINDOWS32
 # include <windows.h>
 # include <io.h>
 # include "pathstuff.h"
 # include "sub_proc.h"
 # include "w32err.h"
-#endif
-#ifdef __EMX__
-# include <sys/types.h>
-# include <sys/wait.h>
 #endif
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
@@ -431,7 +423,6 @@ static const struct command_switch switches[] =
       "warn-undefined-variables" },
     { CHAR_MAX+6, strlist, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { CHAR_MAX+7, string, &sync_mutex, 1, 1, 0, 0, 0, "sync-mutex" },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { CHAR_MAX+8, strlist, &verbosity_opts, 1, 1, 0, 0, 0,
       "verbosity" },
     { CHAR_MAX+9, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
@@ -441,6 +432,7 @@ static const struct command_switch switches[] =
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
     { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger-stop" },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
 /* Secondary long names for options.  */

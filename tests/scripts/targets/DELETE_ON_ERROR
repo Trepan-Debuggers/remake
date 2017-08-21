@@ -11,6 +11,7 @@ all: ; false > $@
               '',
 "false > all
 work/targets/DELETE_ON_ERROR.mk:3: *** [all] Error 1
+
 #0  all at $fullworkdir/DELETE_ON_ERROR.mk:3
 #MAKE#: *** Deleting file 'all'", 512);
 
