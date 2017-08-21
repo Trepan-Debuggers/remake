@@ -60,7 +60,7 @@ AC_MINIX
 AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 
 # Enable gettext, in "external" mode.
-AM_GNU_GETTEXT_VERSION([0.18.3])
+AM_GNU_GETTEXT_VERSION([0.19.3])
 AM_GNU_GETTEXT([external])
 
 # This test must come as early as possible after the compiler configuration
