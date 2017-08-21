@@ -6,7 +6,7 @@ dist: trusty
 group: edge
 
 before_script:
-  sudo apt-get install -y automake-1.15 autopoint gettext libreadline-dev wget texinfo
+  sudo apt-get install -y automake autopoint gettext libreadline-dev wget texinfo
 
 # Configure and run the tests
 script:
