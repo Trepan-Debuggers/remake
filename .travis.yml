@@ -10,5 +10,5 @@ before_script:
 
 # Configure and run the tests
 script:
- - autoreconf -fi && ./configure --enable-maintainer-mode && make update
+ - ./autogen.sh
  - (cd doc && make stamp-vti) && make && TRAVIS=1 make check

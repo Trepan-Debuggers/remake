@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{2017-07-04.16}
+\def\texinfoversion{2017-08-20.20}
 %
 % Copyright 1985, 1986, 1988, 1990, 1991, 1992, 1993, 1994, 1995,
 % 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
@@ -6943,7 +6943,15 @@ end
 % exist, with an empty box.  Let's hope all the numbers have the same width.
 % Also ignore the page number, which is conventionally not printed.
 \def\numeralbox{\setbox0=\hbox{8}\hbox to \wd0{\hfil}}
-\def\partentry#1#2#3#4{\dochapentry{\numeralbox\labelspace#1}{}}
+\def\partentry#1#2#3#4{%
+  % Add stretch and a bonus for breaking the page before the part heading.
+  % This reduces the chance of the page being broken immediately after the
+  % part heading, before a following chapter heading.
+  \vskip 0pt plus 5\baselineskip
+  \penalty-300
+  \vskip 0pt plus -5\baselineskip
+  \dochapentry{\numeralbox\labelspace#1}{}%
+}
 %
 % Parts, in the short toc.
 \def\shortpartentry#1#2#3#4{%
