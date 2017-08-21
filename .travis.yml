@@ -6,6 +6,7 @@ addons:
   apt:
     packages:
       - autopoint
+      - gettext
       - libreadline-dev
       - wget
       - texinfo
