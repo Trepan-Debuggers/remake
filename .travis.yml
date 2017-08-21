@@ -1,18 +1,11 @@
 language: C
 
-sudo: required
+sudo: false
 
-addons:
-  apt:
-    packages:
-      - autopoint
-      - gettext
-      - libreadline-dev
-      - wget
-      - texinfo
-
-# run the tests
-script:
+install:
  - sudo apt-get install  -y autopoint gettext libreadline-dev wget texinfo
- - autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
-# script: ./autogen.sh && make && TRAVIS=1 make check
+
+# Configure and run the tests
+script:
+ - autoreconf -i && ./configure --enable-maintainer-mode && make update
+ - (cd doc && make stamp-vti) && make && TRAVIS=1 make check
