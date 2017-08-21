@@ -4,7 +4,6 @@
 
 echo "Rebuilding ./configure with autoreconf..."
 autoreconf -f -i
-automake
 if [ $? -ne 0 ]; then
   echo "autoreconf failed"
   exit $?

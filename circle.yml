@@ -1,6 +1,6 @@
 checkout:
   post:
-    - sudo apt-get install -y autopoint gettext libreadline-dev wget texinfo
+    - sudo apt-get install -y autopoint automake-1.15 gettext libreadline-dev wget texinfo
     - sh ./autogen.sh
     - sh ./configure --enable-maintainer-mode
     - make
