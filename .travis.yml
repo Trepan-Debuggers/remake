@@ -12,5 +12,7 @@ addons:
       - texinfo
 
 # run the tests
-#script: autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
-script: ./autogen.sh && make && TRAVIS=1 make check
+script:
+ - apt-get install  -y autopoint gettext libreadline-dev wget texinfo
+ - autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
+# script: ./autogen.sh && make && TRAVIS=1 make check
