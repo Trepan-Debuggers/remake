@@ -1,6 +1,6 @@
 language: C
 
-sudo: false
+sudo: required
 
 addons:
   apt:
