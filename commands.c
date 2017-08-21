@@ -606,13 +606,6 @@ fatal_error_signal (int sig)
   remove_intermediates (1);
   exit (EXIT_FAILURE);
 #else /* not __MSDOS__ */
-#ifdef _AMIGA
-  remove_intermediates (1);
-  if (sig == SIGINT)
-     fputs (_("*** Break.\n"), stderr);
-
-  exit (10);
-#else /* not Amiga */
 #ifdef WINDOWS32
   extern HANDLE main_thread;
 
@@ -707,7 +700,6 @@ fatal_error_signal (int sig)
   if (kill (getpid (), sig) < 0)
     pfatal_with_name ("kill");
 #endif /* not WINDOWS32 */
-#endif /* not Amiga */
 #endif /* not __MSDOS__  */
 }
 
