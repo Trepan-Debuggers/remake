@@ -1,5 +1,7 @@
 language: C
 
+sudo: false
+
 before_install:
  - sudo apt-get install  -y autopoint gettext libreadline-dev wget texinfo
 
