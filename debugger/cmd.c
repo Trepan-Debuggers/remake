@@ -45,6 +45,13 @@ Boston, MA 02111-1307, USA.  */
 #include <readline/history.h>
 #endif
 
+
+#ifdef _GNU_SOURCE
+# define ATTRIBUTE_UNUSED __attribute__((unused))
+#else
+# define ATTRIBUTE_UNUSED
+#endif
+
 /**
    Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb.
@@ -137,7 +144,9 @@ alias_cmd_t aliases[] = {
 };
 
 
-short_cmd_t short_command[256] = { { NULL, '\0', '\0' }, };
+short_cmd_t short_command[256] = { { NULL,
+                                     (const char *) '\0',
+                                     (const char *) '\0' }, };
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -274,7 +283,8 @@ execute_line (char *psz_line)
 
 /* Show history. */
 debug_return_t
-dbg_cmd_show_command (const char *psz_args)
+dbg_cmd_show_command (const char
+                      *psz_args ATTRIBUTE_UNUSED)
 {
  /*
   if (!psz_arg || *psz_arg) {

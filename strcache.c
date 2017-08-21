@@ -307,7 +307,7 @@ strcache_print_stats (const char *prefix)
 
   printf (_("%s current buf: size = %hu B / used = %hu B / count = %hu / avg = %hu B\n"),
           prefix, (sc_buflen_t)BUFSIZE, strcache->end, strcache->count,
-          (strcache->end / strcache->count));
+          (unsigned short) (strcache->end / strcache->count));
 
   if (numbuffs)
     {

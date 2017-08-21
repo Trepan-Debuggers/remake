@@ -46,7 +46,9 @@ Boston, MA 02111-1307, USA.  */
 
 #   define false   0
 #   define true    1
-#   define bool uint8_t
+#   ifndef  bool
+#      define bool uint8_t
+#   endif
 #endif /*HAVE_STDBOOL_H*/
 
 /** Debugger breakpoint type */

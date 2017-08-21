@@ -53,7 +53,7 @@ sub output_sync_set {
 
 @syncfiles = qw(mksync.foo mksync.foo_start mksync.bar mksync.bar_start);
 
-$tmout = 30;
+$tmout = 60;
 
 output_sync_clean();
 mkdir('foo', 0777);

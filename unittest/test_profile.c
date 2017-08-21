@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2015, 2017 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "../types.h"
 #include "../file_basic.h"
+#include "../profile.h"
 int main(int argc, const char * const* argv) {
   bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
   init_hash_files();
