@@ -3,7 +3,7 @@ Version 4.1+dbg1.1
 See NEWS.remake for remake news
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  22 May 2016
+  10 June 2016
 
 See the end of this file for copyrights and conditions.
 
@@ -11,6 +11,15 @@ All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
+
+Version 4.2.1 (10 Jun 2016)
+
+A complete list of bugs fixed in this version is available here:
+h
+ttp://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=107&set=custom
+
+This release is a bug-fix release.
+
 
 Version 4.2 (22 May 2016)
 

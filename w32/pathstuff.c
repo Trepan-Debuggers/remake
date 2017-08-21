@@ -32,7 +32,7 @@ convert_vpath_to_windows32(char *Path, char to_delim)
          * contain blanks get trounced here. Use 8.3 format as a workaround.
          */
         for (etok = Path; etok && *etok; etok++)
-                if (isblank ((unsigned char) *etok))
+                if (ISBLANK ((unsigned char) *etok))
                         *etok = to_delim;
 
         return (convert_Path_to_windows32(Path, to_delim));

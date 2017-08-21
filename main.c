@@ -2203,10 +2203,6 @@ main (int argc, const char **argv, char **envp)
 
             for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
               {
-                /* Reset the considered flag; we may need to look at the file
-                   again to print an error.  */
-                d->file->considered = 0;
-
                 if (d->file->updated)
                   {
                     /* This makefile was updated.  */
@@ -2399,6 +2395,11 @@ main (int argc, const char **argv, char **envp)
             exit (WIFEXITED(r) ? WEXITSTATUS(r) : EXIT_FAILURE);
           }
 #else
+#ifdef SET_STACK_SIZE
+          /* Reset limits, if necessary.  */
+          if (stack_limit.rlim_cur)
+            setrlimit (RLIMIT_STACK, &stack_limit);
+#endif
           exec_command ((char **)nargv, environ);
 #endif
           free (aargv);

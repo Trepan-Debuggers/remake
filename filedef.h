@@ -69,6 +69,8 @@ struct file
     FILE_TIMESTAMP last_mtime;  /* File's modtime, if already known.  */
     FILE_TIMESTAMP mtime_before_update; /* File's modtime before any updating
                                            has been performed.  */
+    unsigned int considered;    /* equal to 'considered' if file has been
+                                   considered on current scan of goal chain */
     int command_flags;          /* Flags OR'd in for cmds; see commands.h.  */
     enum update_status          /* Status of the last attempt to update.  */
       {
@@ -109,8 +111,6 @@ struct file
     unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name.  */
     unsigned int pat_searched:1;/* Nonzero if we already searched for
                                    pattern-specific variables.  */
-    unsigned int considered:1;  /* equal to 'considered' if file has been
-                                   considered on current scan of goal chain */
     unsigned int no_diag:1;     /* True if the file failed to update and no
                                    diagnostics has been issued (dontcare). */
     unsigned int file_profiled:1;  /* True if --profile has been set and

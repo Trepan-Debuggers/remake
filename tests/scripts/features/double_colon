@@ -197,6 +197,21 @@ all:: 3
 ',
               '-rs -j2 1 2 root', "all_one\nall_two\nroot\n");
 
+# SV 47995 : Parallel double-colon rules with FORCE
+
+run_make_test('
+all:: ; @echo one
+
+all:: joe ; @echo four
+
+joe: FORCE ; touch joe-is-forced
+
+FORCE:
+',
+              '-j5', "one\ntouch joe-is-forced\nfour\n");
+
+unlink('joe-is-forced');
+
 # This tells the test driver that the perl test script executed properly.
 1;
 
