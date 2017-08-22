@@ -7,9 +7,9 @@ group: edge
 
 before_script:
   - sudo apt-get install -y automake autopoint gettext libreadline-dev wget texinfo
-  - wget ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.2.tar.xz
-  - tar -xpf gettext-0.19.2.tar.xz
-  - (cd ./gettext-0.19.2 && ./configure --prefix=/usr && make && sudo make install)
+  - wget ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.tar.xz
+  - tar -xpf gettext-0.19.8.tar.xz
+  - (cd ./gettext-0.19.8 && ./configure --prefix=/usr && make && sudo make install)
   - sh ./autogen.sh
 
 # Configure and run the tests
