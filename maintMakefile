@@ -23,7 +23,7 @@ MAKEWEBDIR ?= $(SRCROOTDIR)/make/make-web
 AM_CFLAGS += -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wpointer-arith \
 	-Wdeclaration-after-statement -Wbad-function-cast -Wformat-security \
 	-Wtype-limits -Wunused-but-set-parameter -Wlogical-op \
-	-Wignored-qualifiers -Wformat-signedness
+	-Wignored-qualifiers # -Wformat-signedness  # CI's gcc can't handle this
 
 # Unfortunately the Guile headers are sometimes broken.  Convince GCC
 # to treat them as system headers so warnings are ignored.
