@@ -19,8 +19,10 @@ GNUWEBDIR ?= $(SRCROOTDIR)/gnu-www
 # Where to put the CVS checkout of the GNU make web repository
 MAKEWEBDIR ?= $(SRCROOTDIR)/make/make-web
 
+# FIXME should IFDEF this around whether we are running CI or not
+# Without CI we can warn more
 # We like mondo-warnings!
-AM_CFLAGS += -Wall -Wextra -Werror -Wwrite-strings -Wshadow -Wpointer-arith \
+AM_CFLAGS += -Wall -Wextra -Wwrite-strings -Wshadow -Wpointer-arith \
 	-Wdeclaration-after-statement -Wbad-function-cast -Wformat-security \
 	-Wtype-limits -Wunused-but-set-parameter -Wlogical-op \
 	-Wignored-qualifiers # -Wformat-signedness  # CI's gcc can't handle this
