@@ -4,7 +4,8 @@ checkout:
     - wget ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.tar.xz
     - tar -xpf gettext-0.19.8.tar.xz
     - (cd ./gettext-0.19.8 && ./configure --prefix=/usr && make && sudo make install)
-    - sh ./autogen.sh
+    - rm -fr gettext-0.19.8
+    - bash -x ./autogen.sh
     - make
 
 test:
