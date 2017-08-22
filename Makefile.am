@@ -299,6 +299,12 @@ check-regression: tests/config-flags.pm
 # created before we build a distribution (see maintMakefile in the Git
 # distribution).
 
+README:
+
+@MAINT_MAKEFILE@
+
+# FIXME fix up to use the git2cl in MAINT_MAKEFILE
+GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
 #: create ChangeLog for distirbution from 'git log'
@@ -306,7 +312,3 @@ ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
 
 endif
-
-README:
-
-@MAINT_MAKEFILE@
