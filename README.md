@@ -2,7 +2,7 @@
 
 Patched GNU Make 4.2.1 sources to add improved error reporting, tracing,
 target listing, graph visualization, and profiling. It also
-contains debugger. See braches remake-4-1 and remake-3-82 forpatched GNU Make
+contains debugger. See branches remake-4-1 and remake-3-82 for patched GNU Make
 4.1 and 3.82 respectively
 
 Tracing and Debugging
