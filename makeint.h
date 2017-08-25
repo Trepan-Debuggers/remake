@@ -99,13 +99,8 @@ char *alloca ();
 extern int errno;
 #endif
 
-#ifdef __VMS
-/* In strict ANSI mode, VMS compilers should not be defining the
-   VMS macro.  Define it here instead of a bulk edit for the correct code.
- */
-# ifndef VMS
-#  define VMS
-# endif
+#ifndef isblank
+# define isblank(c)     ((c) == ' ' || (c) == '\t')
 #endif
 
 #ifdef  HAVE_UNISTD_H
@@ -430,13 +425,8 @@ extern int unixy_shell;
 # define PATH_SEPARATOR_CHAR ';'
 # define MAP_PATHSEP    MAP_SEMI
 #elif !defined(PATH_SEPARATOR_CHAR)
-# if defined (VMS)
-#  define PATH_SEPARATOR_CHAR (vms_comma_separator ? ',' : ':')
-#  define MAP_PATHSEP    (vms_comma_separator ? MAP_COMMA : MAP_SEMI)
-# else
-#  define PATH_SEPARATOR_CHAR ':'
-#  define MAP_PATHSEP    MAP_COLON
-# endif
+#define PATH_SEPARATOR_CHAR ':'
+#define MAP_PATHSEP    MAP_COLON
 #elif PATH_SEPARATOR_CHAR == ':'
 # define MAP_PATHSEP     MAP_COLON
 #elif PATH_SEPARATOR_CHAR == ';'
