@@ -112,6 +112,7 @@ dbg_cmd_write(char *psz_args)
 		p_target->floc.filenm, p_target->floc.lineno);
       }
 
+      /* FIXME: this code duplicaes some code in file.c: print_target_props. DRY. */
       fprintf (outfd,
                "## %s:%s", p_target->name,
                p_target->double_colon ? ":" : "");
