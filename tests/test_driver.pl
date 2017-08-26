@@ -461,11 +461,8 @@ sub run_all_tests
 
 	chomp($fulltestdir = `pwd`);
 	$testcat = dirname($testname);
-	if ($^O eq 'cygwin') {
-	    $fullworkdir = "$workpath$pathsep$testcat";
-	} else {
-	    $fullworkdir = "$fulltestdir$pathsep$workpath$pathsep$testcat";
-	}
+	$fullworkdir = "$fulltestdir$pathsep$workpath$pathsep$testcat";
+
 	# Leave enough space in the extensions to append a number, even
         # though it needs to fit into 8+3 limits.
         if ($short_filenames) {
