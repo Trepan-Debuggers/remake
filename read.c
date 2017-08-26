@@ -34,13 +34,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <windows.h>
 #include "sub_proc.h"
 #else  /* !WINDOWS32 */
-#ifndef _AMIGA
-#ifndef VMS
 #include <pwd.h>
-#else
-struct passwd *getpwnam (char *name);
-#endif
-#endif
 #endif /* !WINDOWS32 */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently
@@ -229,21 +223,11 @@ read_all_makefiles (const char **makefiles)
   if (num_makefiles == 0)
     {
       static const char *default_makefiles[] =
-#ifdef VMS
-        /* all lower case since readdir() (the vms version) 'lowercasifies' */
-        /* TODO: Above is not always true, this needs more work */
-        { "makefile.vms", "gnumakefile", "makefile", 0 };
-#else
-#ifdef _AMIGA
-        { "GNUmakefile", "Makefile", "SMakefile", 0 };
-#else /* !Amiga && !VMS */
 #ifdef WINDOWS32
         { "GNUmakefile", "makefile", "Makefile", "makefile.mak", 0 };
-#else /* !Amiga && !VMS && !WINDOWS32 */
+#else
         { "GNUmakefile", "makefile", "Makefile", 0 };
-#endif /* !Amiga && !VMS && !WINDOWS32 */
-#endif /* AMIGA */
-#endif /* VMS */
+#endif /* !WINDOWS32 */
       const char **p = default_makefiles;
       while (*p != 0 && !file_exists_p (*p))
         ++p;
@@ -1256,22 +1240,6 @@ eval (struct ebuffer *ebuf, int set_default)
             else
               break;
           }
-#ifdef _AMIGA
-        /* Here, the situation is quite complicated. Let's have a look
-           at a couple of targets:
-
-           install: dev:make
-
-           dev:make: make
-
-           dev:make:: xyz
-
-           The rule is that it's only a target, if there are TWO :'s
-           OR a space around the :.
-        */
-        if (p && !(ISSPACE (p[1]) || !p[1] || ISSPACE (p[-1])))
-          p = 0;
-#endif
 #ifdef HAVE_DOS_PATHS
         {
           int check_again;
