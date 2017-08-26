@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -19,7 +19,7 @@ Boston, MA 02111-1307, USA.  */
 
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
     giving a file directory location helps a debugger frontend
-    when we change directories. For regression tests it is helpful to 
+    when we change directories. For regression tests it is helpful to
     list just the basename part as that doesn't change from installation
     to installation. Users may have their preferences too.
 */
@@ -28,18 +28,6 @@ extern int basename_filenames;
 /*! Nonzero means --trace=noshell.  */
 
 extern int no_shell_trace;
-
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --tasks
- */
-
-extern int show_tasks_flag;
-
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --targets
- */
-
-extern int show_targets_flag;
 
 /*! Nonzero means use GNU readline in the debugger. */
 extern int use_readline_flag;

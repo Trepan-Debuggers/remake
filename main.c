@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
+#include "profile.h"
 #include "filedef.h"
 #include "dep.h"
 #include "variable.h"
@@ -47,6 +49,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef _AMIGA
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
+
+extern void initialize_stopchar_map ();
 
 void init_dir (void);
 void remote_setup (void);
@@ -123,40 +127,18 @@ struct command_switch
 
 /* The recognized command switches.  */
 
-/* Nonzero means do extra verification (that may slow things down).  */
-
-int verify_flag;
-
-/* Nonzero means do not print commands to be executed (-s).  */
-
-int silent_flag;
-
-/* Nonzero means just touch the files
-   that would appear to need remaking (-t)  */
-
-int touch_flag;
-
-/* Nonzero means just print what commands would need to be executed,
-   don't actually execute them (-n).  */
-
-int just_print_flag;
-
 /* Synchronize output (--output-sync).  */
 
 char *output_sync_option = 0;
-
-/*! If 1, we don't give additional error reporting information. */
-int no_extended_errors = 0;
-
-/*! If true, show version information on entry. */
-bool b_show_version = false;
 
 /*! If non-null, contains the type of tracing we are to do.
   This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
-/*! Nonzero means use GNU readline in the debugger. */
+/*! If true, show version information on entry. */
+bool b_show_version = false;
 
+/*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
     1
@@ -164,28 +146,6 @@ int use_readline_flag =
     0
 #endif
     ;
-
-/*! If nonzero, we are debugging after each "step" for that many times.
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_stepping = 0;
-
-/*! If nonzero, we are debugging after each "next" for that many times.
-  When we have a value 1, then we actually run the debugger read loop.
-  Otherwise we decrement the step count.
-
-*/
-unsigned int i_debugger_nexting = 0;
-
-/*! If nonzero, enter the debugger if we hit a fatal error.
-*/
-unsigned int debugger_on_error = 0;
-
-/*! If nonzero, we have requested some sort of debugging.
-*/
-unsigned int debugger_enabled;
 
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
     giving a file directory location helps a debugger frontend
@@ -207,71 +167,21 @@ int suspend_flag = 0;
 
 /* Environment variables override makefile definitions.  */
 
-int env_overrides = 0;
-
-/* Nonzero means ignore status codes returned by commands
-   executed to remake files.  Just treat them all as successful (-i).  */
-
-int ignore_errors_flag = 0;
-
-/* Nonzero means don't remake anything, just print the data base
-   that results from reading the makefile (-p).  */
-
-int print_data_base_flag = 0;
-
-/* Nonzero means don't remake anything; just return a nonzero status
-   if the specified targets are not up to date (-q).  */
-
-int question_flag = 0;
-
-/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
-
-int no_builtin_rules_flag = 0;
-int no_builtin_variables_flag = 0;
-
 /* Nonzero means keep going even if remaking some file fails (-k).  */
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
-
-/* Nonzero means check symlink mtimes.  */
-
-int check_symlink_flag = 0;
-
-/* Nonzero means print directory before starting and when done (-w).  */
-
-int print_directory_flag = 0;
-
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
-
-int inhibit_print_directory_flag = 0;
-
-/* Nonzero means print version information.  */
-
-int print_version_flag = 0;
-
-/*! Nonzero means --trace and shell trace with input.  */
-
-int shell_trace = 0;
-
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --targets
- */
-
-int show_targets_flag = 0;
-
-/*! Nonzero gives a list of explicit target names that have commands
-  associated with them and exits. Set by option --tasks
- */
-
-int show_tasks_flag = 0;
 
 /*! Nonzero gives a list of explicit target names that have commands
    AND comments associated with them and exits. Set by option --task-comments
  */
 
 int show_task_comments_flag = 0;
+
+/* Nonzero means ignore print_directory_flag and never print the directory.
+   This is necessary because print_directory_flag is set implicitly.  */
+
+int inhibit_print_directory_flag = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -352,31 +262,14 @@ static int print_usage_flag = 0;
 */
 static stringlist_t* debugger_opts = NULL;
 
-/*! If 1, same as --debugger=preaction */
-int debugger_flag;
-
-/* If nonzero, we should print a warning message
-   for each reference to an undefined variable.  */
-
-int warn_undefined_variables_flag;
-
 /* If nonzero, always build all targets, regardless of whether
    they appear out of date or not.  */
-
 static int always_make_set = 0;
 int always_make_flag = 0;
 
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
 int rebuilding_makefiles = 0;
-
-/* Remember the original value of the SHELL variable, from the environment.  */
-
-struct variable shell_var;
-
-/* This character introduces a command: it's the first char on the line.  */
-
-char cmd_prefix = '\t';
 
 
 /* The usage output.  We write it this way to make life easier for the
@@ -435,6 +328,8 @@ static const char *const usage[] =
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
     N_("\
+  -P, --profile               Print profiling information for each target.\n"),
+    N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
@@ -458,7 +353,7 @@ static const char *const usage[] =
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
   --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n"
-                              "\full\"\n. The default is \"full\".\n"),
+                              "\"full\"\n. The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -504,6 +399,7 @@ static const struct command_switch switches[] =
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'P', flag, &profile_flag, 1, 1, 0, 0, 0, "profile" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -594,25 +490,11 @@ char *argv0 = NULL;
 
 /*! The name we were invoked with.  */
 
-#ifdef WINDOWS32
-/* On MS-Windows, we chop off the .exe suffix in 'main', so this
-   cannot be 'const'.  */
-char *program = NULL;
-#else
-const char *program = NULL;
-#endif
-
 /*! Our initial arguments -- used for debugger restart execvp.  */
-char **global_argv;
+const char * const*global_argv;
 
 /*! Our current directory before processing any -C options.  */
 char *directory_before_chdir = NULL;
-
-/*! Our current directory after processing all -C options.  */
-char *starting_directory;
-
-/*! Value of the MAKELEVEL variable at startup (or 0).  */
-unsigned int makelevel;
 
 /*! Pointer to the value of the .DEFAULT_GOAL special variable.
   The value will be the name of the goal to remake if the command line
@@ -626,10 +508,6 @@ struct variable * default_goal_var;
    This is zero if the makefiles do not define .DEFAULT.  */
 struct file *default_file;
 
-/*! Nonzero if we have seen the magic '.POSIX' target.
-   This turns on pedantic compliance with POSIX.2.  */
-int posix_pedantic;
-
 /* Nonzero if we have seen the '.SECONDEXPANSION' target.
    This turns on secondary expansion of prerequisites.  */
 
@@ -641,12 +519,6 @@ int second_expansion;
 
 int one_shell;
 
-/* One of OUTPUT_SYNC_* if the "--output-sync" option was given.  This
-   attempts to synchronize the output of parallel jobs such that the results
-   of each job stay together.  */
-
-int output_sync = OUTPUT_SYNC_NONE;
-
 /* Nonzero if we have seen the '.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
@@ -657,12 +529,6 @@ int not_parallel;
    warning at the end of the run. */
 
 int clock_skew_detected;
-
-/* Map of possible stop characters for searching strings.  */
-#ifndef UCHAR_MAX
-# define UCHAR_MAX 255
-#endif
-unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
 
 /* If output-sync is enabled we'll collect all the output generated due to
    options, while reading makefiles, etc.  */
@@ -753,46 +619,6 @@ initialize_global_hash_tables (void)
   init_hash_files ();
   hash_init_directories ();
   hash_init_function_table ();
-}
-
-/* This character map locate stop chars when parsing GNU makefiles.
-   Each element is true if we should stop parsing on that character.  */
-
-static void
-initialize_stopchar_map ()
-{
-  int i;
-
-  stopchar_map[(int)'\0'] = MAP_NUL;
-  stopchar_map[(int)'#'] = MAP_COMMENT;
-  stopchar_map[(int)';'] = MAP_SEMI;
-  stopchar_map[(int)'='] = MAP_EQUALS;
-  stopchar_map[(int)':'] = MAP_COLON;
-  stopchar_map[(int)'%'] = MAP_PERCENT;
-  stopchar_map[(int)'|'] = MAP_PIPE;
-  stopchar_map[(int)'.'] = MAP_DOT | MAP_USERFUNC;
-  stopchar_map[(int)','] = MAP_COMMA;
-  stopchar_map[(int)'$'] = MAP_VARIABLE;
-
-  stopchar_map[(int)'-'] = MAP_USERFUNC;
-  stopchar_map[(int)'_'] = MAP_USERFUNC;
-
-  stopchar_map[(int)'/'] = MAP_DIRSEP;
-#if defined(VMS)
-  stopchar_map[(int)']'] = MAP_DIRSEP;
-#elif defined(HAVE_DOS_PATHS)
-  stopchar_map[(int)'\\'] = MAP_DIRSEP;
-#endif
-
-  for (i = 1; i <= UCHAR_MAX; ++i)
-    {
-      if (isblank(i))
-        stopchar_map[i] = MAP_BLANK;
-      if (isspace(i))
-        stopchar_map[i] |= MAP_SPACE;
-      if (isalnum(i))
-        stopchar_map[i] = MAP_USERFUNC;
-    }
 }
 
 static const char *
@@ -1168,13 +994,8 @@ msdos_return_to_initial_directory (void)
 }
 #endif  /* __MSDOS__ */
 
-#ifdef _AMIGA
 int
-main (int argc, char **argv)
-#else
-int
-main (int argc, char **argv, char **envp)
-#endif
+main (int argc, const char **argv, char **envp)
 {
   static char *stdin_nm = 0;
   int makefile_status = MAKE_SUCCESS;
@@ -1717,6 +1538,7 @@ main (int argc, char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
+  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
 
 #ifdef MAKE_JOBSERVER
   /* If the jobserver-fds option is seen, make sure that -j is reasonable.
@@ -3673,5 +3495,26 @@ die (int status)
         }
     }
 
+  if (profile_flag) {
+    const char *status_str;
+    switch (status) {
+      case MAKE_SUCCESS:
+	status_str = "Normal program termination";
+	break;
+      case MAKE_TROUBLE:
+	status_str = "Platform failure termination";
+	break;
+      case MAKE_FAILURE:
+	status_str = "Failure program termination";
+	break;
+      case DEBUGGER_QUIT_RC:
+	status_str = "Debugger termination";
+	break;
+      default:
+	status_str = "";
+      }
+
+    close_callgrind(status_str);
+  }
   exit (status);
 }

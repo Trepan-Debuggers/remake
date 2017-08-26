@@ -386,7 +386,7 @@ var_to_on_off(int i_bool)
 }
 
 /*! See if psz_varname is $varname or $(varname) */
-void
+variable_t *
 try_without_dollar(const char *psz_varname)
 {
   printf("Can't find variable `%s'.\n", psz_varname);
@@ -401,7 +401,12 @@ try_without_dollar(const char *psz_varname)
     } else
       printf(_("Did you mean `%s'?\n"), psz_nodollar);
     free(psz_try);
+  } else {
+    printf("Adding variable `%s'.\n", psz_varname);
+    return define_variable (psz_varname, strlen(psz_varname), "", o_debugger, 0);
   }
+  return NULL;
+
 }
 
 /*! Show a expression. Set "expand" to 1 if you want variable

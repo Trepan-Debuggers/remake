@@ -1,4 +1,5 @@
-/* Copyright (C) 2011 R. Bernstein  <rocky@gnu.org>
+/*
+Copyright (C) 2015 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -16,31 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Set a variable definition without variable references but don't
-   expand variable references in the value part of psz_string. */
-static debug_return_t
-dbg_cmd_setq(char *psz_string)
-{
-  dbg_cmd_set_var(psz_string, 0);
-  return debug_readloop;
-}
-
-static void
-dbg_cmd_setq_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_setq;
-  short_command[c].use  = _("setq VARIABLE VALUE");
-  short_command[c].doc  =
-    _("Set MAKE variable VARIABLE to VALUE. Variable definitions\n"
-      "\tinside VALUE is expanded before assignment occurs."
-"\nSee also 'setqx'.");
-}
-
-
-
-/*
- * Local variables:
- * eval: (c-set-style "gnu")
- * indent-tabs-mode: nil
- * End:
- */
+#include <sys/time.h>
+#include "filedef.h"
+extern bool init_callgrind(const char *creator, const char *const *argv);
+extern void add_target(file_t *target, file_t *prev);
+extern void close_callgrind(const char *program_status);
+extern bool get_time(struct timeval *t);
+extern uint64_t time_diff(struct timeval *start_time, struct timeval *finish_time);

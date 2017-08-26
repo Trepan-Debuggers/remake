@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg0.91],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[4.1+dbg1.1],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 
@@ -30,7 +30,7 @@ AC_CONFIG_HEADERS([config.h])
 # We have to enable "foreign" because ChangeLog is auto-generated
 # We cannot enable -Werror because gettext 0.18.1 has invalid content
 # When we update gettext to 0.18.3 or better we can add it again.
-AM_INIT_AUTOMAKE([1.11.1 silent-rules foreign -Wall])
+AM_INIT_AUTOMAKE([subdir-objects 1.11.1 silent-rules foreign -Wall])
 AM_MAINTAINER_MODE
 
 # Checks for programs.
@@ -612,8 +612,16 @@ AS_IF([test "x$make_cv_load" = xno && test "x$user_load" = xyes],
 ])
 
 # Specify what files are to be created.
-AC_CONFIG_FILES([Makefile glob/Makefile po/Makefile.in config/Makefile \
-                 doc/Makefile w32/Makefile tests/config-flags.pm])
+AC_CONFIG_FILES([ \
+	Makefile \
+	glob/Makefile \
+	po/Makefile.in \
+	config/Makefile \
+        doc/Makefile \
+	unittest/Makefile \
+	w32/Makefile \
+	tests/config-flags.pm
+	])
 
 # OK, do it!
 
