@@ -16,8 +16,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
-ACLOCAL_AMFLAGS	=  -I config
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 silent-rules std-options check-news
+ACLOCAL_AMFLAGS = -I config
 
 transform = s,make,@MAKE_NAME@,
 
@@ -138,7 +138,7 @@ endif
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS) \
+EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
 		README.customs \
 		SCOPTIONS SMakefile \
 		make.lnk  NMakefile  \
@@ -263,6 +263,7 @@ MAKETESTFLAGS =
 #: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
 	@if test -f '$(srcdir)/tests/run_make_tests'; then \
+	  ulimit -n 128; \
 	  if $(PERL) -v >/dev/null 2>&1; then \
 	    case `cd '$(srcdir)'; pwd` in `pwd`) : ;; \
 	      *) test -d tests || mkdir tests; \
@@ -290,6 +291,12 @@ check-regression: tests/config-flags.pm
 # created before we build a distribution (see maintMakefile in the Git
 # distribution).
 
+README:
+
+@MAINT_MAKEFILE@
+
+# FIXME fix up to use the git2cl in MAINT_MAKEFILE
+GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
 #: create ChangeLog for distirbution from 'git log'
@@ -297,7 +304,3 @@ ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
 
 endif
-
-README:
-
-@MAINT_MAKEFILE@
