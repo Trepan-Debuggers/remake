@@ -16,41 +16,41 @@ that the load will be above this number and make will therefore
 decide that it cannot run more than one job even though -j 4 was
 also specified on the command line.";
 
-open(MAKEFILE,"> $makefile");
+# open(MAKEFILE,"> $makefile");
 
-# The Contents of the MAKEFILE ...
+# # The Contents of the MAKEFILE ...
 
-print MAKEFILE <<'EOF';
-SHELL = /bin/sh
+# print MAKEFILE <<'EOF';
+# SHELL = /bin/sh
 
-define test
-if [ ! -f test-file ]; then \
-  echo >> test-file; sleep 2; rm -f test-file; \
-else \
-  echo $@ FAILED; \
-fi
-endef
+# define test
+# if [ ! -f test-file ]; then \
+#   echo >> test-file; sleep 2; rm -f test-file; \
+# else \
+#   echo $@ FAILED; \
+# fi
+# endef
 
-all : ONE TWO THREE
-ONE : ; @$(test)
-TWO : ; @$(test)
-THREE : ; @$(test)
-EOF
+# all : ONE TWO THREE
+# ONE : ; @$(test)
+# TWO : ; @$(test)
+# THREE : ; @$(test)
+# EOF
 
 
-# END of Contents of MAKEFILE
+# # END of Contents of MAKEFILE
 
-close(MAKEFILE);
+# close(MAKEFILE);
 
-$mkoptions = "-l 0.0001";
-$mkoptions .= " -j 4" if ($parallel_jobs);
+# $mkoptions = "-l 0.0001";
+# $mkoptions .= " -j 4" if ($parallel_jobs);
 
-# We have to wait longer than the default (5s).
-&run_make_with_options($makefile, $mkoptions, &get_logfile, 0, 8);
+# # We have to wait longer than the default (5s).
+# &run_make_with_options($makefile, $mkoptions, &get_logfile, 0, 8);
 
-$slurp = &read_file_into_string (&get_logfile(1));
-if ($slurp !~ /cannot enforce load limit/) {
-  &compare_output("", &get_logfile(1));
-}
+# $slurp = &read_file_into_string (&get_logfile(1));
+# if ($slurp !~ /cannot enforce load limit/) {
+#   &compare_output("", &get_logfile(1));
+# }
 
 1;

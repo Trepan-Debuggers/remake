@@ -1,3 +1,13 @@
+Version 4.1+dbg-1.2
+2015-08-26
+
+- Add more information int "write" command:
+  the complete target name and dependencies
+  Format a little nicers
+
+- Some lint-like fixes.
+- Sync with 4.2+dbg-1.2
+
 Version 4.1+dbg-1.1
 2015-06-23
 
