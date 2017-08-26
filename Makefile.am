@@ -104,7 +104,7 @@ make_SOURCES =	alloc.c ar.c arscan.c \
 	$(remote) \
 	$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c mock.c
+EXTRA_make_SOURCES = remote-stub.c remote-cstms.c mock.c
 
 noinst_HEADERS = buildargv.h commands.h \
 	debug.h debugger.h dep.h expand.h \
@@ -141,10 +141,8 @@ endif
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.customs \
 		SCOPTIONS SMakefile \
-		 make.lnk amiga.c amiga.h \
-		NMakefile  \
+		make.lnk  NMakefile  \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		vmsdir.h vmsfunctions.c vmsify.c \
 		gmk-default.scm gmk-default.h \
 	        debugger/Makefile \
 		NEWS.remake README.remake REMAKE.todo Rakefile
@@ -160,6 +158,7 @@ MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
 html-local:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
+#: Make (re)make
 make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)

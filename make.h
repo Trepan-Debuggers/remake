@@ -368,7 +368,8 @@ FILE *open_tmpfile (char **, const char *);
 int ar_name (const char *);
 void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
-time_t ar_member_date (const char *);
+int ar_member_date (const char *, time_t *);
+
 
 #endif
 

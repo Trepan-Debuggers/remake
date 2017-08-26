@@ -1329,6 +1329,7 @@ f_mtime (struct file *file, int search)
 
       char *arname, *memname;
       struct file *arfile;
+      int found;
       time_t member_date;
 
       /* Find the archive's name.  */
@@ -1376,10 +1377,15 @@ f_mtime (struct file *file, int search)
         /* The archive doesn't exist, so its members don't exist either.  */
         return NONEXISTENT_MTIME;
 
-      member_date = ar_member_date (file->hname);
-      mtime = (member_date == (time_t) -1
-               ? NONEXISTENT_MTIME
-               : file_timestamp_cons (file->hname, member_date, 0));
+      found = ar_member_date (file->hname, &member_date);
+      if (found && member_date == (time_t) 0)
+        {
+              OSS (error, NILF,
+                   _("Warning: Archive '%s' seems to have been created in deterministic mode. '%s' will always be updated. Please consider passing the U flag to ar to avoid the problem."),
+                   arfile->name, memname);
+
+        }
+      mtime = found ? file_timestamp_cons (file->hname, member_date, 0) : NONEXISTENT_MTIME;
     }
   else
 #endif

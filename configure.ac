@@ -77,7 +77,8 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
-                  memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h])
+                  memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h \
+                  sys/user.h linux/binfmts.h])
 
 AM_PROG_CC_C_O
 AC_C_CONST
