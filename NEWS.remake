@@ -1,3 +1,13 @@
+Version 4.2.1+dbg-1.2
+2017-08-26
+
+- Add more information int "write" command:
+  the complete target name and dependencies
+  Format is a little nicer
+
+- Remove more VMS, AMIGA and XENIX code which complicates things
+
+
 Version 4.2.1+dbg-1.1
 2017-08-22
 
