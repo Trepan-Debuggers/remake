@@ -1,0 +1,10 @@
+checkout:
+  post:
+    - sudo apt-get install -y automake autopoint libreadline-dev wget gettext texinfo texlive
+    - bash -x ./autogen.sh
+    - make
+
+test:
+  override:
+    - make check
+    - make distcheck
