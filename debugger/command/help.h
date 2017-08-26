@@ -1,5 +1,5 @@
 /* Write commands associated with a given target. */
-/* 
+/*
 Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -20,12 +20,12 @@ Boston, MA 02111-1307, USA.  */
 /* Debugger help command. */
 
 
-void 
+void
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
 		      subcommand_var_info_t *p_subcmd, bool full_info)
 {
     if (full_info) {
-      const char *doc = p_subcmd->doc ? 
+      const char *doc = p_subcmd->doc ?
 	p_subcmd->doc : p_subcmd->short_doc;
       printf("%s ", psz_subcmd_name);
       printf("%s%s", p_subcmd->name, doc);
@@ -34,19 +34,19 @@ dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
       printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
       if (p_subcmd->var) {
 	if (p_subcmd->b_onoff)
-	  printf(" is %s.", 
+	  printf(" is %s.",
 		 var_to_on_off(* (int *) p_subcmd->var));
-	else 
+	else
 	  printf(" is %d.", *(int *)(p_subcmd->var));
       }
     }
-    
+
     printf("\n");
 }
 
-debug_return_t 
-dbg_help_subcmd(const char *psz_subcmd_name, 
-		short_cmd_t *p_command, const char *psz_args, 
+debug_return_t
+dbg_help_subcmd(const char *psz_subcmd_name,
+		short_cmd_t *p_command, const char *psz_args,
 		subcommand_var_info_t *subcommands)
 {
     unsigned int i;
@@ -54,7 +54,7 @@ dbg_help_subcmd(const char *psz_subcmd_name,
 	printf("%s\n\n%s\n", p_command->use, p_command->doc);
     } else {
 	for (i = 0; subcommands[i].name; i++) {
-	    if (is_abbrev_of(psz_args, subcommands[i].name, 
+	    if (is_abbrev_of(psz_args, subcommands[i].name,
 			     subcommands[i].min_abbrev)) {
 		dbg_help_subcmd_entry(psz_subcmd_name, "%s%s",
 				      &(subcommands[i]), true);
@@ -66,7 +66,7 @@ dbg_help_subcmd(const char *psz_subcmd_name,
     return debug_readloop;
 }
 
-debug_return_t 
+debug_return_t
 dbg_cmd_help(char *psz_args)
 {
   unsigned int i;
@@ -78,7 +78,7 @@ dbg_cmd_help(char *psz_args)
       unsigned int j;
       bool b_alias = false;
       uint8_t s=commands[i].short_name;
-      printf("  %-31s (%c)", 
+      printf("  %-31s (%c)",
 	     short_command[s].use, commands[i].short_name);
       for (j = 0; aliases[j].alias; j++) {
 	if (strcmp (commands[i].long_name, aliases[j].command) == 0) {
@@ -96,13 +96,13 @@ dbg_cmd_help(char *psz_args)
     printf("\nReadline command line editing (emacs/vi mode) is available.\n"
 "For more detailed help, type 'help COMAMND-NAME' or consult\n"
 "the online-documentation.\n");
-    
+
   } else {
       short_cmd_t *p_command;
-      char *psz_command = "";
-      
+      const char *psz_command = "";
+
       if (1 == strlen(psz_args)) {
-	  if ( NULL != short_command[(uint8_t)psz_args[0]].func ) 
+	  if ( NULL != short_command[(uint8_t)psz_args[0]].func )
 	      p_command = &short_command[(uint8_t)psz_args[0]];
 	  else
 	      p_command = NULL;
@@ -122,26 +122,26 @@ dbg_cmd_help(char *psz_args)
 	      printf("%s\n", p_command->doc);
 	  }
       } else {
-	  printf("Undefined command `%s'. Try help for a list of commands.\n", 
+	  printf("Undefined command `%s'. Try help for a list of commands.\n",
 		 psz_command);
       }
   }
-  
+
   return debug_readloop;
 }
 
 static void
-dbg_cmd_help_init(unsigned int c) 
+dbg_cmd_help_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_help;
   short_command[c].use  = _("help [COMMAND]");
-  short_command[c].doc  = 
+  short_command[c].doc  =
     _("Display list of commands (i.e. this help text.)\n"		\
       "\twith an command name, give only the help for that command.");
 }
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

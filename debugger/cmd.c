@@ -120,6 +120,7 @@ long_cmd_t commands[] = {
   { "run"     , 'R' },
   { "set"     , '=' },
   { "setq"    , '"' },
+  { "setqx"   , '`' },
   { "shell"   , '!' },
   { "show"    , 'S' },
   { "source"  , '<' },
@@ -206,6 +207,7 @@ find_command (const char *psz_name)
 #include "command/run.h"
 #include "command/set.h"
 #include "command/setq.h"
+#include "command/setqx.h"
 #include "command/shell.h"
 #include "command/show.h"
 #include "command/skip.h"
@@ -251,6 +253,7 @@ cmd_initialize(void)
   dbg_cmd_comment_init ('#');
   dbg_cmd_set_init     ('=');
   dbg_cmd_setq_init    ('"');
+  dbg_cmd_setqx_init   ('`');
   dbg_cmd_shell_init   ('!');
 }
 
