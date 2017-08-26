@@ -280,9 +280,6 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
   struct nameseq *n;
   const char **names;
   unsigned int i;
-#ifdef VMS
-  char *vms_member_pattern;
-#endif
   if (! ar_glob_pattern_p (member_pattern, 1))
     return 0;
 
@@ -290,35 +287,10 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
      ar_glob_match will accumulate them in STATE.chain.  */
   state.arname = arname;
   state.pattern = member_pattern;
-#ifdef VMS
-    {
-      /* In a copy of the pattern, find the suffix, save it and  remove it from
-         the pattern */
-      char *lastdot;
-      vms_member_pattern = xstrdup(member_pattern);
-      lastdot = strrchr(vms_member_pattern, '.');
-      state.suffix = lastdot;
-      if (lastdot)
-        {
-          state.suffix = xstrdup(lastdot);
-          *lastdot = 0;
-        }
-      state.pattern = vms_member_pattern;
-    }
-#endif
   state.size = size;
   state.chain = 0;
   state.n = 0;
   ar_scan (arname, ar_glob_match, &state);
-
-#ifdef VMS
-  /* Deallocate any duplicated string */
-  free(vms_member_pattern);
-  if (state.suffix)
-    {
-      free(state.suffix);
-    }
-#endif
 
   if (state.chain == 0)
     return 0;
