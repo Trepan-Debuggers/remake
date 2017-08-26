@@ -3125,16 +3125,11 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
       /* There are names left, so find the end of the next name.
          Throughout this iteration S points to the start.  */
       s = p;
-      p = find_char_unquote (p, stopmap|MAP_VMSCOMMA|MAP_BLANK);
+      p = find_char_unquote (p, stopmap|MAP_BLANK);
 #ifdef VMS
         /* convert comma separated list to space separated */
       if (p && *p == ',')
         *p =' ';
-#endif
-#ifdef _AMIGA
-      if (p && STOP_SET (*p, stopmap & MAP_COLON)
-          && !(ISSPACE (p[1]) || !p[1] || ISSPACE (p[-1])))
-        p = find_char_unquote (p+1, stopmap|MAP_VMSCOMMA|MAP_BLANK);
 #endif
 #ifdef HAVE_DOS_PATHS
     /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
@@ -3151,14 +3146,6 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
 
       /* Strip leading "this directory" references.  */
       if (NONE_SET (flags, PARSEFS_NOSTRIP))
-#ifdef VMS
-        /* Skip leading '[]'s. should only be one set or bug somwhere else */
-        if (p - s > 2 && s[0] == '[' && s[1] == ']')
-            s += 2;
-        /* Skip leading '<>'s. should only be one set or bug somwhere else */
-        if (p - s > 2 && s[0] == '<' && s[1] == '>')
-            s += 2;
-#endif
         /* Skip leading './'s.  */
         while (p - s > 2 && s[0] == '.' && s[1] == '/')
           {
@@ -3241,7 +3228,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
                   /* Find the end of this word.  We don't want to unquote and
                      we don't care about quoting since we're looking for the
                      last char in the word. */
-                  while (! STOP_SET (*e, stopmap|MAP_BLANK|MAP_VMSCOMMA))
+                  while (! STOP_SET (*e, stopmap|MAP_BLANK))
                     ++e;
                   /* If we didn't move, we're done now.  */
                   if (e == o)

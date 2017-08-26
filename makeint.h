@@ -408,12 +408,6 @@ extern int unixy_shell;
 /* The set of characters which are directory separators is OS-specific.  */
 #define MAP_DIRSEP      0x8000
 
-#ifdef VMS
-# define MAP_VMSCOMMA   MAP_COMMA
-#else
-# define MAP_VMSCOMMA   0x0000
-#endif
-
 #define MAP_SPACE       (MAP_BLANK|MAP_NEWLINE)
 
 /* Handle other OSs.
@@ -527,9 +521,7 @@ typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
 
 long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
 int ar_name_equal (const char *name, const char *mem, int truncated);
-#ifndef VMS
 int ar_member_touch (const char *arname, const char *memname);
-#endif
 #endif
 
 int dir_file_exists_p (const char *, const char *);
