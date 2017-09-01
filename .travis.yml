@@ -13,7 +13,7 @@ before_script:
   - sudo apt-get install -y automake autopoint gettext libreadline-dev wget texinfo
   - wget ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.tar.xz
   - tar -xpf gettext-0.19.8.tar.xz
-  - (cd ./gettext-0.19.8 && ./configure --prefix=/usr && make && sudo make install)
+  - (cd ./gettext-0.19.8 && CC=gcc ./configure --prefix=/usr && make && sudo make install)
   - rm -fr gettext-0.19.8
   - bash -x ./autogen.sh
 
