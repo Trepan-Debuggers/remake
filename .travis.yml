@@ -3,6 +3,10 @@ language: C
 sudo: required
 dist: trusty
 
+compiler:
+  - gcc
+  - clang
+
 group: edge
 
 before_script:
