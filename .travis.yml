@@ -5,7 +5,10 @@ dist: trusty
 
 compiler:
   - gcc
-  - clang
+# Nope, travis can't do clang because it seems to want to compile libcroc with clang
+# and that doesn't work. Why it feels compelled to do this I don't know. And why
+# libcroc can't be compiled with clang is also weird.
+#  - clang
 
 group: edge
 
