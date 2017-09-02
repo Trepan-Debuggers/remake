@@ -50,12 +50,13 @@ If the project has commented its Makefile using remake-friendly comments you may
 To get a list of *all* targets, interesting or not, use *--targets*
 instead of *--tasks*.
 
-To build:
+To build from a tarball:
 
-    $ autoreconf -i
-    $ ./configure
-    $ make update
-    $ make && make check && sudo make install
+    $ ./configure && make && make check && sudo make install
+
+To build from git, run first:
+
+    $ $SHELL ./autogen.sh
 
 Profiling and Visualization
 ----------------------------
