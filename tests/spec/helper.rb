@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'rspec'
 require 'tmpdir'
-puts "YO"
 module RemakeTestHelper
   unless defined?(SPEC_DIR)
     SPEC_DIR = File.dirname(__FILE__)
