@@ -13,20 +13,20 @@ using no options since normal output is a little more verbose and detailed.
 When that isn't enough, I use the *--trace* or *-x* option, e.g:
 
 ```console
-$ remake -x <other make options>
+$ remake -x # ... add other make options
 ```
 
 
 But if you want the full debugger, use *--debugger* or *-X*:
 
 ```
-$ remake -X <other make options>
+$ remake -X # ... add other make options
 ```
 
 If you want to get into the debugger only after an error is encountered use *--post-mortem*:
 
 ```console
-remake --post-mortem <other make options>
+$ remake --post-mortem # ... add other make options
 ```
 
 
