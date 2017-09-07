@@ -1,6 +1,7 @@
 Version 4.1+dbg-1.2
 2015-08-26
 
+- Add --port-mortem option
 - Add more information int "write" command:
   the complete target name and dependencies
   Format a little nicers

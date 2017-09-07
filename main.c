@@ -139,6 +139,10 @@ stringlist_t *tracing_opts = NULL;
 /*! If true, show version information on entry. */
 bool b_show_version = false;
 
+/*! If true, go into debugger on error.
+Sets --debugger --debugger-stop=error. */
+bool b_post_mortem_flag = false;
+
 /*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
@@ -366,15 +370,20 @@ static const char *const usage[] =
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]          Trace command execution TYPE may be\n\
-                              \"command\", \"read\", \"normal\",.\"\n\
+                              \"command\", \"read\", \"normal\".\"\n\
                               \"noshell\", or \"full\". Default is \"normal\"\n"),
     N_("\
   --debugger-stop[=TYPE]      Which point to enter debugger. TYPE may be\n\
                               \"goal\", \"preread\", \"preaction\",\n\
                               \"full\", \"error\", or \"fatal\".\n\
                               Only makes sense with -X set.\n"),
-    N_("\n\
-  -X, --debugger              Enter debugger.\n"),
+    N_("\
+  --post-mortem               Go into debugger on error.\n\
+                              Same as --debugger --debugger-stop=error\n"),
+    N_("\
+  -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+-X, N(|--debugger             Enter debugger.\n"),
     N_("\
    --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
@@ -452,7 +461,10 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-    { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger-stop" },
+    { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
+      "debugger-stop" },
+    { CHAR_MAX+13, flag, &b_post_mortem_flag, 0, 0, 0, 0, 0,
+      "post-mortem" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -1423,7 +1435,10 @@ main (int argc, const char **argv, char **envp)
   decode_verbosity_flags (verbosity_opts);
 
   /* FIXME: put into a subroutine like decode_trace_flags */
-  if (debugger_flag) {
+  if (b_post_mortem_flag) {
+    debugger_on_error   |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+    debugger_enabled     =  1;
+  } else if (debugger_flag) {
     b_debugger_preread   = false;
     job_slots            =  1;
     i_debugger_stepping  =  1;
