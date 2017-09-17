@@ -2,7 +2,7 @@
 #
 # Copyright (C) 1993-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
-# Copyright (C) 2008, 2011, 2014 rocky@gnu.org
+# Copyright (C) 2008, 2011, 2014, 2017 rocky@gnu.org
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg1.2],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[4.1+dbg1.3],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 
