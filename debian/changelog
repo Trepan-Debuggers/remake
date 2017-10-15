@@ -1,4 +1,4 @@
-remake (4.1+dbg1.3+dfsg-1) unstable; urgency=medium
+remake (4.1+dbg1.3~dfsg.1-1) unstable; urgency=medium
 
   * Fresh upstream release:
     - all debian/patches/* dropped -- upstreamed
