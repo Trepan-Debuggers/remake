@@ -1,7 +1,7 @@
 Version 4.2.1+dbg-1.3
 2017-09-17
 
-- Add --port-mortem option
+- Add --post-mortem option
 
 Version 4.2.1+dbg-1.2
 2017-08-26
