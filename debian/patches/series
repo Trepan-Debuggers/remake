@@ -1,6 +1,0 @@
-0001-handle_excessive_command_length-Patch-to-fix-large-c.patch
-0002-Fix-test-issues-with-ar-in-deterministic-mode.patch
-0003-Make-ar_member_date-compatible-with-archives-with-ti.patch
-0004-Issue-a-warning-when-we-detect-a-deterministic-archi.patch
-0005-main.c-main-SV-43434-Handle-NULL-returns-from-ttynam.patch
-0006-Reinstate-manpage.-Document-target-option.patch
