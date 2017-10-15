@@ -837,14 +837,17 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
       case cs_finished:
 	switch (p_target->update_status)
 	  {
-	  case 0:
+	  case us_success:
 	    puts (_("#  Successfully updated."));
 	    break;
-	  case 1:
+	  case us_none:
+	    puts (_("#  No attempt to update has been made."));
+	    break;
+	  case us_question:
 	    assert (question_flag);
 	    puts (_("#  Needs to be updated (-q is set)."));
 	    break;
-	  case 2:
+	  case us_failed:
 	    puts (_("#  Failed to be updated."));
 	    break;
 	  default:

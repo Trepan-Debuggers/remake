@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2005, 2007, 2008 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2005, 2007-2008, 2015 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ struct breakpoint_node
 {
   file_t            *p_target;
   unsigned int      i_num;
+  brkpt_mask_t      brkpt_mask;
   breakpoint_node_t *p_next;
 };
 
@@ -39,11 +40,11 @@ breakpoint_node_t *p_breakpoint_bottom = NULL;
 
 brkpt_mask_t i_breakpoints = BRK_NONE;
 
-/*! Add "p_target" to the list of breakpoints. Return true if 
+/*! Add "p_target" to the list of breakpoints. Return true if
     there were no errors
 */
-bool 
-add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask) 
+bool
+add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
 {
   breakpoint_node_t *p_new   = CALLOC (breakpoint_node_t, 1);
 
@@ -59,23 +60,25 @@ add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
   p_breakpoint_bottom           = p_new;
   p_new->p_target               = p_target;
   p_new->i_num                  = ++i_breakpoints;
+  p_new->brkpt_mask             = brkpt_mask;
 
 
   /* Finally, note that we are tracing this target. */
   if (p_target->tracing & (BRK_BEFORE_PREREQ & brkpt_mask)) {
-    dbg_msg(_("Note: prerequisite breakpoint already set at target %s."), 
+    dbg_msg(_("Note: prerequisite breakpoint already set at target %s."),
             p_target->name);
-  } 
+  }
   if (p_target->tracing & (BRK_AFTER_PREREQ & brkpt_mask)) {
-    dbg_msg(_("Note: command breakpoint already set at target %s."), 
+    dbg_msg(_("Note: command breakpoint already set at target %s."),
             p_target->name);
-  } 
+  }
   if (p_target->tracing & (BRK_AFTER_CMD & brkpt_mask)) {
-    dbg_msg(_("Note: target end breakpont set at target %s."), 
+    dbg_msg(_("Note: target end breakpont set at target %s."),
             p_target->name);
   }
   p_target->tracing = brkpt_mask;
-  printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
+  printf(_("Breakpoint %d on target %s, mask 0x%02x"), i_breakpoints,
+         p_target->name, brkpt_mask);
   if (p_target->floc.filenm)
     dbg_msg(": file %s, line %lu.", p_target->floc.filenm,
             p_target->floc.lineno);
@@ -88,21 +91,21 @@ add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
       dbg_msg("so it might not get stopped at again.");
   }
   return true;
-  
+
 }
 
-/*! Remove breakpoint i from the list of breakpoints. Return true if 
+/*! Remove breakpoint i from the list of breakpoints. Return true if
     there were no errors
 */
-bool 
-remove_breakpoint (unsigned int i) 
+bool
+remove_breakpoint (unsigned int i)
 {
   if (!i) {
     dbg_msg(_("Invalid Breakpoint number 0."));
     return false;
   }
   if (i > i_breakpoints) {
-    dbg_msg(_("Breakpoint number %d is too high. " 
+    dbg_msg(_("Breakpoint number %d is too high. "
 	   "%d is the highest breakpoint number."), i, i_breakpoints);
     return false;
   } else {
@@ -141,7 +144,7 @@ remove_breakpoint (unsigned int i)
 
 /*! List breakpoints.*/
 void
-list_breakpoints (void) 
+list_breakpoints (void)
 {
   breakpoint_node_t *p;
 
@@ -150,11 +153,12 @@ list_breakpoints (void)
     return;
   }
 
-  dbg_msg(  "Num Type           Disp Enb Target     Location");
+  dbg_msg(  "Num Type           Disp Enb Mask Target  Location");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   %s", 
+    printf("%3d breakpoint     keep   y 0x%02x %s",
 	   p->i_num,
-	   p->p_target->name);
+	   p->brkpt_mask,
+           p->p_target->name);
     if (p->p_target->floc.filenm) {
 	printf(" at ");
 	print_floc_prefix(&(p->p_target->floc));
@@ -162,10 +166,9 @@ list_breakpoints (void)
     printf("\n");
   }
 }
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil
  * End:
  */
- 

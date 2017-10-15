@@ -1,4 +1,5 @@
 /* Argument parsing and main program of GNU Make.
+Copyright (C) 2015 Rocky Bernstein
 Copyright (C) 1988-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -343,8 +344,8 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n"
-"                             have commands associated with them.\n"),
+  --tasks                     Give list of explicitly-named targets which\n\
+                              have commands associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
@@ -352,8 +353,8 @@ static const char *const usage[] =
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
-  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n"
-                              "\"full\"\n. The default is \"full\".\n"),
+  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
+                              \"full\". The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -364,17 +365,18 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
-  -x --trace[=TYPE]           Trace command execution TYPE may be\n\
+  -x, --trace[=TYPE]          Trace command execution TYPE may be\n\
                               \"command\", \"read\", \"normal\",\"\n\
                               \"noshell\", or \"full\". Default is \"normal\"\n"),
     N_("\
-  --debugger[=TYPE]            Enter debugger. TYPE may be\n\
-                               \"goal\", \"preread\", \"preaction\",\n\
-                               \"full\", \"error\", or \"fatal\".\n"),
+  --debugger-stop[=TYPE]      Which point to enter debugger. TYPE may be\n\
+                              \"goal\", \"preread\", \"preaction\",\n\
+                              \"full\", \"error\", or \"fatal\".\n\
+                              Only makes sense with -X set.\n"),
     N_("\n\
-  -X                           Same as \"--debugger=preaction\"\n"),
+  -X, --debugger              Enter debugger\n"),
     N_("\
-   --no-readline               Do not use GNU ReadLine in debugger.\n"),
+   --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 
@@ -411,8 +413,7 @@ static const struct command_switch switches[] =
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
-    { 'X', strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger" },
-    { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
+    { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, "debugger" },
 
     /* These options take arguments.  */
     { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },
@@ -451,6 +452,7 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
+    { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger-stop" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -1036,6 +1038,7 @@ main (int argc, const char **argv, char **envp)
   }
 #endif
 
+  global_argv = argv;
   /* Needed for OS/2 */
   initialize_main (&argc, &argv);
 
@@ -3114,7 +3117,7 @@ define_makeflags (int all, int makefile)
           if (!*(int *) cs->value_ptr == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
-            ADD_FLAG (0, 0);
+	    if (cs->c != 'X') ADD_FLAG (0, 0);
           break;
 
         case positive_int:
@@ -3203,8 +3206,10 @@ define_makeflags (int all, int makefile)
   /* Add simple options as a group.  */
   while (flags != 0 && !flags->arg && short_option (flags->cs->c))
     {
-      *p++ = flags->cs->c;
-      flags = flags->next;
+      if (flags->cs->c != 'X') {
+	*p++ = flags->cs->c;
+	flags = flags->next;
+      }
     }
 
   /* Now add more complex flags: ones with options and/or long names.  */
@@ -3214,9 +3219,9 @@ define_makeflags (int all, int makefile)
       *p++ = '-';
 
       /* Add the flag letter or name to the string.  */
-      if (short_option (flags->cs->c))
-        *p++ = flags->cs->c;
-      else
+      if (short_option (flags->cs->c)) {
+        if (flags->cs->c != 'X') *p++ = flags->cs->c;
+      } else
         {
           /* Long options require a double-dash.  */
           *p++ = '-';

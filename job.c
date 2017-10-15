@@ -878,6 +878,14 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
       dontcare = c->dontcare;
 
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	if (job_slots_used > 0) --job_slots_used;
+	c->file->update_status = 0;
+	free_child (c);
+	in_debugger = DEBUGGER_QUIT_RC;
+	die(DEBUGGER_QUIT_RC);
+      }
+
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
@@ -1005,7 +1013,8 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	   --keep-going, etc.
 	*/
 	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
-	    in_debugger = DEBUGGER_QUIT_RC;
+	  if (job_slots_used > 0) --job_slots_used;
+	  in_debugger = DEBUGGER_QUIT_RC;
 	  die(DEBUGGER_QUIT_RC);
 	}
 
