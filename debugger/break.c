@@ -119,7 +119,7 @@ remove_breakpoint (unsigned int i)
     if (p && p->i_num == i) {
       /* Delete breakpoint */
       if (!p->p_next) p_breakpoint_bottom = p_prev;
-      if ( (p == p_breakpoint_top) ) p_breakpoint_top = p->p_next;
+      if (p == p_breakpoint_top) p_breakpoint_top = p->p_next;
 
       if (p_prev) p_prev->p_next = p->p_next;
 

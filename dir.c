@@ -22,10 +22,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef  HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
-# ifdef VMS
-/* its prototype is in vmsdir.h, which is not needed for HAVE_DIRENT_H */
-const char *vmsify (const char *name, int type);
-# endif
 #else
 # define dirent direct
 # define NAMLEN(dirent) (dirent)->d_namlen
@@ -38,9 +34,6 @@ const char *vmsify (const char *name, int type);
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
-# ifdef HAVE_VMSDIR_H
-#  include "vmsdir.h"
-# endif /* HAVE_VMSDIR_H */
 #endif
 
 /* In GNU systems, <dirent.h> defines this macro for us.  */
@@ -748,8 +741,11 @@ file_exists_p (const char *name)
   const char *slash;
 
 #ifndef NO_ARCHIVES
-  if (ar_name (name))
-    return ar_member_date (name) != (time_t) -1;
+  {
+    time_t member_date;
+    if (ar_name (name))
+      return ar_member_date (name, &member_date);
+  }
 #endif
 
 #ifdef VMS

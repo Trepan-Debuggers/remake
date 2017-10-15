@@ -1,5 +1,7 @@
+/*.Po
 /Makefile
 /Makefile.in
-/test_profile
+/test-suite.log
 /test_*.log
 /test_*.trs
+/test_profile

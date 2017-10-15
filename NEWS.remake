@@ -1,3 +1,14 @@
+Version 4.1+dbg-1.3  (no +dbg-1.2)
+2017-09-17
+
+- Add --port-mortem option
+- Add more information int "write" command:
+  the complete target name and dependencies
+  Format a little nicer
+
+- Some lint-like fixes.
+- Sync with 4.2+dbg-1.2 and 1.3
+
 Version 4.1+dbg-1.1
 2015-06-23
 

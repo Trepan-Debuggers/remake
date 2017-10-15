@@ -1,6 +1,6 @@
 /* Write commands associated with a given target. */
-/* 
-Copyright (C) 2011 R. Bernstein  <rocky@gnu.org>
+/*
+Copyright (C) 2011, 2017 R. Bernstein  <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -18,8 +18,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-static debug_return_t 
-dbg_cmd_write(char *psz_args) 
+#include "../../dep.h"
+
+static debug_return_t
+dbg_cmd_write(char *psz_args)
 {
   file_t *p_target = NULL;
   const char *psz_target = NULL;
@@ -31,37 +33,37 @@ dbg_cmd_write(char *psz_args)
     char *psz_filename = NULL;
     FILE *outfd;
     char *s;
-    
+
     if (! p_target->cmds || ! p_target->cmds->commands) {
-      printf(_("Target \"%s\" doesn't have commands associated with it.\n"), 
+      printf(_("Target \"%s\" doesn't have commands associated with it.\n"),
 	     psz_target);
       return debug_readloop;
     }
-    
+
     s = p_target->cmds->commands;
-    
+
     /* FIXME: should get directory from a variable, e.g. TMPDIR */
 
     if (psz_args && *psz_args) {
       if (strcmp (psz_args, "here") == 0)
 	b_stdout = 1;
-      else 
+      else
 	psz_filename = strdup(psz_args);
     } else {
       /* Create target from the basename of the target name. */
       char *psz_target_basename = strrchr(psz_target, '/');
       if (!psz_target_basename)
 	psz_target_basename = (char *) psz_target;
-      else 
+      else
 	psz_target_basename++; /* Skip delimiter */
       psz_filename = CALLOC(char, strlen(psz_target_basename) + 10);
-      snprintf(psz_filename, MAX_FILE_LENGTH, "/tmp/%s.sh", 
+      snprintf(psz_filename, MAX_FILE_LENGTH, "/tmp/%s.sh",
 	       psz_target_basename);
     }
-    
+
     /* Skip leading space, MAKE's command prefixes:
           echo suppression  @,
-	  ignore-error  -, 
+	  ignore-error  -,
 	  and recursion +
     */
     while (*s != '\0')
@@ -83,36 +85,63 @@ dbg_cmd_write(char *psz_args)
     if ( '\0' == *s ) {
       printf(_("Null command string parsed\n"));
     } else {
-      if (b_stdout) 
+      dep_t *d;
+      dep_t *ood = 0;
+
+      if (b_stdout)
 	outfd = stdout;
       else if (!(outfd = fopen (psz_filename, "w"))) {
 	perror ("write target");
 	free(psz_filename);
 	return debug_readloop;
       }
-      
+
       if (p_v) {
 	fprintf(outfd, "#!%s\n", variable_expand(p_v->value));
       }
+
       if (!p_target->floc.filenm && p_target->cmds->fileinfo.filenm) {
 	/* Fake the location based on the commands - it's better than
 	   nothing...
 	*/
-	fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
-		p_target->cmds->fileinfo.filenm, 
+	fprintf(outfd, "## %s/%s:%lu\n", starting_directory,
+		p_target->cmds->fileinfo.filenm,
 		p_target->cmds->fileinfo.lineno-1);
       } else {
-	fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
+	fprintf(outfd, "## %s/%s:%lu\n", starting_directory,
 		p_target->floc.filenm, p_target->floc.lineno);
       }
-      
-      { 
+
+      /* FIXME: this code duplicaes some code in file.c: print_target_props. DRY. */
+      fprintf (outfd,
+               "## %s:%s", p_target->name,
+               p_target->double_colon ? ":" : "");
+
+      /* Print all normal dependencies; note any order-only deps.  */
+      for (d = p_target->deps; d != 0; d = d->next)
+        if (! d->ignore_mtime) {
+          fprintf (outfd, " %s", dep_name (d));
+        } else if (! ood)
+          ood = d;
+
+      /* Print order-only deps, if we have any.  */
+      if (ood)
+        {
+          fprintf (outfd, " | %s", dep_name (ood));
+          for (d = ood->next; d != 0; d = d->next)
+            if (d->ignore_mtime)
+              fprintf (outfd, " %s", dep_name (d));
+        }
+
+      fprintf (outfd, "\n");
+
+      {
 	char wd[300];
 	if (getcwd (wd, sizeof(wd))) {
-	  fprintf(outfd, "#cd %s\n", wd);
+	  fprintf(outfd, "\n#cd %s\n", wd);
 	}
       }
-	
+
       initialize_file_variables (p_target, 0);
       set_file_variables (p_target);
 
@@ -126,7 +155,7 @@ dbg_cmd_write(char *psz_args)
 	chop_commands (&cmds);
 	lines = xmalloc (cmds.ncommand_lines * sizeof (char *));
 	expand_command_lines(&cmds, lines, p_target);
-	for (i = 0; i < cmds.ncommand_lines; ++i) 
+	for (i = 0; i < cmds.ncommand_lines; ++i)
 	  {
 	    fprintf (outfd, "%s\n", lines[i]);
 	    free (lines[i]);
@@ -138,7 +167,7 @@ dbg_cmd_write(char *psz_args)
 	free(line);
 #endif
       }
-      
+
       if (!b_stdout) {
 	struct stat buf;
 	if (0 == fstat(fileno(outfd), &buf)) {
@@ -160,11 +189,11 @@ dbg_cmd_write(char *psz_args)
 }
 
 static void
-dbg_cmd_write_init(unsigned int c) 
+dbg_cmd_write_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_write;
   short_command[c].use =  _("write [TARGET [FILENAME]]");
-  short_command[c].doc  = 
+  short_command[c].doc  =
     _("writes the commands associated of a target to a file with MAKE\n"
       "variables expanded. If no target given, the basename of the current\n"
       "is used. If a filename is supplied it is used. If it is the string\n"
@@ -174,7 +203,7 @@ dbg_cmd_write_init(unsigned int c)
 }
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

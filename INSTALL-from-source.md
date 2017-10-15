@@ -45,13 +45,14 @@ to pull in the latest translation strings.
 
 # Building
 
-After the above is done:
+So the full sequence is:
 
 ```console
 
    $ cd remake*
    $ [ ! -f ./configure ] && autoreconf -f -i
    $ ./configure
+   $ make po-update
    $ make
    $ make check
 ```

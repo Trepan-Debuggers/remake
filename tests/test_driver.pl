@@ -151,6 +151,11 @@ sub toplevel
 
   $makeENV{LC_ALL} = 'C';
 
+  # HACK. On Debian, ar is now compiled with determinism, which makes
+  # make tests fail. Pass in the U modifier to revert that behaviour change
+  # If ar has not been changed, this should be a no-op.
+  $makeENV{ARFLAGS} = 'rvU';
+
   # Replace the environment with the new one
   #
   %origENV = %ENV unless $^O eq 'VMS';

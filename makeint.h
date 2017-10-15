@@ -428,10 +428,11 @@ extern struct rlimit stack_limit;
 /* The number of bytes needed to represent the largest integer as a string.  */
 #define INTSTR_LENGTH         CSTRLEN ("18446744073709551616")
 
+#define DEFAULT_TTYNAME "true"
 #ifdef HAVE_TTYNAME
 # define TTYNAME(_f) ttyname (_f)
 #else
-# define TTYNAME(_f) "true"
+# define TTYNAME(_f) DEFAULT_TTYNAME
 #endif
 
 
@@ -482,7 +483,7 @@ const char *find_percent_cached (const char **);
 int ar_name (const char *);
 void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
-time_t ar_member_date (const char *);
+int ar_member_date (const char *, time_t *);
 
 typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
                                       long int hdrpos, long int datapos,

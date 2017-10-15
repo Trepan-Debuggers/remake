@@ -2,7 +2,7 @@
 #
 # Copyright (C) 1993-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
-# Copyright (C) 2008, 2011, 2014 rocky@gnu.org
+# Copyright (C) 2008, 2011, 2014, 2017 rocky@gnu.org
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg1.1],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[4.1+dbg1.3],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 
@@ -77,7 +77,8 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
-                  memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h])
+                  memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h \
+                  sys/user.h linux/binfmts.h])
 
 AM_PROG_CC_C_O
 AC_C_CONST
