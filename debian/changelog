@@ -2,6 +2,8 @@ remake (4.1+dbg1.3+dfsg-1) unstable; urgency=medium
 
   * Fresh upstream release:
     - all debian/patches/* dropped -- upstreamed
+  * debian/control
+    - boosted policy to 4.0.0
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 15 Oct 2017 13:35:22 -0400
 
