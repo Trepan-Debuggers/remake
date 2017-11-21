@@ -378,14 +378,14 @@ static const char *const usage[] =
                               \"full\", \"error\", or \"fatal\".\n\
                               Only makes sense with -X set.\n"),
     N_("\
+  -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  -X, |--debugger               Enter debugger.\n"),
+    N_("\
   -!, --post-mortem           Go into debugger on error.\n\
                               Same as --debugger --debugger-stop=error\n"),
     N_("\
-  -v, --version               Print the version number of make and exit.\n"),
-    N_("\
--X, N(|--debugger             Enter debugger.\n"),
-    N_("\
-   --no-readline              Do not use GNU ReadLine in debugger.\n"),
+  --no-readline              Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 

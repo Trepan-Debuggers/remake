@@ -83,7 +83,7 @@ $ $SHELL ./autogen.sh
 Profiling and Visualization
 ----------------------------
 
-To profile and get a graph of targets encountered used the `--profile`
+To profile and get a graph of targets encountered use the `--profile`
 option. For example:
 
 ```console

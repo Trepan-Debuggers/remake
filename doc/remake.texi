@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004, 2005, 2006, 2011, 2012
+@c Copyright 2004, 2005, 2006, 2011, 2012, 2017
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO:
@@ -136,6 +136,8 @@ Copyright (C) 2004, 2005, 2006, 2011, 2012 Rocky Bernstein
 
 * Invocation::                  Getting in and out and GNU Make command options
 * Debugger Command Reference::  @value{DBG} command reference
+
+* Profiling and Visualization::
 
 * Front Ends::                  Using @value{DBG} from a front-end user interface
 
@@ -1064,8 +1066,8 @@ There are a couple ways you could get into the debugger
 @item
 invoke from the outset, using option @code{-X} or @code{--debugger}.
 @item
-enter when there is a fatal error using option @code{--debugger=error}
-or @code{debugger=fatal}
+enter when there is a fatal error using option @code{--debugger=error},
+@code{debugger=fatal}, or @code{--post-mortem}
 @item
 through an explicit call inside the debugger using built-in function @code{debugger}
 @end itemize
@@ -1121,6 +1123,7 @@ Here is a full list of debugger options and sub-options...
 @item --debugger @ovar{preread | preaction | full | error | fatal}
 @itemx -X
 @cindex @code{-X}
+@cindex @code{--debugger}
 The ``preread'' sub-option enters the debugger after command-line
 options are parsed but before any Makefiles have been read. It also
 puts @value{REMAKE} in step-tracing mode and sets the debugger to enter
@@ -1146,12 +1149,14 @@ execution.
 If no sub-option is provided, ``full'' is assumed.
 
 @item --no-extended-errors
+@cindex @code{--no-extended-errors}
 This option causes @value{REMAKE} to @emph{not} print a target stack
 trace if it encounters an error.
 
 @item --trace @ovar{=suboption}
 @itemx -x
 @cindex @code{-x}
+@cindex @code{--trace}
 Causes target names which have commands associated with them to get
 printed before they are considered. If a target has multiple commands
 each one is printed before they are run whether or not the command has
@@ -1165,6 +1170,12 @@ tracing as Makefiles are read.
 tracing is independent of the @code{--debugger} option and can be used
 in conjunction with it. Inside the debugger one can have the same
 effect by issuing the debugger @code{set trace on} command.
+
+@cindex @code{-!}
+@cindex @code{--post-mortem}
+@item --post-mortem
+This option causes @value{REMAKE} to go into the debugger after
+encountering an error.
 
 @end table
 
@@ -2451,6 +2462,25 @@ Sets @var{variable} to the value @var{string}, but @var{string} is
 @emph{not} expanded first as it is not you use @code{print}.
 @end table
 
+@node Profiling and Visualization
+@chapter Profiling and Visualization
+
+To profile and get a graph of targets encountered use the
+@code{--profile} option. For example:
+
+@smallexample
+  $ remake --profile # target...
+@end smallexample
+
+@value{REMAKE} outputs callgrind profile format data
+@footnote{@url{http://valgrind.org/docs/manual/cl-format.html}} which
+can be used with
+@code{kcachegrind}@footnote{http://kcachegrind.sourceforge.net/html/Home.html}
+or other
+tools@footnote{@url{https://github.com/icefox/callgrind_tools},
+@url{https://github.com/zenkj/callgrind2dot}} that work with this
+format. that work with this format.
+
 @node Front Ends
 @chapter Using @value{DBG} from a front-end user interface
 
@@ -2469,8 +2499,9 @@ The only front-ends that can use @value{DBG} as a back-end debugger is
 @cindex Emacs
 @cindex @sc{gnu} Emacs
 There is a multi-debugger emacs interface which includes
-@code{remake}. This is distributed as a separate program. See
-@url{https://github.com/rocky/emacs-dbgr/wiki}
+@code{remake}. This is distributed as a separate program and is
+available via the Emacs package managers ELPA or MELPA. See
+@url{https://github.com/realgud/realgud}
 
 @node DDD
 @section Using @value{REMAKE} from @value{DDD}
@@ -2515,7 +2546,7 @@ If you are not sure whether you have found a bug, here are some guidelines:
 @itemize @bullet
 @cindex fatal signal
 @cindex debugger crash
-@cindex crash of debugger
+@cindex crash, debugger
 @item
 If the debugger gets a fatal signal, for any input whatever, that is a
 @value{REMAKE} bug.  Reliable debuggers never crash.
