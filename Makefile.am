@@ -157,7 +157,7 @@ EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
 
 # This is built during configure, but behind configure's back
 
-DISTCLEANFILES = build.sh
+DISTCLEANFILES = build.sh ./tests/testload.c ./tests/testapi.c
 
 MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
 
