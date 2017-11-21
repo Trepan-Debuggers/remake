@@ -1,9 +1,11 @@
-Version 4.1+dbg1.4
+Version 4.1+dbg-1.4
 
 Two small but important changes...
 
 1. gnumake.h -> gnuremake.h so we don't conflict with GNU make
 2. Propagate --post-mortem flag (now short option -!) in recursive make
+
+Revise documentation to include recent --post-mortem and profiling changes.
 
 Version 4.1+dbg1.3
 
