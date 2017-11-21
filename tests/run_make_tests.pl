@@ -81,7 +81,7 @@ sub valid_option
 
    if ($option =~ /^-srcdir$/i) {
        $srcdir = shift @argv;
-       if (! -f "$srcdir/gnumake.h") {
+       if (! -f "$srcdir/gnuremake.h") {
            print "$option $srcdir: Not a valid GNU make source directory.\n";
            exit 0;
        }

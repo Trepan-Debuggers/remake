@@ -17,7 +17,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef VARIABLE_H
 #define VARIABLE_H
 
-#include "gnumake.h"
+#include "gnuremake.h"
 #include "hash.h"
 
 /* Codes in a variable definition saying where the definition came from.

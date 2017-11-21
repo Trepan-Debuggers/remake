@@ -58,7 +58,7 @@ char *alloca ();
 #ifdef WINDOWS32
 # define GMK_BUILDING_MAKE
 #endif
-#include "gnumake.h"
+#include "gnuremake.h"
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so

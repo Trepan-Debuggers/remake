@@ -23,7 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define _REMAKE_FILEDEF_H
 
 #include "hash.h"
-#include "gnumake.h"
+#include "gnuremake.h"
 #include "types.h"
 
 struct file

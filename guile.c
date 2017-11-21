@@ -18,7 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifdef HAVE_GUILE
 
-#include "gnumake.h"
+#include "gnuremake.h"
 
 #include "debug.h"
 #include "filedef.h"

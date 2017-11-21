@@ -33,7 +33,7 @@ endif
 SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
 
 bin_PROGRAMS =	make
-include_HEADERS = gnumake.h
+include_HEADERS = gnuremake.h
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
