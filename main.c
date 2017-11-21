@@ -385,7 +385,7 @@ static const char *const usage[] =
   -!, --post-mortem           Go into debugger on error.\n\
                               Same as --debugger --debugger-stop=error\n"),
     N_("\
-  --no-readline              Do not use GNU ReadLine in debugger.\n"),
+  --no-readline               Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 
