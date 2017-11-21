@@ -36,13 +36,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <windows.h>
 #include "sub_proc.h"
 #else  /* !WINDOWS32 */
-#ifndef _AMIGA
-#ifndef VMS
 #include <pwd.h>
-#else
-struct passwd *getpwnam (char *name);
-#endif
-#endif
 #endif /* !WINDOWS32 */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently
@@ -3128,7 +3122,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
       /* There are names left, so find the end of the next name.
          Throughout this iteration S points to the start.  */
       s = p;
-      p = find_char_unquote (p, stopmap|MAP_VMSCOMMA|MAP_BLANK);
+      p = find_char_unquote (p, stopmap|MAP_BLANK);
 #ifdef VMS
         /* convert comma separated list to space separated */
       if (p && *p == ',')
