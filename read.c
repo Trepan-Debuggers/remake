@@ -2936,7 +2936,6 @@ construct_include_path (const char **arg_dirs)
 char *
 remake_tilde_expand (const char *name)
 {
-#ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
     {
       char *home_dir;
@@ -2998,7 +2997,6 @@ remake_tilde_expand (const char *name)
         *userend = '/';
     }
 # endif /* !AMIGA && !WINDOWS32 */
-#endif /* !VMS */
   return 0;
 }
 
@@ -3094,11 +3092,6 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
          Throughout this iteration S points to the start.  */
       s = p;
       p = find_char_unquote (p, stopmap|MAP_BLANK);
-#ifdef VMS
-        /* convert comma separated list to space separated */
-      if (p && *p == ',')
-        *p =' ';
-#endif
 #ifdef HAVE_DOS_PATHS
     /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
        first colon which isn't followed by a slash or a backslash.
@@ -3107,7 +3100,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
     if (stopmap | MAP_COLON)
       while (p != 0 && !ISSPACE (*p) &&
              (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
-        p = find_char_unquote (p + 1, stopmap|MAP_VMSCOMMA|MAP_BLANK);
+        p = find_char_unquote (p + 1, stopmap|MAP_BLANK);
 #endif
       if (p == 0)
         p = s + strlen (s);
@@ -3129,38 +3122,16 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
       if (s == p)
         {
         /* The name was stripped to empty ("./"). */
-#if defined(_AMIGA)
-          /* PDS-- This cannot be right!! */
-          tp[0] = '\0';
-          nlen = 0;
-#else
           tp[0] = '.';
           tp[1] = '/';
           tp[2] = '\0';
           nlen = 2;
-#endif
         }
       else
         {
-#ifdef VMS
-/* VMS filenames can have a ':' in them but they have to be '\'ed but we need
- *  to remove this '\' before we can use the filename.
- * xstrdup called because S may be read-only string constant.
- */
-          char *n = tp;
-          while (s < p)
-            {
-              if (s[0] == '\\' && s[1] == ':')
-                ++s;
-              *(n++) = *(s++);
-            }
-          n[0] = '\0';
-          nlen = strlen (tp);
-#else
           nlen = p - s;
           memcpy (tp, s, nlen);
           tp[nlen] = '\0';
-#endif
         }
 
       /* At this point, TP points to the element and NLEN is its length.  */
