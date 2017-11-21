@@ -359,7 +359,7 @@ static const char *const usage[] =
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
-  -X, |--debugger             Enter debugger.\n"),
+  -X, --debugger              Enter debugger.\n"),
     N_("\
   -!, --post-mortem           Go into debugger on error.\n\
                               Same as --debugger --debugger-stop=error\n"),
