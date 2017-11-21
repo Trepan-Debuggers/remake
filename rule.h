@@ -19,7 +19,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _REMAKE_RULE_H
 #define _REMAKE_RULE_H
-#include "gnumake.h"
+#include "gnuremake.h"
 #include "types.h"
 
 struct rule

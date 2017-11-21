@@ -17,7 +17,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef REMAKE_DEP_H
 #define REMAKE_DEP_H
 
-#include "gnumake.h"
+#include "gnuremake.h"
 
 #define NAMESEQ(_t)     \
     _t *next;           \

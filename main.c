@@ -420,6 +420,8 @@ static const struct command_switch switches[] =
     { 'o', filename, &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'O', string, &output_sync_option, 1, 1, 0, "target", 0, "output-sync" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
+    { '!', flag, &b_post_mortem_flag, 1, 1, 0, 0, 0,
+      "post-mortem" },
 
     /* These are long-style options.  */
     { CHAR_MAX+1, strlist, &db_flags, 1, 1, 0, "basic", 0, "debug" },
@@ -441,8 +443,6 @@ static const struct command_switch switches[] =
       "targets" },
     { CHAR_MAX+12, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
       "debugger-stop" },
-    { CHAR_MAX+13, flag, &b_post_mortem_flag, 0, 0, 0, 0, 0,
-      "post-mortem" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
