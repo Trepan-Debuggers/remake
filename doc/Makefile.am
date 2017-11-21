@@ -1,6 +1,6 @@
 # -*-Makefile-*-, or close enough
-# Copyright (C) 2000-2014 Free Software Foundation, Inc.
-# This file is part of GNU Make.
+# Copyright (C) 2000-201T Free Software Foundation, Inc.
+# This file is part of GNU Remake.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -18,8 +18,8 @@
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
-info_TEXINFOS =	remake.texi
+info_TEXINFOS =	make.texi remake.texi
 
-# make_TEXINFOS = fdl.texi make-stds.texi
+make_TEXINFOS = fdl.texi make-stds.texi
 
-CLEANFILES = callgrind.out.* make*.html remake*.html
+CLEANFILES = callgrind.out.* make*.html remake*.html remake.info
