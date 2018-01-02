@@ -13,6 +13,7 @@ compiler:
 group: edge
 
 before_script:
+  - sudo apt-get update
   - sudo apt-get install -y automake autopoint gettext libreadline-dev wget texinfo
   - wget ftp://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.tar.xz
   - tar -xpf gettext-0.19.8.tar.xz
