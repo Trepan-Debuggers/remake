@@ -1,3 +1,10 @@
+remake (4.1+dbg1.3~dfsg.1-2) unstable; urgency=medium
+
+  * Fixed FTBFS issue with glibc 2.27. Thanks to Aurelien Jarno
+    <aurel32@debian.org> for the patch. (Closes: #891368)
+  
+ -- Dima Kogan <dkogan@debian.org>  Sat, 24 Feb 2018 16:10:49 -0800
+
 remake (4.1+dbg1.3~dfsg.1-1) unstable; urgency=medium
 
   * Fresh upstream release:
