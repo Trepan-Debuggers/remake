@@ -357,7 +357,7 @@ static const char *const usage[] =
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
-  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
+  --verbosity=LEVEL           Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n\
                               \"full\". The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
