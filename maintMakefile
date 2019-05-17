@@ -143,13 +143,8 @@ po_wget_flags =	--recursive --level=1 --no-directories --no-parent \
 po_repo = http://translationproject.org/latest/make
 .PHONY: do-po-update po-update
 do-po-update:
-	tmppo="/tmp/po-$(PACKAGE)-$(VERSION).$$$$" \
-	  && rm -rf "$$tmppo" \
-	  && mkdir "$$tmppo" \
-	  && (cd "$$tmppo" \
-		&& $(WGET) $(po_wget_flags) -A '*.po' $(po_repo)) \
-	  && cp "$$tmppo"/*.po $(top_srcdir)/po && rm -rf "$$tmppo"
-	cd po && $(MAKE) update-po
+	$(WGET) $(po_wget_flags) --accept=po --directory-prefix=po $(po_repo)
+	$(MAKE) -C po update-po
 	$(MAKE) po-check
 
 po-update:
