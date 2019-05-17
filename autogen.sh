@@ -10,4 +10,5 @@ if [ $? -ne 0 ]; then
 fi
 
 ./configure --enable-maintainer-mode "$@"
-make update
+make po-update
+(cd doc && make stamp-1 stamp-vti)

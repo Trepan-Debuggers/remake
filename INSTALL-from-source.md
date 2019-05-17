@@ -34,13 +34,36 @@ To build documentation you need:
 
 Add that to the `apt-get` or `yum` command above.
 
+# Simplicfied approach
+
+
+   $ $SHELL ./autogen.sh
+   $ make && make check
+
+
+This performs the step below steps up to but not including
+"Building".
+
+# Creating and running configure script
+
+
+	$ autoreconf -f -i
+	$ ./configure
+
+
 # Updating translation links
 
 After running `configure` run:
 
-    make po-update
+    $ make po-update
 
 to pull in the latest translation strings.
+
+
+# TeXinfo mess
+
+
+    $ (cd doc && make stamp-1 stamp-vti)
 
 
 # Building
@@ -50,9 +73,9 @@ So the full sequence is:
 ```console
 
    $ cd remake*
-   $ [ ! -f ./configure ] && autoreconf -f -i
+   $ autoreconf -f -i
    $ ./configure
    $ make po-update
-   $ make
-   $ make check
+   $ (cd doc && make stamp-1 stamp-vti)
+   $ make && make check
 ```
