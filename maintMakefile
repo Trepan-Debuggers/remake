@@ -177,13 +177,8 @@ po_sync = translationproject.org::tp/latest/make/
 
 .PHONY: do-po-update po-update
 do-po-update:
-	tmppo="/tmp/po-$(PACKAGE)-$(VERSION).$$$$" \
-	  && rm -rf "$$tmppo" \
-	  && mkdir "$$tmppo" \
-	  && $(RSYNC) $(po_sync)  "$$tmppo" \
-	  && cp "$$tmppo"/*.po $(top_srcdir)/po \
-	  && rm -rf "$$tmppo"
-	cd po && $(MAKE) update-po
+	$(WGET) $(po_wget_flags) --accept=po --directory-prefix=po $(po_repo)
+	$(MAKE) -C po update-po
 	$(MAKE) po-check
 
 po-update:
