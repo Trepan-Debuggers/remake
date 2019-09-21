@@ -1,0 +1,13 @@
+diff --git a/configure.ac b/configure.ac
+index 3dcc3043..fe5753e7 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -181,7 +181,7 @@ AC_ARG_WITH([guile], [AS_HELP_STRING([--with-guile],
+ # comes with it's own PC file so we have to specify them as individual
+ # packages.  Ugh.
+ AS_IF([test "x$with_guile" != xno],
+-[ PKG_CHECK_MODULES([GUILE], [guile-2.0], [have_guile=yes],
++[ PKG_CHECK_MODULES([GUILE], [guile-2.2], [have_guile=yes],
+   [PKG_CHECK_MODULES([GUILE], [guile-1.8], [have_guile=yes],
+     [have_guile=no])])
+ ])
