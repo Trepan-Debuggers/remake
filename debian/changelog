@@ -1,3 +1,9 @@
+remake (4.1+dbg1.3~dfsg.1-3) unstable; urgency=medium
+
+  * Moved to guile 2.2. (Closes: #885237)
+
+ -- Dima Kogan <dkogan@debian.org>  Sat, 21 Sep 2019 12:09:02 -0700
+
 remake (4.1+dbg1.3~dfsg.1-2) unstable; urgency=medium
 
   * Fixed FTBFS issue with glibc 2.27. Thanks to Aurelien Jarno
