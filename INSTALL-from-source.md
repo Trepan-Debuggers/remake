@@ -7,6 +7,7 @@ Build from sources you need:
 * gettext
 * GNU Readline
 * guile version 2.0
+* texinfo
 
 
 Additionally if installing from git you need:
@@ -19,7 +20,7 @@ Additionally if installing from git you need:
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
 ```console
-   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint libreadline-dev make guile-2.0
+   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint libreadline-dev make guile-2.0 texinfo
 ```
 
 Here is a `yum` command Redhat/CentOS:
