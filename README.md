@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake)
+[![Build Status](https://travis-ci.org/rocky/remake.svg?branch=remake-4-1)](https://travis-ci.org/rocky/remake)
+
++[![Packaging status](https://repology.org/badge/vertical-allrepos/remake.svg)](https://repology.org/project/remake/versions)
 
 Patched GNU Make 4.1 sources to add improved error reporting, tracing,
 target listing, graph visualization, and profiling. It also contains
