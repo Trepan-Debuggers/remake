@@ -579,6 +579,8 @@ decode_trace_flags (stringlist_t *ppsz_tracing_opts)
           db_level = DB_BASIC | DB_TRACE;
         else if (0 == strcmp(*p, "read"))
           db_level |= DB_READ_MAKEFILES;
+        else
+          OS ( fatal, NILF, _("unknown trace command execution type `%s'"), *p);
       }
   }
 }
