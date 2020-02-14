@@ -31,6 +31,7 @@
 /config/test-driver
 /configure
 /debian/remake.debhelper.log
+/dist
 /loadavg
 /make
 /po-check-*
