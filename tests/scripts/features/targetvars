@@ -7,7 +7,6 @@ values, override and non-override, and using various variable expansion
 rules, semicolon interference, etc.";
 
 run_make_test('
-SHELL = /bin/sh
 export FOO = foo
 export BAR = bar
 one: override FOO = one
@@ -256,6 +255,32 @@ a: ; @echo $(A)
 !,
               '', "hello; world\n");
 
+# TEST #21: SV-56834 Ensure setting PATH in a target var works properly
+my $sname = "foobar$scriptsuffix";
+
+mkdir('sd', 0775);
+create_file("sd/$sname", "exit 0\n");
+chmod 0755, "sd/$sname";
+
+run_make_test(qq!
+all: PATH := sd
+all: ; $sname >/dev/null
+!,
+              '', "$sname >/dev/null\n");
+
+# Don't use the general PATH if not found on the target path
+
+$extraENV{PATH} = "$ENV{PATH}:sd";
+
+run_make_test(qq!
+all: PATH := ..
+all: ; $sname
+!,
+              '', "$sname\n#MAKE#: $sname: $ERR_no_such_file\n#MAKE#: *** [#MAKEFILE#:3: all] Error 127", 512);
+
+unlink("sd/$sname");
+rmdir ('sd');
+
 # TEST #19: Test define/endef variables as target-specific vars
 
 # run_make_test('
@@ -271,3 +296,7 @@ a: ; @echo $(A)
 #               '', "local\n");
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

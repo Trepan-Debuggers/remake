@@ -1,19 +1,123 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  22 May 2016
+  19 January 2020
 
 See the end of this file for copyrights and conditions.
 
-All changes mentioned here are more fully described in the GNU make
-manual, which is contained in this distribution as the file doc/make.texi.
+All user-visible changes are more fully described in the GNU make manual,
+which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
+
+Version 4.3 (19 Jan 2020)
+
+A complete list of bugs fixed in this version is available here:
+
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=108&set=custom
+
+* WARNING: Backward-incompatibility!
+  Number signs (#) appearing inside a macro reference or function invocation
+  no longer introduce comments and should not be escaped with backslashes:
+  thus a call such as:
+    foo := $(shell echo '#')
+  is legal.  Previously the number sign needed to be escaped, for example:
+    foo := $(shell echo '\#')
+  Now this latter will resolve to "\#".  If you want to write makefiles
+  portable to both versions, assign the number sign to a variable:
+    H := \#
+    foo := $(shell echo '$H')
+  This was claimed to be fixed in 3.81, but wasn't, for some reason.
+  To detect this change search for 'nocomment' in the .FEATURES variable.
+
+* WARNING: Backward-incompatibility!
+  Previously appending using '+=' to an empty variable would result in a value
+  starting with a space.  Now the initial space is only added if the variable
+  already contains some value.  Similarly, appending an empty string does not
+  add a trailing space.
+
+* NOTE: Deprecated behavior.
+  Contrary to the documentation, suffix rules with prerequisites are being
+  treated BOTH as simple targets AND as pattern rules.  Further, the
+  prerequisites are ignored by the pattern rules.  POSIX specifies that in
+  order to be a suffix rule there can be no prerequisites defined.  In this
+  release if POSIX mode is enabled then rules with prerequisites cannot be
+  suffix rules.  If POSIX mode is not enabled then the previous behavior is
+  preserved (a pattern rule with no extra prerequisites is created) AND a
+  warning about this behavior is generated:
+    warning: ignoring prerequisites on suffix rule definition
+  The POSIX behavior will be adopted as the only behavior in a future release
+  of GNU make so please resolve any warnings.
+
+* New feature: Grouped explicit targets
+  Pattern rules have always had the ability to generate multiple targets with
+  a single invocation of the recipe.  It's now possible to declare that an
+  explicit rule generates multiple targets with a single invocation.  To use
+  this, replace the ":" token with "&:" in the rule.  To detect this feature
+  search for 'grouped-target' in the .FEATURES special variable.
+  Implementation contributed by Kaz Kylheku <kaz@kylheku.com>
+
+* New feature: .EXTRA_PREREQS variable
+  Words in this variable are considered prerequisites of targets but they are
+  not added to any of the automatic variable values when expanding the
+  recipe.  This variable can either be global (applies to all targets) or
+  a target-specific variable.  To detect this feature search for 'extra-prereqs'
+  in the .FEATURES special variable.
+  Implementation contributed by Christof Warlich <cwarlich@gmx.de>
+
+* Makefiles can now specify the '-j' option in their MAKEFLAGS variable and
+  this will cause make to enable that parallelism mode.
+
+* GNU make will now use posix_spawn() on systems where it is available.
+  If you prefer to use fork/exec even on systems where posix_spawn() is
+  present, you can use the --disable-posix-spawn option to configure.
+  Implementation contributed by Aron Barath <baratharon@caesar.elte.hu>
+
+* Error messages printed when invoking non-existent commands have been cleaned
+  up and made consistent.
+
+* The previous limit of 63 jobs under -jN on MS-Windows is now
+  increased to 4095.  That limit includes the subprocess started by
+  the $(shell) function.
+
+* A new option --no-silent has been added, that cancels the effect of the
+  -s/--silent/--quiet flag.
+
+* A new option -E has been added as a short alias for --eval.
+
+* All wildcard expansion within GNU make, including $(wildcard ...), will sort
+  the results.  See https://savannah.gnu.org/bugs/index.php?52076
+
+* Interoperate with newer GNU libc and musl C runtime libraries.
+
+* Performance improvements provided by Paolo Bonzini <pbonzini@redhat.com>
+
+GNU make Developer News
+
+* Import the GNU standard bootstrap script to replace the hand-rolled
+  "make update" method for building code from a GNU make Git repository.
+
+* Rework the source distribution to move source files into the src/*
+  subdirectory.  This aligns with modern best practices in GNU.
+
+* Replace local portability code with Gnulib content.  Unfortunately due to a
+  problem with Gnulib support for getloadavg, this forces a requirement on
+  Automake 1.16 or above in order to build from Git.  See README.git.
+
+
+Version 4.2.1 (10 Jun 2016)
+
+A complete list of bugs fixed in this version is available here:
+
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=107&set=custom
+
+This release is a bug-fix release.
+
 
 Version 4.2 (22 May 2016)
 
 A complete list of bugs fixed in this version is available here:
 
-http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=106&set=custom
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=106&set=custom
 
 * New variable: $(.SHELLSTATUS) is set to the exit status of the last != or
   $(shell ...) function invoked in this instance of make.  This will be "0" if
@@ -52,7 +156,7 @@ Version 4.1 (05 Oct 2014)
 
 A complete list of bugs fixed in this version is available here:
 
-http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=105&set=custom
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=105&set=custom
 
 * New variables: $(MAKE_TERMOUT) and $(MAKE_TERMERR) are set to non-empty
   values if stdout or stderr, respectively, are believed to be writing to a
@@ -100,7 +204,7 @@ Version 4.0 (09 Oct 2013)
 
 A complete list of bugs fixed in this version is available here:
 
-http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101&set=custom
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101&set=custom
 
 * WARNING: Backward-incompatibility!
   If .POSIX is specified, then make adheres to the POSIX backslash/newline
@@ -204,7 +308,7 @@ Version 3.82 (28 Jul 2010)
 
 A complete list of bugs fixed in this version is available here:
 
-http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=104&set=custom
+https://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=104&set=custom
 
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
@@ -369,7 +473,7 @@ Version 3.81 (01 Apr 2006)
   might have caused the target to rebuild.  Starting with the _next_
   release of GNU make, '$?' will contain all prerequisites that caused
   the target to be considered out of date.
-  See http://savannah.gnu.org/bugs/?16051
+  See https://savannah.gnu.org/bugs/?16051
 
 * WARNING: Backward-incompatibility!
   GNU make now implements a generic "second expansion" feature on the
@@ -493,7 +597,7 @@ Version 3.81 (01 Apr 2006)
 
 A complete list of bugs fixed in this version is available here:
 
-  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=103
+  https://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=103
 
 
 Version 3.80 (03 Oct 2002)
@@ -611,7 +715,7 @@ Version 3.80 (03 Oct 2002)
 
 A complete list of bugs fixed in this version is available here:
 
-  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=102
+  https://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=102
 
 
 Version 3.79.1 (23 Jun 2000)
@@ -1515,7 +1619,7 @@ Version 3.05
 (Changes from versions 1 through 3.05 were never recorded.  Sorry.)
 
 -------------------------------------------------------------------------------
-Copyright (C) 1988-2016 Free Software Foundation, Inc.
+Copyright (C) 1988-2020 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the

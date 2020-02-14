@@ -3,7 +3,7 @@
 @setfilename make.info
 
 @include version.texi
-@set EDITION 0.74
+@set EDITION 0.75
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -26,8 +26,8 @@ of @cite{The GNU Make Manual}, for GNU @code{make} version @value{VERSION}.
 
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007,
-2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016 Free Software
-Foundation, Inc.
+2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+2020 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -143,7 +143,8 @@ Writing Makefiles
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
-* Reading Makefiles::           How makefiles are parsed.
+* Reading Makefiles::           How makefiles are read in.
+* Parsing Makefiles::           How makefiles are parsed.
 * Secondary Expansion::         How and when secondary expansion is performed.
 
 What Makefiles Contain
@@ -988,7 +989,8 @@ reading a data base called the @dfn{makefile}.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
-* Reading Makefiles::           How makefiles are parsed.
+* Reading Makefiles::           How makefiles are read in.
+* Parsing Makefiles::           How makefiles are parsed.
 * Secondary Expansion::         How and when secondary expansion is performed.
 @end menu
 
@@ -1112,6 +1114,36 @@ If the @code{.POSIX} special target is defined then backslash/newline
 handling is modified slightly to conform to POSIX.2: first, whitespace
 preceding a backslash is not removed and second, consecutive
 backslash/newlines are not condensed.
+
+@subsubheading Splitting Without Adding Whitespace
+@cindex whitespace, avoiding on line split
+@cindex removing whitespace from split lines
+
+If you need to split a line but do @emph{not} want any whitespace
+added, you can utilize a subtle trick: replace your backslash/newline
+pairs with the three characters dollar sign/backslash/newline:
+
+@example
+var := one$\
+       word
+@end example
+
+After @code{make} removes the backslash/newline and condenses the
+following line into a single space, this is equivalent to:
+
+@example
+var := one$ word
+@end example
+
+Then @code{make} will perform variable expansion.  The variable
+reference @samp{$ } refers to a variable with the one-character name
+`` '' (space) which does not exist, and so expands to the empty
+string, giving a final assignment which is the equivalent of:
+
+@example
+var := oneword
+@end example
+
 
 @node Makefile Names, Include, Makefile Contents, Makefiles
 @section What Name to Give Your Makefile
@@ -1313,7 +1345,7 @@ Sometimes makefiles can be remade from other files, such as RCS or SCCS
 files.  If a makefile can be remade from other files, you probably want
 @code{make} to get an up-to-date version of the makefile to read in.
 
-To this end, after reading in all makefiles, @code{make} will consider
+To this end, after reading in all makefiles @code{make} will consider
 each as a goal target and attempt to update it.  If a makefile has a
 rule which says how to update it (found either in that very makefile or
 in another one) or if an implicit rule applies to it (@pxref{Implicit
@@ -1322,7 +1354,8 @@ all makefiles have been checked, if any have actually been changed,
 @code{make} starts with a clean slate and reads all the makefiles over
 again.  (It will also attempt to update each of them over again, but
 normally this will not change them again, since they are already up to
-date.)@refill
+date.)  Each restart will cause the special variable
+@code{MAKE_RESTARTS} to be updated (@pxref{Special Variables}).@refill
 
 If you know that one or more of your makefiles cannot be remade and
 you want to keep @code{make} from performing an implicit rule search
@@ -1431,30 +1464,32 @@ empty recipe to prevent @code{make} from searching for an implicit rule to
 build it---otherwise it would apply the same match-anything rule to
 @file{force} itself and create a prerequisite loop!
 
-@node Reading Makefiles,  Secondary Expansion, Overriding Makefiles, Makefiles
+@node Reading Makefiles, Parsing Makefiles, Overriding Makefiles, Makefiles
 @section How @code{make} Reads a Makefile
 @cindex reading makefiles
-@cindex makefile, parsing
+@cindex makefile, reading
 
-GNU @code{make} does its work in two distinct phases.  During the first
-phase it reads all the makefiles, included makefiles, etc. and
-internalizes all the variables and their values, implicit and explicit
-rules, and constructs a dependency graph of all the targets and their
-prerequisites.  During the second phase, @code{make} uses these internal
-structures to determine what targets will need to be rebuilt and to
-invoke the rules necessary to do so.
+GNU @code{make} does its work in two distinct phases.  During the
+first phase it reads all the makefiles, included makefiles, etc. and
+internalizes all the variables and their values and implicit and
+explicit rules, and builds a dependency graph of all the targets and
+their prerequisites.  During the second phase, @code{make} uses this
+internalized data to determine which targets need to be updated and
+run the recipes necessary to update them.
 
 It's important to understand this two-phase approach because it has a
 direct impact on how variable and function expansion happens; this is
-often a source of some confusion when writing makefiles.  Here we will
-present a summary of the phases in which expansion happens for different
-constructs within the makefile.  We say that expansion is
-@dfn{immediate} if it happens during the first phase: in this case
-@code{make} will expand any variables or functions in that section of a
-construct as the makefile is parsed.  We say that expansion is
-@dfn{deferred} if expansion is not performed immediately.  Expansion of
-a deferred construct is not performed until either the construct appears
-later in an immediate context, or until the second phase.
+often a source of some confusion when writing makefiles.  Below is a
+summary of the different constructs that can be found in a makefile,
+and the phase in which expansion happens for each part of the
+construct.
+
+We say that expansion is @dfn{immediate} if it happens during the
+first phase: @code{make} will expand that part of the construct as the
+makefile is parsed.  We say that expansion is @dfn{deferred} if it is
+not immediate.  Expansion of a deferred construct part is delayed
+until the expansion is used: either when it is referenced in an
+immediate context, or when it is needed during the second phase.
 
 You may not be familiar with some of these constructs yet.  You can
 reference this section as you become familiar with them, in later
@@ -1507,14 +1542,14 @@ define @var{immediate} !=
 endef
 @end example
 
-For the append operator, @samp{+=}, the right-hand side is considered
+For the append operator @samp{+=}, the right-hand side is considered
 immediate if the variable was previously set as a simple variable
 (@samp{:=} or @samp{::=}), and deferred otherwise.
 
-For the shell assignment operator, @samp{!=}, the right-hand side is
-evaluated immediately and handed to the shell.  The result is stored in the
-variable named on the left, and that variable becomes a simple variable
-(and will thus be re-evaluated on each reference).
+For the shell assignment operator @samp{!=}, the right-hand side is
+evaluated immediately and handed to the shell.  The result is stored
+in the variable named on the left, and that variable becomes a simple
+variable (and will thus be re-evaluated on each reference).
 
 @subheading Conditional Directives
 @cindex ifdef, expansion
@@ -1543,23 +1578,89 @@ A rule is always expanded the same way, regardless of the form:
         @var{deferred}
 @end example
 
-That is, the target and prerequisite sections are expanded immediately,
-and the recipe used to construct the target is always deferred.  This
-general rule is true for explicit rules, pattern rules, suffix rules,
-static pattern rules, and simple prerequisite definitions.
+That is, the target and prerequisite sections are expanded
+immediately, and the recipe used to build the target is always
+deferred.  This is true for explicit rules, pattern rules, suffix
+rules, static pattern rules, and simple prerequisite definitions.
 
-@node Secondary Expansion, , Reading Makefiles, Makefiles
+@node Parsing Makefiles, Secondary Expansion, Reading Makefiles, Makefiles
+@section How Makefiles Are Parsed
+@cindex parsing makefiles
+@cindex makefiles, parsing
+
+GNU @code{make} parses makefiles line-by-line.  Parsing proceeds using
+the following steps:
+
+@enumerate
+@item
+Read in a full logical line, including backslash-escaped lines
+(@pxref{Splitting Lines, , Splitting Long Lines}).
+
+@item
+Remove comments (@pxref{Makefile Contents, , What Makefiles Contain}).
+
+@item
+If the line begins with the recipe prefix character and we are in a
+rule context, add the line to the current recipe and read the next
+line (@pxref{Recipe Syntax}).
+
+@item
+Expand elements of the line which appear in an @emph{immediate}
+expansion context (@pxref{Reading Makefiles, , How @code{make} Reads a
+Makefile}).@refill
+
+@item
+Scan the line for a separator character, such as @samp{:} or @samp{=},
+to determine whether the line is a macro assignment or a rule
+(@pxref{Recipe Syntax}).
+
+@item
+Internalize the resulting operation and read the next line.
+@end enumerate
+
+An important consequence of this is that a macro can expand to an
+entire rule, @emph{if it is one line long}.  This will work:
+
+@example
+myrule = target : ; echo built
+
+$(myrule)
+@end example
+
+However, this will not work because @code{make} does not re-split lines
+after it has expanded them:
+
+@example
+define myrule
+target:
+        echo built
+endef
+
+$(myrule)
+@end example
+
+The above makefile results in the definition of a target @samp{target}
+with prerequisites @samp{echo} and @samp{built}, as if the makefile
+contained @code{target: echo built}, rather than a rule with a recipe.
+Newlines still present in a line after expansion is complete are
+ignored as normal whitespace.
+
+In order to properly expand a multi-line macro you must use the
+@code{eval} function: this causes the @code{make} parser to be run on
+the results of the expanded macro (@pxref{Eval Function}).
+
+@node Secondary Expansion,  , Parsing Makefiles, Makefiles
 @section Secondary Expansion
 @cindex secondary expansion
 @cindex expansion, secondary
 
 @findex .SECONDEXPANSION
-In the previous section we learned that GNU @code{make} works in two
-distinct phases: a read-in phase and a target-update phase
-(@pxref{Reading Makefiles, , How @code{make} Reads a Makefile}).  GNU
-make also has the ability to enable a @emph{second expansion} of the
-prerequisites (only) for some or all targets defined in the makefile.
-In order for this second expansion to occur, the special target
+Previously we learned that GNU @code{make} works in two distinct
+phases: a read-in phase and a target-update phase (@pxref{Reading
+Makefiles, , How @code{make} Reads a Makefile}).  GNU make also has
+the ability to enable a @emph{second expansion} of the prerequisites
+(only) for some or all targets defined in the makefile.  In order for
+this second expansion to occur, the special target
 @code{.SECONDEXPANSION} must be defined before the first prerequisite
 list that makes use of this feature.
 
@@ -1831,8 +1932,8 @@ more recent than it.
 @item
 How to update the file @file{foo.o}: by running @code{cc} as stated.
 The recipe does not explicitly mention @file{defs.h}, but we presume
-that @file{foo.c} includes it, and that that is why @file{defs.h} was
-added to the prerequisites.
+that @file{foo.c} includes it, and that is why @file{defs.h} was added
+to the prerequisites.
 @end itemize
 @end ifnottex
 
@@ -2945,10 +3046,9 @@ If you specify prerequisites for @code{.SILENT}, then @code{make} will
 not print the recipe used to remake those particular files before
 executing them.  The recipe for @code{.SILENT} is ignored.
 
-If mentioned as a target with no prerequisites, @code{.SILENT} says not
-to print any recipes before executing them.  This usage of
-@samp{.SILENT} is supported only for historical compatibility.  We
-recommend you use the more selective ways to silence specific recipes.
+If mentioned as a target with no prerequisites, @code{.SILENT} says
+not to print any recipes before executing them.  You may also use more
+selective ways to silence specific recipe command lines.
 @xref{Echoing, ,Recipe Echoing}.  If you want to silence all recipes
 for a particular run of @code{make}, use the @samp{-s} or
 @w{@samp{--silent}} option (@pxref{Options Summary}).
@@ -3012,13 +3112,22 @@ both pieces to the suffix list.  In practice, suffixes normally begin with
 @cindex targets, multiple
 @cindex rule, with multiple targets
 
-A rule with multiple targets is equivalent to writing many rules, each with
-one target, and all identical aside from that.  The same recipe applies to
-all the targets, but its effect may vary because you can substitute the
-actual target name into the recipe using @samp{$@@}.  The rule contributes
-the same prerequisites to all the targets also.
+When an explicit rule has multiple targets they can be treated in one
+of two possible ways: as independent targets or as grouped targets.
+The manner in which they are treated is determined by the separator that
+appears after the list of targets.
 
-This is useful in two cases.
+@subsubheading Rules with Independent Targets
+@cindex independent targets
+@cindex targets, independent
+
+Rules that use the standard target separator, @code{:}, define
+independent targets.  This is equivalent to writing the same rule once
+for each target, with duplicated prerequisites and recipes.  Typically,
+the recipe would use automatic variables such as @samp{$@@} to specify
+which target is being built.
+
+Rules with independent targets are useful in two cases:
 
 @itemize @bullet
 @item
@@ -3030,13 +3139,18 @@ kbd.o command.o files.o: command.h
 
 @noindent
 gives an additional prerequisite to each of the three object files
-mentioned.
+mentioned.  It is equivalent to writing:
+
+@example
+kbd.o: command.h
+command.o: command.h
+files.o: command.h
+@end example
 
 @item
-Similar recipes work for all the targets.  The recipes do not need
-to be absolutely identical, since the automatic variable @samp{$@@}
-can be used to substitute the particular target to be remade into the
-commands (@pxref{Automatic Variables}).  For example:
+Similar recipes work for all the targets.  The automatic variable
+@samp{$@@} can be used to substitute the particular target to be
+remade into the commands (@pxref{Automatic Variables}).  For example:
 
 @example
 @group
@@ -3069,6 +3183,57 @@ target, much as the variable @samp{$@@} allows you to vary the recipe.
 You cannot do this with multiple targets in an ordinary rule, but you
 can do it with a @dfn{static pattern rule}.  @xref{Static Pattern,
 ,Static Pattern Rules}.
+
+@subsubheading Rules with Grouped Targets
+@cindex grouped targets
+@cindex targets, grouped
+
+If instead of independent targets you have a recipe that generates
+multiple files from a single invocation, you can express that
+relationship by declaring your rule to use @emph{grouped targets}.  A
+grouped target rule uses the separator @code{&:} (the @samp{&} here is
+used to imply ``all'').
+
+When @code{make} builds any one of the grouped targets, it understands
+that all the other targets in the group are also created as a result
+of the invocation of the recipe.  Furthermore, if only some of the
+grouped targets are out of date or missing @code{make} will realize
+that running the recipe will update all of the targets.
+
+As an example, this rule defines a grouped target:
+
+@example
+@group
+foo bar biz &: baz boz
+        echo $^ > foo
+        echo $^ > bar
+        echo $^ > biz
+@end group
+@end example
+
+During the execution of a grouped target's recipe, the automatic
+variable @samp{$@@} is set to the name of the particular target in the
+group which triggered the rule.  Caution must be used if relying on
+this variable in the recipe of a grouped target rule.
+
+Unlike independent targets, a grouped target rule @emph{must} include
+a recipe.  However, targets that are members of a grouped target may
+also appear in independent target rule definitions that do not have
+recipes.
+
+Each target may have only one recipe associated with it.  If a grouped
+target appears in either an independent target rule or in another
+grouped target rule with a recipe, you will get a warning and the
+latter recipe will replace the former recipe.  Additionally the target
+will be removed from the previous group and appear only in the new
+group.
+
+If you would like a target to appear in multiple groups, then you must
+use the double-colon grouped target separator, @code{&::} when
+declaring all of the groups containing that target.  Grouped
+double-colon targets are each considered independently, and each
+grouped double-colon rule's recipe is executed at most once, if at
+least one of its multiple targets requires updating.
 
 @node Multiple Rules, Static Pattern, Multiple Targets, Rules
 @section Multiple Rules for One Target
@@ -3788,8 +3953,7 @@ The @samp{-s} or @samp{--silent}
 flag to @code{make} prevents all echoing, as if all recipes
 started with @samp{@@}.  A rule in the makefile for the special target
 @code{.SILENT} without prerequisites has the same effect
-(@pxref{Special Targets, ,Special Built-in Target Names}).
-@code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
+(@pxref{Special Targets, ,Special Built-in Target Names}).@refill
 
 @node Execution, Parallel, Echoing, Recipes
 @section Recipe Execution
@@ -3818,7 +3982,7 @@ the statements in sequence.  For example:
 
 @example
 foo : bar/lose
-        cd $(@@D) && gobble $(@@F) > ../$@@
+        cd $(<D) && gobble $(<F) > ../$@@
 @end example
 
 @noindent
@@ -3909,8 +4073,8 @@ show :
 
 As a special feature, if @code{SHELL} is determined to be a
 POSIX-style shell, the special prefix characters in ``internal''
-recipe lines will @emph{removed} before the recipe is processed.  This
-feature is intended to allow existing makefiles to add the
+recipe lines will be @emph{removed} before the recipe is processed.
+This feature is intended to allow existing makefiles to add the
 @code{.ONESHELL} special target and still run properly without
 extensive modifications.  Since the special prefix characters are not
 legal at the beginning of a line in a POSIX shell script this is not a
@@ -4283,8 +4447,7 @@ remove a file.
 When you run @code{make} with the @samp{-i} or @samp{--ignore-errors}
 flag, errors are ignored in all recipes of all rules.  A rule in the
 makefile for the special target @code{.IGNORE} has the same effect, if
-there are no prerequisites.  These ways of ignoring errors are obsolete
-because @samp{-} is more flexible.
+there are no prerequisites.  This is less flexible but sometimes useful.
 
 When errors are to be ignored, because of either a @samp{-} or the
 @samp{-i} flag, @code{make} treats an error return just like success,
@@ -4369,6 +4532,19 @@ if a signal happens.  Some reasons why you might do this are that the
 target is updated in some atomic fashion, or exists only to record a
 modification-time (its contents do not matter), or must exist at all
 times to prevent other sorts of trouble.
+
+Although @code{make} does its best to clean up there are certain situations
+in which cleanup is impossible.  For example, @code{make} may be killed by
+an uncatchable signal.  Or, one of the programs make invokes may be killed
+or crash, leaving behind an up-to-date but corrupt target file: @code{make}
+will not realize that this failure requires the target to be cleaned.  Or
+@code{make} itself may encounter a bug and crash.
+
+For these reasons it's best to write @emph{defensive recipes}, which won't
+leave behind corrupted targets even if they fail.  Most commonly these
+recipes create temporary files rather than updating the target directly,
+then rename the temporary file to the final target name.  Some compilers
+already behave this way, so that you don't need to write a defensive recipe.
 
 @node Recursion, Canned Recipes, Interrupts, Recipes
 @section Recursive Use of @code{make}
@@ -5117,8 +5293,12 @@ this way!)
 A dollar sign followed by a character other than a dollar sign,
 open-parenthesis or open-brace treats that single character as the
 variable name.  Thus, you could reference the variable @code{x} with
-@samp{$x}.  However, this practice is strongly discouraged, except in
-the case of the automatic variables (@pxref{Automatic Variables}).
+@samp{$x}.  However, this practice can lead to confusion (e.g.,
+@samp{$foo} refers to the variable @code{f} followed by the string
+@code{oo}) so we recommend using parentheses or braces around all
+variables, even single-letter variables, unless omitting them gives
+significant readability improvements.  One place where readability is
+often improved is automatic variables (@pxref{Automatic Variables}).
 
 @node Flavors, Advanced, Reference, Using Variables
 @section The Two Flavors of Variables
@@ -5358,17 +5538,19 @@ replaced; other occurrences of @var{a} in the value are unaltered.  For
 example:@refill
 
 @example
-foo := a.o b.o c.o
+foo := a.o b.o l.a c.o
 bar := $(foo:.o=.c)
 @end example
 
 @noindent
-sets @samp{bar} to @samp{a.c b.c c.c}.  @xref{Setting, ,Setting Variables}.
+sets @samp{bar} to @samp{a.c b.c l.a c.c}.  @xref{Setting, ,Setting Variables}.
 
-A substitution reference is actually an abbreviation for use of the
-@code{patsubst} expansion function (@pxref{Text Functions, ,Functions for String Substitution and Analysis}).  We provide
-substitution references as well as @code{patsubst} for compatibility with
-other implementations of @code{make}.
+A substitution reference is shorthand for the @code{patsubst}
+expansion function (@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
+@samp{$(@var{var}:@var{a}=@var{b})} is equivalent to
+@samp{$(patsubst %@var{a},%@var{b},@var{var})}.  We provide
+substitution references as well as @code{patsubst} for compatibility
+with other implementations of @code{make}.
 
 @findex patsubst
 Another type of substitution reference lets you use the full power of
@@ -5383,13 +5565,13 @@ for a description of the @code{patsubst} function.@refill
 @group
 @exdent For example:
 
-foo := a.o b.o c.o
+foo := a.o b.o l.a c.o
 bar := $(foo:%.o=%.c)
 @end group
 @end example
 
 @noindent
-sets @samp{bar} to @samp{a.c b.c c.c}.
+sets @samp{bar} to @samp{a.c b.c l.a c.c}.
 
 @node Computed Names,  , Substitution Refs, Advanced
 @subsection Computed Variable Names
@@ -5722,7 +5904,8 @@ objects += another.o
 
 @noindent
 This takes the value of the variable @code{objects}, and adds the text
-@samp{another.o} to it (preceded by a single space).  Thus:
+@samp{another.o} to it (preceded by a single space, if it has a value
+already).  Thus:
 
 @example
 objects = main.o foo.o bar.o utils.o
@@ -5927,11 +6110,24 @@ The @code{define} directive is followed on the same line by the name
 of the variable being defined and an (optional) assignment operator,
 and nothing more.  The value to give the variable appears on the
 following lines.  The end of the value is marked by a line containing
-just the word @code{endef}.  Aside from this difference in syntax,
-@code{define} works just like any other variable definition.  The
-variable name may contain function and variable references, which are
-expanded when the directive is read to find the actual variable name
-to use.
+just the word @code{endef}.
+
+Aside from this difference in syntax, @code{define} works just like
+any other variable definition.  The variable name may contain function
+and variable references, which are expanded when the directive is read
+to find the actual variable name to use.
+
+The final newline before the @code{endef} is not included in the
+value; if you want your value to contain a trailing newline you must
+include a blank line.  For example in order to define a variable that
+contains a newline character you must use @emph{two} empty lines, not one:
+
+@example
+define newline
+
+
+endef
+@end example
 
 You may omit the variable assignment operator if you prefer.  If
 omitted, @code{make} assumes it to be @samp{=} and creates a
@@ -5948,16 +6144,11 @@ or @code{endef} strings appearing on such a line will not be
 considered @code{make} directives.
 
 @example
-define two-lines =
+define two-lines
 echo foo
 echo $(bar)
 endef
 @end example
-
-The value in an ordinary assignment cannot contain a newline; but the
-newlines that separate the lines of the value in a @code{define} become
-part of the variable's value (except for the final newline which precedes
-the @code{endef} and is not considered part of the value).@refill
 
 @need 800
 When used in a recipe, the previous example is functionally equivalent
@@ -6453,6 +6644,57 @@ Supports dynamically loadable objects for creating custom extensions.
 Expands to a list of directories that @code{make} searches for
 included makefiles (@pxref{Include, , Including Other Makefiles}).
 
+@vindex .EXTRA_PREREQS @r{(prerequisites not added to automatic variables)}
+@item .EXTRA_PREREQS
+Each word in this variable is a new prerequisite which is added to
+targets for which it is set.  These prerequisites differ from normal
+prerequisites in that they do not appear in any of the automatic
+variables (@pxref{Automatic Variables}).  This allows prerequisites to
+be defined which do not impact the recipe.
+
+Consider a rule to link a program:
+
+@example
+myprog: myprog.o file1.o file2.o
+       $(CC) $(CFLAGS) $(LDFLAGS) -o $@@ $^ $(LDLIBS)
+@end example
+
+Now suppose you want to enhance this makefile to ensure that updates
+to the compiler cause the program to be re-linked.  You can add the
+compiler as a prerequisite, but you must ensure that it's not passed
+as an argument to link command.  You'll need something like this:
+
+@example
+myprog: myprog.o file1.o file2.o $(CC)
+       $(CC) $(CFLAGS) $(LDFLAGS) -o $@@ $(filter-out $(CC),$^) $(LDLIBS)
+@end example
+
+Then consider having multiple extra prerequisites: they would all have
+to be filtered out.  Using @code{.EXTRA_PREREQS} and target-specific
+variables provides a simpler solution:
+
+@example
+myprog: myprog.o file1.o file2.o
+       $(CC) $(CFLAGS) $(LDFLAGS) -o $@@ $^ $(LDLIBS)
+myprog: .EXTRA_PREREQS = $(CC)
+@end example
+
+This feature can also be useful if you want to add prerequisites to a
+makefile you cannot easily modify: you can create a new file such as
+@file{extra.mk}:
+
+@example
+myprog: .EXTRA_PREREQS = $(CC)
+@end example
+
+then invoke @code{make -f extra.mk -f Makefile}.
+
+Setting @code{.EXTRA_PREREQS} globally will cause those prerequisites
+to be added to all targets (which did not themselves override it with
+a target-specific value).  Note @code{make} is smart enough not to add
+a prerequisite listed in @code{.EXTRA_PREREQS} as a prerequisite to
+itself.
+
 @end table
 
 @node Conditionals, Functions, Using Variables, Top
@@ -6881,7 +7123,7 @@ the function call.  For example,
 $(subst ee,EE,feet on the street)
 @end example
 
-substitutes the string @samp{fEEt on the strEEt}.
+produces the value @samp{fEEt on the strEEt}.
 
 @item $(patsubst @var{pattern},@var{replacement},@var{text})
 @findex patsubst
@@ -7401,7 +7643,7 @@ will be expanded.
 The @code{if} function provides support for conditional expansion in a
 functional context (as opposed to the GNU @code{make} makefile
 conditionals such as @code{ifeq} (@pxref{Conditional Syntax, ,Syntax of
-Conditionals}).
+Conditionals})).
 
 The first argument, @var{condition}, first has all preceding and
 trailing whitespace stripped, then is expanded.  If it expands to any
@@ -8659,6 +8901,8 @@ Give variables taken from the environment precedence
 over variables from makefiles.
 @xref{Environment, ,Variables from the Environment}.
 
+@item -E @var{string}
+@cindex @code{-E}
 @item --eval=@var{string}
 @cindex @code{--eval}
 @c Extra blank line here makes the table look better.
@@ -9687,6 +9931,10 @@ and linking with a single @code{cc} command.  The optimized rule is used in
 preference to the step-by-step chain because it comes earlier in the
 ordering of rules.
 
+Finally, for performance reasons @code{make} will not consider non-terminal
+match-anything rules (i.e., @samp{%:}) when searching for a rule to
+build a prerequisite of an implicit rule (@pxref{Match-Anything Rules}).
+
 @node Pattern Rules, Last Resort, Chained Rules, Implicit Rules
 @section Defining and Redefining Pattern Rules
 
@@ -9767,20 +10015,13 @@ More than one pattern rule may match a target.  In this case
 @code{make} will choose the ``best fit'' rule.  @xref{Pattern Match,
 ,How Patterns Match}.
 
-@c !!! The end of of this paragraph should be rewritten.  --bob
-Pattern rules may have more than one target.  Unlike normal rules,
-this does not act as many different rules with the same prerequisites
-and recipe.  If a pattern rule has multiple targets, @code{make} knows
-that the rule's recipe is responsible for making all of the targets.
-The recipe is executed only once to make all the targets.  When
-searching for a pattern rule to match a target, the target patterns of
-a rule other than the one that matches the target in need of a rule
-are incidental: @code{make} worries only about giving a recipe and
-prerequisites to the file presently in question.  However, when this
-file's recipe is run, the other targets are marked as having been
-updated themselves.
 @cindex multiple targets, in pattern rule
 @cindex target, multiple in pattern rule
+Pattern rules may have more than one target; however, every target
+must contain a @code{%} character.  Pattern rules are always treated
+as grouped targets (@pxref{Multiple Targets, , Multiple Targets in a
+Rule}) regardless of whether they use the @code{:} or @code{&:}
+separator.
 
 @node Pattern Examples, Automatic Variables, Pattern Intro, Pattern Rules
 @subsection Pattern Rule Examples
@@ -9900,8 +10141,9 @@ implicit rule (@pxref{Implicit Rules}).
 @vindex ? @r{(automatic variable)}
 @item $?
 The names of all the prerequisites that are newer than the target, with
-spaces between them.  For prerequisites which are archive members, only
-the named member is used (@pxref{Archives}).
+spaces between them.  If the target does not exist, all prerequisites
+will be included.  For prerequisites which are archive members, only the
+named member is used (@pxref{Archives}).
 @cindex prerequisites, list of changed
 @cindex list of changed prerequisites
 
@@ -9971,15 +10213,15 @@ lib: foo.o bar.o lose.o win.o
 @end example
 
 Of the variables listed above, four have values that are single file
-names, and three have values that are lists of file names.  These seven
-have variants that get just the file's directory name or just the file
-name within the directory.  The variant variables' names are formed by
-appending @samp{D} or @samp{F}, respectively.  These variants are
-semi-obsolete in GNU @code{make} since the functions @code{dir} and
-@code{notdir} can be used to get a similar effect (@pxref{File Name
-Functions, , Functions for File Names}).  Note, however, that the
-@samp{D} variants all omit the trailing slash which always appears in
-the output of the @code{dir} function.  Here is a table of the variants:
+names, and three have values that are lists of file names.  These
+seven have variants that get just the file's directory name or just
+the file name within the directory.  The variant variables' names are
+formed by appending @samp{D} or @samp{F}, respectively.  The functions
+@code{dir} and @code{notdir} can be used to obtain a similar effect
+(@pxref{File Name Functions, , Functions for File Names}).  Note,
+however, that the @samp{D} variants all omit the trailing slash which
+always appears in the output of the @code{dir} function.  Here is a
+table of the variants:
 
 @table @samp
 @vindex $(@@D)
@@ -10182,9 +10424,10 @@ remade from any other files; therefore, @code{make} can save time by not
 looking for ways to remake them.@refill
 
 If you do not mark the match-anything rule as terminal, then it is
-non-terminal.  A non-terminal match-anything rule cannot apply to a file name
-that indicates a specific type of data.  A file name indicates a specific
-type of data if some non-match-anything implicit rule target matches it.
+non-terminal.  A non-terminal match-anything rule cannot apply to a
+prerequisite of an implicit rule, or to a file name that indicates a
+specific type of data.  A file name indicates a specific type of data
+if some non-match-anything implicit rule target matches it.
 
 For example, the file name @file{foo.c} matches the target for the pattern
 rule @samp{%.c : %.y} (the rule to run Yacc).  Regardless of whether this
@@ -10296,12 +10539,13 @@ general and clearer.  They are supported in GNU @code{make} for
 compatibility with old makefiles.  They come in two kinds:
 @dfn{double-suffix} and @dfn{single-suffix}.@refill
 
-A double-suffix rule is defined by a pair of suffixes: the target suffix
-and the source suffix.  It matches any file whose name ends with the
-target suffix.  The corresponding implicit prerequisite is made by
-replacing the target suffix with the source suffix in the file name.  A
-two-suffix rule whose target and source suffixes are @samp{.o} and
-@samp{.c} is equivalent to the pattern rule @samp{%.o : %.c}.
+A double-suffix rule is defined by a pair of suffixes: the target
+suffix and the source suffix.  It matches any file whose name ends
+with the target suffix.  The corresponding implicit prerequisite is
+made by replacing the target suffix with the source suffix in the file
+name.  A two-suffix rule @samp{.c.o} (whose target and source suffixes
+are @samp{.o} and @samp{.c}) is equivalent to the pattern rule
+@samp{%.o : %.c}.
 
 A single-suffix rule is defined by a single suffix, which is the source
 suffix.  It matches any file name, and the corresponding implicit
@@ -10420,8 +10664,9 @@ Make a list of all the pattern rules one of whose targets matches
 matched against @var{t}; otherwise, against @var{n}.
 
 @item
-If any rule in that list is @emph{not} a match-anything rule, then
-remove all non-terminal match-anything rules from the list.
+If any rule in that list is @emph{not} a match-anything rule, or if
+@var{t} is a prerequisite of an implicit rule, then remove all
+non-terminal match-anything rules from the list.
 
 @item
 Remove from the list all rules with no recipe.
@@ -11452,7 +11697,8 @@ On POSIX systems the jobserver is implemented as a simple UNIX pipe.
 The pipe will be pre-loaded with one single-character token for each
 available job.  To obtain an extra slot you must read a single
 character from the jobserver pipe; to release a slot you must write a
-single character back into the jobserver pipe.
+single character back into the jobserver pipe.  Note that the read
+side of the jobserver pipe is set to ``blocking'' mode.
 
 To access the pipe you must parse the @code{MAKEFLAGS} variable and
 look for the argument string @code{--jobserver-auth=R,W} where
@@ -11882,7 +12128,7 @@ In System V and 4.3 BSD @code{make}, files found by @code{VPATH}
 search (@pxref{Directory Search, ,Searching Directories for
 Prerequisites}) have their names changed inside recipes.  We feel it
 is much cleaner to always use automatic variables and thus make this
-feature obsolete.@refill
+feature unnecessary.@refill
 
 @item
 In some Unix @code{make}s, the automatic variable @code{$*} appearing in
@@ -12467,16 +12713,18 @@ of its arguments.  @xref{Functions, ,Functions for Transforming Text}.
 @itemx multiple target patterns.  Stop.
 @itemx target pattern contains no `%'.  Stop.
 @itemx mixed implicit and static pattern rules.  Stop.
-These are generated for malformed static pattern rules.  The first
-means there's no pattern in the target section of the rule; the second
-means there are multiple patterns in the target section; the third
-means the target doesn't contain a pattern character (@code{%}); and
-the fourth means that all three parts of the static pattern rule
-contain pattern characters (@code{%})--only the first two parts
-should.  If you see these errors and you aren't trying to create a
-static pattern rule, check the value of any variables in your target
-and prerequisite lists to be sure they do not contain colons.
-@xref{Static Usage, ,Syntax of Static Pattern Rules}.
+These errors are generated for malformed static pattern rules
+(@pxref{Static Usage, ,Syntax of Static Pattern Rules}).  The first
+means the target-pattern part of the rule is empty; the second means
+there are multiple pattern characters (@code{%}) in the target-pattern
+part; the third means there are no pattern characters in the
+target-pattern part; and the fourth means that all three parts of the
+static pattern rule contain pattern characters (@code{%})--the first
+part should not contain pattern characters.
+
+If you see these errors and you aren't trying to create a static
+pattern rule, check the value of any variables in your target and
+prerequisite lists to be sure they do not contain colons.
 
 @item warning: -jN forced in submake: disabling jobserver mode.
 This warning and the next are generated if @code{make} detects error
@@ -12501,6 +12749,18 @@ doesn't know the child is a @code{make} process, then the child will
 receive only part of the information necessary.  In this case, the child
 will generate this warning message and proceed with its build in a
 sequential manner.
+
+@item warning: ignoring prerequisites on suffix rule definition
+According to POSIX, a suffix rule cannot contain prerequisites.  If a rule
+that could be a suffix rule has prerequisites it is interpreted as a simple
+explicit rule, with an odd target name.  This requirement is obeyed when
+POSIX-conforming mode is enabled (the @code{.POSIX} target is defined).  In
+versions of GNU @code{make} prior to 4.3, no warning was emitted and a
+suffix rule was created, however all prerequisites were ignored and were not
+part of the suffix rule.  Starting with GNU @code{make} 4.3 the behavior is
+the same, and in addition this warning is generated.  In a future version
+the POSIX-conforming behavior will be the only behavior: no rule with a
+prerequisite can be suffix rule and this warning will be removed.
 
 @end table
 
@@ -12784,7 +13044,7 @@ tar.zoo: $(SRCS) $(AUX)
 @end example
 
 @node GNU Free Documentation License, Concept Index, Complex Makefile, Top
-@appendixsec GNU Free Documentation License
+@appendix GNU Free Documentation License
 @cindex FDL, GNU Free Documentation License
 @include fdl.texi
 

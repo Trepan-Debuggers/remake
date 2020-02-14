@@ -88,25 +88,27 @@ foo bar
 foo bar');
 
 # Test the fastpath / single quotes
-run_make_test("
+# Single quotes don't behave the same in Windows
+if ($port_type ne 'W32') {
+    run_make_test(q!
 all:
-	\@echo 'foo\\
+	@echo 'foo\
 bar'
-	\@echo 'foo\\
+	@echo 'foo\
 	bar'
-	\@echo 'foo\\
+	@echo 'foo\
     bar'
-	\@echo 'foo\\
+	@echo 'foo\
 	    bar'
-	\@echo 'foo \\
+	@echo 'foo \
 bar'
-	\@echo 'foo \\
+	@echo 'foo \
 	bar'
-	\@echo 'foo \\
+	@echo 'foo \
     bar'
-	\@echo 'foo \\
+	@echo 'foo \
 	    bar'
-",
+!,
               '', 'foo\
 bar
 foo\
@@ -123,6 +125,7 @@ foo \
     bar
 foo \
     bar');
+}
 
 # Test the fastpath / double quotes
 run_make_test('
@@ -229,25 +232,25 @@ foo bar
 hi');
 
 # Test the slow path / single quotes
-run_make_test("
+run_make_test(q!
 all:
-	\@echo hi; echo 'foo\\
+	@echo hi; echo 'foo\
 bar'
-	\@echo hi; echo 'foo\\
+	@echo hi; echo 'foo\
 	bar'
-	\@echo hi; echo 'foo\\
+	@echo hi; echo 'foo\
     bar'
-	\@echo hi; echo 'foo\\
+	@echo hi; echo 'foo\
 	    bar'
-	\@echo hi; echo 'foo \\
+	@echo hi; echo 'foo \
 bar'
-	\@echo hi; echo 'foo \\
+	@echo hi; echo 'foo \
 	bar'
-	\@echo hi; echo 'foo \\
+	@echo hi; echo 'foo \
     bar'
-	\@echo hi; echo 'foo \\
+	@echo hi; echo 'foo \
 	    bar'
-",
+!,
               '', 'hi
 foo\
 bar
@@ -312,4 +315,33 @@ foo     bar');
 
 run_make_test('x:;@-exit 1', '', "#MAKE#: [#MAKEFILE#:1: x] Error 1 (ignored)\n");
 
+# Slow path with odd setups
+
+if ($port_type ne 'W32') {
+    run_make_test(q!
+    slow: SHELL := echo
+    slow: .SHELLFLAGS := hoho
+    slow:; @foo bar
+    !,
+                  '', "hoho foo bar\n");
+
+    run_make_test(q!
+    slow: SHELL := echo hi
+    slow: .SHELLFLAGS := ho ho
+    slow:; @foo bar
+    !,
+                  '', "hi ho ho foo bar\n");
+
+    run_make_test(q!
+    slow: SHELL := echo hi
+    slow: .SHELLFLAGS := 'ho;ho'
+    slow:; @foo bar
+    !,
+                  '', "hi ho;ho foo bar\n");
+}
+
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

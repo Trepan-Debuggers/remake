@@ -92,7 +92,7 @@ EOF
 close(MAKEFILE);
 
 &run_make_with_options($topmake, '-n --no-print-directory', &get_logfile);
-$answer = "$make_command -f \"$submake\" bar\ntouch inc\necho n --no-print-directory\n";
+$answer = subst_make_string("#MAKEPATH# -f \"$submake\" bar\ntouch inc\necho n --no-print-directory\n");
 &compare_output($answer, &get_logfile(1));
 
 unlink('inc');

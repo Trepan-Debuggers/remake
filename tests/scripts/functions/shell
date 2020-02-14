@@ -25,15 +25,12 @@ BAD := $(.SHELLSTATUS)
 all: ; @echo PRE=$(PRE) OK=$(OK) BAD=$(BAD)
               ','','PRE= OK=0 BAD=1');
 
-
 # Test unescaped comment characters in shells.  Savannah bug #20513
-if ($all_tests) {
-    run_make_test(q!
+run_make_test(q!
 FOO := $(shell echo '#')
 foo: ; echo '$(FOO)'
 !,
-              '', "#\n");
-}
+              '', "echo '#'\n#\n");
 
 # Test shells inside exported environment variables.
 # This is the test that fails if we try to put make exported variables into
@@ -44,14 +41,47 @@ export HI = $(shell echo hi)
 all: ; @echo $$HI
     ','','hi');
 
-# Test shell errors in recipes including offset
-run_make_test('
+if ($port_type ne 'W32') {
+    # Test shell errors in recipes including offset
+    # This needs to be ported to Windows, or else Windows error messages
+    # need to converted to look like more normal make errors.
+    run_make_test('
 all:
 	@echo hi
 	$(shell ./basdfdfsed there)
-	@echo there
+	@echo $(.SHELLSTATUS)
 ',
-              '', "#MAKE#: ./basdfdfsed: Command not found\nhi\nthere\n");
+                  '', "#MAKE#: ./basdfdfsed: $ERR_no_such_file\nhi\n127\n");
+
+    run_make_test('
+$(shell ./basdfdfsed where)
+all: ; @echo $(.SHELLSTATUS)
+',
+                  '', "#MAKE#: ./basdfdfsed: $ERR_no_such_file\n127\n");
+
+    # Test SHELLSTATUS for kill.
+    # This test could be ported to Windows, using taskkill ... ?
+
+    # Figure out the exit code for SIGINT
+    my $pid = fork();
+    if (! $pid) {
+        exec('kill -2 $$') or die "exec: Cannot execute sleep\n";
+    }
+    waitpid($pid, 0);
+    # .SHELLSTATUS for a signal gives 128 + the signal number
+    my $ret = $?;
+    if ($ret > 255) {
+       # Solaris 10 perl 5.8.4 puts signal number + 128 into the high 8 bits.
+       $ret >>= 8;
+    }
+    $ret |= 128;
+
+    run_make_test('.PHONY: all
+$(shell kill -2 $$$$)
+STAT := $(.SHELLSTATUS)
+all: ; @echo STAT=$(STAT)
+              ','',"STAT=$ret\n");
+}
 
 1;
 

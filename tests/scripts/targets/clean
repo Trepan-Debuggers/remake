@@ -8,43 +8,24 @@ $description = "The following test creates a makefile to delete a \n"
 $example = "EXAMPLE_FILE";
 
 open(MAKEFILE,"> $makefile");
-
-# The Contents of the MAKEFILE ...
-
-print MAKEFILE "all: \n";
-print MAKEFILE "\t\@echo This makefile did not clean the dir... good\n";
-print MAKEFILE "clean: \n";
-print MAKEFILE "\t$delete_command EXAMPLE_FILE\n";
-
-# END of Contents of MAKEFILE
-
+print MAKEFILE qq!
+all: ; \@echo This makefile did not clean the dir... good
+clean: ; $CMD_rmfile $example
+!;
 close(MAKEFILE);
 
-&touch($example);
+touch($example);
+run_make_with_options($makefile,"",&get_logfile,0);
 
-
-&run_make_with_options($makefile,"",&get_logfile,0);
-
-# Create the answer to what should be produced by this Makefile
 $answer = "This makefile did not clean the dir... good\n";
+compare_output($answer,&get_logfile(1)) || error("abort");
 
-&compare_output($answer,&get_logfile(1)) || &error ("abort");
 
-
-$answer = "$delete_command $example\n";
-&run_make_with_options($makefile,"clean",&get_logfile,0);
+$answer = "$CMD_rmfile $example\n";
+run_make_with_options($makefile,"clean",&get_logfile,0);
 if (-f $example) {
   $test_passed = 0;
 }
-&compare_output($answer,&get_logfile(1)) || &error ("abort");
+compare_output($answer,&get_logfile(1)) || error("abort");
 
 1;
-
-
-
-
-
-
-
-
-

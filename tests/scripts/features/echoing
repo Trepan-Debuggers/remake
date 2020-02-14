@@ -36,7 +36,7 @@ run_make_test("
 all:
 \techo This makefile did not clean the dir... good
 clean:
-\t\@$delete_command $example\n",
+\t\@$CMD_rmfile $example\n",
               '', 'echo This makefile did not clean the dir... good
 This makefile did not clean the dir... good');
 
@@ -52,7 +52,7 @@ if (-f $example) {
 # TEST #3
 # -------
 
-run_make_test(undef, '-n clean', "$delete_command $example\n");
+run_make_test(undef, '-n clean', "$CMD_rmfile $example\n");
 
 
 # TEST #4

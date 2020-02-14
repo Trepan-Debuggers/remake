@@ -79,4 +79,43 @@ all: ; \@echo hi
 ",
               '', "hi\n");
 
+# SV-56834 Ensure setting PATH in the makefile works properly
+my $sname = "foobar$scriptsuffix";
+
+mkdir('sd', 0775);
+create_file("sd/$sname", "exit 0\n");
+chmod 0755, "sd/$sname";
+
+run_make_test(qq!
+PATH := sd
+all: ; $sname >/dev/null
+!,
+              '', "$sname >/dev/null\n");
+
+# Don't use the general PATH if not found on the target path
+
+$extraENV{PATH} = "$ENV{PATH}:sd";
+
+run_make_test(qq!
+PATH := ..
+all: ; $sname
+!,
+              '', "$sname\n#MAKE#: $sname: $ERR_no_such_file\n#MAKE#: *** [#MAKEFILE#:3: all] Error 127", 512);
+
+unlink("sd/$sname");
+rmdir('sd');
+
+# Ensure that local programs are not found if "." is not on the PATH
+
+create_file($sname, '');
+chmod 0755, $sname;
+
+run_make_test(qq!
+PATH := ..
+all: ; $sname
+!,
+              '', "$sname\n#MAKE#: $sname: $ERR_no_such_file\n#MAKE#: *** [#MAKEFILE#:3: all] Error 127", 512);
+
+unlink($sname);
+
 1;

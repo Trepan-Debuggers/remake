@@ -42,15 +42,18 @@ place). You have to use "$(wildcard src/*.c)" instead.
 COMPILING FROM SCRATCH
 ----------------------
 
-To recompile, you need SAS/C 6.51. make itself is not necessary, there
-is an smakefile.
+To recompile, you need SAS/C 6.51.
 
-1. Copy config.ami to config.h
-2. If you use make to compile, copy Makefile.ami to Makefile and
-    glob/Makefile.ami to glob/Makefile. Copy make into the current
-    directory.
+As of GNU make 4.3, the build environment has been cleaned up and alternate
+make files (including smakefiles) have been removed.  If you have an existing
+version of GNU make available you _should_ be able to run:
 
-3. Run smake/make
+   make -f Basic.mk
+
+However this is untested.
+
+If you have an Amiga system and would like to collaborate on getting
+bootstrapping to work properly please contact bug-make@gnu.org.
 
 INSTALLATION
 
@@ -61,7 +64,7 @@ If you plan to use recursive makes, install make resident:
 
 
 -------------------------------------------------------------------------------
-Copyright (C) 1995-2016 Free Software Foundation, Inc.
+Copyright (C) 1995-2020 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the

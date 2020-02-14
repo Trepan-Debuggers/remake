@@ -7,7 +7,7 @@ $details = "This is a test of the foreach function in gnu make.
 This function starts with a space separated list of
 names and a variable. Each name in the list is subsituted
 into the variable and the given text evaluated. The general
-form of the command is $(foreach var,$list,$text). Several
+form of the command is $(foreach var,\$list,\$text). Several
 types of foreach loops are tested\n";
 
 

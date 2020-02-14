@@ -71,14 +71,19 @@ $ if (p3.nes."WALL")
 $ then
 $   gosub check_cc_qual
 $ endif
-$ filelist = "alloca ar arscan commands default dir expand file function " + -
-             "guile hash implicit job load main misc read remake " + -
-             "remote-stub rule output signame variable version " + -
-             "vmsfunctions vmsify vpath vms_progname vms_exit " + -
-	     "vms_export_symbol [.glob]glob [.glob]fnmatch getopt1 " + -
-             "getopt strcache"
+$ filelist = "[.src]ar [.src]arscan [.src]commands [.src]default [.src]dir " + -
+             "[.src]expand [.src]file [.src]function [.src]guile " + -
+             "[.src]hash [.src]implicit [.src]job [.src]load [.src]main " + -
+             "[.src]misc [.src]read [.src]remake [.src]remote-stub " + -
+             "[.src]rule [.src]output [.src]signame [.src]variable " + -
+             "[.src]version [.src]strcache [.src]vpath " + -
+             "[.src]vmsfunctions [.src]vmsify [.src]vms_progname " + -
+             "[.src]vms_exit [.src]vms_export_symbol " + -
+             "[.lib]alloca [.lib]fnmatch [.lib]glob [.src]getopt1 [.src]getopt"
 $!
-$ copy config.h-vms config.h
+$ copy [.src]config.h-vms [.src]config.h
+$ copy [.lib]fnmatch.in.h [.lib]fnmatch.h
+$ copy [.lib]glob.in.h [.lib]glob.h
 $ n=0
 $ open/write optf make.opt
 $ loop:
@@ -141,7 +146,7 @@ $ else
 $   objdir := []
 $   write optf objdir+p1
 $ endif
-$ cc'ccopt'/nested=none/include=([],[.glob])/obj='objdir' -
+$ cc'ccopt'/nested=none/include=([],[.src],[.lib])/obj='objdir' -
   /define=("allocated_variable_expand_for_file=alloc_var_expand_for_file",-
   "unlink=remove","HAVE_CONFIG_H","VMS") -
   'p1'
@@ -149,7 +154,7 @@ $ exit
 $ endsubroutine : compileit
 $!
 $!-----------------------------------------------------------------------------
-$!Copyright (C) 1996-2016 Free Software Foundation, Inc.
+$!Copyright (C) 1996-2020 Free Software Foundation, Inc.
 $!This file is part of GNU Make.
 $!
 $!GNU Make is free software; you can redistribute it and/or modify it under

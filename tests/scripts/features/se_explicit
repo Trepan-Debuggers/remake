@@ -164,4 +164,40 @@ foo: $$(@\\:%=%.bar); @echo '$^'
 !,
               '', "foo.bar\n");
 
+# SV 54549 : Ensure we don't free used variable_sets
+run_make_test(q!
+foo: -lcat
+
+# Removing second expansion prevents segfault
+.SECONDEXPANSION:
+foo: $$@.o ;
+
+# Having an empty command here prevents segfault unless,
+# the environment is empty. `env -i make foo`
+# MFLAGS=-w or MAKEFLAGS=-w `env MFLAGS=-w make foo`
+# libcat.a target calls an extra command, `@true \n @touch $@`
+# odd.
+%.o: ; @true
+
+# Having an empty command prevents segfault.
+-l%: lib%.a ; @true
+
+# Not creating libcat.a here prevents segfault,
+libcat.a: ; @touch $@
+!,
+              '', q!#MAKEFILE#:16: Recipe was specified for file '-lcat' at #MAKEFILE#:19,
+#MAKEFILE#:16: but '-lcat' is now considered the same file as 'libcat.a'.
+#MAKEFILE#:16: Recipe for 'libcat.a' will be ignored in favor of the one for '-lcat'.!);
+unlink('libcat.a');
+
+# SV 28456 : Don't reset $$< for default recipes
+run_make_test(q!
+.SECONDEXPANSION:
+
+.PHONY: biz baz
+biz: baz ;
+biz: $$(info $$<)
+!,
+              '', "baz\n#MAKE#: Nothing to be done for 'biz'.\n");
+
 1;

@@ -12,9 +12,6 @@ open(MAKEFILE,"> $makefile");
 print MAKEFILE "VPATH = $VP\n";
 
 print MAKEFILE <<'EOMAKE';
-
-SHELL = /bin/sh
-
 .SUFFIXES: .a .b .c .d
 .PHONY: general rename notarget intermediate
 
@@ -86,7 +83,7 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
-$make_name: *** [$makefile:16: notarget.b] Error 1
+$make_name: *** [$makefile:13: notarget.b] Error 1
 ";
 
 &compare_output($answer,&get_logfile(1));
@@ -99,10 +96,12 @@ $make_name: *** [$makefile:16: notarget.b] Error 1
 
 push(@touchedfiles, "inter.a", "inter.b");
 
+my $be = pack("L", 1) eq pack("N", 1);
+my $intfiles = $be ? "inter.c inter.b" : "inter.b inter.c";
 $answer = "cat ${VP}inter.d > inter.c
 cat inter.c > inter.b 2>/dev/null || exit 1
 cat inter.b > inter.a
-rm inter.b inter.c
+rm $intfiles
 ";
 &compare_output($answer,&get_logfile(1));
 

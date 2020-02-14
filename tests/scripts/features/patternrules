@@ -163,16 +163,16 @@ p1.% p2.%: %.orig
 # TEST 6: Make sure that non-target files are still eligible to be created
 # as part of implicit rule chaining.  Savannah bug #17752.
 
-run_make_test(q!
+run_make_test(sprintf(q!
 BIN = xyz
 COPY = $(BIN).cp
 SRC = $(BIN).c
 allbroken: $(COPY) $(BIN) ; @echo ok
 $(SRC): ; @echo 'main(){}' > $@
-%.cp: % ; @cp $< $@
-% : %.c ; @cp $< $@
-clean: ; @rm -rf $(SRC) $(COPY) $(BIN)
-!,
+%%.cp: %% ; @cp $< $@
+%% : %%.c ; @cp $< $@
+clean: ; @%s $(SRC) $(COPY) $(BIN)
+!, $CMD_rmfile),
               '', "ok\n");
 
 unlink(qw(xyz xyz.cp xyz.c));
@@ -219,6 +219,30 @@ all: foo.x foo-mt.x
 "one\ntwo");
 
 1;
+
+# Test pattern rules building the same targets
+# See SV 54233.  Rely on our standard test timeout to break the loop
+
+touch('a.c');
+
+run_make_test(q!
+all: a.elf a.dbg
+
+%.elf %.lnk: %.c ; : $*.elf $*.lnk
+
+%.elf %.dbg: %.lnk ; : $*.elf $*.dbg
+!,
+    '-j2', ": a.elf a.lnk\n: a.elf a.dbg\n");
+
+unlink('a.c');
+
+# SV 56655: Test patterns matching files containing whitespace
+touch('some file.yy');
+run_make_test(q!
+%.xx : %.yy ; @echo matched
+!, '"some file.xx"', "matched\n");
+
+unlink('some file.xx', 'some file.yy');
 
 # This tells the test driver that the perl test script executed properly.
 1;

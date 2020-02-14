@@ -5,16 +5,17 @@ $details = "DETAILS";
 
 # Test some basic recursion.
 run_make_test('
+.RECIPEPREFIX := |
 all:
-	$(MAKE) -f #MAKEFILE# foo
+|       $(MAKE) -f #MAKEFILE# foo
 foo:
-	@echo $(MAKE)
-	@echo MAKELEVEL = $(MAKELEVEL)
-	$(MAKE) -f #MAKEFILE# last
+|       @echo $(MAKE)
+|       @echo MAKELEVEL = $(MAKELEVEL)
+|       $(MAKE) -f #MAKEFILE# last
 last:
-	@echo $(MAKE)
-	@echo MAKELEVEL = $(MAKELEVEL)
-	@echo THE END
+|       @echo $(MAKE)
+|       @echo MAKELEVEL = $(MAKELEVEL)
+|       @echo THE END
 ',
               ('CFLAGS=-O -w' . ($parallel_jobs ? ' -j 2' : '')),
               ($vos
@@ -51,5 +52,16 @@ all: ; @echo "MAKEOVERRIDES = $(MAKEOVERRIDES)"
               'MAKEOVERRIDES = a=ZZ
 MAKEOVERRIDES = a=AA
 ');
+
+# SV 46013: Ensure that MAKEOVERRIDES is passed even if set in the makefile
+run_make_test(q!
+ifeq ($(MAKELEVEL),0)
+MAKEOVERRIDES += FOO+=bar
+endif
+.PHONY: M R
+M: ; @$(MAKE) --no-print-directory -f #MAKEFILE# R
+R: ; @echo '$(FOO)'
+!,
+              '', 'bar');
 
 1;

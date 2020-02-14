@@ -8,10 +8,12 @@ This only works on systems that support it.";
 # If this instance of make doesn't support archives, skip it
 exists $FEATURES{archives} or return -1;
 
+# In theory archive support exists on Windows but it doesn't use ar;
+# someone will need to port this test.
+$port_type eq 'W32' and return -1;
+
 # Create some .o files to work with
 if ($osname eq 'VMS') {
-  use Cwd;
-  my $pwd = getcwd;
   # VMS AR needs real object files at this time.
   foreach $afile ('a1', 'a2', 'a3') {
     # Use non-standard extension to prevent implicit rules from recreating
@@ -27,11 +29,8 @@ if ($osname eq 'VMS') {
   utouch(-60, qw(a1.o a2.o a3.o));
 }
 
-my $ar = $CONFIG_FLAGS{AR};
-
-# Fallback if configure did not find AR, such as VMS
-# which does not run configure.
-$ar = 'ar' if $ar eq '';
+# Fallback if configure did not find AR
+my $ar = get_config('AR') || 'ar';
 
 my $redir = '2>&1';
 $redir = '' if $osname eq 'VMS';
@@ -52,6 +51,7 @@ if ($? == 0) {
 # Some versions of ar print different things on creation.  Find out.
 unlink('libxx.a');
 my $created = `$ar $arflags libxx.a a1.o $redir`;
+$created =~ s/a1\.o/#OBJECT#/g;
 
 # Some versions of ar print different things on add.  Find out.
 my $add = `$ar $arflags libxx.a a2.o $redir`;
@@ -64,7 +64,8 @@ $repl =~ s/a2\.o/#OBJECT#/g;
 unlink('libxx.a');
 
 # Very simple
-my $answer = "$ar $arflags libxx.a a1.o\n$created";
+($_ = $created) =~ s/#OBJECT#/a1.o/g;
+my $answer = "$ar $arflags libxx.a a1.o\n$_";
 if ($port_type eq 'VMS-DCL') {
   $answer = 'library /replace libxx.a a1.o';
 }
@@ -204,9 +205,36 @@ run_make_test(undef, $arvar, "#MAKE#: Nothing to be done for 'default'.\n");
 
 unlink('foo.vhd');
 if ($osname eq 'VMS') {
-  remove_directory_tree("$pwd/artest");
+  remove_directory_tree("$cwdpath/artest");
 } else {
   remove_directory_tree('artest');
+}
+
+# Check long names for archive members.
+# See Savannah bug #54395
+
+if ($osname ne 'VMS') {
+    my $pre = '1234567890123456';
+    my $lib = 'libxx.a';
+    my $cr = $created;
+    $cr =~ s/#OBJECT#/${pre}a/g;
+    my $ad = $add;
+    $ad =~ s/#OBJECT#/${pre}b/g;
+
+    run_make_test(qq!
+# Both member names > 16 characters long
+default: $lib(${pre}a) $lib(${pre}b)
+
+(%): % ; \$(AR) \$(ARFLAGS) \$@ \$%
+
+$pre%: ; touch \$\@
+!,
+                  $arvar, "touch ${pre}a\n$ar $arflags $lib ${pre}a\n${cr}touch ${pre}b\n$ar $arflags $lib ${pre}b\n${ad}rm ${pre}a ${pre}b\n");
+
+    # Run it again; nothing should happen
+    run_make_test(undef, $arvar, "#MAKE#: Nothing to be done for 'default'.\n");
+
+    unlink($lib);
 }
 
 # This tells the test driver that the perl test script executed properly.

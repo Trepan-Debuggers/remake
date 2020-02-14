@@ -11,7 +11,7 @@ $details = "";
 
 my $script = 'false; true';
 my $flags = '-ec';
-my $out = `/bin/sh $flags '$script' 2>&1`;
+my $out = `$sh_name $flags '$script' 2>&1`;
 my $err = $? >> 8;
 run_make_test(qq!
 .POSIX:
@@ -21,7 +21,7 @@ all: ; \@$script
 
 # User settings must override .POSIX
 $flags = '-xc';
-$out = `/bin/sh $flags '$script' 2>&1`;
+$out = `$sh_name $flags '$script' 2>&1`;
 run_make_test(qq!
 .SHELLFLAGS = $flags
 .POSIX:
@@ -34,9 +34,8 @@ my %POSIX = (AR => 'ar', ARFLAGS => '-rv',
              YACC => 'yacc', YFLAGS => '',
              LEX => 'lex', LFLAGS => '',
              LDFLAGS => '',
-             CC => 'c99', CFLAGS => '-O',
-             FC => 'fort77', FFLAGS => '-O 1',
-             GET => 'get', GFLAGS => '',
+             CC => 'c99', CFLAGS => '-O1',
+             FC => 'fort77', FFLAGS => '-O1',
              SCCSFLAGS => '', SCCSGETFLAGS => '-s');
 my $make = join('', map { "\t\@echo '$_=\$($_)'\n" } sort keys %POSIX);
 my $r = join('', map { "$_=$POSIX{$_}\n"} sort keys %POSIX);

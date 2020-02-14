@@ -25,7 +25,7 @@ $mk_string = "text : text.tlb(file1.txt)\n\n" .
 "file1.txt :\n" .
 "\t\@pipe open/write xxx file1.txt ; write xxx \"text file\" ; close xxx\n";
 
-my $answer = "library /replace text.tlb file1.txt";
+$answer = "library /replace text.tlb file1.txt";
 
 run_make_test($mk_string,
               '', $answer);
@@ -37,10 +37,10 @@ unlink('file1.txt');
 #Macro library
 $mk_string = "macro : macro.mlb(file1.mar)\n\n" .
 "file1.mar :\n" .
-"\t\pipe open/write xxx file1.mar ; " .
+"\tpipe open/write xxx file1.mar ; " .
 "write xxx \".macro a b\" ; write xxx \".endm\" ; close xxx\n";
 
-my $answer = "library /replace macro.mlb file1.mar";
+$answer = "library /replace macro.mlb file1.mar";
 
 run_make_test($mk_string,
               '', $answer);
@@ -58,7 +58,7 @@ $mk_string =
 "file2.c :\n" .
 "\t\@pipe open/write xxx file2.c ; write xxx \"file2(){}\" ; close xxx\n";
 
-my $answer = "library /replace imagelib.olb file2.exe";
+$answer = "library /replace imagelib.olb file2.exe";
 
 run_make_test($mk_string,
               '', $answer);

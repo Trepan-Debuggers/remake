@@ -3,7 +3,7 @@ $! config_flags_pm.com  - Build config-flags.pm on VMS.
 $!
 $! Just good enough to run the self tests for now.
 $!
-$! Copyright (C) 2014-2016 Free Software Foundation, Inc.
+$! Copyright (C) 2014-2020 Free Software Foundation, Inc.
 $! This file is part of GNU Make.
 $!
 $! GNU Make is free software; you can redistribute it and/or modify it under
@@ -24,7 +24,7 @@ $ open/read cfpm_in config-flags.pm.in
 $!
 $ outfile = "sys$disk:[]config-flags.pm"
 $!
-$ cflags = "/include=([],[.glob]"
+$ cflags = "/include=([],[.lib]"
 $!
 $ create 'outfile'
 $ open/append cfpm 'outfile'
@@ -42,6 +42,7 @@ $       if key .eqs. "CC" then value = "CC"
 $       if key .eqs. "CPP" then value = "CPP"
 $       if key .eqs. "CFLAGS" then value = cflags
 $       if key .eqs. "GUILE_CFLAGS" then value = cflags
+$       if key .eqs. "USE_SYSTEM_GLOB" then value = "no"
 $       write cfpm part1, value, part2
 $       goto cfpm_read_loop
 $   endif

@@ -100,15 +100,17 @@ $make_name: Target 'all' not remade because of errors.\n";
 # TEST -- make sure we keep the error code if we can't create an included
 # makefile.
 
-run_make_test('all: ; @echo hi
+if (defined $ERR_no_such_file) {
+    run_make_test('all: ; @echo hi
 include ifile
 ifile: no-such-file; @false
 ',
-              '-k',
-              "#MAKEFILE#:2: ifile: No such file or directory
+                  '-k',
+                  "#MAKEFILE#:2: ifile: $ERR_no_such_file
 #MAKE#: *** No rule to make target 'no-such-file', needed by 'ifile'.
 #MAKE#: Failed to remake makefile 'ifile'.
 hi\n",
-              512);
+                  512);
+}
 
 1;
