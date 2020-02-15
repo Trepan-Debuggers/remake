@@ -1,3 +1,19 @@
+Version 4.3+dbg-1.4
+
+Base on make 4.3 
+
+Version 4.2.1+dbg-1.4
+
+Two small but important changes...
+
+1. gnumake.h -> gnuremake.h so we don't conflict with GNU make
+2. Propagate --post-mortem flag (now short option -!) in recursive make
+
+Revise documentation to include recent --post-mortem and profiling changes.
+
+Version 4.2.1+dbg-1.3
+
+See NEWS.remake for remake news
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
   19 January 2020
@@ -686,7 +702,7 @@ Version 3.80 (03 Oct 2002)
   * This is the VMS port of GNU Make done by Hartmut.Becker@compaq.com.
 
     It is based on the specific version 3.77k and on 3.78.1. 3.77k was done
-    by Klaus Kämpf <kkaempf@rmi.de>, the code was based on the VMS port of
+    by Klaus Kï¿½mpf <kkaempf@rmi.de>, the code was based on the VMS port of
     GNU Make 3.60 by Mike Moretti.
 
     It was ported on OpenVMS/Alpha V7.1, DECC V5.7-006. It was re-build and
@@ -926,7 +942,7 @@ Version 3.77 (28 Jul 1998)
 
   * This is the VMS port of GNU Make.
     It is based on the VMS port of GNU Make 3.60 by Mike Moretti.
-    This port was done by Klaus Kämpf <kkaempf@rmi.de>
+    This port was done by Klaus Kï¿½mpf <kkaempf@rmi.de>
 
   * There is first-level support available from proGIS Software, Germany.
     Visit their web-site at http://www.progis.de to get information

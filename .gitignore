@@ -1,7 +1,7 @@
 *.a
 *.o
+*~
 .deps
-/*~
 /.dep_segment
 /ABOUT-NLS
 /ChangeLog
@@ -16,9 +16,11 @@
 /SMakefile
 /aclocal.m4
 /autom4te.cache
+/build.cfg
 /build.sh
 /build.sh.in
 /config.ami
+/config.dos
 /config.h
 /config.h-vms
 /config.h.W32
@@ -27,12 +29,12 @@
 /config.status
 /config/*.m4
 /config/Makefile
-/config.dos
 /config/test-driver
 /configure
 /debian/remake.debhelper.log
 /dist
 /loadavg
+/m4
 /make
 /po-check-*
 /remake
@@ -40,3 +42,4 @@
 /remake-*.tar.gz
 /stamp-h1
 /tmp
+callgrind.out.*

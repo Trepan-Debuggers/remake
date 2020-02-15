@@ -18,7 +18,8 @@
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
-info_TEXINFOS =	make.texi
+info_TEXINFOS =	make.texi remake.texi
+
 make_TEXINFOS = fdl.texi make-stds.texi
 
-CLEANFILES = make*.html
+CLEANFILES = callgrind.out.* make*.html remake*.html remake.info

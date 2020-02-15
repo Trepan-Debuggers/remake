@@ -272,11 +272,17 @@ all: ; $sname >/dev/null
 
 $extraENV{PATH} = "$ENV{PATH}:sd";
 
+my $answer = "$sname
+#MAKE#: $sname: $ERR_no_such_file
+#MAKEFILE#:3: *** [all] error 127
+
+#0  all at $fulltestdir/#MAKEFILE#:3
+";
 run_make_test(qq!
 all: PATH := ..
 all: ; $sname
 !,
-              '', "$sname\n#MAKE#: $sname: $ERR_no_such_file\n#MAKE#: *** [#MAKEFILE#:3: all] Error 127", 512);
+              '', $answer, 512);
 
 unlink("sd/$sname");
 rmdir ('sd');

@@ -1,0 +1,528 @@
+# Maintainer-only makefile segment.  This contains things that are relevant
+# only if you have the full copy of the GNU make sources from the Git
+# tree, not a dist copy.
+
+# --------------------- #
+# Updating everything.  #
+# --------------------- #
+
+.PHONY: update
+update:
+
+BUGLIST := bug-make@gnu.org
+
+# These are related to my personal setup.
+GPG_KEYID := 80CB727A20C79BB2
+
+# SRCROOTDIR is just a handy location to keep source files in
+SRCROOTDIR ?= $(HOME)/src
+
+# Where the gnulib project has been locally cloned
+GNULIBDIR ?= $(SRCROOTDIR)/gnulib
+
+# Where to put the CVS checkout of the GNU web repository
+GNUWEBDIR ?= $(SRCROOTDIR)/gnu-www
+
+# Where to put the CVS checkout of the GNU make web repository
+MAKEWEBDIR ?= $(SRCROOTDIR)/make/make-web
+
+# Enable Perl warnings for the test suite
+PERLFLAGS := -w
+
+# We like mondo-warnings!
+# Also force comments to be preserved.  This helps when using ccache, in
+# combination with GCC 7's implicit-fallthrough warning.
+MAKE_CFLAGS := -C -Wall -Wextra -Werror -Wwrite-strings -Wshadow \
+	-Wdeclaration-after-statement -Wbad-function-cast -Wformat-security \
+	-Wtype-limits -Wunused-but-set-parameter -Wlogical-op \
+	-Wignored-qualifiers # -Wformat-signedness  # CI's gcc can't handle this
+
+AM_CFLAGS += $(MAKE_CFLAGS)
+
+# Unfortunately the Guile headers are sometimes broken.  Convince GCC
+# to treat them as system headers so warnings are ignored.
+GUILE_CFLAGS := $(patsubst -I%,-isystem %,$(GUILE_CFLAGS))
+
+MAKE_MAINTAINER_MODE := -DMAKE_MAINTAINER_MODE
+AM_CPPFLAGS += $(MAKE_MAINTAINER_MODE)
+
+# I want this one but I have to wait for the const cleanup!
+# -Wwrite-strings
+
+# Find the glob source files... this might be dangerous, but we're maintainers!
+globsrc := $(wildcard glob/*.c)
+globhdr := $(wildcard glob/*.h)
+
+TEMPLATES = README README.W32
+
+all: $(TEMPLATES)
+
+# Create preprocessor output files--GCC specific!
+%.i : %.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -E -dD -o $@ $<
+
+# General rule for turning a .template into a regular file.
+#
+$(TEMPLATES) : % : %.template Makefile
+	rm -f $@
+	sed -e 's@%VERSION%@$(MAKE_VERSION)@g' \
+	    -e 's@%PACKAGE%@$(PACKAGE)@g' \
+	  $< > $@
+	chmod a-w $@
+
+# Construct Makefiles by adding on dependencies, etc.
+#
+cvt = $(patsubst $1/%,$$($1)%,$(filter %.c,$2))
+Basic.mk: Basic.mk.template .dep_segment Makefile
+	rm -f $@
+	sed -e 's@%MAKE_VERSION%@$(MAKE_VERSION)@g' \
+	    -e 's@%make_SOURCES%@$(call cvt,src,$(make_SRCS))@g' \
+	    -e 's@%w32_SOURCES%@$(call cvt,src,$(w32_SRCS))@g' \
+	    -e 's@%vms_SOURCES%@$(call cvt,src,$(vms_SRCS))@g' \
+	    -e 's@%amiga_SOURCES%@$(call cvt,src,$(amiga_SRCS))@g' \
+	    -e 's@%loadavg_SOURCES%@$(call cvt,lib,$(loadavg_SRCS))@g' \
+	    -e 's@%alloca_SOURCES%@$(call cvt,lib,$(alloca_SRCS))@g' \
+	    -e 's@%glob_SOURCES%@$(call cvt,lib,$(glob_SRCS))@g' \
+	  $< > $@
+	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
+	sed -e 's@^\([^ ]*\)\.o:@$$(OUTDIR)\1.$$(OBJEXT):@' \
+	    -e 's@\([^ ]*\.[ch]\)@$$(SRCDIR)/\1@g' \
+	    -e 's@$$(SRCDIR)/src/config.h@$$(OUTDIR)src/config.h@g' \
+	    -e 's@$$(SRCDIR)/lib/stdlib.h@@g' \
+	    -e 's@$$(SRCDIR)/lib/sys/types.h@@g' \
+	    -e 's@$$(SRCDIR)/lib/unistd.h@@g' \
+	  $(word 2,$^) >>$@
+	chmod a-w $@
+
+
+# Use automake to build a dependency list file, for Makebase.mk.
+#
+# Automake used to have a --generate-deps flag but it's gone now, so we have
+# to do it ourselves.
+#
+DEP_FILES := $(wildcard src/$(DEPDIR)/*.Po)
+.dep_segment: Makefile.am maintMakefile $(DEP_FILES)
+	rm -f $@
+	(for f in src/$(DEPDIR)/*.Po; do \
+	   echo ""; \
+	   echo "# $$f"; \
+	   sed	-e '/^[^:]*\.[ch] *:/d' \
+		-e 's, /usr/[^ ]*,,g' \
+		-e 's, $(srcdir)/, ,g' \
+		-e '/^ *\\$$/d' \
+		-e '/^ *$$/d' \
+		< $$f; \
+	 done) > $@
+
+# Cleaning
+
+GIT :=	git
+
+# git-clean:      Clean all "ignored" files.  Leave untracked files.
+# git-very-clean: Clean all files that aren't stored in source control.
+
+.PHONY: git-clean git-very-clean
+git-clean:
+	-$(GIT) clean -fdX
+git-very-clean: git-clean
+	-$(GIT) clean -fd
+
+
+## ---------------------- ##
+## Generating ChangeLog.  ##
+## ---------------------- ##
+
+gl2cl-date := 2013-10-10
+gl2cl := $(GNULIBDIR)/build-aux/gitlog-to-changelog
+
+# Rebuild the changelog whenever a new commit is added
+ChangeLog: .check-git-HEAD
+	if test -f '$(gl2cl)'; then \
+	    '$(gl2cl)' --since='$(gl2cl-date)' > '$@'; \
+	else \
+	    echo "WARNING: $(gl2cl) is not available.  No $@ generated."; \
+	fi
+
+.PHONY: .check-git-HEAD
+.check-git-HEAD:
+	sha="`git rev-parse HEAD`"; \
+	[ -f '$@' ] && [ "`cat '$@' 2>/dev/null`" = "$$sha" ] \
+	    || echo "$$sha" > '$@'
+
+
+## ---------------- ##
+## Updating files.  ##
+## ---------------- ##
+RSYNC = rsync -Lrtvz
+WGET = wget --passive-ftp -np -nv
+ftp-gnu = ftp://ftp.gnu.org/gnu
+
+move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
+		    echo $(target) is unchanged; rm -f $(target).t; \
+		  else \
+		    mv -f $(target).t $(target); \
+		  fi
+
+# ------------------- #
+# Updating PO files.  #
+# ------------------- #
+
+# NOTE: This is handled by the bootstrap script now
+
+#update: po-update
+update: po-check
+
+# PO archive mirrors --- Be careful; some might not be fully populated!
+#   ftp://ftp.unex.es/pub/gnu-i18n/po/maint/
+#   http://translation.sf.net/maint/
+#   ftp://tiger.informatik.hu-berlin.de/pub/po/maint/
+
+po_wget_flags =	--recursive --level=1 --no-directories --no-check-certificate
+po_repo = https://translationproject.org/latest/$(MAKE_PACKAGE)
+po_sync = translationproject.org::tp/latest/$(MAKE_PACKAGE)/
+
+.PHONY: do-po-update po-update
+do-po-update:
+	tmppo="/tmp/po-$(MAKE_PACKAGE)-$(MAKE_VERSION).$$$$" \
+	  && rm -rf "$$tmppo" \
+	  && mkdir "$$tmppo" \
+	  && $(RSYNC) $(po_sync)  "$$tmppo" \
+	  && cp "$$tmppo"/*.po $(top_srcdir)/po \
+	  && rm -rf "$$tmppo"
+	cd po && $(MAKE) update-po
+	$(MAKE) po-check
+
+po-update:
+	[ -d "po" ] && $(MAKE) do-po-update
+
+# -------------------------- #
+# Updating GNU build files.  #
+# -------------------------- #
+
+# Note: this is handled by the bootstrap script now
+#update: scm-update
+
+.PHONY: scm-update
+scm-update: get-build-aux/texinfo.tex get-build-aux/config.guess \
+		get-build-aux/config.sub get-doc/make-stds.texi get-doc/fdl.texi
+
+# The following pseudo table associates a local directory and a URL
+# with each of the files that belongs to some other package and is
+# regularly updated from the specified URL.
+
+cvs-url = https://savannah.gnu.org/cgi-bin/viewcvs/~checkout~
+git-url = https://git.savannah.gnu.org/cgit
+target = $(patsubst get-%,%,$@)
+
+config-url = $(git-url)/config.git/plain/$(patsubst get-build-aux/%,%,$@)
+get-build-aux/config.guess get-build-aux/config.sub:
+	@echo $(WGET) $(config-url) -O $(target) \
+	  && $(WGET) $(config-url) -O $(target).t \
+	  && $(move_if_change)
+
+gnulib-url = $(git-url)/gnulib.git/plain/build-aux/$(patsubst get-build-aux/%,%,$@)
+get-build-aux/texinfo.tex:
+	@echo $(WGET) $(gnulib-url) -O $(target) \
+	  && $(WGET) $(gnulib-url) -O $(target).t \
+	  && $(move_if_change)
+
+gnustandards-url = $(cvs-url)/gnustandards/gnustandards/$(patsubst get-doc/%,%,$@)
+get-doc/make-stds.texi get-doc/fdl.texi:
+	@echo $(WGET) $(gnustandards-url) -O $(target) \
+	  && $(WGET) $(gnustandards-url) -O $(target).t \
+	  && $(move_if_change)
+
+
+# ---------------------------------- #
+# Alternative configuration checks.  #
+# ---------------------------------- #
+
+CFGCHECK_CONFIGFLAGS =
+CFGCHECK_BUILDFLAGS  =
+CFGCHECK_MAKEFLAGS   = CFLAGS='$(AM_CFLAGS)'
+
+checkcfg.strict-c90:  CFGCHECK_CONFIGFLAGS = CFLAGS='-std=c90 -pedantic'
+checkcfg.strict-c90:  CFGCHECK_MAKEFLAGS   =
+
+checkcfg.no-jobserver:CFGCHECK_CONFIGFLAGS = --disable-job-server
+checkcfg.no-load:     CFGCHECK_CONFIGFLAGS = --disable-load
+checkcfg.no-guile:    CFGCHECK_CONFIGFLAGS = --without-guile
+checkcfg.no-spawn:    CFGCHECK_CONFIGFLAGS = --disable-posix-spawn
+checkcfg.no-sysglob:  CFGCHECK_CONFIGFLAGS = make_cv_sys_gnu_glob=no
+checkcfg.no-loadavg:  CFGCHECK_CONFIGFLAGS = ac_cv_func_getloadavg=no \
+	                                     ac_cv_have_decl_getloadavg=no \
+                                             gl_cv_have_raw_decl_getloadavg=no \
+                                             ac_cv_lib_util_getloadavg=no \
+                                             ac_cv_lib_getloadavg_getloadavg=no
+checkcfg.no-sync:     CFGCHECK_CONFIGFLAGS = CPPFLAGS=-DNO_OUTPUT_SYNC
+checkcfg.no-archives: CFGCHECK_CONFIGFLAGS = CPPFLAGS=-DNO_ARCHIVES
+
+CONFIG_CHECKS := \
+	checkcfg.strict-c90 \
+	checkcfg.no-jobserver \
+	checkcfg.no-load \
+	checkcfg.no-guile \
+	checkcfg.no-spawn \
+	checkcfg.no-sysglob \
+	checkcfg.no-loadavg \
+	checkcfg.no-sync \
+	checkcfg.no-archives
+
+.PHONY: check-alt-config
+check-alt-config: $(CONFIG_CHECKS)
+
+# Trick GNU make so it doesn't run the submake as a recursive make.
+NR_MAKE = $(MAKE)
+
+# Check builds both with build.sh and with make
+$(CONFIG_CHECKS): checkcfg.%: distdir
+	@echo "Building $@ (output in checkcfg.$*.log)"
+	exec >'checkcfg.$*.log' 2>&1; \
+	   echo "Testing configure with $(CFGCHECK_CONFIGFLAGS)"; set -x; \
+	   rm -rf $(distdir)/_build \
+	&& mkdir $(distdir)/_build \
+	&& cd $(distdir)/_build \
+	&& ../configure --srcdir=.. $(CFGCHECK_CONFIGFLAGS) \
+		$(AM_DISTCHECK_CONFIGURE_FLAGS) $(DISTCHECK_CONFIGURE_FLAGS)
+	exec >>'checkcfg.$*.log' 2>&1; set -x; \
+	   cd $(distdir)/_build \
+	&& OUTDIR=_bld ../build.sh $(CFGCHECK_BUILD_FLAGS) \
+	&& _bld/make $(AM_MAKEFLAGS) check-local \
+	&& _bld/make $(AM_MAKEFLAGS) clean
+	exec >>'checkcfg.$*.log' 2>&1; set -x; \
+	   cd $(distdir)/_build \
+	&& $(NR_MAKE) $(AM_MAKEFLAGS) $(CFGCHECK_MAKEFLAGS) \
+	&& ./make $(AM_MAKEFLAGS) check \
+	&& ./make $(AM_MAKEFLAGS) clean
+
+# Try using Basic.mk.  I can't test this on POSIX systems because it is only
+# used for non-POSIX systems; POSIX systems can just use normal
+# configure/Makefile.in etc.
+checkcfg.basicmk: checkcfg.% : distdir
+	@echo "Building $@ (output in checkcfg.$*.log)"
+	exec >'checkcfg.$*.log' 2>&1; \
+	   echo "Testing Basic.mk SRCDIR=.."; set -x; \
+	   rm -rf $(distdir)/_build \
+	&& mkdir $(distdir)/_build \
+	&& cd $(distdir)/_build \
+	&& ../configure --srcdir=.. \
+		$(AM_DISTCHECK_CONFIGURE_FLAGS) $(DISTCHECK_CONFIGURE_FLAGS)
+	exec >>'checkcfg.$*.log' 2>&1; set -x; \
+	   cd $(distdir)/_build \
+	&& $(NR_MAKE) $(AM_MAKEFLAGS) -f ../Basic.mk SRCDIR=.. CFLAGS='$(AM_CFLAGS)' \
+	&& ./make $(AM_MAKEFLAGS) -f ../Basic.mk SRCDIR=.. check \
+	&& ./make $(AM_MAKEFLAGS) -f ../Basic.mk SRCDIR=.. clean
+	exec >>'checkcfg.$*.log' 2>&1; \
+	   echo "Testing Basic.mk SRCDIR=."; set -x; \
+	&& rm -rf $(distdir)/_build \
+	&& cd $(distdir) \
+	&& ./configure \
+		$(AM_DISTCHECK_CONFIGURE_FLAGS) $(DISTCHECK_CONFIGURE_FLAGS) \
+	&& $(NR_MAKE) $(AM_MAKEFLAGS) -f Basic.mk CFLAGS='$(AM_CFLAGS)' \
+	&& ./make $(AM_MAKEFLAGS) -f Basic.mk check \
+	&& ./make $(AM_MAKEFLAGS) -f Basic.mk clean
+
+
+## --------------- ##
+## Sanity checks.  ##
+## --------------- ##
+
+# Before we build a distribution be sure we run our local checks
+#distdir: local-check
+
+.PHONY: local-check po-check changelog-check
+
+# Checks that don't require Git.  Run 'changelog-check' last as
+# previous test may reveal problems requiring new ChangeLog entries.
+local-check: po-check changelog-check
+
+# copyright-check writable-files
+
+changelog-check:
+	if head $(top_srcdir)/ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
+	  :; \
+	else \
+	  echo "$(VERSION) not in ChangeLog" 1>&2; \
+	  exit 1; \
+	fi
+
+# Verify that all source files using _() are listed in po/POTFILES.in.
+# Ignore src/makeint.h; it defines _().
+# FIXME: Also ignore files in lib. remake has more of these than make. Why?
+po-check:
+	if test -f po/POTFILES.in; then \
+	  grep '^[^#]' po/POTFILES.in | sort > $@-1; \
+	  find [a-z]* -name '*.[ch]' | xargs grep -l '\b_(' | grep -v src/makeint.h | grep -v lib/ | sort > $@-2; \
+	  diff -u $@-1 $@-2 || exit 1; \
+	  rm -f $@-1 $@-2; \
+	fi
+
+
+## --------------- ##
+## Generate docs.  ##
+## --------------- ##
+
+.PHONY: update-makeweb gendocs
+
+CVS = cvs
+
+makeweb-repo = $(USER)@cvs.sv.gnu.org:/web/make
+gnuweb-repo = :pserver:anonymous@cvs.sv.gnu.org:/web/www
+gnuweb-dir = www/server/standards
+
+# Get the GNU make web page boilerplate etc.
+update-makeweb:
+	[ -d '$(MAKEWEBDIR)' ] || mkdir -p '$(MAKEWEBDIR)'
+	[ -d '$(MAKEWEBDIR)'/CVS ] \
+	    && { cd '$(MAKEWEBDIR)' && $(CVS) update; } \
+	    || { mkdir -p '$(dir $(MAKEWEBDIR))' && cd '$(dir $(MAKEWEBDIR))' \
+		 && $(CVS) -d $(makeweb-repo) co -d '$(notdir $(MAKEWEBDIR))' make; }
+
+# Get the GNU web page boilerplate etc.
+update-gnuweb:
+	[ -d '$(GNUWEBDIR)' ] || mkdir -p '$(GNUWEBDIR)'
+	[ -d '$(GNUWEBDIR)/$(gnuweb-dir)'/CVS ] \
+	    && { cd '$(GNUWEBDIR)/$(gnuweb-dir)' && $(CVS) update; } \
+	    || { cd '$(GNUWEBDIR)' && $(CVS) -d $(gnuweb-repo) co '$(gnuweb-dir)'; }
+
+gendocs: update-gnuweb update-makeweb
+	cp $(GNULIBDIR)/doc/gendocs_template doc
+	cd doc \
+	  && rm -rf doc/manual \
+	  && $(GNULIBDIR)/build-aux/gendocs.sh --email '$(BUGLIST)' \
+		make 'GNU Make Manual'
+	find '$(MAKEWEBDIR)'/manual \( -name CVS -prune \) -o \( -name '[!.]*' -type f -exec rm -f '{}' \; \)
+	cp -r doc/manual '$(MAKEWEBDIR)'
+	@echo 'Status of $(MAKEWEBDIR) repo:' && cd '$(MAKEWEBDIR)' \
+	    && cvs -q -n update | grep -v '^M '
+	@echo '- cvs add <new files>' \
+	    && echo '- cvs remove <deleted files>' \
+	    && echo '- cvs commit' \
+	    && echo '- cvs tag make-$(subst .,-,$(VERSION))'
+
+
+## --------------------------------------------- ##
+## Submitting Coverity cov-build results to Scan ##
+## --------------------------------------------- ##
+
+# Note you must have set COVERITY_TOKEN and COVERITY_EMAIL properly
+# to submit results.  COVERITY_PATH can be set to the root of the
+# cov-build tools if it's not already on your PATH.
+
+COV_BUILD_FILE := cov-build.tgz
+
+.PHONY: cov-build cov-submit
+
+cov-build: $(COV_BUILD_FILE)
+
+$(COV_BUILD_FILE): $(filter %.c %.h,$(DISTFILES))
+	$(MAKE) distdir
+	@echo "Running Coverity cov-build"
+	rm -rf '$(distdir)'/_build
+	mkdir '$(distdir)'/_build
+	cd '$(distdir)'/_build \
+	    && ../configure --srcdir=.. \
+		$(AM_DISTCHECK_CONFIGURE_FLAGS) $(DISTCHECK_CONFIGURE_FLAGS) \
+		CFLAGS='$(AM_CFLAGS)'
+	PATH="$${COVERITY_PATH:+$$COVERITY_PATH/bin:}$$PATH"; \
+	    cd '$(distdir)'/_build \
+		&& cov-build --dir cov-int ../build.sh
+	rm -f '$@'
+	(cd '$(distdir)'/_build && tar czf - cov-int) > '$@'
+
+cov-submit: $(COV_BUILD_FILE)-submitted
+
+$(COV_BUILD_FILE)-submitted: $(COV_BUILD_FILE)
+	@[ -n "$(COVERITY_TOKEN)" ] || { echo 'COVERITY_TOKEN not set'; exit 1; }
+	@[ -n "$(COVERITY_EMAIL)" ] || { echo 'COVERITY_EMAIL not set'; exit 1; }
+	rm -f '$@'
+	case '$(VERSION)' in \
+	    (*.*.9*) type="daily build"; ext=".$$(date +%Y%m%d)" ;; \
+	    (*)      type="release"; ext= ;; \
+	esac; \
+	curl --form token='$(COVERITY_TOKEN)' \
+	     --form email='$(COVERITY_EMAIL)' \
+	     --form file='@$<' \
+	     --form version="$(VERSION)$$ext" \
+	     --form description="GNU make $$type" \
+	     'https://scan.coverity.com/builds?project=gmake'
+	cp '$<' '$@'
+
+
+## ------------------------- ##
+## Make release targets.     ##
+## ------------------------- ##
+
+.PHONY: tag-release
+tag-release:
+	case '$(VERSION)' in \
+	    (*.*.9*) message=" candidate" ;; \
+	    (*)      message= ;; \
+	esac; \
+	$(GIT) tag -m "GNU Make release$$message $(VERSION)" -u '$(GPG_KEYID)' '$(VERSION)'
+
+
+## ------------------------- ##
+## GNU FTP upload artifacts. ##
+## ------------------------- ##
+
+# This target creates the upload artifacts.
+# Sign it with my key.  If you don't have my key/passphrase then sorry,
+# you're SOL! :)
+
+GPG = gpg
+GPGFLAGS = -u $(GPG_KEYID)
+
+DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
+DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
+
+# A simple rule to test signing, etc.
+.PHONY: distsign
+distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+
+%.sig : %
+	@echo "Signing file '$<':"
+	$(GPG) $(GPGFLAGS) -o "$@" -b "$<"
+
+%.directive.asc: %
+	@echo "Creating signed directive file '$@':"
+	@( \
+	   echo 'version: 1.2'; \
+	   echo 'directory: make'; \
+	   echo 'filename: $*'; \
+	   echo 'comment: Official upload of GNU make version $(VERSION)'; \
+	 ) > "$*.directive"
+	$(GPG) $(GPGFLAGS) -o "$@" --clearsign "$*.directive"
+	@rm -f "$*.directive"
+
+# Upload the artifacts
+
+FTPPUT = ncftpput
+gnu-upload-host = ftp-upload.gnu.org
+gnu-upload-dir  = /incoming
+
+
+UPLOADS = upload-alpha upload-ftp
+.PHONY: $(UPLOADS)
+$(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+	$(FTPPUT) "$(gnu-upload-host)" "$(gnu-upload-dir)/$(@:upload-%=%)" $^
+
+
+# Rebuild Makefile.in if this file is modifed.
+Makefile.in: maintMakefile
+
+# Copyright (C) 1997-2020 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.

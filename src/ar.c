@@ -68,25 +68,38 @@ ar_parse_name (const char *name, char **arname_p, char **memname_p)
 
 /* This function is called by 'ar_scan' to find which member to look at.  */
 
+struct member_date_lookup
+{
+  const char *name;
+  time_t *member_date;
+};
+
 /* ARGSUSED */
 static long int
 ar_member_date_1 (int desc UNUSED, const char *mem, int truncated,
                   long int hdrpos UNUSED, long int datapos UNUSED,
                   long int size UNUSED, long int date,
                   int uid UNUSED, int gid UNUSED, unsigned int mode UNUSED,
-                  const void *name)
+                  const void *data)
 {
-  return ar_name_equal (name, mem, truncated) ? date : 0;
+  const struct member_date_lookup *lookup_data = data;
+  if (ar_name_equal (lookup_data->name, mem, truncated))
+    {
+      *lookup_data->member_date = date;
+      return 1;
+    }
+  return 0;
 }
 
-/* Return the modtime of NAME.  */
-
-time_t
-ar_member_date (const char *name)
+/* Read the modtime of NAME in MEMBER_DATE.
+   Returns 1 if NAME exists, 0 otherwise.  */
+int
+ar_member_date (const char *name, time_t *member_date)
 {
   char *arname;
   char *memname;
-  long int val;
+  int found;
+  struct member_date_lookup lookup_data;
 
   ar_parse_name (name, &arname, &memname);
 
@@ -107,11 +120,14 @@ ar_member_date (const char *name)
       (void) f_mtime (arfile, 0);
   }
 
-  val = ar_scan (arname, ar_member_date_1, memname);
+  lookup_data.name = memname;
+  lookup_data.member_date = member_date;
+  found = ar_scan (arname, ar_member_date_1, &lookup_data);
 
   free (arname);
 
-  return (val <= 0 ? (time_t) -1 : (time_t) val);
+  /* return 0 (not found) if the archive does not exist or has invalid format. */
+  return (found == 1) ? 1 : 0;
 }
 
 /* Set the archive-member NAME's modtime to now.  */
@@ -264,9 +280,6 @@ ar_glob (const char *arname, const char *member_pattern, size_t size)
   struct nameseq *n;
   const char **names;
   unsigned int i;
-#ifdef VMS
-  char *vms_member_pattern;
-#endif
   if (! ar_glob_pattern_p (member_pattern, 1))
     return 0;
 
@@ -274,35 +287,10 @@ ar_glob (const char *arname, const char *member_pattern, size_t size)
      ar_glob_match will accumulate them in STATE.chain.  */
   state.arname = arname;
   state.pattern = member_pattern;
-#ifdef VMS
-    {
-      /* In a copy of the pattern, find the suffix, save it and  remove it from
-         the pattern */
-      char *lastdot;
-      vms_member_pattern = xstrdup(member_pattern);
-      lastdot = strrchr(vms_member_pattern, '.');
-      state.suffix = lastdot;
-      if (lastdot)
-        {
-          state.suffix = xstrdup(lastdot);
-          *lastdot = 0;
-        }
-      state.pattern = vms_member_pattern;
-    }
-#endif
   state.size = size;
   state.chain = 0;
   state.n = 0;
   ar_scan (arname, ar_glob_match, &state);
-
-#ifdef VMS
-  /* Deallocate any duplicated string */
-  free(vms_member_pattern);
-  if (state.suffix)
-    {
-      free(state.suffix);
-    }
-#endif
 
   if (state.chain == 0)
     return 0;

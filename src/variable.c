@@ -28,6 +28,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "pathstuff.h"
 #endif
 #include "hash.h"
+#include "main.h"
 
 /* Incremented every time we add or remove a global variable.  */
 static unsigned long variable_changenum;
@@ -39,6 +40,44 @@ static struct pattern_var *pattern_vars;
 /* Pointer to the last struct in the pack of a specific size, from 1 to 255.*/
 
 static struct pattern_var *last_pattern_vars[256];
+
+/*!
+  Return a string describing origin.
+ */
+const char *
+origin2str(variable_origin_t origin)
+{
+  switch (origin)
+    {
+    case o_default:
+      return _("default");
+      break;
+    case o_env:
+      return _("environment");
+      break;
+    case o_file:
+      return _("makefile");
+      break;
+    case o_env_override:
+      return _("environment under -e");
+      break;
+    case o_command:
+      return _("command line");
+      break;
+    case o_override:
+      return _("`override' directive");
+      break;
+    case o_automatic:
+      return _("automatic");
+      break;
+    case o_debugger:
+      return _("debugger");
+      break;
+    case o_invalid:
+    default:
+      return _("invalid");
+    }
+}
 
 /* Create a new pattern-specific variable struct. The new variable is
    inserted into the PATTERN_VARS list in the shortest patterns first
@@ -196,7 +235,7 @@ struct variable *
 define_variable_in_set (const char *name, size_t length,
                         const char *value, enum variable_origin origin,
                         int recursive, struct variable_set *set,
-                        const floc *flocp)
+                        const gmk_floc *flocp)
 {
   struct variable *v;
   struct variable **var_slot;
@@ -1161,7 +1200,7 @@ shell_result (const char *p)
    See the try_variable_definition() function for details on the parameters. */
 
 struct variable *
-do_variable_definition (const floc *flocp, const char *varname,
+do_variable_definition (const gmk_floc *flocp, const char *varname,
                         const char *value, enum variable_origin origin,
                         enum variable_flavor flavor, int target_var)
 {
@@ -1616,7 +1655,7 @@ assign_variable_definition (struct variable *v, const char *line)
    returned.  */
 
 struct variable *
-try_variable_definition (const floc *flocp, const char *line,
+try_variable_definition (const gmk_floc *flocp, const char *line,
                          enum variable_origin origin, int target_var)
 {
   struct variable v;
@@ -1712,6 +1751,55 @@ print_variable (const void *item, void *arg)
     }
 }
 
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+void
+print_variable_info (const void *item, void *arg)
+{
+  const variable_t *v = (variable_t *) item;
+  const char *prefix = (char *) arg;
+  const char *origin;
+
+  if (o_invalid == v->origin) abort ();
+  origin = origin2str(v->origin);
+
+  if (prefix) {
+    fputs ("# ", stdout);
+    fputs (origin, stdout);
+    if (v->fileinfo.filenm)
+      printf (_(" (from `%s', line %lu)"),
+	      v->fileinfo.filenm, v->fileinfo.lineno);
+    putchar ('\n');
+    fputs (prefix, stdout);
+  }
+
+  /* Is this a `define'?  */
+  if (v->recursive && strchr (v->value, '\n') != 0)
+    printf ("define %s\n%s\nendef\n", v->name, v->value);
+  else
+    {
+      char *p;
+
+      printf ("%s %s= ", v->name, v->recursive ? v->append ? "+" : "" : ":");
+
+      /* Check if the value is just whitespace.  */
+      p = next_token (v->value);
+      if (p != v->value && *p == '\0')
+	/* All whitespace.  */
+	printf ("$(subst ,,%s)", v->value);
+      else if (v->recursive)
+	fputs (v->value, stdout);
+      else
+	/* Double up dollar signs.  */
+	for (p = v->value; *p != '\0'; ++p)
+	  {
+	    if (*p == '$')
+	      putchar ('$');
+	    putchar (*p);
+	  }
+      putchar ('\n');
+    }
+}
 
 static void
 print_auto_variable (const void *item, void *arg)
@@ -1736,7 +1824,7 @@ print_noauto_variable (const void *item, void *arg)
 /* Print all the variables in SET.  PREFIX is printed before
    the actual variable definitions (everything else is comments).  */
 
-static void
+void
 print_variable_set (struct variable_set *set, const char *prefix, int pauto)
 {
   hash_map_arg (&set->table, (pauto ? print_auto_variable : print_variable),
@@ -1781,10 +1869,10 @@ print_variable_data_base (void)
 /* Print all the local variables of FILE.  */
 
 void
-print_file_variables (const struct file *file)
+print_file_variables (const file_t *p_target, bool b_hash_stats)
 {
-  if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ", 1);
+  if (p_target->variables != 0)
+    print_variable_set (p_target->variables->set, "# ", b_hash_stats);
 }
 
 void

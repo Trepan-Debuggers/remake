@@ -16,27 +16,80 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = dist-lzip silent-rules std-options subdir-objects nostdinc
+AUTOMAKE_OPTIONS = 1.8 dist-lzip silent-rules std-options subdir-objects nostdinc check-news
 ACLOCAL_AMFLAGS = -I m4
+
+transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-SUBDIRS =	lib po doc
+SUBDIRS =	lib po doc glob unittest
 
 bin_PROGRAMS =	make
-include_HEADERS = src/gnumake.h
+include_HEADERS = src/gnuremake.h
 
 man_MANS =	doc/make.1
 
-make_SRCS =	src/ar.c src/arscan.c src/commands.c src/commands.h \
-		src/debug.h src/default.c src/dep.h src/dir.c src/expand.c \
-		src/file.c src/filedef.h src/function.c src/getopt.c \
-		src/getopt.h src/getopt1.c src/gettext.h src/guile.c \
-		src/hash.c src/hash.h src/implicit.c src/job.c src/job.h \
-		src/load.c src/loadapi.c src/main.c src/makeint.h src/misc.c \
-		src/os.h src/output.c src/output.h src/read.c src/remake.c \
+DEBUGGER_SRC = 	\
+		src/debugger/break.c \
+		src/debugger/cmd.c 	\
+		src/debugger/fns.c 	\
+		src/debugger/file2line.c 	\
+		src/debugger/msg.c 	\
+		src/debugger/stack.c
+
+DEBUGGER_H = \
+		src/debugger/break.h 		\
+		src/debugger/cmd.h 			\
+		src/debugger/fns.h 			\
+		src/debugger/msg.h 			\
+		src/debugger/command/break.h 	\
+		src/debugger/command/chdir.h  	\
+		src/debugger/command/comment.h 	\
+		src/debugger/command/continue.h	\
+		src/debugger/command/delete.h 	\
+		src/debugger/command/down.h 	\
+		src/debugger/command/edit.h 	\
+		src/debugger/command/eval.h 	\
+		src/debugger/command/expand.h	\
+		src/debugger/command/finish.h	\
+		src/debugger/command/frame.h	\
+		src/debugger/command/help.h		\
+		src/debugger/command/info.h		\
+		src/debugger/command/list.h		\
+		src/debugger/command/next.h		\
+		src/debugger/command/print.h	\
+		src/debugger/command/pwd.h		\
+		src/debugger/command/quit.h		\
+		src/debugger/command/run.h		\
+		src/debugger/command/set.h		\
+		src/debugger/command/setq.h		\
+		src/debugger/command/setqx.h	\
+		src/debugger/command/shell.h	\
+		src/debugger/command/show.h		\
+		src/debugger/command/skip.h		\
+		src/debugger/command/source.h	\
+		src/debugger/command/step.h		\
+		src/debugger/command/target.h	\
+		src/debugger/command/up.h		\
+		src/debugger/command/where.h	\
+		src/debugger/command/write.h	\
+		src/debugger/file2line.h 	        \
+		src/debugger/fns.h 			\
+		src/debugger/info.h			\
+		src/debugger/stack.h		\
+		src/debugger/subcmd.h
+
+make_SRCS =	\
+		src/alloc.c src/ar.c src/arscan.c src/buildargv.c \
+		src/commands.c src/debug.c src/default.c src/dir.c src/expand.c \
+		src/file.c src/file_basic.c src/function.c src/getopt.c \
+		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \
+		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
+		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
 		src/rule.c src/rule.h src/signame.c src/strcache.c \
-		src/variable.c src/variable.h src/version.c src/vpath.c
+		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
+		$(DEBUGGER_SRC)
 
 w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
 		src/w32/compat/posixfcn.c src/w32/include/dirent.h \
@@ -45,11 +98,6 @@ w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
 		src/w32/subproc/misc.c src/w32/subproc/proc.h \
 		src/w32/subproc/sub_proc.c src/w32/subproc/w32err.c
 
-vms_SRCS =	src/vms_exit.c src/vms_export_symbol.c src/vms_progname.c \
-		src/vmsdir.h src/vmsfunctions.c src/vmsify.c
-
-amiga_SRCS =	src/amiga.c src/amiga.h
-
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
 alloca_SRCS =	lib/alloca.c
@@ -57,7 +105,15 @@ alloca_SRCS =	lib/alloca.c
 loadavg_SRCS =	lib/getloadavg.c
 
 make_SOURCES =	$(make_SRCS)
-EXTRA_make_SOURCES = $(amiga_SRCS) $(vms_SRCS)
+
+noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
+				src/dep.h src/expand.h src/file.h src/file_basic.h \
+				src/filedef.h src/function.h src/getopt.h src/gettext.h \
+				src/globals.h src/hash.h src/implicit.h src/job.h \
+				src/main.h src/make.h src/makeint.h src/mock.h src/os.h \
+				src/output.h src/print.h src/profile.h src/read.h \
+				src/rule.h src/trace.h src/types.h src/variable.h src/vpath.h \
+				$(DEBUGGER_H)
 
 make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
 		@LIBINTL@
@@ -78,14 +134,16 @@ else
 endif
 
 if USE_CUSTOMS
+  # make_SOURCES += src/remote-cstms.c src/mock.c
   make_SOURCES += src/remote-cstms.c
 else
+  # make_SOURCES += src/remote-stub.c src/mock.c
   make_SOURCES += src/remote-stub.c
 endif
 
 # Extra stuff to include in the distribution.
 
-mk_FILES =	Basic.mk mk/msdosdjgpp.mk mk/Amiga.mk mk/VMS.mk mk/Windows32.mk
+mk_FILES =	Basic.mk mk/msdosdjgpp.mk mk/Amiga.mk mk/Windows32.mk
 # We don't need this, since the standard automake output will do.
 #mk/Posix.mk.in
 
@@ -98,18 +156,19 @@ test_FILES =	tests/run_make_tests tests/run_make_tests.bat \
 		tests/mkshadow tests/thelp.pl tests/guile.supp tests/README
 # test/scripts are added via dist-hook below.
 
-EXTRA_DIST =	ChangeLog README build.sh build.cfg.in $(man_MANS) \
-		README.customs README.OS2 \
-		README.Amiga SCOPTIONS src/config.ami \
+EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
+		README.customs \
+		SCOPTIONS src/config.ami \
 		README.DOS builddos.bat src/configh.dos \
 		README.W32 build_w32.bat src/config.h.W32 \
-		README.VMS makefile.com src/config.h-vms src/vmsjobs.c \
-		vms_export_symbol_test.com \
+		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
+		NEWS.remake README.remake REMAKE.todo Rakefile \
 		$(mk_FILES) $(m4_FILES) $(test_FILES)
 
 # --------------- Generate the Guile default module content
 
+#: Generate the Guile module
 src/guile.$(OBJEXT): src/gmk-default.h
 src/gmk-default.h: $(top_srcdir)/src/gmk-default.scm
 	(echo 'static const char *const GUILE_module_defn = " '\\ \
@@ -119,17 +178,17 @@ src/gmk-default.h: $(top_srcdir)/src/gmk-default.scm
 
 # --------------- Local DIST Section
 
-# Install the mk and tests subdirectories
-#
+#: Install the mk and tests subdirectories
 dist-hook:
 	(cd $(top_srcdir); \
-	 sub=`find tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
+	 sub=`find src/w32 tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
 
 # --------------- Local CHECK Section
 
+#: run regression tests and show a banner
 check-local: check-regression
 	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
 	dashes=`echo "$$banner" | sed s/./=/g`; \
@@ -149,6 +208,7 @@ MAKETESTFLAGS =
 
 .PHONY: check-regression
 
+#: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
 	@if test -f '$(top_srcdir)/tests/run_make_tests'; then \
 	  ulimit -n 128; \
@@ -180,3 +240,13 @@ check-regression: tests/config-flags.pm
 README:
 
 @MAINT_MAKEFILE@
+
+# FIXME fix up to use the git2cl in MAINT_MAKEFILE
+GIT2CL = ./git2cl
+if MAINTAINER_MODE
+
+#: create ChangeLog for distribution from 'git log'
+ChangeLog:
+	git log --pretty --numstat --summary | $(GIT2CL) > $@
+
+endif

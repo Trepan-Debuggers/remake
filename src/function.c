@@ -16,6 +16,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "filedef.h"
+#include "expand.h"
 #include "variable.h"
 #include "dep.h"
 #include "job.h"
@@ -23,10 +24,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "debug.h"
 
-#ifdef _AMIGA
-#include "amiga.h"
-#endif
-
+#include "debugger/cmd.h"
 
 struct function_table_entry
   {
@@ -1394,7 +1392,7 @@ func_wildcard (char *o, char **argv, const char *funcname UNUSED)
   Treat the arguments as a segment of makefile, and parse them.
 */
 
-static char *
+char *
 func_eval (char *o, char **argv, const char *funcname UNUSED)
 {
   char *buf;
@@ -1412,6 +1410,25 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+
+/*
+  $(debugger )
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+
+static char *
+func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
+{
+  debug_return_t rc;
+  static char buffer[10];
+  rc = enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  snprintf(buffer, sizeof(buffer), "%u", rc);
+  o = buffer;
+  return o;
+}
 
 static char *
 func_value (char *o, char **argv, const char *funcname UNUSED)
@@ -1850,7 +1867,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
     /* Loop until child_handler or reap_children()  sets
        shell_function_completed to the status of our child shell.  */
     while (shell_function_completed == 0)
-      reap_children (1, 0);
+      reap_children (1, 0, NULL);
 
     if (batch_filename)
       {
@@ -2383,6 +2400,7 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("value",         0,  1,  1,  func_value),
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
+  FT_ENTRY ("debugger",      0,  1,  1,  func_debugger),
 #ifdef EXPERIMENTAL
   FT_ENTRY ("eq",            2,  2,  1,  func_eq),
   FT_ENTRY ("not",           0,  1,  1,  func_not),
@@ -2651,7 +2669,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 }
 
 void
-define_new_function (const floc *flocp, const char *name,
+define_new_function (const gmk_floc *flocp, const char *name,
                      unsigned int min, unsigned int max, unsigned int flags,
                      gmk_func_ptr func)
 {
