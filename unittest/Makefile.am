@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/lib \
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/lib
 
 test_profile_SOURCES = test_profile.c
 
