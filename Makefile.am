@@ -106,6 +106,8 @@ loadavg_SRCS =	lib/getloadavg.c
 
 make_SOURCES =	$(make_SRCS)
 
+EXTRA_make_SOURCES = src/mock.c
+
 noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
 				src/dep.h src/expand.h src/file.h src/file_basic.h \
 				src/filedef.h src/function.h src/getopt.h src/gettext.h \
