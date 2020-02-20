@@ -2,6 +2,7 @@
 /config.guess
 /config.h.in
 /config.sub
+/depcomp
 /install-sh
 /mdate-sh
 /test-driver
