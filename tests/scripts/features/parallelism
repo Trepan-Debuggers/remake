@@ -106,12 +106,15 @@ ok:
 > \@#HELPER# sleep 4
 > \@#HELPER# out OK",
               '-rR -j5', "sleep 1\nFail\nfail 1
-#MAKE#: *** [#MAKEFILE#:10: fail.1] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.1] error 1
 #MAKE#: *** Waiting for unfinished jobs....
 sleep 2\nFail\nfail 1
-#MAKE#: *** [#MAKEFILE#:10: fail.2] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.2] error 1
 sleep 3\nFail\nfail 1
-#MAKE#: *** [#MAKEFILE#:10: fail.3] Error 1
+make: directory '$fulltestdir'
+#MAKE#: *** [fail.3] error 1
 sleep 4\nOK",
              512);
 

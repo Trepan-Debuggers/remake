@@ -37,12 +37,12 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This section provides OS-specific functions to support the jobserver.  */
 
 /* These track the state of the jobserver pipe.  Passed to child instances.  */
-static int job_fds[2] = { -1, -1 };
+int job_fds[2] = { -1, -1 };
 
 /* Used to signal read() that a SIGCHLD happened.  Always CLOEXEC.
    If we use pselect() this will never be created and always -1.
  */
-static int job_rfd = -1;
+int job_rfd = -1;
 
 /* Token written to the pipe (could be any character...)  */
 static char token = '+';

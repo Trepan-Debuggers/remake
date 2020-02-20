@@ -14,7 +14,11 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _REMAKE_JOB_H_
+#define _REMAKE_JOB_H_
+
 #include "output.h"
+#include "trace.h"
 
 /* Structure describing a running or dead child process.  */
 
@@ -70,24 +74,22 @@ extern struct child *children;
 /* A signal handler for SIGCHLD, if needed.  */
 RETSIGTYPE child_handler (int sig);
 int is_bourne_compatible_shell(const char *path);
-void new_job (struct file *file);
-void reap_children (int block, int err);
-void start_waiting_jobs (void);
+extern void new_job (file_t *file, target_stack_node_t *p_call_stack);
+extern void reap_children (int block, int err,
+			   target_stack_node_t *p_call_stack);
+extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
 
 char **construct_command_argv (char *line, char **restp, struct file *file,
                                int cmd_flags, char** batch_file);
 
 pid_t child_execute_job (struct childbase *child, int good_stdin, char **argv);
 
-#ifdef _AMIGA
-void exec_command (char **argv) NORETURN;
-#elif defined(__EMX__)
-int exec_command (char **argv, char **envp);
-#else
-void exec_command (char **argv, char **envp) NORETURN;
-#endif
+// void exec_command (char **argv, char **envp) NORETURN;
+void exec_command (char **argv, char **envp);
 
 void unblock_all_sigs (void);
 
 extern unsigned int job_slots_used;
 extern unsigned int jobserver_tokens;
+
+#endif  /* _REMAKE_JOB_H_ */

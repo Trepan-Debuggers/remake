@@ -14,6 +14,9 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef REMAKE_OUTPUT_H
+#define REMAKE_OUTPUT_H
+
 struct output
   {
     int out;
@@ -104,3 +107,5 @@ typedef int sync_handle_t;      /* file descriptor */
 
 # endif
 #endif  /* !NO_OUTPUT_SYNC */
+
+#endif /*REMAKE_OUTPUT_H*/

@@ -2,6 +2,13 @@
 
 $description = "Test ignored failures in recipe command lines";
 
+my $answer ="exit 1
+#MAKEFILE#:3: [one] error 1 (ignored)
+
+#0  one at $fulltestdir/#MAKEFILE#:2
+exit 0
+";
+
 run_make_test(qq!
 one:
 \t-exit 1
@@ -10,18 +17,32 @@ two:
 \texit 1
 \texit 0
 !,
-              "one", "exit 1\n#MAKE#: [#MAKEFILE#:3: one] Error 1 (ignored)\nexit 0\n");
+              "one", $answer);
 
 # TEST #1
 # -------
 
-run_make_test(undef, " -i two",
-              "exit 1\n#MAKE#: [#MAKEFILE#:6: two] Error 1 (ignored)\nexit 0\n");
+my $answer = "exit 1
+#MAKEFILE#:6: [two] error 1 (ignored)
+
+#0  two at $fulltestdir/#MAKEFILE#:5
+exit 0
+";
+
+run_make_test(undef, " -i two", $answer);
 
 # TEST #2
 # -------
 
 # Test that error line offset works
+
+my $answer = "hi
+there
+#MAKEFILE#:4: *** [all] error 1
+
+#0  all at $fulltestdir/#MAKEFILE#:2
+";
+
 
 run_make_test(qq!
 all:
@@ -29,7 +50,7 @@ all:
 \t\@echo there
 \t\@exit 1
 !,
-              '', "hi\nthere\n#MAKE#: *** [#MAKEFILE#:5: all] Error 1", 512);
+              '', $answer, 512);
 
 # TEST #3
 # -------
@@ -39,36 +60,68 @@ my $unk = './foobarbazbozblat';
 unlink($unk);
 
 my $err = $ERR_no_such_file;
+my $answer = "$unk xx yy
+#MAKE#: $unk: $err
+#MAKEFILE#:2: [one] error 127 (ignored)
+
+#0  one at $fulltestdir/#MAKEFILE#:2
+";
 
 run_make_test(qq!
 one: ; -$unk xx yy
 !,
-              'one', "$unk xx yy\n#MAKE#: $unk: $err\n#MAKE#: [#MAKEFILE#:2: one] Error 127 (ignored)\n");
+              'one', $answer);
 
 # TEST #4
 # -------
 
+my $answer = "$unk aa bb
+#MAKE#: $unk: $err
+#MAKEFILE#:2: [two] error 127 (ignored)
+
+#0  two at $fulltestdir/#MAKEFILE#:2
+";
+
 run_make_test(qq!
 two: ; $unk aa bb
-!, 'two -i',
-              "$unk aa bb\n#MAKE#: $unk: $err\n#MAKE#: [#MAKEFILE#:2: two] Error 127 (ignored)\n");
+!, 'two -i', $answer);
 
 # TEST #5
 # -------
 
-run_make_test(undef, 'two',
-              "$unk aa bb\n#MAKE#: $unk: $err\n#MAKE#: *** [#MAKEFILE#:2: two] Error 127\n", 512);
+my $answer = "$unk aa bb
+#MAKE#: $unk: $err
+#MAKEFILE#:2: *** [two] error 127
+
+#0  two at $fulltestdir/#MAKEFILE#:2
+";
+
+run_make_test(undef, 'two', $answer, 512);
 
 # SV #56918 : Test the unknown command as the second recipe line
+
+my $answer = "one
+$unk qq rr
+#MAKE#: $unk: $err
+#MAKEFILE#:3: *** [three] error 127
+
+#0  three at $fulltestdir/#MAKEFILE#:2
+";
 
 run_make_test(qq!
 three:
 \t\@echo one
 \t$unk qq rr
-!, 'three',
-              "one\n$unk qq rr\n#MAKE#: $unk: $err\n#MAKE#: *** [#MAKEFILE#:4: three] Error 127\n", 512);
+!, 'three', $answer, 512);
 
 # Try failing due to non-executable file
+
+my $answer = "$noexe xx yy
+#MAKE#: $noexe: $ERR_nonexe_file
+#MAKEFILE#:2: [one] error 127 (ignored)
+
+#0  one at $fulltestdir/#MAKEFILE#:2
+";
 
 if ($ERR_nonexe_file) {
     my $noexe = './barfooblatboz';
@@ -77,8 +130,7 @@ if ($ERR_nonexe_file) {
     run_make_test(qq!
     one: ; -$noexe xx yy
     two: ; $noexe aa bb
-    !,
-                  'one', "$noexe xx yy\n#MAKE#: $noexe: $ERR_nonexe_file\n#MAKE#: [#MAKEFILE#:2: one] Error 127 (ignored)\n");
+    !, 'one', $answer);
 
     unlink($noexe);
 }
@@ -92,12 +144,12 @@ if ($ERR_exe_dir) {
 PATH := .
 all: ; sd
 !,
-              '', "sd\n#MAKE#: sd: $ERR_exe_dir\n#MAKE#: *** [#MAKEFILE#:3: all] Error 127", 512);
+              '', "sd\n#MAKE#: sd: $ERR_exe_dir\n#MAKE#: *** [#MAKEFILE#:3: all] error 127", 512);
 
     run_make_test(q!
 all: ; ./sd
 !,
-              '', "./sd\n#MAKE#: ./sd: $ERR_exe_dir\n#MAKE#: *** [#MAKEFILE#:2: all] Error 127", 512);
+              '', "./sd\n#MAKE#: ./sd: $ERR_exe_dir\n#MAKE#: *** [#MAKEFILE#:2: all] error 127", 512);
 
     rmdir('sd');
 }

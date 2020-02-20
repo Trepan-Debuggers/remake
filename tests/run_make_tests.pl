@@ -177,7 +177,7 @@ sub valid_option
 
    if ($option =~ /^-srcdir$/i) {
        $srcdir = shift @argv;
-       if (! -f File::Spec->catfile($srcdir, 'src', 'gnumake.h')) {
+       if (! -f File::Spec->catfile($srcdir, 'src', 'gnuremake.h')) {
            print "$option $srcdir: Not a valid GNU make source directory.\n";
            exit 0;
        }
@@ -516,7 +516,7 @@ sub set_more_defaults
   # If srcdir wasn't provided on the command line, try to find it.
   if (! $srcdir && $blddir) {
     # See if the blddir is the srcdir
-    my $f = File::Spec->catpath($bldvol, File::Spec->catdir($blddir, 'src'), 'gnumake.h');
+    my $f = File::Spec->catpath($bldvol, File::Spec->catdir($blddir, 'src'), 'gnuremake.h');
     if (-f $f) {
       $srcdir = $blddir;
       $srcvol = $bldvol;
@@ -525,7 +525,7 @@ sub set_more_defaults
 
   if (! $srcdir) {
     # Not found, see if our parent is the source dir
-    my $f = File::Spec->catpath($cwdvol, File::Spec->catdir(File::Spec->updir(), 'src'), 'gnumake.h');
+    my $f = File::Spec->catpath($cwdvol, File::Spec->catdir(File::Spec->updir(), 'src'), 'gnuremake.h');
     if (-f $f) {
       $srcdir = File::Spec->updir();
       $srcvol = $cwdvol;
@@ -611,7 +611,7 @@ sub set_more_defaults
     $_ = <MF>;
     close(MF);
     /^abs_srcdir\s*=\s*(.*?)\s*$/m;
-    -f File::Spec->catfile($1, 'src', 'gnumake.h') and $srcdir = $1;
+    -f File::Spec->catfile($1, 'src', 'gnuremake.h') and $srcdir = $1;
   }
 
   # At this point we should have srcdir and blddir: get fq versions

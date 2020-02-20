@@ -14,6 +14,10 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef VARIABLE_H
+#define VARIABLE_H
+
+#include "gnuremake.h"
 #include "hash.h"
 
 /* Codes in a variable definition saying where the definition came from.
@@ -27,6 +31,7 @@ enum variable_origin
     o_command,          /* Variable given by user.  */
     o_override,         /* Variable from an 'override' directive.  */
     o_automatic,        /* Automatic variable -- cannot be set.  */
+    o_debugger,  	/* Set inside debugger.  */
     o_invalid           /* Core dump time.  */
   };
 
@@ -52,7 +57,7 @@ struct variable
   {
     char *name;                 /* Variable name.  */
     char *value;                /* Variable value.  */
-    floc fileinfo;              /* Where the variable was defined.  */
+    gmk_floc fileinfo;              /* Where the variable was defined.  */
     unsigned int length;        /* strlen (name) */
     unsigned int recursive:1;   /* Gets recursively re-evaluated.  */
     unsigned int append:1;      /* Nonzero if an appending target-specific
@@ -69,9 +74,9 @@ struct variable
                                 /* If >1, allow this many self-referential
                                    expansions.  */
     enum variable_flavor
-      flavor ENUM_BITFIELD (3); /* Variable flavor.  */
+      flavor ENUM_BITFIELD (4); /* Variable flavor.  */
     enum variable_origin
-      origin ENUM_BITFIELD (3); /* Variable origin.  */
+      origin ENUM_BITFIELD (4); /* Variable origin.  */
     enum variable_export
       {
         v_export,               /* Export this variable.  */
@@ -148,16 +153,64 @@ char *recursively_expand_for_file (struct variable *v, struct file *file);
 
 /* variable.c */
 struct variable_set_list *create_new_variable_set (void);
+
+/*!
+  Return a string describing origin.
+ */
+const char *origin2str(variable_origin_t origin);
+
 void free_variable_set (struct variable_set_list *);
+
+/*! Create a new variable set, push it on the current setlist,
+  and assign current_variable_set_list to it.
+ */
 struct variable_set_list *push_new_variable_scope (void);
+
+/*! Pop the top set off the current_variable_set_list, and free all
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
 void pop_variable_scope (void);
+
+/*! Define the automatic variables, and record the addresses of their
+  structures so we can change their values quickly.  */
 void define_automatic_variables (void);
+
+/*! Initialize FILE's variable set list.  If FILE already has a
+   variable set list, the topmost variable set is left intact, but the
+   the rest of the chain is replaced with FILE->parent's setlist.  If
+   FILE is a double-colon rule, then we will use the "root"
+   double-colon target's variable set as the parent of FILE's variable
+   set.
+
+   If we're READing a makefile, don't do the pattern variable search now,
+   since the pattern variable might not have been defined yet.  */
 void initialize_file_variables (struct file *file, int reading);
-void print_file_variables (const struct file *file);
+
+/*! Print all the local variables of P_TARGET.  Lines output have "# "
+    prepended. If you want hash table statistics too, set b_hash_stats
+    true.
+*/
+extern void print_file_variables(const file_t *p_target, bool b_hash_stats);
+
+/*! Print the data base of variables.  */
+
+extern void print_variable_data_base (void);
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+extern void print_variable_info (const void *item, void *arg);
+
 void print_target_variables (const struct file *file);
+
+/*! Print all the variables in SET.  PREFIX is printed before the
+   actual variable definitions (everything else is comments).  If you
+   want hash table statistics too, set b_hash_stats true.
+*/
+void print_variable_set (struct variable_set *set, const char *prefix, int pauto);
+
 void merge_variable_set_lists (struct variable_set_list **to_list,
                                struct variable_set_list *from_list);
-struct variable *do_variable_definition (const floc *flocp,
+struct variable *do_variable_definition (const gmk_floc *flocp,
                                          const char *name, const char *value,
                                          enum variable_origin origin,
                                          enum variable_flavor flavor,
@@ -165,12 +218,12 @@ struct variable *do_variable_definition (const floc *flocp,
 char *parse_variable_definition (const char *line,
                                  struct variable *v);
 struct variable *assign_variable_definition (struct variable *v, const char *line);
-struct variable *try_variable_definition (const floc *flocp, const char *line,
+struct variable *try_variable_definition (const gmk_floc *flocp, const char *line,
                                           enum variable_origin origin,
                                           int target_var);
 void init_hash_global_variable_set (void);
 void hash_init_function_table (void);
-void define_new_function(const floc *flocp, const char *name,
+void define_new_function(const gmk_floc *flocp, const char *name,
                          unsigned int min, unsigned int max, unsigned int flags,
                          gmk_func_ptr func);
 struct variable *lookup_variable (const char *name, size_t length);
@@ -182,7 +235,7 @@ struct variable *define_variable_in_set (const char *name, size_t length,
                                          enum variable_origin origin,
                                          int recursive,
                                          struct variable_set *set,
-                                         const floc *flocp);
+                                         const gmk_floc *flocp);
 
 /* Define a variable in the current variable set.  */
 
@@ -239,3 +292,5 @@ extern int export_all_variables;
 
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (CSTRLEN (MAKELEVEL_NAME))
+
+#endif /*VARIABLE_H*/

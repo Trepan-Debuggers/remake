@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "globals.h"
 #include "os.h"
 #include "output.h"
 
@@ -76,7 +77,7 @@ _outputs (struct output *out, int is_err, const char *msg)
 /* Write a message indicating that we've just entered or
    left (according to ENTERING) the current directory.  */
 
-static int
+int
 log_working_directory (int entering)
 {
   static char *buf = NULL;
@@ -587,7 +588,7 @@ message (int prefix, size_t len, const char *fmt, ...)
 /* Print an error message.  */
 
 void
-error (const floc *flocp, size_t len, const char *fmt, ...)
+error (const gmk_floc *flocp, size_t len, const char *fmt, ...)
 {
   va_list args;
   char *p;
@@ -618,7 +619,7 @@ error (const floc *flocp, size_t len, const char *fmt, ...)
 /* Print an error message and exit.  */
 
 void
-fatal (const floc *flocp, size_t len, const char *fmt, ...)
+fatal (const gmk_floc *flocp, size_t len, const char *fmt, ...)
 {
   va_list args;
   const char *stop = _(".  Stop.\n");

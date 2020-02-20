@@ -17,6 +17,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because makeint.h was found in $srcdir).  */
+
+#ifndef REMAKE_MAKEINT_H
+#define REMAKE_MAKEINT_H
+
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
@@ -54,7 +58,7 @@ char *alloca ();
 #ifdef WINDOWS32
 # define GMK_BUILDING_MAKE
 #endif
-#include "gnumake.h"
+#include "gnuremake.h"
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -96,13 +100,8 @@ char *alloca ();
 extern int errno;
 #endif
 
-#ifdef __VMS
-/* In strict ANSI mode, VMS compilers should not be defining the
-   VMS macro.  Define it here instead of a bulk edit for the correct code.
- */
-# ifndef VMS
-#  define VMS
-# endif
+#ifndef isblank
+# define isblank(c)     ((c) == ' ' || (c) == '\t')
 #endif
 
 #ifdef  HAVE_UNISTD_H
@@ -211,13 +210,6 @@ unsigned int get_path_max (void);
 # include <perror.h>
 /* Needed to use alloca on VMS.  */
 # include <builtins.h>
-
-extern int vms_use_mcr_command;
-extern int vms_always_use_cmd_file;
-extern int vms_gnv_shell;
-extern int vms_comma_separator;
-extern int vms_legacy_behavior;
-extern int vms_unix_simulation;
 #endif
 
 #if !defined(__attribute__) && (__GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__)
@@ -350,6 +342,21 @@ extern mode_t umask (mode_t);
 #define N_(msgid)           gettext_noop (msgid)
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
+/* Handle other OSs.
+   To overcome an issue parsing paths in a DOS/Windows environment when
+   built in a unix based environment, override the PATH_SEPARATOR_CHAR
+   definition unless being built for Cygwin. */
+#if defined(HAVE_DOS_PATHS) && !defined(__CYGWIN__)
+# undef PATH_SEPARATOR_CHAR
+# define PATH_SEPARATOR_CHAR ';'
+#elif !defined(PATH_SEPARATOR_CHAR)
+# if defined (VMS)
+#  define PATH_SEPARATOR_CHAR ','
+# else
+#  define PATH_SEPARATOR_CHAR ':'
+# endif
+#endif
+
 /* This is needed for getcwd() and chdir(), on some W32 systems.  */
 #if defined(HAVE_DIRECT_H)
 # include <direct.h>
@@ -410,12 +417,6 @@ extern int unixy_shell;
 /* The set of characters which are directory separators is OS-specific.  */
 #define MAP_DIRSEP      0x8000
 
-#ifdef VMS
-# define MAP_VMSCOMMA   MAP_COMMA
-#else
-# define MAP_VMSCOMMA   0x0000
-#endif
-
 #define MAP_SPACE       (MAP_BLANK|MAP_NEWLINE)
 
 /* Handle other OSs.
@@ -427,13 +428,8 @@ extern int unixy_shell;
 # define PATH_SEPARATOR_CHAR ';'
 # define MAP_PATHSEP    MAP_SEMI
 #elif !defined(PATH_SEPARATOR_CHAR)
-# if defined (VMS)
-#  define PATH_SEPARATOR_CHAR (vms_comma_separator ? ',' : ':')
-#  define MAP_PATHSEP    (vms_comma_separator ? MAP_COMMA : MAP_SEMI)
-# else
-#  define PATH_SEPARATOR_CHAR ':'
-#  define MAP_PATHSEP    MAP_COLON
-# endif
+#define PATH_SEPARATOR_CHAR ':'
+#define MAP_PATHSEP    MAP_COLON
 #elif PATH_SEPARATOR_CHAR == ':'
 # define MAP_PATHSEP     MAP_COLON
 #elif PATH_SEPARATOR_CHAR == ';'
@@ -462,7 +458,7 @@ extern struct rlimit stack_limit;
 
 #include <glob.h>
 
-#define NILF ((floc *)0)
+#define NILF ((gmk_floc *)0)
 
 #define CSTRLEN(_s)           (sizeof (_s)-1)
 #define STRING_SIZE_TUPLE(_s) (_s), CSTRLEN(_s)
@@ -478,21 +474,12 @@ extern struct rlimit stack_limit;
 #endif
 
 
-
-/* Specify the location of elements read from makefiles.  */
-typedef struct
-  {
-    const char *filenm;
-    unsigned long lineno;
-    unsigned long offset;
-  } floc;
-
 const char *concat (unsigned int, ...);
 void message (int prefix, size_t length, const char *fmt, ...)
               ATTRIBUTE ((__format__ (__printf__, 3, 4)));
-void error (const floc *flocp, size_t length, const char *fmt, ...)
+void error (const gmk_floc *flocp, size_t length, const char *fmt, ...)
             ATTRIBUTE ((__format__ (__printf__, 3, 4)));
-void fatal (const floc *flocp, size_t length, const char *fmt, ...)
+void fatal (const gmk_floc *flocp, size_t length, const char *fmt, ...)
             ATTRIBUTE ((noreturn, __format__ (__printf__, 3, 4)));
 void out_of_memory () NORETURN;
 
@@ -511,6 +498,8 @@ void out_of_memory () NORETURN;
                                  (_f), (_s), (_n))
 #define ONS(_t,_a,_f,_n,_s)   _t((_a), INTSTR_LENGTH + strlen (_s), \
                                  (_f), (_n), (_s))
+
+#define OUT_OF_MEM() O (fatal, NILF, _("virtual memory exhausted"))
 
 void die (int) NORETURN;
 void pfatal_with_name (const char *) NORETURN;
@@ -542,7 +531,7 @@ void *memrchr(const void *, int, size_t);
 int ar_name (const char *);
 void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
-time_t ar_member_date (const char *);
+int ar_member_date (const char *, time_t *);
 
 typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
                                       long int hdrpos, long int datapos,
@@ -552,9 +541,7 @@ typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
 
 long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
 int ar_name_equal (const char *name, const char *mem, int truncated);
-#ifndef VMS
 int ar_member_touch (const char *arname, const char *memname);
-#endif
 #endif
 
 int dir_file_exists_p (const char *, const char *);
@@ -576,7 +563,7 @@ void build_vpath_lists (void);
 void construct_vpath_list (char *pattern, char *dirpath);
 const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
                           unsigned int* vpath_index, unsigned int* path_index);
-int gpath_search (const char *file, size_t len);
+//int gpath_search (const char *file, size_t len);
 
 void construct_include_path (const char **arg_dirs);
 
@@ -594,13 +581,14 @@ void strcache_print_stats (const char *prefix);
 int strcache_iscached (const char *str);
 const char *strcache_add (const char *str);
 const char *strcache_add_len (const char *str, size_t len);
+int strcache_setbufsize (unsigned int size);
 
 /* Guile support  */
-int guile_gmake_setup (const floc *flocp);
+int guile_gmake_setup (const gmk_floc *flocp);
 
 /* Loadable object support.  Sets to the strcached name of the loaded file.  */
-typedef int (*load_func_t)(const floc *flocp);
-int load_file (const floc *flocp, const char **filename, int noerror);
+typedef int (*load_func_t)(const gmk_floc *flocp);
+int load_file (const gmk_floc *flocp, const char **filename, int noerror);
 void unload_file (const char *name);
 
 /* Maintainer mode support */
@@ -621,16 +609,16 @@ long int atol ();
 long int lseek ();
 # endif
 
-# ifdef  HAVE_GETCWD
-#  if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-#  endif
-# else
-char *getwd ();
-#  define getcwd(buf, len)       getwd (buf)
-# endif
-
 #endif  /* Not GNU C library or POSIX.  */
+
+#ifdef  HAVE_GETCWD
+# if !defined(VMS) && !defined(__DECC)
+char *getcwd ();
+# endif
+#else
+char *getwd ();
+# define getcwd(buf, len)       getwd (buf)
+#endif
 
 #if !HAVE_STRCASECMP
 # if HAVE_STRICMP
@@ -654,16 +642,10 @@ int strncasecmp (const char *s1, const char *s2, int n);
 # endif
 #endif
 
-#define OUTPUT_SYNC_NONE    0
-#define OUTPUT_SYNC_LINE    1
-#define OUTPUT_SYNC_TARGET  2
-#define OUTPUT_SYNC_RECURSE 3
+extern const gmk_floc *reading_file;
+extern const gmk_floc **expanding_var;
 
-/* Non-GNU systems may not declare this in unistd.h.  */
 extern char **environ;
-
-extern const floc *reading_file;
-extern const floc **expanding_var;
 
 extern unsigned short stopchar_map[];
 
@@ -675,8 +657,6 @@ extern int warn_undefined_variables_flag, trace_flag, posix_pedantic;
 extern int not_parallel, second_expansion, clock_skew_detected;
 extern int rebuilding_makefiles, one_shell, output_sync, verify_flag;
 
-extern const char *default_shell;
-
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
 
@@ -686,39 +666,11 @@ extern int batch_mode_shell;
 extern char cmd_prefix;
 
 extern unsigned int job_slots;
+extern int job_fds[2];
+extern int job_rfd;
 extern double max_load_average;
 
 extern const char *program;
-
-#ifdef VMS
-const char *vms_command (const char *argv0);
-const char *vms_progname (const char *argv0);
-
-void vms_exit (int);
-# define _exit(foo) vms_exit(foo)
-# define exit(foo) vms_exit(foo)
-
-extern char *program_name;
-
-void
-set_program_name (const char *arv0);
-
-int
-need_vms_symbol (void);
-
-int
-create_foreign_command (const char *command, const char *image);
-
-int
-vms_export_dcl_symbol (const char *name, const char *value);
-
-int
-vms_putenv_symbol (const char *string);
-
-void
-vms_restore_symbol (const char *string);
-
-#endif
 
 void remote_setup (void);
 void remote_cleanup (void);
@@ -806,3 +758,5 @@ extern int handling_fatal_signal;
 
 #define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
                            while((_v)==0 && errno==EINTR)
+
+#endif /* REMAKE_MAKEINT_H */

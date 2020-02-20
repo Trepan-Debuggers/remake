@@ -173,95 +173,6 @@ concat (unsigned int num, ...)
   return result;
 }
 
-/* Like malloc but get fatal error if memory is exhausted.  */
-/* Don't bother if we're using dmalloc; it provides these for us.  */
-
-#ifndef HAVE_DMALLOC_H
-
-#undef xmalloc
-#undef xcalloc
-#undef xrealloc
-#undef xstrdup
-
-void *
-xmalloc (size_t size)
-{
-  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
-  void *result = malloc (size ? size : 1);
-  if (result == 0)
-    out_of_memory ();
-  return result;
-}
-
-
-void *
-xcalloc (size_t size)
-{
-  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
-  void *result = calloc (size ? size : 1, 1);
-  if (result == 0)
-    out_of_memory ();
-  return result;
-}
-
-
-void *
-xrealloc (void *ptr, size_t size)
-{
-  void *result;
-
-  /* Some older implementations of realloc() don't conform to ISO.  */
-  if (! size)
-    size = 1;
-  result = ptr ? realloc (ptr, size) : malloc (size);
-  if (result == 0)
-    out_of_memory ();
-  return result;
-}
-
-
-char *
-xstrdup (const char *ptr)
-{
-  char *result;
-
-#ifdef HAVE_STRDUP
-  result = strdup (ptr);
-#else
-  result = malloc (strlen (ptr) + 1);
-#endif
-
-  if (result == 0)
-    out_of_memory ();
-
-#ifdef HAVE_STRDUP
-  return result;
-#else
-  return strcpy (result, ptr);
-#endif
-}
-
-#endif  /* HAVE_DMALLOC_H */
-
-char *
-xstrndup (const char *str, size_t length)
-{
-  char *result;
-
-#ifdef HAVE_STRNDUP
-  result = strndup (str, length);
-  if (result == 0)
-    out_of_memory ();
-#else
-  result = xmalloc (length + 1);
-  if (length > 0)
-    strncpy (result, str, length);
-  result[length] = '\0';
-#endif
-
-  return result;
-}
-
 #ifndef HAVE_MEMRCHR
 void *
 memrchr(const void* str, int ch, size_t len)
@@ -845,3 +756,52 @@ get_path_max (void)
   return value;
 }
 #endif
+
+/* Map of possible stop characters for searching strings.  */
+#ifndef UCHAR_MAX
+# define UCHAR_MAX 255
+#endif
+unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
+
+/* This character map locate stop chars when parsing GNU makefiles.
+   Each element is true if we should stop parsing on that character.  */
+
+extern void
+initialize_stopchar_map (void)
+{
+  int i;
+  stopchar_map[(int)'\0'] = MAP_NUL;
+  stopchar_map[(int)'#'] = MAP_COMMENT;
+  stopchar_map[(int)';'] = MAP_SEMI;
+  stopchar_map[(int)'='] = MAP_EQUALS;
+  stopchar_map[(int)':'] = MAP_COLON;
+  stopchar_map[(int)'|'] = MAP_PIPE;
+  stopchar_map[(int)'.'] = MAP_DOT | MAP_USERFUNC;
+  stopchar_map[(int)','] = MAP_COMMA;
+  stopchar_map[(int)'('] = MAP_VARSEP;
+  stopchar_map[(int)'{'] = MAP_VARSEP;
+  stopchar_map[(int)'}'] = MAP_VARSEP;
+  stopchar_map[(int)')'] = MAP_VARSEP;
+  stopchar_map[(int)'$'] = MAP_VARIABLE;
+
+  stopchar_map[(int)'-'] = MAP_USERFUNC;
+  stopchar_map[(int)'_'] = MAP_USERFUNC;
+
+  stopchar_map[(int)' '] = MAP_BLANK;
+  stopchar_map[(int)'\t'] = MAP_BLANK;
+
+  stopchar_map[(int)'/'] = MAP_DIRSEP;
+
+#if defined(HAVE_DOS_PATHS)
+  stopchar_map[(int)'\\'] = MAP_DIRSEP;
+#endif
+
+  for (i = 1; i <= UCHAR_MAX; ++i)
+    {
+      if (isspace (i) && NONE_SET (stopchar_map[i], MAP_BLANK))
+        /* Don't mark blank characters as newline characters.  */
+        stopchar_map[i] |= MAP_NEWLINE;
+      else if (isalnum (i))
+        stopchar_map[i] |= MAP_USERFUNC;
+    }
+}
