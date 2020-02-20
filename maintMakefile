@@ -94,6 +94,13 @@ Basic.mk: Basic.mk.template .dep_segment Makefile
 	  $(word 2,$^) >>$@
 	chmod a-w $@
 
+build.sh.in: build.template Makefile
+	rm -f $@
+	sed -e 's@%objs%@$(patsubst %.o,%.$${OBJEXT},$(filter-out remote-%,$(make_OBJECTS)))@g' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.$${OBJEXT},$(globsrc))@g' \
+	$< > $@
+	chmod a-w+x $@
+
 
 # Use automake to build a dependency list file, for Makebase.mk.
 #
