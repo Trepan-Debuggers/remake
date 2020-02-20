@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # Copyright (C) 2007, 2008 Simon Josefsson <simon@josefsson.org>
 # Copyright (C) 2007 Luis Mondesi <lemsx1@gmail.com>
