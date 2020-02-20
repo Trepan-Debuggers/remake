@@ -1,6 +1,4 @@
-AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
-		-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" \
-		-DLOCALEDIR=\"$(localedir)\"
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/lib \
 
 test_profile_SOURCES = test_profile.c
 
