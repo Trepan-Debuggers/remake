@@ -106,6 +106,8 @@ loadavg_SRCS =	lib/getloadavg.c
 
 make_SOURCES =	$(make_SRCS)
 
+EXTRA_make_SOURCES = src/mock.c
+
 noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
 				src/dep.h src/expand.h src/file.h src/file_basic.h \
 				src/filedef.h src/function.h src/getopt.h src/gettext.h \
@@ -164,6 +166,12 @@ EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS.remake README.remake REMAKE.todo Rakefile \
 		$(mk_FILES) $(m4_FILES) $(test_FILES)
+
+# FIXME: Not sure why these src/w32 *.Po's & Makefile are left over
+#       but distcheck fails with them so they have to go, hasta la vista
+distclean-local:
+	find src/w32 -type f  -name 'libw32*.Po' -delete
+	rm -f src/w32/Makefile
 
 # --------------- Generate the Guile default module content
 
