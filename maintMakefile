@@ -181,7 +181,6 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 
 # NOTE: This is handled by the bootstrap script now
 
-#: Pull in translation files from https://translationproject.org
 update: po-check
 
 # PO archive mirrors --- Be careful; some might not be fully populated!
@@ -361,6 +360,8 @@ changelog-check:
 # Verify that all source files using _() are listed in po/POTFILES.in.
 # Ignore src/makeint.h; it defines _().
 # FIXME: Also ignore files in lib. remake has more of these than make. Why?
+
+#: Pull in translation files from https://translationproject.org
 po-check:
 	if test -f po/POTFILES.in; then \
 	  grep '^[^#]' po/POTFILES.in | sort > $@-1; \
