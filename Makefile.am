@@ -151,7 +151,7 @@ mk_FILES =	Basic.mk mk/msdosdjgpp.mk mk/Amiga.mk mk/Windows32.mk
 
 m4_FILES =	m4/gnulib-cache.m4
 
-test_FILES =	tests/run_make_tests tests/run_make_tests.bat \
+test_FILES =	tests/run_make_tests \
 		tests/run_make_tests.pl tests/test_driver.pl \
 		tests/config-flags.pm.in tests/config_flags_pm.com \
 		tests/config-flags.pm.W32 \
@@ -161,7 +161,7 @@ test_FILES =	tests/run_make_tests tests/run_make_tests.bat \
 EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		README.customs \
 		SCOPTIONS src/config.ami \
-		README.W32 build_w32.bat src/config.h.W32 \
+		README.W32 src/config.h.W32 \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS-remake.md README.remake REMAKE.todo Rakefile \

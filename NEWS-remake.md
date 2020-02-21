@@ -1,5 +1,5 @@
-Version 4.3.1+dbg-1.4 (2017-11-21)
-==================================
+Version 4.3.1+dbg-1.4
+======================
 
 Rebase code on GNU Make 4.3. This was made possible by Thomas Kupper (boretom) who did all the heavy lifting while rocky looked on in amazement.
 
