@@ -36,7 +36,7 @@ PERLFLAGS ?=
 # We like mondo-warnings!
 # Also force comments to be preserved.  This helps when using ccache, in
 # combination with GCC 7's implicit-fallthrough warning.
-MAKE_CFLAGS := -C -Wall -Wextra -Werror -Wwrite-strings -Wshadow \
+MAKE_CFLAGS := -Wall -Wextra -Wwrite-strings -Wshadow \
 	-Wdeclaration-after-statement -Wbad-function-cast -Wformat-security \
 	-Wtype-limits -Wunused-but-set-parameter -Wlogical-op \
 	-Wignored-qualifiers # -Wformat-signedness  # CI's gcc can't handle this
