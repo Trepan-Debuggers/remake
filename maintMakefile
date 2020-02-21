@@ -143,16 +143,17 @@ git-very-clean: git-clean
 ## Generating ChangeLog.  ##
 ## ---------------------- ##
 
-gl2cl-date := 2013-10-10
-gl2cl := $(GNULIBDIR)/build-aux/gitlog-to-changelog
+# rocky: we use our own routine here:
+# gl2cl-date := 2013-10-10
+# gl2cl := $(GNULIBDIR)/build-aux/gitlog-to-changelog
 
-# Rebuild the changelog whenever a new commit is added
-ChangeLog: .check-git-HEAD
-	if test -f '$(gl2cl)'; then \
-	    '$(gl2cl)' --since='$(gl2cl-date)' > '$@'; \
-	else \
-	    echo "WARNING: $(gl2cl) is not available.  No $@ generated."; \
-	fi
+# # Rebuild the changelog whenever a new commit is added
+# ChangeLog: .check-git-HEAD
+# 	if test -f '$(gl2cl)'; then \
+# 	    '$(gl2cl)' --since='$(gl2cl-date)' > '$@'; \
+# 	else \
+# 	    echo "WARNING: $(gl2cl) is not available.  No $@ generated."; \
+# 	fi
 
 .PHONY: .check-git-HEAD
 .check-git-HEAD:
