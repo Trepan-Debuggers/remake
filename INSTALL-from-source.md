@@ -2,7 +2,7 @@
 
 Build from sources you need:
 
-* a previous version of GNU make
+* a previous version of remake or GNU make
 * gcc
 * gettext
 * GNU Readline
@@ -16,17 +16,18 @@ Additionally if installing from git you need:
 * autoconf
 * automake
 * autopoint
+* gzip and lzip (to compress the tarball)
 
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
 ```console
-   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint libreadline-dev make guile-2.0 texinfo
+   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint libreadline-dev make guile-2.0 texinfo lzip
 ```
 
 Here is a `yum` command Redhat/CentOS:
 
 ```console
-   $ sudo yum install git gcc pkgconfig autoconf automake readline-devel make guile
+   $ sudo yum install git gcc pkgconfig autoconf automake readline-devel make guile lzip
 ```
 
 To build documentation you need:

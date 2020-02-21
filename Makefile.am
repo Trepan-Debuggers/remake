@@ -164,7 +164,7 @@ EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		README.W32 build_w32.bat src/config.h.W32 \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
-		NEWS.remake README.remake REMAKE.todo Rakefile \
+		NEWS-remake.md README.remake REMAKE.todo Rakefile \
 		$(mk_FILES) $(m4_FILES) $(test_FILES)
 
 # FIXME: Not sure why these src/w32 *.Po's & Makefile are left over
