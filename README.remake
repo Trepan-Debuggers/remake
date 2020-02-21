@@ -1,6 +1,6 @@
 See the file NEWS-remake.md for the user-visible changes
 
-lots of room for improvement. But since it's only been me working on this, this will have to do.
+There is a lot of room for improvement. But since it's only been me working on this, this will have to do.
 
 Although there are a number of gaps the debugger is very usable -- at least for me. It passes the standard GNU Make regression tests, and I
 have now added tests for the debugger. For that you need RSpec (a Ruby "gem").
