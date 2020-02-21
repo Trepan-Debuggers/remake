@@ -159,7 +159,6 @@ test_FILES =	tests/run_make_tests tests/run_make_tests.bat \
 EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		README.customs \
 		SCOPTIONS src/config.ami \
-		README.DOS builddos.bat src/configh.dos \
 		README.W32 build_w32.bat src/config.h.W32 \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
