@@ -22,7 +22,7 @@ two:
 # TEST #1
 # -------
 
-my $answer = "exit 1
+$answer = "exit 1
 #MAKEFILE#:6: [two] error 1 (ignored)
 
 #0  two at $fulltestdir/#MAKEFILE#:5
@@ -36,7 +36,7 @@ run_make_test(undef, " -i two", $answer);
 
 # Test that error line offset works
 
-my $answer = "hi
+$answer = "hi
 there
 #MAKEFILE#:4: *** [all] error 1
 
@@ -60,7 +60,7 @@ my $unk = './foobarbazbozblat';
 unlink($unk);
 
 my $err = $ERR_no_such_file;
-my $answer = "$unk xx yy
+$answer = "$unk xx yy
 #MAKE#: $unk: $err
 #MAKEFILE#:2: [one] error 127 (ignored)
 
@@ -75,7 +75,7 @@ one: ; -$unk xx yy
 # TEST #4
 # -------
 
-my $answer = "$unk aa bb
+$answer = "$unk aa bb
 #MAKE#: $unk: $err
 #MAKEFILE#:2: [two] error 127 (ignored)
 
@@ -89,7 +89,7 @@ two: ; $unk aa bb
 # TEST #5
 # -------
 
-my $answer = "$unk aa bb
+$answer = "$unk aa bb
 #MAKE#: $unk: $err
 #MAKEFILE#:2: *** [two] error 127
 
@@ -100,7 +100,7 @@ run_make_test(undef, 'two', $answer, 512);
 
 # SV #56918 : Test the unknown command as the second recipe line
 
-my $answer = "one
+$answer = "one
 $unk qq rr
 #MAKE#: $unk: $err
 #MAKEFILE#:3: *** [three] error 127
@@ -116,16 +116,16 @@ three:
 
 # Try failing due to non-executable file
 
-my $answer = "$noexe xx yy
+if ($ERR_nonexe_file) {
+    my $noexe = './barfooblatboz';
+    touch($noexe);
+
+    $answer = "$noexe xx yy
 #MAKE#: $noexe: $ERR_nonexe_file
 #MAKEFILE#:2: [one] error 127 (ignored)
 
 #0  one at $fulltestdir/#MAKEFILE#:2
 ";
-
-if ($ERR_nonexe_file) {
-    my $noexe = './barfooblatboz';
-    touch($noexe);
 
     run_make_test(qq!
     one: ; -$noexe xx yy

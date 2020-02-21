@@ -27,7 +27,11 @@ GNUWEBDIR ?= $(SRCROOTDIR)/gnu-www
 MAKEWEBDIR ?= $(SRCROOTDIR)/make/make-web
 
 # Enable Perl warnings for the test suite
-PERLFLAGS := -w
+# PERLFLAGS := -w
+# rocky: GNU Make's tests/run_make_tests.pl as distributed in 4.3 gives
+# "variable used once" warnings. Rather than try to improve this Perl program
+# as distributed in GNU Make, we'll squelch the warnings.
+PERLFLAGS ?=
 
 # We like mondo-warnings!
 # Also force comments to be preserved.  This helps when using ccache, in
