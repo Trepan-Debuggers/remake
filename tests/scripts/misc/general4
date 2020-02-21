@@ -117,7 +117,7 @@ rmdir('sd');
 create_file($sname, '');
 chmod 0755, $sname;
 
-my $answer = "$sname
+$answer = "$sname
 #MAKE#: $sname: $ERR_no_such_file
 #MAKEFILE#:3: *** [all] error 127
 

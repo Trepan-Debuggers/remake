@@ -21,7 +21,7 @@ print MAKEFILE qq{
 all: ; \@$script
 };
 
-my $out = `/bin/sh $flags '$script' 2>&1`;
+$out = `/bin/sh $flags '$script' 2>&1`;
 my $answer = qq{#MAKEFILE#:4: *** [all] error $err
 
 #0 all at #MAKEFILE#:4

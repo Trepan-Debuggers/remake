@@ -1,9 +1,11 @@
 /ar-lib
+/compile
 /config.guess
 /config.h.in
 /config.sub
 /depcomp
 /install-sh
 /mdate-sh
+/missing
 /test-driver
 /texinfo.tex
