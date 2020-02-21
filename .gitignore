@@ -4,6 +4,7 @@
 .deps
 /.dep_segment
 /ABOUT-NLS
+/Basic.mk
 /ChangeLog
 /Makefile
 /Makefile.DOS
@@ -40,6 +41,7 @@
 /remake
 /remake-*.tar.bz2
 /remake-*.tar.gz
+/remake-*.tar.lz
 /stamp-h1
 /tmp
 /w32

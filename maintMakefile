@@ -181,7 +181,7 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 
 # NOTE: This is handled by the bootstrap script now
 
-#update: po-update
+#: Pull in translation files from https://translationproject.org
 update: po-check
 
 # PO archive mirrors --- Be careful; some might not be fully populated!
