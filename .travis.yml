@@ -1,14 +1,30 @@
-os: linux
-
-# 'xenial': one test of 'functions/wildcard' fails
-# On bionic it works out of the box
-dist: bionic
-
 language: c
 
-install:
-  # Prerequisites
-  - sudo apt-get install autopoint libreadline-dev wget texinfo gettext
+compiler:
+  - gcc
+
+addons:
+  homebrew:
+    packages:
+      - autoconf automake gettext gcc guile lzip pkg-config readline texinfo
+  apt:
+    packages:
+      - autopoint gettext libreadline-dev texinfo wget
+
+jobs:
+  include:
+    - os: linux
+      name: Ubuntu
+      dist: bionic
+    - os: osx
+      name: macOS
+      env:
+        - GETTEXT_EVAL="PATH=/usr/local/opt/gettext/bin:$PATH"
+      osx_image: xcode9.4
+
+before_install:
+  # if macOS then add autopoint/gettext path to the PATH variable
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then eval "${GETTEXT_EVAL}" ; fi
 
 # run the tests
 script: autoreconf -i && ./configure && make po-update && (cd doc && make stamp-1 stamp-vti) && make && make check
