@@ -1473,9 +1473,9 @@ main (int argc, const char **argv, char **envp)
           }
         }
 #ifndef HAVE_LIBREADLINE
-      error (NILF,
+      O (error, NILF,
              "warning: you specified a debugger option, but you don't have readline support");
-      error (NILF,
+      O (error, NILF,
              "debugger support compiled in. Debugger options will be ignored.");
 #endif
     }
