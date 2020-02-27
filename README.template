@@ -147,18 +147,10 @@ Ports
   - See README.customs for details on integrating GNU make with the
     Customs distributed build environment from the Pmake distribution.
 
-  - See README.VMS for details about GNU Make on OpenVMS.
-
-  - See README.Amiga for details about GNU Make on AmigaDOS.
-
   - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
 
   - See README.DOS for compilation instructions on MS-DOS and MS-Windows
     using DJGPP tools.
-
-    A precompiled binary of the MSDOS port of GNU Make is available as part
-    of DJGPP; see the WWW page http://www.delorie.com/djgpp/ for more
-    information.
 
     The Cygwin project maintains its own port of GNU make.  That port may have
     patches which are not present in this version.  If you are using Cygwin

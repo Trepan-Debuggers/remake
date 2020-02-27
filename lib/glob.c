@@ -72,7 +72,7 @@ USA.  */
 # endif
 #endif
 
-#if !defined _AMIGA && !defined VMS && !defined WINDOWS32
+#if !defined WINDOWS32
 # include <pwd.h>
 #endif
 
@@ -541,11 +541,7 @@ glob (pattern, flags, errfunc, pglob)
       else
 	{
 	  filename = pattern;
-#ifdef _AMIGA
-	  dirname = "";
-#else
 	  dirname = ".";
-#endif
 	  dirlen = 0;
 	}
     }
@@ -722,7 +718,7 @@ glob (pattern, flags, errfunc, pglob)
 	      dirname = newp;
 	    }
 	}
-# if !defined _AMIGA && !defined WINDOWS32 && !defined VMS
+# if !defined WINDOWS32
       else
 	{
 	  char *end_name = strchr (dirname, '/');

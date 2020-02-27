@@ -179,14 +179,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *varg)
 
 #if (!defined (PORTAR) || PORTAR == 0) && (!defined (PORT5AR) || PORT5AR == 0)
 #undef  PORTAR
-#ifdef M_XENIX
-/* According to Jim Sievert <jas1@rsvl.unisys.com>, for SCO XENIX defining
-   PORTAR to 1 gets the wrong archive format, and defining it to 0 gets the
-   right one.  */
-#define PORTAR 0
-#else
 #define PORTAR 1
-#endif
 #endif
 
 /* On AIX, define these symbols to be sure to get both archive formats.
@@ -340,11 +333,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
   }
 #else
   {
-#ifndef M_XENIX
     int buf;
-#else
-    unsigned short int buf;
-#endif
     int nread;
     nread = readbuf (desc, &buf, sizeof (buf));
     if (nread != sizeof (buf) || buf != ARMAG)
