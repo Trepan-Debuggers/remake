@@ -542,7 +542,7 @@ snap_file (const void *item, void *arg)
    Also mark the files depended on by .PRECIOUS, .PHONY, .SILENT,
    and various other special targets.  */
 
-void
+extern void
 snap_deps (void)
 {
   struct file *f;

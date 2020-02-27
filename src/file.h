@@ -81,4 +81,12 @@ extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
 
 /*! Expand and parse each dependency line. */
 extern void expand_deps (file_t *f);
+
+/*! For each dependency of each file, make the 'struct dep' point
+   at the appropriate 'struct file' (which may have to be created).
+
+   Also mark the files depended on by .PRECIOUS, .PHONY, .SILENT,
+   and various other special targets.  */
+extern void snap_deps (void);
+
 #endif /*FILE_H*/

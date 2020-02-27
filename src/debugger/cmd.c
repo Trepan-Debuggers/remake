@@ -1,5 +1,6 @@
 /*
-Copyright (C) 2004-2005, 2007-2009, 2011, 2014-2015 R. Bernstein
+Copyright (C) 2004-2005, 2007-2009, 2011,
+              2014-2015, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -103,6 +104,7 @@ long_cmd_t commands[] = {
   { "help"    , 'h' },
   { "info"    , 'i' },
   { "list"    , 'l' },
+  { "load"    , 'M' },
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "pwd"     , 'P' },
@@ -191,6 +193,7 @@ find_command (const char *psz_name)
 #include "command/finish.h"
 #include "command/frame.h"
 #include "command/info.h"
+#include "command/load.h"
 #include "command/next.h"
 #include "command/list.h"
 #include "command/print.h"
@@ -229,6 +232,7 @@ cmd_initialize(void)
   dbg_cmd_info_init    ('i');
   dbg_cmd_skip_init    ('k');
   dbg_cmd_list_init    ('l');
+  dbg_cmd_load_init    ('M');
   dbg_cmd_next_init    ('n');
   dbg_cmd_print_init   ('p');
   dbg_cmd_pwd_init     ('P');
