@@ -19,6 +19,7 @@ An Emacs interface is available via realgud_.
    :maxdepth: 2
    :caption: Contents:
 
+   features
    manpage
 
 
