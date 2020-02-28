@@ -53,7 +53,7 @@ have commands associated with them and are either phony or are not implicit.
 
 Print debugging information in addition to normal processing.
 
-If *flags* are omitted, then the behavior is the same as if `-d`
+If *flags* are omitted, then the behavior is the same as if `--trace=normal`
 was specified
 
 *flags* can be one of:
