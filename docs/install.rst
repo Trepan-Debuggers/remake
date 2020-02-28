@@ -41,7 +41,7 @@ On OSX systems, you can install from Homebrew or MacPorts_.
 
 .. code:: console
 
-    $  brew install `remake`
+    $  brew install remake
 
 
 From Source
@@ -86,24 +86,28 @@ Optionally you may want:
 
 Additionally if installing from git you need:
 
-* git (duh)
-* autoconf
-* automake
-* autopoint
+* `git` (duh)
+* `autoconf`
+* `automake`
+* `autopoint`
+* `gettext` to process the language-customizaton files in the `po` director
+
+and optionally:
+
 * gzip and lzip (to compress the tarball)
 
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
 .. code:: console
 
-   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint libreadline-dev make guile-2.0 texinfo lzip
+   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.0 texinfo lzip
 
 
 Here is a `yum` command Redhat/CentOS:
 
 .. code:: console
 
-   $ sudo yum install git gcc pkgconfig autoconf automake readline-devel make guile lzip
+   $ sudo yum install git gcc pkgconfig autoconf automake gettext readline-devel make guile lzip
 
 
 To build documentation you need:
@@ -130,11 +134,13 @@ Creating and running configure script
 .. code:: console
 
     $ autoreconf -f -i
-    $ ./configure
+    $ ./configure --enable-maintainer-mode "$@"
+    $ make po-update
+    $ (cd doc && make stamp-1 stamp-vti)
 
 
-Updating translation links
-..........................
+Updating language-translation text substitutions
+................................................
 
 After running `configure` run:
 

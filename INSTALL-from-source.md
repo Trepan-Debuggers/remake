@@ -62,7 +62,7 @@ This performs the step below steps up to but not including
 	$ (cd doc && make stamp-1 stamp-vti)
 ```
 
-# Updating translation links
+# Updating language-translation text substitutions
 
 After running `configure` run:
 
@@ -99,3 +99,9 @@ The main targets to remove `remake` are:
 * `uninstall` - removes files created via  `make install` or removes installation
 * `clean`  - removes files created via  `make` or `make all`
 * `distclean` - more aggresively removes any files that are not part of git
+
+Therefore to remove file installed via `make install`:
+
+```console
+    $ make uninstall # ;-)
+```
