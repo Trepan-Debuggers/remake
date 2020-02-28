@@ -22,4 +22,4 @@ info_TEXINFOS =	make.texi remake.texi
 
 make_TEXINFOS = fdl.texi make-stds.texi
 
-CLEANFILES = callgrind.out.* make*.html remake*.html remake.info
+CLEANFILES = callgrind.out.* make*.html remake*.html make.pdf remake.pdf remake.info
