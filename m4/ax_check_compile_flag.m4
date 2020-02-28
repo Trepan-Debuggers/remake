@@ -38,8 +38,8 @@
 
 # Rocky change: Assume pre-set variable WARN_TO_ERROR_CFLAG is be
 # string "-Werror" (treat compiler warnings as errors) if that option
-# is possible, "". This allows us to filter unknown options that give
-# warnings instead of errors.
+# is possible, or "" if not. This allows us to remove unknown compiler
+# options simply give warnings on compilation instead of errors.
 
 AC_DEFUN([AX_CHECK_COMPILE_FLAG],
 [AC_PREREQ(2.64)dnl for _AC_LANG_PREFIX and AS_VAR_IF
