@@ -3,7 +3,7 @@
 .PHONY: html
 
 html:
-	$(MAKE) -C ../.. $@
+	$(MAKE) -C ../../../.. $@
 
 %: html
-	$(MAKE) -C ../.. $@
+	$(MAKE) -C ../../../.. $@

@@ -1,4 +1,4 @@
-.. _zshdb:
+.. _remake:
 
 .. toctree::
 .. contents::
@@ -115,3 +115,4 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see http://www.gnu.org/licenses/ .
 
 .. _Make: https://www.gnu.org/software/make/
+.. _remake: https://bashdb.sf.net/remake
