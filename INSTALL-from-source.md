@@ -27,20 +27,41 @@ and optionally:
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
 ```console
-   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.2 texinfo lzip
+   $ sudo apt-get install git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.2 lzip
 ```
 
-Here is a `yum` command Redhat/CentOS:
+Here is a `yum`/`dnf` command for Redhat/CentOS:
 
 ```console
    $ sudo yum install git gcc pkgconfig autoconf automake gettext readline-devel make guile lzip
+
+   # on CentOS 7 and later, autopoint is part of gettext-devel
+   $ sudo yum install git gcc pkgconfig autoconf automake gettext gettext-devel readline-devel make guile lzip
+```
+
+Here is a `brew` command for macOS (additionally Xcode is required):
+
+```console
+   $ sudo brew install git pkg-config autoconf automake gettext readline guile lzip
+```
+
+Here is a `pkg` command for FreeBSD:
+
+```console
+   $ sudo pkg install git gcc pkgconf autotools automake gettext gmake readline rsync guile2 lzip wget
+```
+
+Here is a `pkg_add` command for OpenBSD as, root:
+
+```console
+   $ pkg_add install git pkgconf autoconf-2.69p2 automake-1.16.1 gettext-tools ggrep gmake readline rsync-3.1.3 guile2 lzip wget
 ```
 
 To build documentation you need:
 
 * [`texinfo`](https://www.gnu.org/software/texinfo/) for building the TeXInfo docs
 
-Add that to the `apt-get` or `yum` command above.
+Add that to any of the above package installation commands above.
 
 # Simplified approach
 
@@ -58,8 +79,6 @@ This performs the step below steps up to but not including
 ```console
 	$ autoreconf -f -i
 	$ ./configure --enable-maintainer-mode "$@"
-	$ make po-update
-	$ (cd doc && make stamp-1 stamp-vti)
 ```
 
 # Updating language-translation text substitutions
