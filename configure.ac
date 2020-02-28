@@ -668,23 +668,49 @@ Makefile build.cfg lib/Makefile po/Makefile.in doc/Makefile \
 # combination with GCC 7's implicit-fallthrough warning.
 # check for some supported compiler flags, instead of have 'em hard coded in
 # maintMakefile
-# -Werror is too much, on differentt platform we get different warnings FOR
+# -Werror is too much, on different platform we get different warnings FOR
 # e.g. guile headers.
-# AX_CHECK_COMPILE_FLAG([-Werrror], [AM_CFLAGS="$AM_CFLAGS -Werror"])
-AX_CHECK_COMPILE_FLAG([-C], [AM_CFLAGS="$AM_CFLAGS -C"])
-AX_CHECK_COMPILE_FLAG([-Wall],[AM_CFLAGS="$AM_CFLAGS -Wall"])
-AX_CHECK_COMPILE_FLAG([-Wextra], [AM_CFLAGS="$AM_CFLAGS -Wextra"])
-AX_CHECK_COMPILE_FLAG([-Wwrite-strings], [AM_CFLAGS="$AM_CFLAGS -Wwrite-strings"])
-AX_CHECK_COMPILE_FLAG([-Wshadow], [AM_CFLAGS="$AM_CFLAGS -Wshadow"])
-AX_CHECK_COMPILE_FLAG([-Wdeclaration-after-statement], [AM_CFLAGS="$AM_CFLAGS -Wdeclaration-after-statement"])
-AX_CHECK_COMPILE_FLAG([-Wbad-function-cast], [AM_CFLAGS="$AM_CFLAGS -Wbad-function-cast"])
-AX_CHECK_COMPILE_FLAG([-Wformat-security], [AM_CFLAGS="$AM_CFLAGS -Wformat-security"])
-AX_CHECK_COMPILE_FLAG([-Wtype-limits], [AM_CFLAGS="$AM_CFLAGS -Wtype-limits"])
-AX_CHECK_COMPILE_FLAG([-Wunused-but-set-parameter], [AM_CFLAGS="$AM_CFLAGS -Wunused-but-set-parameter"])
-AX_CHECK_COMPILE_FLAG([-Wlogical-op], [AM_CFLAGS="$AM_CFLAGS -Wlogical-op"])
-AX_CHECK_COMPILE_FLAG([-Wignored-qualifiers], [AM_CFLAGS="$AM_CFLAGS -Wignored-qualifiers"])
-AX_CHECK_COMPILE_FLAG([-Wformat-signedness], [AM_CFLAGS="$AM_CFLAGS -Wformat-signedness"])
-AX_CHECK_COMPILE_FLAG([-Wduplicated-conk], [AM_CFLAGS="$AM_CFLAGS -Wduplicated-conk"])
+# rocky: However to *test* for whether to use options below, we want to turn
+# warnings into errors, hence, the separate check for -Werror.
+WARN_TO_ERROR_CFLAG=""
+AX_CHECK_COMPILE_FLAG([-Werror], [WARN_TO_ERROR_CFLAG="-Werror "])
+CHECK_CFLAGS="
+        -C
+	-Wall
+	-Wbad-function-cast
+	-Wchar-subscripts
+	-Wdeclaration-after-statement
+	-Wdisabled-optimization
+	-Wduplicate-conk
+	-Wduplicate-enum
+	-Wendif-labels
+	-Wextra
+	-Wformat-security
+	-Wformat-signedness
+	-Wignore-qualifiers
+	-Winline
+	-Wlogical-op
+	-Wlong-long
+	-Wnested-externs
+	-Wno-sign-compare
+	-Wpointer-arith
+	-Wshadow
+	-Wtype-limits
+	-Wunused
+	-Wunused-but-set-parameter
+	-Wunused-parameter
+	-Wwrite-strings
+"
+
+# Warnings not used (because they trigger messages):
+#   -Wmissing-declarations
+#   -Wstrict-prototypes
+#   -Wundef
+
+for OPT in $CHECK_CFLAGS; do
+    AX_CHECK_COMPILE_FLAG([$OPT $WARN_TO_ERROR_CFLAG], [AM_CFLAGS="$AM_CFLAGS $OPT"])
+done
+
 AC_SUBST([AM_CFLAGS])
 
 # OK, do it!
