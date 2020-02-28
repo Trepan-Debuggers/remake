@@ -20,6 +20,26 @@ by KCachegrind_, callgrind_annotate_, or gprof2dot_ or other tools that understa
 You can get not only timings, but a graph of the target dependencies
 checked.
 
+Documenting Makefile Targets
+----------------------------
+
+If you want to know what targets can be run, there are two new options:
+
+* `--targets` gives a list of targets
+* `--tasks`  gives a list of "interesting" targets
+
+Before each target in the Makefile, you can give add a one-line comment
+describing what the target does, starting the comment with `#:`.
+
+If you do this, when either of these options is shown it will also be shown
+with next to the target name. Here is an example:
+
+.. code:: Makefile
+
+	  #: Run Python pytests
+	  check-short:
+	       py.test pytest
+
 
 Improved Execution Tracing
 --------------------------

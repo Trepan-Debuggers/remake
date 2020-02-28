@@ -23,6 +23,7 @@ Additionally, if installing from _git_ you need:
 and optionally:
 
 * `gzip` and `lzip` if building a compressed tarball
+* `guile` version 2 or greater if you want Guile support in `remake`
 
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
