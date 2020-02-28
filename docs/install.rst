@@ -103,12 +103,27 @@ Here is a `apt-get` command you can use to install on Debian-ish systems:
    $ sudo apt-get install git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.0 texinfo lzip
 
 
-Here is a `yum` command Redhat/CentOS:
+Here is a `yum`/`dnf` command for Redhat/CentOS:
 
 .. code:: console
 
    $ sudo yum install git gcc pkgconfig autoconf automake gettext readline-devel make guile lzip
 
+   # on CentOS 7 and later, autopoint is part of gettext-devel
+   $ sudo yum install git gcc pkgconfig autoconf automake gettext gettext-devel readline-devel make guile lzip
+
+Here is a `pkg` command for FreeBSD:
+
+.. code:: console
+
+   $ sudo pkg install git gcc pkgconf autotools automake gettext gmake readline rsync guile2 lzip wget
+
+
+Here is a `pkg_add` command for OpenBSD as, root:
+
+.. code:: console
+
+   $ pkg_add install git pkgconf autoconf-2.69p2 automake-1.16.1 gettext-tools ggrep gmake readline rsync-3.1.3 guile2 lzip wget
 
 To build documentation you need:
 
