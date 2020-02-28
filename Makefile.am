@@ -57,6 +57,7 @@ DEBUGGER_H = \
 		src/debugger/command/help.h		\
 		src/debugger/command/info.h		\
 		src/debugger/command/list.h		\
+		src/debugger/command/load.h		\
 		src/debugger/command/next.h		\
 		src/debugger/command/print.h	\
 		src/debugger/command/pwd.h		\

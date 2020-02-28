@@ -20,8 +20,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <assert.h>
 
+#include "read.h"
 #include "filedef.h"
-#include "dep.h"
 #include "job.h"
 #include "os.h"
 #include "commands.h"
@@ -120,7 +120,7 @@ static const char **include_directories;
 
 static size_t max_incl_len;
 
-static struct goaldep *eval_makefile (const char *filename, unsigned short flags);
+extern struct goaldep *eval_makefile (const char *filename, unsigned short flags);
 static void eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
@@ -296,7 +296,7 @@ restore_conditionals (struct conditionals *saved)
   conditionals = saved;
 }
 
-static struct goaldep *
+extern struct goaldep *
 eval_makefile (const char *filename, unsigned short flags)
 {
   struct goaldep *deps;
