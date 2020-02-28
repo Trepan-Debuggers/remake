@@ -1,18 +1,18 @@
 /* Continue until the next command to be executed. */
 #define DEPENDS_COMMANDS " depends commands"
 
-#include <wordexp.h>
+#include <glob.h>
 
 static debug_return_t
 dbg_cmd_source(char *psz_filename)
 {
   if (psz_filename && *psz_filename) {
-    wordexp_t p;
     FILE *p_source_file;
     char *psz_expanded_file;
+	glob_t p;
 
-    wordexp(psz_filename, &p, 0);
-    if (0 == p.we_wordc) {
+	glob(psz_filename, 0, NULL, &p);
+	if (0 == p.gl_pathc) {
       struct stat stat_buf;
       int ret = stat(psz_filename, &stat_buf);
       if (ret != 0) {
@@ -20,15 +20,14 @@ dbg_cmd_source(char *psz_filename)
         return debug_cmd_error;
       }
       psz_expanded_file = psz_filename;
-
-    } else if (1 != p.we_wordc) {
+    } else if (1 != p.gl_pathc) {
       dbg_errmsg("Expansion of %s doesn't lead to a single filename. \n"
                  "Got %zu matches",
-                 psz_filename, p.we_wordc);
+                 psz_filename, (size_t)p.gl_pathv);
       return debug_cmd_error;
 
     } else {
-      psz_expanded_file = p.we_wordv[0];
+      psz_expanded_file = p.gl_pathv[0];
     }
 
     p_source_file = fopen(psz_expanded_file, "r");
@@ -48,7 +47,8 @@ dbg_cmd_source(char *psz_filename)
     } else
       dbg_errmsg("error reading file %s (expanded to %s):\n\t%s",
                  psz_filename, psz_expanded_file, strerror(errno));
-    wordfree(&p);
+
+    globfree(&p);
   }  else {
     dbg_errmsg("Expecting a file name");
     return debug_cmd_error;
