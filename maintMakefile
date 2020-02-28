@@ -76,8 +76,6 @@ Basic.mk: Basic.mk.template .dep_segment Makefile
 	sed -e 's@%MAKE_VERSION%@$(MAKE_VERSION)@g' \
 	    -e 's@%make_SOURCES%@$(call cvt,src,$(make_SRCS))@g' \
 	    -e 's@%w32_SOURCES%@$(call cvt,src,$(w32_SRCS))@g' \
-	    -e 's@%vms_SOURCES%@$(call cvt,src,$(vms_SRCS))@g' \
-	    -e 's@%amiga_SOURCES%@$(call cvt,src,$(amiga_SRCS))@g' \
 	    -e 's@%loadavg_SOURCES%@$(call cvt,lib,$(loadavg_SRCS))@g' \
 	    -e 's@%alloca_SOURCES%@$(call cvt,lib,$(alloca_SRCS))@g' \
 	    -e 's@%glob_SOURCES%@$(call cvt,lib,$(glob_SRCS))@g' \

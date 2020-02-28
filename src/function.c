@@ -522,24 +522,7 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
   int is_suffix = funcname[0] == 's';
   int is_notdir = !is_suffix;
   int stop = MAP_DIRSEP | (is_suffix ? MAP_DOT : 0);
-#ifdef VMS
-  /* For VMS list_iterator points to a comma separated list. To use the common
-     [find_]next_token, create a local copy and replace the commas with
-     spaces. Obviously, there is a problem if there is a ',' in the VMS filename
-     (can only happen on ODS5), the same problem as with spaces in filenames,
-     which seems to be present in make on all platforms. */
-  char *vms_list_iterator = alloca(strlen(list_iterator) + 1);
-  int i;
-  for (i = 0; list_iterator[i]; i++)
-    if (list_iterator[i] == ',')
-      vms_list_iterator[i] = ' ';
-    else
-      vms_list_iterator[i] = list_iterator[i];
-  vms_list_iterator[i] = list_iterator[i];
-  while ((p2 = find_next_token((const char**) &vms_list_iterator, &len)) != 0)
-#else
   while ((p2 = find_next_token (&list_iterator, &len)) != 0)
-#endif
     {
       const char *p = p2 + len - 1;
 
@@ -554,24 +537,11 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
             continue;
           o = variable_buffer_output (o, p, len - (p - p2));
         }
-#ifdef HAVE_DOS_PATHS
-      /* Handle the case of "d:foo/bar".  */
-      else if (is_notdir && p2[0] && p2[1] == ':')
-        {
-          p = p2 + 2;
-          o = variable_buffer_output (o, p, len - (p - p2));
-        }
-#endif
       else if (is_notdir)
         o = variable_buffer_output (o, p2, len);
 
       if (is_notdir || p >= p2)
         {
-#ifdef VMS
-          if (vms_comma_separator)
-            o = variable_buffer_output (o, ",", 1);
-          else
-#endif
           o = variable_buffer_output (o, " ", 1);
 
           doneany = 1;
@@ -598,20 +568,7 @@ func_basename_dir (char *o, char **argv, const char *funcname)
   int is_basename = funcname[0] == 'b';
   int is_dir = !is_basename;
   int stop = MAP_DIRSEP | (is_basename ? MAP_DOT : 0) | MAP_NUL;
-#ifdef VMS
-  /* As in func_notdir_suffix ... */
-  char *vms_p3 = alloca (strlen(p3) + 1);
-  int i;
-  for (i = 0; p3[i]; i++)
-    if (p3[i] == ',')
-      vms_p3[i] = ' ';
-    else
-      vms_p3[i] = p3[i];
-  vms_p3[i] = p3[i];
-  while ((p2 = find_next_token((const char**) &vms_p3, &len)) != 0)
-#else
   while ((p2 = find_next_token (&p3, &len)) != 0)
-#endif
     {
       const char *p = p2 + len - 1;
       while (p >= p2 && ! STOP_SET (*p, stop))
@@ -621,38 +578,13 @@ func_basename_dir (char *o, char **argv, const char *funcname)
         o = variable_buffer_output (o, p2, ++p - p2);
       else if (p >= p2 && (*p == '.'))
         o = variable_buffer_output (o, p2, p - p2);
-#ifdef HAVE_DOS_PATHS
-      /* Handle the "d:foobar" case */
-      else if (p2[0] && p2[1] == ':' && is_dir)
-        o = variable_buffer_output (o, p2, 2);
-#endif
       else if (is_dir)
-#ifdef VMS
-        {
-          extern int vms_report_unix_paths;
-          if (vms_report_unix_paths)
-            o = variable_buffer_output (o, "./", 2);
-          else
-            o = variable_buffer_output (o, "[]", 2);
-        }
-#else
-#ifndef _AMIGA
-      o = variable_buffer_output (o, "./", 2);
-#else
-      ; /* Just a nop...  */
-#endif /* AMIGA */
-#endif /* !VMS */
+	o = variable_buffer_output (o, "./", 2);
       else
         /* The entire name is the basename.  */
         o = variable_buffer_output (o, p2, len);
 
-#ifdef VMS
-      if (vms_comma_separator)
-        o = variable_buffer_output (o, ",", 1);
-      else
-#endif
-        o = variable_buffer_output (o, " ", 1);
-
+      o = variable_buffer_output (o, " ", 1);
       doneany = 1;
     }
 
@@ -1375,12 +1307,8 @@ func_and (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_wildcard (char *o, char **argv, const char *funcname UNUSED)
 {
-#ifdef _AMIGA
-   o = wildcard_expansion (argv[0], o);
-#else
    char *p = string_glob (argv[0]);
    o = variable_buffer_output (o, p, strlen (p));
-#endif
    return o;
 }
 
@@ -1691,30 +1619,11 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   Do shell spawning, with the naughty bits for different OSes.
  */
 
-#ifdef VMS
-
-/* VMS can't do $(shell ...)  */
-
-char *
-func_shell_base (char *o, char **argv, int trim_newlines)
-{
-  fprintf (stderr, "This platform does not support shell\n");
-  die (MAKE_TROUBLE);
-  return NULL;
-}
-
-#define func_shell 0
-
-#else
-#ifndef _AMIGA
 char *
 func_shell_base (char *o, char **argv, int trim_newlines)
 {
   char *batch_filename = NULL;
   int errfd;
-#ifdef __MSDOS__
-  FILE *fpipe;
-#endif
   char **command_argv = NULL;
   char **envp;
   int pipedes[2];
@@ -1823,7 +1732,6 @@ func_shell_base (char *o, char **argv, int trim_newlines)
 
     /* Record the PID for reap_children.  */
     shell_function_pid = pid;
-#ifndef  __MSDOS__
     shell_function_completed = 0;
 
     /* Close the write side of the pipe.  We test for -1, since
@@ -1831,7 +1739,6 @@ func_shell_base (char *o, char **argv, int trim_newlines)
        libraries barf when 'close' is called with -1.  */
     if (pipedes[1] >= 0)
       close (pipedes[1]);
-#endif
 
     /* Set up and read from the pipe.  */
 
@@ -1854,15 +1761,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
     buffer[i] = '\0';
 
     /* Close the read side of the pipe.  */
-#ifdef  __MSDOS__
-    if (fpipe)
-      {
-        int st = pclose (fpipe);
-        shell_completed (st, 0);
-      }
-#else
     (void) close (pipedes[0]);
-#endif
 
     /* Loop until child_handler or reap_children()  sets
        shell_function_completed to the status of our child shell.  */
@@ -1911,100 +1810,11 @@ func_shell_base (char *o, char **argv, int trim_newlines)
   return o;
 }
 
-#else   /* _AMIGA */
-
-/* Do the Amiga version of func_shell.  */
-
-char *
-func_shell_base (char *o, char **argv, int trim_newlines)
-{
-  /* Amiga can't fork nor spawn, but I can start a program with
-     redirection of my choice.  However, this means that we
-     don't have an opportunity to reopen stdout to trap it.  Thus,
-     we save our own stdout onto a new descriptor and dup a temp
-     file's descriptor onto our stdout temporarily.  After we
-     spawn the shell program, we dup our own stdout back to the
-     stdout descriptor.  The buffer reading is the same as above,
-     except that we're now reading from a file.  */
-
-#include <dos/dos.h>
-#include <proto/dos.h>
-
-  BPTR child_stdout;
-  char tmp_output[FILENAME_MAX];
-  size_t maxlen = 200, i;
-  int cc;
-  char * buffer, * ptr;
-  char ** aptr;
-  size_t len = 0;
-  char* batch_filename = NULL;
-
-  /* Construct the argument list.  */
-  command_argv = construct_command_argv (argv[0], NULL, NULL, 0,
-                                         &batch_filename);
-  if (command_argv == 0)
-    return o;
-
-  /* Note the mktemp() is a security hole, but this only runs on Amiga.
-     Ideally we would use get_tmpfile(), but this uses a special Open(), not
-     fopen(), and I'm not familiar enough with the code to mess with it.  */
-  strcpy (tmp_output, "t:MakeshXXXXXXXX");
-  mktemp (tmp_output);
-  child_stdout = Open (tmp_output, MODE_NEWFILE);
-
-  for (aptr=command_argv; *aptr; aptr++)
-    len += strlen (*aptr) + 1;
-
-  buffer = xmalloc (len + 1);
-  ptr = buffer;
-
-  for (aptr=command_argv; *aptr; aptr++)
-    {
-      strcpy (ptr, *aptr);
-      ptr += strlen (ptr) + 1;
-      *ptr ++ = ' ';
-      *ptr = 0;
-    }
-
-  ptr[-1] = '\n';
-
-  Execute (buffer, NULL, child_stdout);
-  free (buffer);
-
-  Close (child_stdout);
-
-  child_stdout = Open (tmp_output, MODE_OLDFILE);
-
-  buffer = xmalloc (maxlen);
-  i = 0;
-  do
-    {
-      if (i == maxlen)
-        {
-          maxlen += 512;
-          buffer = xrealloc (buffer, maxlen + 1);
-        }
-
-      cc = Read (child_stdout, &buffer[i], maxlen - i);
-      if (cc > 0)
-        i += cc;
-    } while (cc > 0);
-
-  Close (child_stdout);
-
-  fold_newlines (buffer, &i, trim_newlines);
-  o = variable_buffer_output (o, buffer, i);
-  free (buffer);
-  return o;
-}
-#endif  /* _AMIGA */
-
 static char *
 func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
   return func_shell_base (o, argv, 1);
 }
-#endif  /* !VMS */
 
 #ifdef EXPERIMENTAL
 

@@ -147,7 +147,7 @@ endif
 
 # Extra stuff to include in the distribution.
 
-mk_FILES =	Basic.mk mk/msdosdjgpp.mk mk/Amiga.mk mk/Windows32.mk
+mk_FILES =	Basic.mk mk/Windows32.mk
 # We don't need this, since the standard automake output will do.
 #mk/Posix.mk.in
 
@@ -162,7 +162,6 @@ test_FILES =	tests/run_make_tests \
 
 EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		README.customs \
-		SCOPTIONS src/config.ami \
 		README.W32 src/config.h.W32 \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \

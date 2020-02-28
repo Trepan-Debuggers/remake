@@ -36,8 +36,6 @@ glob_SOURCES = %glob_SOURCES%
 loadavg_SOURCES = %loadavg_SOURCES%
 alloca_SOURCES = %alloca_SOURCES%
 w32_SOURCES = %w32_SOURCES%
-vms_SOURCES = %vms_SOURCES%
-amiga_SOURCES = %amiga_SOURCES%
 
 posix_SOURCES = $(src)posixos.c
 remote_SOURCES = $(src)remote-stub.c

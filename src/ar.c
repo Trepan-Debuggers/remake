@@ -132,14 +132,6 @@ ar_member_date (const char *name, time_t *member_date)
 
 /* Set the archive-member NAME's modtime to now.  */
 
-#ifdef VMS
-int
-ar_touch (const char *name)
-{
-  O (error, NILF, _("touch archive member is not available on VMS"));
-  return -1;
-}
-#else
 int
 ar_touch (const char *name)
 {
@@ -184,24 +176,13 @@ ar_touch (const char *name)
 
   return val;
 }
-#endif /* !VMS */
 
 /* State of an 'ar_glob' run, passed to 'ar_glob_match'.  */
-
-/* On VMS, (object) modules in libraries do not have suffixes. That is, to
-   find a match for a pattern, the pattern must not have any suffix. So the
-   suffix of the pattern is saved and the pattern is stripped (ar_glob).
-   If there is a match and the match, which is a module name, is added to
-   the chain, the saved suffix is added back to construct a source filename
-   (ar_glob_match). */
 
 struct ar_glob_state
   {
     const char *arname;
     const char *pattern;
-#ifdef VMS
-    char *suffix;
-#endif
     size_t size;
     struct nameseq *chain;
     unsigned int n;
