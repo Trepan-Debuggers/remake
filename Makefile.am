@@ -127,7 +127,8 @@ AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
 		-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" \
 		-DLOCALEDIR=\"$(localedir)\"
 
-AM_CFLAGS =	$(GUILE_CFLAGS)
+AM_CFLAGS += $(GUILE_CFLAGS)
+make_CFLAGS    = $(AM_CFLAGS)
 
 if WINDOWSENV
   make_SOURCES += $(w32_SRCS)

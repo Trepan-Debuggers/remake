@@ -36,12 +36,6 @@ PERLFLAGS ?=
 # We like mondo-warnings!
 # Also force comments to be preserved.  This helps when using ccache, in
 # combination with GCC 7's implicit-fallthrough warning.
-MAKE_CFLAGS := -Wall -Wextra -Wwrite-strings -Wshadow \
-	-Wdeclaration-after-statement -Wbad-function-cast -Wformat-security \
-	-Wtype-limits -Wunused-but-set-parameter -Wlogical-op \
-	-Wignored-qualifiers # -Wformat-signedness  # CI's gcc can't handle this
-
-AM_CFLAGS += $(MAKE_CFLAGS)
 
 # Unfortunately the Guile headers are sometimes broken.  Convince GCC
 # to treat them as system headers so warnings are ignored.
@@ -364,8 +358,8 @@ changelog-check:
 #: Pull in translation files from https://translationproject.org
 po-check:
 	if test -f po/POTFILES.in; then \
-	  grep '^[^#]' po/POTFILES.in | sort > $@-1; \
-	  find [a-z]* -name '*.[ch]' | xargs grep -l '\b_(' | grep -v src/makeint.h | grep -v lib/ | sort > $@-2; \
+	  $(GREP) '^[^#]' po/POTFILES.in | sort > $@-1; \
+	  find [a-z]* -name '*.[ch]' | xargs $(GREP) -l '\b_(' | $(GREP) -v src/makeint.h | $(GREP) -v lib/ | sort > $@-2; \
 	  diff -u $@-1 $@-2 || exit 1; \
 	  rm -f $@-1 $@-2; \
 	fi
