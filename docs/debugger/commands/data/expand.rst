@@ -39,4 +39,4 @@ Example:
 
 .. seealso::
 
-   :ref:`print <print>`, `info variables <info-variables>`.
+   :ref:`print <print>`, `info variables <info_variables>`.

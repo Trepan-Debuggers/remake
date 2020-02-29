@@ -2259,8 +2259,6 @@ remake<0> @b{info variables}
 GNUMAKEFLAGS :=
 # automatic
 <D = $(patsubst %/,%,$(dir $<))
-# automatic
-@D = $(patsubst %/,%,$(dir $@))
 # default
 .SHELLFLAGS := -c
 # default
@@ -2276,41 +2274,36 @@ remake<4>
 @end table
 
 @node Files
-@section Specifying and examining files (@samp{edit}, @samp{load})
+@section Specifying and examining files (@samp{edit}, @samp{list}, @samp{load})
 
 @menu
 * Edit::                   Edit Makefile
+* List::                   Read Makefile target
 * Load::                   Read and Evaluate a Makefile
 @end menu
 
 @node Edit
 @subsection Edit Makefile (@samp{edit})
 
-To edit the Makefile at the current target location file, use the @code{edit} command.  The
-editing program of your choice is invoked with the current line set to
-the active line in the program.  Alternatively, you can give a line
-specification to specify what part of the file you want to print if
-you want to see other parts of the program.
+To edit the Makefile at the current target location file, use the
+@code{edit} command.  The editing program of your choice is invoked
+with the current line set to the active line in the program.
 
 You can customize to use any editor you want by using the
 @code{EDITOR} environment variable. The only restriction is that your
-editor (say @code{ex}), recognizes the following command-line syntax:
+editor, e.g.\ @code{ex}), recognizes the following command-line syntax:
 @smallexample
-ex +@var{number} file
+ex +@var{number} @var{file}
 @end smallexample
+
 The optional numeric value +@var{number} specifies the number of the
 line in the file where to start editing.  For example, to configure
-@value{DBG} to use the @code{vi} editor, you could use these commands
-with the @code{sh} shell:
+@value{DBG} to use the @code{emacs} editor, you could use these commands
+with a POSIX shell:
 @smallexample
-EDITOR=/usr/bin/vi
+EDITOR=/usr/bin/emacs
 export EDITOR
-gdb @dots{}
-@end smallexample
-or in the @code{csh} shell,
-@smallexample
-setenv EDITOR /usr/bin/vi
-gdb @dots{}
+remake @dots{}
 @end smallexample
 
 @table @code
@@ -2318,6 +2311,32 @@ gdb @dots{}
 @item edit
 Edit line specification using the editor specified by the
 @code{EDITOR} environment variable.
+@end table
+
+@node List
+@subsection List Makefile target (@samp{edit})
+
+@table @code
+@kindex list
+@item list
+
+List target dependencies and commands for @emph{target} or @emph{line-number}.
+
+Without a target name or line number, use the current target.
+A target name of @code{-} will use the parent target on the target stack.
+
+@smallexample
+remake<0> @b{list}
+/tmp/remake/tests/spec/example/simple.Makefile:2
+all:
+#  recipe to execute (from '/tmp/remake/tests/spec/example/simple.Makefile', line 3):
+   echo all here
+
+remake<1> @b{list -}
+ ** We don't seem to have a parent target.
+remake<2>
+@end smallexample
+
 @end table
 
 @node Load

@@ -15,8 +15,8 @@ can print arbitrary string expands which of course includes variable.
 
 If you omit *variable*, the last expression again is displayed again..
 
-Example:
-++++++++
+Examples:
++++++++++
 
 ::
 
@@ -33,4 +33,4 @@ Example:
 
 .. seealso::
 
-   :ref:`expand <expand>`, `info variables <info-variables>`.
+   :ref:`expand <expand>`, `info variables <info_variables>`.
