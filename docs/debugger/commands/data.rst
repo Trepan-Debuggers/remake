@@ -10,3 +10,4 @@ Examining data.
    data/target
    data/expand
    data/info-variables
+   data/write

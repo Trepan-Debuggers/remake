@@ -1,8 +1,8 @@
 .. index:: info; variables
 .. _info_variables:
 
-Info Variables
-----------------
+List all Variables (info variables)
+-----------------------------------
 
 **info variables**
 

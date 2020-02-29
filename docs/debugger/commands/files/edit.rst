@@ -1,8 +1,8 @@
 .. index:: edit
 .. _edit:
 
-Edit Makefile
--------------
+Edit Makefile (edit)
+--------------------
 
 **edit**
 

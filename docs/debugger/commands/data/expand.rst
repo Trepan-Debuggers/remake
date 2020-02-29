@@ -1,8 +1,8 @@
 .. index:: expand
 .. _expand:
 
-Expand (Print a string expanded)
---------------------------------
+Expand a Makefile string (expand)
+---------------------------------
 
 **expand** *string*
 

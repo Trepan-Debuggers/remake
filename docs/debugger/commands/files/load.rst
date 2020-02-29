@@ -1,8 +1,8 @@
 .. index:: load
 .. _load:
 
-Load - read Makefile
---------------------
+Read and Evaluate Makefile (eval)
+---------------------------------
 
 **load** *Makefile*
 

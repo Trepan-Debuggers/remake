@@ -1,8 +1,8 @@
 .. index:: list
 .. _list:
 
-List Makefile target
---------------------
+List Makefile target (list)
+---------------------------
 
 **list** [ *target* ]
 
