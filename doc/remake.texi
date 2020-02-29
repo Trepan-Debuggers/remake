@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004, 2005, 2006, 2011, 2012, 2017
+@c Copyright 2004, 2005, 2006, 2011, 2012, 2017, 2020
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO:
@@ -129,7 +129,7 @@ This file describes @value{DBG}, Remake
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004, 2005, 2006, 2011, 2012 Rocky Bernstein
+Copyright (C) 2004, 2005, 2006, 2011, 2012, 2020 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session
@@ -1218,6 +1218,7 @@ just @key{RET}. Some commands which require a parameter, such as
 * Information::           Status and Debugger settings (info, set, show)
 * Stack::                 Examining the stack (where, up, down, frame)
 * Data::                  Examining data (print, target, expand, info variables)
+* Files::                 Specifying and examining files (load, edit)
 * Evaluation/Execution::  Arbitrary execution (eval, shell)
 * Interfacing to the OS:: Interfacing to the OS (cd, pwd, source)
 * Controlling Make::      Controlling make (annotate, file, prompt...)
@@ -2032,7 +2033,6 @@ current stack frame.
 * Print::                  Print variable info
 * Expand::                 Print a string expanded
 * Target::                 Print target Info
-* Edit::                   Edit file at current target location
 * Write::                  Write commands of a target
 * Info Variables::         Print all variables
 @end menu
@@ -2211,8 +2211,80 @@ single-letter variable name.
 The ``list'' is like target but only text-oriented information is shown.
 @end table
 
+@node Write
+@subsection Write commands of a target (@samp{write})
+
+@table @code
+@kindex write @ovar{@var{target} @var{filename|here}}
+@item write @r{[}@var{target} @ovar{filename|here}@r{]}
+
+Use this to write the command portion of a target with @value{REMAKE}'s
+internal variables expanded.  If a filename is given that is the file
+where the expanded commands are written. If the filename is ``here''
+then it is not written to a file but output inside the debugger as
+other debugger command behaves. And if no file name is given a
+filename based on the target name is created.
+
+@end table
+
+@node Info Variables
+@subsection Print all variables (@samp{info variables})
+
+@table @code
+@item info variables
+@kindex info variables
+
+List all POSIX-shell environment and GNU Make variables.
+
+Each variable is shown on a single line and is preceded by a line which indicates the
+type of variable it is . This list of types is:
+
+
+Each variable is preceded by a line which indicates
+@itemize @bullet
+@item automatic: variables which have values computed afresh for each rule
+@item default: a variable using its default value
+@item environment: a POSIX shell environment variable
+@item pattern-specific
+@end itemize
+
+At the end of the list, hash table statistics are shown.
+
+Here is an example:
+
+@smallexample
+@group
+remake<0> @b{info variables}
+# 'override' directive
+GNUMAKEFLAGS :=
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# default
+.SHELLFLAGS := -c
+# default
+LD = ld
+# environment
+PATH = /usr/bin/:/sbin/
+...
+# variable set hash-table stats:
+# Load=214/1024=21%, Rehash=0, Collisions=35/240=15%
+remake<4>
+@end group
+@end smallexample
+@end table
+
+@node Files
+@section Specifying and examining files (@samp{edit}, @samp{load})
+
+@menu
+* Edit::                   Edit Makefile
+* Load::                   Read and Evaluate a Makefile
+@end menu
+
 @node Edit
-@subsection Editing Source Makefiles (@samp{edit})
+@subsection Edit Makefile (@samp{edit})
 
 To edit the Makefile at the current target location file, use the @code{edit} command.  The
 editing program of your choice is invoked with the current line set to
@@ -2248,32 +2320,28 @@ Edit line specification using the editor specified by the
 @code{EDITOR} environment variable.
 @end table
 
-@node Write
-@subsection Write commands of a target (@samp{write})
+@node Load
+@subsection Read and Evaluate Makefile (@samp{load})
 
 @table @code
-@kindex write @ovar{@var{target} @var{filename|here}}
-@item write @r{[}@var{target} @ovar{filename|here}@r{]}
+@item load
+@kindex load
 
-Use this to write the command portion of a target with @value{REMAKE}'s
-internal variables expanded.  If a filename is given that is the file
-where the expanded commands are written. If the filename is ``here''
-then it is not written to a file but output inside the debugger as
-other debugger command behaves. And if no file name is given a
-filename based on the target name is created.
+**load** *Makefile*
+
+Read in and evaluate *Makefile*.
 
 @end table
 
-@node Info Variables
-@subsection Print all variables (@samp{info variables})
+Note that dependencies are updated after reading the file in.
 
-@table @code
-@item info variables
-@kindex info variables
+Here are several possible uses of this command.
 
-If you want to all list variables, use this command.
+In debug sessions you can fix the source code and the run `load` to have the code reread in, to test out the fix.
 
-@end table
+Another use is to have pecific "debug"-oriented Makefiles that aren't
+normally used, but when you want to trace things are avialable.
+This is an aspect of aspect-oriented programming. See @url{https://en.wikipedia.org/wiki/Aspect-oriented_programming}.
 
 @node Evaluation/Execution
 @section Evaluation and Execution (@samp{eval}, @samp{shell})

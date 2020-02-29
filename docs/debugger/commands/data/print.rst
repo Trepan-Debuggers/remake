@@ -33,4 +33,4 @@ Example:
 
 .. seealso::
 
-   :ref:`expand <expand>`.
+   :ref:`expand <expand>`, `info variables <info-variables>`.
