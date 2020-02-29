@@ -23,23 +23,44 @@ checked.
 Documenting Makefile Targets
 ----------------------------
 
-If you want to know what targets can be run, there are two new options:
+Have you ever wanted `rake tasks` for GNU Make?  That is, you have
+some strange `Makefile` and you want to see the interesting targets,
+that you can run "make *target-name*" on?
 
-* `--targets` gives a list of targets
+There are two new options added to `remake` to assist this:
+
 * `--tasks`  gives a list of "interesting" targets
+* `--targets` gives a list of *all* targets
 
 Before each target in the Makefile, you can give add a one-line comment
 describing what the target does, starting the comment with `#:`.
 
 If you do this, when either of these options is shown it will also be shown
-with next to the target name. Here is an example:
+with next to the target name.
+
+Here is an example. Consider this `Makefile`:
 
 .. code:: Makefile
 
-	  #: Run Python pytests
-	  check-short:
-	       py.test pytest
+    #: This is the main target
+    all:
+  	echo all here
 
+    #: test things
+    check:
+	echo check here
+
+    #: Build distribution
+    dist:
+	echo dist here
+
+Running `remake --tasks` gives:
+
+.. code:: console
+
+    all         # This is the main target
+    check       # test things
+    dist        # Build distribution
 
 Improved Execution Tracing
 --------------------------

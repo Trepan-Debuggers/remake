@@ -20,6 +20,7 @@ An Emacs interface is available via realgud_.
    :caption: Contents:
 
    features
+   debugger
    install
    manpage
 
