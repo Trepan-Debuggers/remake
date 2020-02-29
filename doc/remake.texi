@@ -2121,11 +2121,11 @@ compile starts: gcc -DLOCALEDIR=\"\" -DLIBDIR=\"/usr/local/lib\" -DINCLUDEDIR=\"
 @node Target
 @subsection Examining Targets (@samp{target}, @samp{list})
 
-@value{DBG} can print information about targets.  When your script
-stops, @value{DBG} spontaneously prints the line and target name
-where it stopped.  Likewise, when you select a stack frame
-(@pxref{Selection, ,Selecting a frame}), @value{DBG} the default
-target name is changed.
+@value{DBG} can print information about targets.  When @value{DBG}
+enters the debugger, @value{DBG} spontaneously prints the target name
+under consideration and the location of this target.  Likewise, when
+you select a target frame (@pxref{Selection, ,Selecting a frame}),
+@value{DBG} the default target name is changed.
 
 As with debugging any program, the value shown at a particular point in
 time may change. Targets, and commands can use GNU Make uses variables
@@ -2165,11 +2165,12 @@ Show the list of commands that need to get run in order to bring the
 target up to date with @value{REMAKE} variables expanded.
 
 @item nonorder
-Show the dependencies that are not ordered.
+Show the ``non-order'' dependencies, i.e. dependencies that are not ordered.
 
 @item previous
+Previous target name when there are multiple double-colons
 @item state
-Show status of target:
+Show target status:
 @itemize @bullet
 @item Successfully updated
 @item Needs to be updated

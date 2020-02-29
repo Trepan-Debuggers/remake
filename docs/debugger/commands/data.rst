@@ -8,3 +8,4 @@ Examining data.
 
    data/print
    data/expand
+   data/target
