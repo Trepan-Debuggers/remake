@@ -9,5 +9,6 @@ new, like `set`, `show`, and `info`.
 .. toctree::
    :maxdepth: 1
 
+   commands/breakpoints
    commands/data
    commands/files
