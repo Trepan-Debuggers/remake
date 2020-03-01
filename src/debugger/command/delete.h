@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -16,26 +16,30 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* 
-   Delete some breakpoints. Arguments are breakpoint numbers with spaces 
+/*
+   Delete some breakpoints. Arguments are breakpoint numbers with spaces
    in between."To delete all breakpoints, give no argument.
 */
-static debug_return_t 
+static debug_return_t
 dbg_cmd_delete(char *psz_args)
 {
   int i_brkpt;
   char *psz_word;
 
   if (!psz_args || !*psz_args) {
-    while(i_breakpoints) 
-      remove_breakpoint(1);
+    unsigned int breakpoints_removed = 0;
+    for (unsigned int i=1; i<=i_breakpoints; i++) {
+      if (remove_breakpoint(i, true)) breakpoints_removed++;
+    }
+    dbg_msg(_("%u breakpoint(s) removed."), breakpoints_removed);
+
     return debug_readloop;
   }
-  
+
   psz_word = get_word(&psz_args);
   while ( psz_word && *psz_word ) {
     if (get_int(psz_word, &i_brkpt, true)) {
-      remove_breakpoint(i_brkpt);
+      remove_breakpoint(i_brkpt, false);
     }
     psz_word = get_word(&psz_args);
   }
@@ -44,7 +48,7 @@ dbg_cmd_delete(char *psz_args)
 }
 
 static void
-dbg_cmd_delete_init(unsigned int c) 
+dbg_cmd_delete_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_delete;
   short_command[c].use  = _("delete breakpoint numbers..");
@@ -53,7 +57,7 @@ dbg_cmd_delete_init(unsigned int c)
 "To delete all breakpoints, give no argument.");
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil
