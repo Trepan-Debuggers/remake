@@ -3,7 +3,7 @@ Debugger Commands
 
 Following *gdb* and the other trepanning debuggers, we classify
 commands into categories. Note though that some commands, like `quit`,
-and `restart`, are in different categories and some categories are
+and `run`, are in different categories and some categories are
 new, like `set`, `show`, and `info`.
 
 .. toctree::
@@ -13,3 +13,4 @@ new, like `set`, `show`, and `info`.
    commands/data
    commands/files
    commands/running
+   commands/stack
