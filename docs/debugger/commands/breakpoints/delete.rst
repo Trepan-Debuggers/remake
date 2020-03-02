@@ -4,7 +4,7 @@
 Remove breakpoints (delete)
 ---------------------------
 
-**delete** [*bpnumber* [*bpnumber*...]]
+**delete** [ *bpnumber* [*bpnumber*...] ]
 
 Delete some breakpoints.
 

@@ -12,3 +12,4 @@ new, like `set`, `show`, and `info`.
    commands/breakpoints
    commands/data
    commands/files
+   commands/running
