@@ -1,9 +1,9 @@
-/* 
+/*
 Set a breakpoint at a target.  With a target name, set a break before
 running commands of that target.  Without argument, list all breaks.
 */
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -21,7 +21,10 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t 
+
+#include "help/break.h"
+
+static debug_return_t
 dbg_cmd_break (char *psz_args)
 {
   if (!psz_args || !*psz_args) {
@@ -29,7 +32,7 @@ dbg_cmd_break (char *psz_args)
     return debug_readloop;
   } else {
     char *psz_target = get_word(&psz_args);
-    char *psz_break_type; 
+    char *psz_break_type;
     file_t *p_target;
     unsigned int i_brkpt_mask = BRK_NONE;
 
@@ -42,8 +45,8 @@ dbg_cmd_break (char *psz_args)
                                               u_lineno, &entry_type);
           if (F2L_TARGET == entry_type) {
             if (!p_target) {
-              dbg_errmsg("Can't find target or pattern on line %s.\n" 
-                         "Use 'info lines' to get a list of breakpoint lines.", 
+              dbg_errmsg("Can't find target or pattern on line %s.\n"
+                         "Use 'info lines' to get a list of breakpoint lines.",
                          psz_target);
               return debug_cmd_error;
             }
@@ -52,8 +55,8 @@ dbg_cmd_break (char *psz_args)
             return debug_cmd_error;
           }
       } else
-        p_target = 
-          lookup_file(variable_expand_set(psz_target, 
+        p_target =
+          lookup_file(variable_expand_set(psz_target,
                                             p_stack->p_target->variables));
     } else {
       p_target = lookup_file(psz_target);
@@ -80,24 +83,14 @@ dbg_cmd_break (char *psz_args)
 };
 
 static void
-dbg_cmd_break_init(unsigned int c) 
+dbg_cmd_break_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_break;
   short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]*");
-  short_command[c].doc  = _("Set a breakpoint at a target.\n"
-"With a target name or a line number, set a break before running commands\n"
-"of that target or line number.  Without argument, list all breakpoints.\n"
-"There are 3 place where one may want to stop at and that name can\n"
-"be given as a last option. The stopping points are:\n"
-" - before prerequisite checking (prereq)\n"
-" - after prerequisite checking but before running commands (run)\n"
-" - after target is complete (end)\n"
-"\n"
-"To see a list of targets run \"info targets\"\n"
-"See also \"continue\".\n");
+  short_command[c].doc  = _(BREAK_HELP_TEXT);
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

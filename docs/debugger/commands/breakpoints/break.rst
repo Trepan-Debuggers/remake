@@ -15,7 +15,7 @@ Set a breakpoint at a target or line number; also show breakpoints.
 With a target name or a line number, set a break before running commands
 of that target or line number.  Without argument, list all breakpoints.
 
-For a gien target, there are 3 places where one may want to stop at;
+For a given target, there are 3 places where one may want to stop at;
 that name can be given as a last option. The stopping points are:
 
 - before target prerequisite checking: `prereq`
@@ -35,7 +35,7 @@ Examples:
    break 10            # Break on line 10 of the Makefile we are
                        # currently stopped at
    break tests         # Break on the "tests" target
-   break tests prereq  # Break on the "tests" target before dependecy checking is done
+   break tests prereq  # Break on the "tests" target before dependency checking is done
 
 .. seealso::
 

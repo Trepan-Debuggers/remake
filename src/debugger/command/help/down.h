@@ -10,4 +10,4 @@
   "\n"									\
   "See also:\n"								\
   "---------\n"								\
-  "\"up\", and \"frame\""
+  "`up`, and `frame`"
