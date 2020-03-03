@@ -9,7 +9,7 @@ remake - GNU Make with comprehensible tracing, profiling, extended error message
 comprehensible tracing, extended error messages and a debugger
 
 Although debugging GNU Makefiles is a little different than debugging, procedure-oriented
-programming langauges, this debugger tries similar to other_ trepanning_ debuggers_ and *gdb*
+programming languages, this debugger tries similar to other_ trepanning_ debuggers_ and *gdb*
 in general. So knowledge gained by learning this is transferable to those
 debuggers and vice versa.
 
