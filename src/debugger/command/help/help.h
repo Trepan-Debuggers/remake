@@ -9,4 +9,4 @@
   "Some commands like `info`, `set`, and `show` can accept an\n"	\
   "additional subcommand to give help just about that particular\n"	\
   "subcommand. For example `help set basename` give help about the\n"	\
-  "`basename` subcommand of `set`.\n"					\
+  "`basename` subcommand of `set`.\n"
