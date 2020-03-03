@@ -4,7 +4,7 @@ Features
 ========
 
 Although debugging GNU Makefiles is a little different than debugging, procedure-oriented
-programming langauges, this debugger tries similar to other_ trepanning_ debuggers_ and *gdb*
+programming languages, this debugger tries similar to other_ trepanning_ debuggers_ and *gdb*
 in general. So knowledge gained by learning this is transferable to those
 debuggers and vice versa.
 
@@ -80,9 +80,9 @@ Improved Execution Tracing
 
 When the `-x` flag is given (or `--trace=normal`), any commands that
 are about to be run are shown as seen in the `Makefile` along with
-`set -x` tracing when run in a POSIX shell. ALso, we override or
+`set -x` tracing when run in a POSIX shell. Also, we override or
 rather ignore, any non-echo prefix `@` directive listed at the
-beginnig of target commands.
+beginning of target commands.
 
 If different granularity of tracing is desired the `--trace` option
 has other settings. See the relevant parts of this manual for more information.
@@ -100,7 +100,7 @@ Features of the debugger:
 * Set breakpoints
 * Set and expand GNU Make variables
 * Load in Makefiles
-* write a shell script containng the target commands with GNU Make variables expanded away, so the
+* write a shell script containing the target commands with GNU Make variables expanded away, so the
   shell code can be run (and debugged) outside of make.
 * Enter debugger at the outset, call it from inside a Makefile, or enter it upon the first error
 
