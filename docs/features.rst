@@ -62,6 +62,19 @@ Running `remake --tasks` gives:
     check       # test things
     dist        # Build distribution
 
+Makefile searching in Parent Directories
+----------------------------------------
+
+When the `-c` flag is given (or `--search-parent`), if a Makefile or
+goal target isn't found in the current directory, `remake` will search
+in the parent directory for a Makefile. On finding a parent the
+closest parent directory with a Makefile, `remake` will set its current working
+directory to the directory where the Makefile was found.
+
+In this respect the short option `-c`, is like `-C` except no
+directory need to be specified.
+
+
 Improved Execution Tracing
 --------------------------
 
