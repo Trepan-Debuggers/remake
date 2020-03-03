@@ -266,6 +266,8 @@ static const char *const usage[] =
     N_("\
   -B, --always-make           Unconditionally make all targets.\n"),
     N_("\
+  -c, --search-parent         Search parent directories for Makefile.\n"),
+    N_("\
   -C DIRECTORY, --directory=DIRECTORY\n\
                               Change to DIRECTORY before doing anything.\n"),
     N_("\
@@ -375,13 +377,14 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
-    { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
-    { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
-    { 'E', strlist, &eval_strings, 1, 0, 0, 0, 0, "eval" },
-    { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
+    { 'B', flag, &always_make_set,    1, 1, 0, 0, 0, "always-make" },
+    { 'c', flag, &search_parent_flag, 1, 1, 0, 0, 0, "search-parent" },
+    { 'd', flag, &debug_flag,         1, 1, 0, 0, 0, 0 },
+    { 'e', flag, &env_overrides,      1, 1, 0, 0, 0, "environment-overrides", },
+    { 'E', strlist, &eval_strings,    1, 0, 0, 0, 0, "eval" },
+    { 'h', flag, &print_usage_flag,   0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
-    { 'k', flag, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
+    { 'k', flag, &keep_going_flag,    1, 1, 0, 0, &default_keep_going_flag,
       "keep-going" },
     { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
