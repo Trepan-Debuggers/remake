@@ -189,7 +189,7 @@ src/gmk-default.h: $(top_srcdir)/src/gmk-default.scm
 #: Install the mk and tests subdirectories
 dist-hook:
 	(cd $(top_srcdir); \
-	 sub=`find src/w32 tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
+	 sub=`find src tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 

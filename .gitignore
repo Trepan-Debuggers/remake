@@ -20,6 +20,7 @@
 /build.cfg
 /build.sh
 /build.sh.in
+/config
 /config.ami
 /config.dos
 /config.h
@@ -42,6 +43,7 @@
 /remake-*.tar.bz2
 /remake-*.tar.gz
 /remake-*.tar.lz
+/remake-4.*+dbg-*
 /stamp-h1
 /tmp
 /w32

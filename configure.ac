@@ -17,7 +17,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define(_MAKE_VERSION_, 4.3)
-AC_INIT([remake],[_MAKE_VERSION_+dbg-1.4],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[_MAKE_VERSION_+dbg-1.5],[https://github.com/rocky/remake/issues])
 
 # These are used in maintMakefile
 MAKE_VERSION=_MAKE_VERSION_
@@ -35,6 +35,15 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE
 
 AC_CONFIG_LIBOBJ_DIR([lib])
+
+AH_TOP(
+/* Guard against #including config.h more than once */
+#ifndef INCLUDED_REMAKE_CONFIG_H
+#define INCLUDED_REMAKE_CONFIG_H
+)
+AH_BOTTOM(
+#endif /*INCLUDED_REMAKE_CONFIG_H*/
+)
 
 # Automake setup
 # We have to enable "foreign" because ChangeLog is auto-generated
