@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2005, 2008, 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -40,15 +40,16 @@ extern breakpoint_node_t *p_breakpoint_bottom;
     breakpoint is set it will be i_breakpoints+1. */
 extern unsigned int i_breakpoints;
 
-/*! Add "p_target" to the list of breakpoints. Return true if 
+/*! Add "p_target" to the list of breakpoints. Return true if
     there were no errors
 */
 extern bool add_breakpoint (file_t *p_target, unsigned int brkp_mask);
 
-/*! Remove breakpoint i from the list of breakpoints. Return true if 
-    there were no errors
+/*! Remove breakpoint i from the list of breakpoints. Return true if
+    there were no errors. If silent is true, then don't warn about
+    not finding breakpoint at "i".
 */
-extern bool remove_breakpoint (unsigned int i);
+extern bool remove_breakpoint (unsigned int i, bool silent);
 
 /*! List breakpoints.*/
 extern void list_breakpoints (void);
