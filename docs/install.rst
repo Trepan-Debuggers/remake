@@ -196,7 +196,7 @@ The main targets to remove `remake` are:
 
 * `uninstall` - removes files created via  `make install` or removes installation. Since some files
 * `clean`  - removes files created via  `make` or `make all`
-* `distclean` - more aggresively removes any files that are not part of git
+* `distclean` - more aggressively removes any files that are not part of git
 
 Therefore to remove file installed via `make install`:
 

@@ -6,4 +6,4 @@
   "\n"									\
   "See also:\n"								\
   "---------\n"								\
-  "\"down\", and \"frame\""
+  "`down`, and `frame`"
