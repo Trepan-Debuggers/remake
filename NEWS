@@ -1,8 +1,10 @@
-Version 4.3+dbg-1.4
+Version 4.3+dbg-1.5
 
-Base on make 4.3 
+Base on make 4.3
 
-Version 4.2.1+dbg-1.4
+Add "-c" "--search-parent" option
+
+Version 4.2.1+dbg-1.5
 
 Two small but important changes...
 
