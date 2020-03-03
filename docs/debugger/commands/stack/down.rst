@@ -6,8 +6,13 @@ Relative Motion towards a more-recent Target (down)
 
 **down** [ *count* ]
 
-Move the current target down in the target stack (to a newer frame). 0
-is the most recent frame. If no count is given, move down 1.
+Select and print the target this one caused to be examined.
+
+If *count* is given then select that many targets down; the default is 1.
+
+When you enter the debugger this command doesn't make a lot of sense
+because you are at the most-recently frame. However if you issue
+`down` and `frame` commands, this can change.
 
 .. seealso::
 

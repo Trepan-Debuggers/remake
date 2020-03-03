@@ -38,6 +38,6 @@ chdir "work/options/testing";
 unlink($makefile);
 chdir "..";
 rmdir "testing";
-chdir "..";
+chdir "../..";
 
 1;

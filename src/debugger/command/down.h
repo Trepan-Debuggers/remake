@@ -1,6 +1,6 @@
 /** Move reported target frame postition down by psz_amount. */
-/* 
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,8 +17,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-debug_return_t 
-dbg_cmd_frame_down(char *psz_amount) 
+
+#include "help/down.h"
+
+debug_return_t
+dbg_cmd_frame_down(char *psz_amount)
 {
   int i_amount = 1;
 
@@ -31,16 +34,14 @@ dbg_cmd_frame_down(char *psz_amount)
 }
 
 static void
-dbg_cmd_down_init(unsigned int c) 
+dbg_cmd_down_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_frame_down;
   short_command[c].use  = _("down [AMOUNT]");
-  short_command[c].doc  = 
-    _("Select and print the target this one caused to be examined.\n"
-      "\tAn argument says how many targets down to go.");
+  short_command[c].doc  = _(DOWN_HELP_TEXT);
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

@@ -1,13 +1,15 @@
 .. index:: up
 .. _up:
 
-Relative Frame Motion towards a less-recent Frame (up)
-------------------------------------------------------
+Relative Target Motion towards a more-recent Target (up)
+--------------------------------------------------------
 
 **up** [ *count* ]
 
-Move the current frame up in the stack trace (to an older frame). 0 is
-the most recent frame. If no count is given, move up 1.
+Select and print the immediate child dependency target that is
+currently under consideration.
+
+If *count* is the default is 1.
 
 .. seealso::
 

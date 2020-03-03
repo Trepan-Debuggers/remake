@@ -55,7 +55,10 @@ DEBUGGER_H = \
 		src/debugger/command/finish.h	\
 		src/debugger/command/frame.h	\
 		src/debugger/command/help.h		\
+		src/debugger/command/help/down.h	\
+		src/debugger/command/help/help.h	\
 		src/debugger/command/help/source.h	\
+		src/debugger/command/help/up.h		\
 		src/debugger/command/info.h		\
 		src/debugger/command/list.h		\
 		src/debugger/command/load.h		\
