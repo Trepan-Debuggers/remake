@@ -14,3 +14,4 @@ new, like `set`, `show`, and `info`.
    commands/files
    commands/running
    commands/stack
+   commands/support
