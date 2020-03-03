@@ -1,6 +1,6 @@
 /* Write commands associated with a given target. */
 /*
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -19,6 +19,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Debugger help command. */
 
+#include "help/help.h"
 
 void
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
@@ -135,9 +136,7 @@ dbg_cmd_help_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_help;
   short_command[c].use  = _("help [COMMAND]");
-  short_command[c].doc  =
-    _("Display list of commands (i.e. this help text.)\n"		\
-      "\twith an command name, give only the help for that command.");
+  short_command[c].doc  = _(HELP_TEXT);
 }
 
 

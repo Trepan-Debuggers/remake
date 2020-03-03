@@ -23,3 +23,15 @@ info_TEXINFOS =	make.texi remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
 CLEANFILES = callgrind.out.* make*.html remake*.html make.pdf remake.pdf remake.info
+
+#: creates GNU Make and remake manuals in PDF form
+all-pdf:
+	$(MAKE) remake.pdf make.pdf
+
+#: creates GNU Make and remake manuals in HTML form
+all-html:
+	$(MAKE) remake.html make.html
+
+#: creates the GNU Make and remake manuals in GNU TeXinfo form
+all-info:
+	$(MAKE) remake.info make.info
