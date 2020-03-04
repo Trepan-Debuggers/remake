@@ -92,7 +92,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 long_cmd_t commands[] = {
   { "break",    'b' },
   { "cd",       'C' },
-  // { "comment",  '#' },
+  { "comment",  '#' },
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
@@ -100,7 +100,7 @@ long_cmd_t commands[] = {
   { "eval" ,    'E' },
   // { "expand" ,  'x' },
   // { "finish"  , 'F' },
-  // { "frame"   , 'f' },
+  { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
   // { "list"    , 'l' },
@@ -115,13 +115,13 @@ long_cmd_t commands[] = {
   // { "setqx"   , '`' },
   // { "shell"   , '!' },
   { "show"    , 'S' },
-  // { "skip"    , 'k' },
+  { "skip"    , 'k' },
   { "source"  , '<' },
   { "step"    , 's' },
   { "target"  , 't' },
   { "up"      , 'u' },
   { "where"   , 'T' },
-  // { "write"   , 'w' },
+  { "write"   , 'w' },
   { (char *)NULL, ' '}
 };
 
@@ -184,7 +184,7 @@ find_command (const char *psz_name)
 
 #include "command/break.h"
 #include "command/chdir.h"
-/* #include "command/comment.h" */
+#include "command/comment.h"
 #include "command/continue.h"
 #include "command/delete.h"
 #include "command/down.h"
@@ -192,7 +192,7 @@ find_command (const char *psz_name)
 #include "command/eval.h"
 /* #include "command/expand.h" */
 /* #include "command/finish.h" */
-/* #include "command/frame.h" */
+#include "command/frame.h"
 #include "command/info.h"
 /* #include "command/load.h" */
 /* #include "command/next.h" */
@@ -206,34 +206,38 @@ find_command (const char *psz_name)
 /* #include "command/setqx.h" */
 /* #include "command/shell.h" */
 #include "command/show.h"
-/* #include "command/skip.h" */
+#include "command/skip.h"
 #include "command/source.h"
 #include "command/step.h"
 #include "command/target.h"
 #include "command/up.h"
 #include "command/where.h"
-/* #include "command/write.h" */
+#include "command/write.h"
 
 /* Needs to come after dbg_cmd_show */
 #include "command/help.h"
 
 #include "command/help/break.h"
 #include "command/help/chdir.h"
+#include "command/help/comment.h"
 #include "command/help/continue.h"
 #include "command/help/delete.h"
 #include "command/help/down.h"
 #include "command/help/edit.h"
 #include "command/help/eval.h"
+#include "command/help/frame.h"
 #include "command/help/help.h"
 #include "command/help/info.h"
 #include "command/help/print.h"
 #include "command/help/quit.h"
 #include "command/help/set.h"
 #include "command/help/show.h"
+#include "command/help/skip.h"
 #include "command/help/step.h"
 #include "command/help/target.h"
 #include "command/help/up.h"
 #include "command/help/where.h"
+#include "command/help/write.h"
 
 
 #define DBG_CMD_INIT(CMD, LETTER)                       \
@@ -247,7 +251,7 @@ cmd_initialize(void)
   int id=0;
   DBG_CMD_INIT(break, 'b');
   DBG_CMD_INIT(chdir, 'C');
-  /* dbg_cmd_comment_init ('#'); */
+  DBG_CMD_INIT(comment, '#');
   DBG_CMD_INIT(continue, 'c');
   DBG_CMD_INIT(delete, 'd');
   DBG_CMD_INIT(down, 'D');
@@ -255,7 +259,7 @@ cmd_initialize(void)
   DBG_CMD_INIT(eval, 'E');
   /* dbg_cmd_expand_init  ('x'); */
   /* dbg_cmd_finish_init  ('F'); */
-  /* dbg_cmd_frame_init   ('f'); */
+  DBG_CMD_INIT(frame, 'f');
   DBG_CMD_INIT(help, 'h');
   DBG_CMD_INIT(info, 'i');
   /* dbg_cmd_list_init    ('l'); */
@@ -270,13 +274,13 @@ cmd_initialize(void)
   /* dbg_cmd_setqx_init   ('`'); */
   /* dbg_cmd_shell_init   ('!'); */
   DBG_CMD_INIT(show, 'S');
-  /* dbg_cmd_skip_init    ('k'); */
+  DBG_CMD_INIT(skip, 'k');
   DBG_CMD_INIT(source, '<');
   DBG_CMD_INIT(step, 's');
   DBG_CMD_INIT(target, 't');
   DBG_CMD_INIT(up, 'u');
   DBG_CMD_INIT(where, 'T');
-  /* dbg_cmd_write_init   ('w'); */
+  DBG_CMD_INIT(write, 'w');
 }
 
 /* Execute a command line. */

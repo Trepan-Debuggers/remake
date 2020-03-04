@@ -37,10 +37,6 @@ dbg_cmd_frame_init(unsigned int c)
   printf("%s\n", commands[0].long_name);
   short_command[c].func = &dbg_cmd_frame;
   short_command[c].use  = _("frame N");
-  short_command[c].doc  =
-    _("Move target frame to N; In contrast to \"up\" or \"down\",\n"
-      "\tthis sets to an absolute position. 0 is the top.");
-  short_command[c].long_name = "frame";
 }
 
 

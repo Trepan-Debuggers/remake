@@ -29,9 +29,6 @@ dbg_cmd_comment_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_comment;
   short_command[c].use  = _("comment TEXT");
-  short_command[c].doc  =
-    _("Ignore this line.");
-  short_command[c].long_name = "comment";
 }
 
 
