@@ -96,8 +96,8 @@ long_cmd_t commands[] = {
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
-  // { "edit" ,    'e' },
-  // { "eval" ,    'E' },
+  { "edit" ,    'e' },
+  { "eval" ,    'E' },
   // { "expand" ,  'x' },
   // { "finish"  , 'F' },
   // { "frame"   , 'f' },
@@ -106,7 +106,7 @@ long_cmd_t commands[] = {
   // { "list"    , 'l' },
   // { "load"    , 'M' },
   // { "next"    , 'n' },
-  // { "print"   , 'p' },
+  { "print"   , 'p' },
   // { "pwd"     , 'P' },
   { "quit"    , 'q' },
   // { "run"     , 'R' },
@@ -188,8 +188,8 @@ find_command (const char *psz_name)
 #include "command/continue.h"
 #include "command/delete.h"
 #include "command/down.h"
-/* #include "command/edit.h" */
-/* #include "command/eval.h" */
+#include "command/edit.h"
+#include "command/eval.h"
 /* #include "command/expand.h" */
 /* #include "command/finish.h" */
 /* #include "command/frame.h" */
@@ -197,7 +197,7 @@ find_command (const char *psz_name)
 /* #include "command/load.h" */
 /* #include "command/next.h" */
 /* #include "command/list.h" */
-/* #include "command/print.h" */
+#include "command/print.h"
 /* #include "command/pwd.h" */
 #include "command/quit.h"
 /* #include "command/run.h" */
@@ -222,8 +222,11 @@ find_command (const char *psz_name)
 #include "command/help/continue.h"
 #include "command/help/delete.h"
 #include "command/help/down.h"
+#include "command/help/edit.h"
+#include "command/help/eval.h"
 #include "command/help/help.h"
 #include "command/help/info.h"
+#include "command/help/print.h"
 #include "command/help/quit.h"
 #include "command/help/set.h"
 #include "command/help/show.h"
@@ -235,7 +238,7 @@ find_command (const char *psz_name)
 
 #define DBG_CMD_INIT(CMD, LETTER)                       \
   dbg_cmd_ ## CMD ## _init(LETTER);                     \
-  short_command[LETTER].doc = CMD ## _HELP_TEXT;        \
+  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);   \
   short_command[LETTER].id = id++
 
 static void
@@ -248,8 +251,8 @@ cmd_initialize(void)
   DBG_CMD_INIT(continue, 'c');
   DBG_CMD_INIT(delete, 'd');
   DBG_CMD_INIT(down, 'D');
-  /* dbg_cmd_edit_init    ('e'); */
-  /* dbg_cmd_eval_init    ('E'); */
+  DBG_CMD_INIT(edit, 'e');
+  DBG_CMD_INIT(eval, 'E');
   /* dbg_cmd_expand_init  ('x'); */
   /* dbg_cmd_finish_init  ('F'); */
   /* dbg_cmd_frame_init   ('f'); */
@@ -258,7 +261,7 @@ cmd_initialize(void)
   /* dbg_cmd_list_init    ('l'); */
   /* dbg_cmd_load_init    ('M'); */
   /* dbg_cmd_next_init    ('n'); */
-  /* dbg_cmd_print_init   ('p'); */
+  DBG_CMD_INIT(print, 'p');
   /* dbg_cmd_pwd_init     ('P'); */
   DBG_CMD_INIT(quit, 'q');
   /* dbg_cmd_run_init     ('R'); */

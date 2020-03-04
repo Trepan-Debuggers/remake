@@ -54,7 +54,6 @@ dbg_cmd_eval_init(unsigned int c)
   short_command[c].func = &dbg_cmd_eval;
   short_command[c].use  = _("eval STRING");
   short_command[c].doc  = _("parse and evaluate a string.");
-  short_command[c].long_name = "eval";
 }
 
 /*

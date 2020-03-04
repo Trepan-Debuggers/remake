@@ -1,6 +1,6 @@
 /* edit starting at current location. */
 /* Print working directory. */
-/* Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein
+/* Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -53,13 +53,6 @@ dbg_cmd_edit_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_edit;
   short_command[c].use = _("edit");
-  short_command[c].doc =
-    _("edit"
-      ""
-      "Enter an editor using the current location. "
-      "Uses EDITOR environment variable contents as editor (or ex as default)."
-      "Assumes the editor positions at a file using options +linenumber filename.");
-  short_command[c].long_name = "edit";
 }
 
 /*

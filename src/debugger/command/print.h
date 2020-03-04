@@ -49,15 +49,6 @@ dbg_cmd_print_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_print;
   short_command[c].use = _("print {VARIABLE [attrs...]}");
-  short_command[c].doc =
-    _("Show a variable definition.\n"
-      "The value is shown with embedded\n"
-      "variable-references unexpanded. Don't include $ before a variable\n"
-      "name. See also \"examine\".\n\n"
-      "If no variable is supplied, we try to use the\n"
-      "last value given."
-      );
-  short_command[c].long_name = "print";
 }
 
 /*

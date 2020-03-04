@@ -34,7 +34,7 @@ dbg_cmd_delete(char *psz_args)
     for (unsigned int i=1; i<=i_breakpoints; i++) {
       if (remove_breakpoint(i, true)) breakpoints_removed++;
     }
-    dbg_msg(_("%u breakpoint(s) removed.\n"), breakpoints_removed);
+    dbg_msg(_("%u breakpoint(s) removed."), breakpoints_removed);
 
     return debug_readloop;
   }
