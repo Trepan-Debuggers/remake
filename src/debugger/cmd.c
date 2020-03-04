@@ -98,22 +98,22 @@ long_cmd_t commands[] = {
   { "down",     'D' },
   { "edit" ,    'e' },
   { "eval" ,    'E' },
-  // { "expand" ,  'x' },
-  // { "finish"  , 'F' },
+  { "expand" ,  'x' },
+  { "finish"  , 'F' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
-  // { "list"    , 'l' },
-  // { "load"    , 'M' },
-  // { "next"    , 'n' },
+  { "list"    , 'l' },
+  { "load"    , 'M' },
+  { "next"    , 'n' },
   { "print"   , 'p' },
-  // { "pwd"     , 'P' },
+  { "pwd"     , 'P' },
   { "quit"    , 'q' },
-  // { "run"     , 'R' },
+  { "run"     , 'R' },
   { "set"     , '=' },
-  // { "setq"    , '"' },
-  // { "setqx"   , '`' },
-  // { "shell"   , '!' },
+  { "setq"    , '"' },
+  { "setqx"   , '`' },
+  { "shell"   , '!' },
   { "show"    , 'S' },
   { "skip"    , 'k' },
   { "source"  , '<' },
@@ -190,21 +190,21 @@ find_command (const char *psz_name)
 #include "command/down.h"
 #include "command/edit.h"
 #include "command/eval.h"
-/* #include "command/expand.h" */
-/* #include "command/finish.h" */
+#include "command/expand.h"
+#include "command/finish.h"
 #include "command/frame.h"
 #include "command/info.h"
-/* #include "command/load.h" */
-/* #include "command/next.h" */
-/* #include "command/list.h" */
+#include "command/load.h"
+#include "command/next.h"
+#include "command/list.h"
 #include "command/print.h"
-/* #include "command/pwd.h" */
+#include "command/pwd.h"
 #include "command/quit.h"
-/* #include "command/run.h" */
+#include "command/run.h"
 #include "command/set.h"
-/* #include "command/setq.h" */
-/* #include "command/setqx.h" */
-/* #include "command/shell.h" */
+#include "command/setq.h"
+#include "command/setqx.h"
+#include "command/shell.h"
 #include "command/show.h"
 #include "command/skip.h"
 #include "command/source.h"
@@ -214,7 +214,7 @@ find_command (const char *psz_name)
 #include "command/where.h"
 #include "command/write.h"
 
-/* Needs to come after dbg_cmd_show */
+/* Needs to come after command/show.h */
 #include "command/help.h"
 
 #include "command/help/break.h"
@@ -224,13 +224,23 @@ find_command (const char *psz_name)
 #include "command/help/delete.h"
 #include "command/help/down.h"
 #include "command/help/edit.h"
+#include "command/help/expand.h"
 #include "command/help/eval.h"
+#include "command/help/finish.h"
 #include "command/help/frame.h"
 #include "command/help/help.h"
 #include "command/help/info.h"
+#include "command/help/load.h"
+#include "command/help/next.h"
+#include "command/help/list.h"
 #include "command/help/print.h"
+#include "command/help/pwd.h"
 #include "command/help/quit.h"
+#include "command/help/run.h"
 #include "command/help/set.h"
+#include "command/help/setq.h"
+#include "command/help/setqx.h"
+#include "command/help/shell.h"
 #include "command/help/show.h"
 #include "command/help/skip.h"
 #include "command/help/step.h"
@@ -257,22 +267,22 @@ cmd_initialize(void)
   DBG_CMD_INIT(down, 'D');
   DBG_CMD_INIT(edit, 'e');
   DBG_CMD_INIT(eval, 'E');
-  /* dbg_cmd_expand_init  ('x'); */
-  /* dbg_cmd_finish_init  ('F'); */
+  DBG_CMD_INIT(expand, 'x');
+  DBG_CMD_INIT(finish, 'F');
   DBG_CMD_INIT(frame, 'f');
   DBG_CMD_INIT(help, 'h');
   DBG_CMD_INIT(info, 'i');
-  /* dbg_cmd_list_init    ('l'); */
-  /* dbg_cmd_load_init    ('M'); */
-  /* dbg_cmd_next_init    ('n'); */
+  DBG_CMD_INIT(list, 'l');
+  DBG_CMD_INIT(load, 'M');
+  DBG_CMD_INIT(next, 'n');
   DBG_CMD_INIT(print, 'p');
-  /* dbg_cmd_pwd_init     ('P'); */
+  DBG_CMD_INIT(pwd, 'P');
   DBG_CMD_INIT(quit, 'q');
-  /* dbg_cmd_run_init     ('R'); */
+  DBG_CMD_INIT(run, 'R');
   DBG_CMD_INIT(set, '=');
-  /* dbg_cmd_setq_init    ('"'); */
-  /* dbg_cmd_setqx_init   ('`'); */
-  /* dbg_cmd_shell_init   ('!'); */
+  DBG_CMD_INIT(setq, '"');
+  DBG_CMD_INIT(setqx, '`');
+  DBG_CMD_INIT(shell, '!');
   DBG_CMD_INIT(show, 'S');
   DBG_CMD_INIT(skip, 'k');
   DBG_CMD_INIT(source, '<');
