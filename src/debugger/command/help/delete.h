@@ -1,4 +1,4 @@
-#define DELETE_HELP_TEXT						\
+#define delete_HELP_TEXT						\
   "Delete some breakpoints.\n"						\
   "\n"									\
   "Arguments are breakpoint numbers with spaces in between.  To delete\n" \

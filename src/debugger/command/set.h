@@ -1,8 +1,8 @@
 /* Set a variable definition with all variable references in the value
    part of psz_string expanded. */
 /*
-Copyright (C) 2011, 2015 R. Bernstein <rocky@gnu.org>
-This file is part of GNU Make (remake variant).
+  "Copyright (C) 2011, 2015, 2020 R. Bernstein <rocky@gnu.org>\n" \
+  This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -135,12 +135,6 @@ dbg_cmd_set_init(unsigned int c)
   short_command[c].func = &dbg_cmd_set;
   short_command[c].use =
     _("set OPTION {on|off|toggle}");
-  short_command[c].doc  =
-    _("Set debugger boolean value for OPTION.\n"
-"Run `set' for a list of options and current values\n"
-"\n"
-"See also 'setq'."
-      );
 }
 
 /*

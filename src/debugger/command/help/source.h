@@ -1,4 +1,4 @@
-#define SOURCE_HELP_TEXT \
+#define source_HELP_TEXT \
   "Read debugger commands from the glob expansion of FILE-GLOB.\n"	\
   "\n"									\
   "Examples:\n"								\

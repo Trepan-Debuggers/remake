@@ -92,36 +92,36 @@ static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 long_cmd_t commands[] = {
   { "break",    'b' },
   { "cd",       'C' },
-  { "comment",  '#' },
+  // { "comment",  '#' },
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
-  { "edit" ,    'e' },
-  { "eval" ,    'E' },
-  { "expand" ,  'x' },
-  { "finish"  , 'F' },
-  { "frame"   , 'f' },
+  // { "edit" ,    'e' },
+  // { "eval" ,    'E' },
+  // { "expand" ,  'x' },
+  // { "finish"  , 'F' },
+  // { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
-  { "list"    , 'l' },
-  { "load"    , 'M' },
-  { "next"    , 'n' },
-  { "print"   , 'p' },
-  { "pwd"     , 'P' },
+  // { "list"    , 'l' },
+  // { "load"    , 'M' },
+  // { "next"    , 'n' },
+  // { "print"   , 'p' },
+  // { "pwd"     , 'P' },
   { "quit"    , 'q' },
-  { "run"     , 'R' },
+  // { "run"     , 'R' },
   { "set"     , '=' },
-  { "setq"    , '"' },
-  { "setqx"   , '`' },
-  { "shell"   , '!' },
+  // { "setq"    , '"' },
+  // { "setqx"   , '`' },
+  // { "shell"   , '!' },
   { "show"    , 'S' },
-  { "skip"    , 'k' },
+  // { "skip"    , 'k' },
   { "source"  , '<' },
   { "step"    , 's' },
   { "target"  , 't' },
   { "up"      , 'u' },
   { "where"   , 'T' },
-  { "write"   , 'w' },
+  // { "write"   , 'w' },
   { (char *)NULL, ' '}
 };
 
@@ -135,7 +135,6 @@ typedef struct {
 alias_cmd_t aliases[] = {
   { "shell",    "!!" },
   { "help",     "?" },
-  { "help",     "??" },
   { "break",    "L" },
   { "where",    "backtrace" },
   { "where",    "bt" },
@@ -148,7 +147,9 @@ alias_cmd_t aliases[] = {
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
-                                     (const char *) '\0' }, };
+                                     (const char *) '\0',
+                                     (uint8_t) 255,
+                                    }, };
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -171,7 +172,7 @@ find_command (const char *psz_name)
   for (i = 0; commands[i].long_name; i++) {
     const int cmp = strcmp (psz_name, commands[i].long_name);
     if ( 0 == cmp ) {
-      return (&short_command[(uint8_t) commands[i].short_name]);
+      return &(short_command[(uint8_t) commands[i].short_name]);
     } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
@@ -183,74 +184,96 @@ find_command (const char *psz_name)
 
 #include "command/break.h"
 #include "command/chdir.h"
-#include "command/comment.h"
+/* #include "command/comment.h" */
 #include "command/continue.h"
 #include "command/delete.h"
 #include "command/down.h"
-#include "command/edit.h"
-#include "command/eval.h"
-#include "command/expand.h"
-#include "command/finish.h"
-#include "command/frame.h"
+/* #include "command/edit.h" */
+/* #include "command/eval.h" */
+/* #include "command/expand.h" */
+/* #include "command/finish.h" */
+/* #include "command/frame.h" */
 #include "command/info.h"
-#include "command/load.h"
-#include "command/next.h"
-#include "command/list.h"
-#include "command/print.h"
-#include "command/pwd.h"
+/* #include "command/load.h" */
+/* #include "command/next.h" */
+/* #include "command/list.h" */
+/* #include "command/print.h" */
+/* #include "command/pwd.h" */
 #include "command/quit.h"
-#include "command/run.h"
+/* #include "command/run.h" */
 #include "command/set.h"
-#include "command/setq.h"
-#include "command/setqx.h"
-#include "command/shell.h"
+/* #include "command/setq.h" */
+/* #include "command/setqx.h" */
+/* #include "command/shell.h" */
 #include "command/show.h"
-#include "command/skip.h"
+/* #include "command/skip.h" */
 #include "command/source.h"
 #include "command/step.h"
 #include "command/target.h"
 #include "command/up.h"
 #include "command/where.h"
-#include "command/write.h"
+/* #include "command/write.h" */
 
 /* Needs to come after dbg_cmd_show */
 #include "command/help.h"
 
+#include "command/help/break.h"
+#include "command/help/chdir.h"
+#include "command/help/continue.h"
+#include "command/help/delete.h"
+#include "command/help/down.h"
+#include "command/help/help.h"
+#include "command/help/info.h"
+#include "command/help/quit.h"
+#include "command/help/set.h"
+#include "command/help/show.h"
+#include "command/help/step.h"
+#include "command/help/target.h"
+#include "command/help/up.h"
+#include "command/help/where.h"
+
+
+#define DBG_CMD_INIT(CMD, LETTER)                       \
+  dbg_cmd_ ## CMD ## _init(LETTER);                     \
+  short_command[LETTER].doc = CMD ## _HELP_TEXT;        \
+  short_command[LETTER].id = id++
+
 static void
 cmd_initialize(void)
 {
-  dbg_cmd_break_init   ('b');
-  dbg_cmd_chdir_init   ('C');
-  dbg_cmd_continue_init('c');
-  dbg_cmd_delete_init  ('d');
-  dbg_cmd_down_init    ('D');
-  dbg_cmd_edit_init    ('e');
-  dbg_cmd_eval_init    ('E');
-  dbg_cmd_finish_init  ('F');
-  dbg_cmd_frame_init   ('f');
-  dbg_cmd_help_init    ('h');
-  dbg_cmd_info_init    ('i');
-  dbg_cmd_skip_init    ('k');
-  dbg_cmd_list_init    ('l');
-  dbg_cmd_load_init    ('M');
-  dbg_cmd_next_init    ('n');
-  dbg_cmd_print_init   ('p');
-  dbg_cmd_pwd_init     ('P');
-  dbg_cmd_quit_init    ('q');
-  dbg_cmd_run_init     ('R');
-  dbg_cmd_source_init  ('<');
-  dbg_cmd_show_init    ('S');
-  dbg_cmd_step_init    ('s');
-  dbg_cmd_target_init  ('t');
-  dbg_cmd_up_init      ('u');
-  dbg_cmd_where_init   ('T');
-  dbg_cmd_write_init   ('w');
-  dbg_cmd_expand_init  ('x');
-  dbg_cmd_comment_init ('#');
-  dbg_cmd_set_init     ('=');
-  dbg_cmd_setq_init    ('"');
-  dbg_cmd_setqx_init   ('`');
-  dbg_cmd_shell_init   ('!');
+  int id=0;
+  DBG_CMD_INIT(break, 'b');
+  DBG_CMD_INIT(chdir, 'C');
+  /* dbg_cmd_comment_init ('#'); */
+  DBG_CMD_INIT(continue, 'c');
+  DBG_CMD_INIT(delete, 'd');
+  DBG_CMD_INIT(down, 'D');
+  /* dbg_cmd_edit_init    ('e'); */
+  /* dbg_cmd_eval_init    ('E'); */
+  /* dbg_cmd_expand_init  ('x'); */
+  /* dbg_cmd_finish_init  ('F'); */
+  /* dbg_cmd_frame_init   ('f'); */
+  DBG_CMD_INIT(help, 'h');
+  DBG_CMD_INIT(info, 'i');
+  /* dbg_cmd_list_init    ('l'); */
+  /* dbg_cmd_load_init    ('M'); */
+  /* dbg_cmd_next_init    ('n'); */
+  /* dbg_cmd_print_init   ('p'); */
+  /* dbg_cmd_pwd_init     ('P'); */
+  DBG_CMD_INIT(quit, 'q');
+  /* dbg_cmd_run_init     ('R'); */
+  DBG_CMD_INIT(set, '=');
+  /* dbg_cmd_setq_init    ('"'); */
+  /* dbg_cmd_setqx_init   ('`'); */
+  /* dbg_cmd_shell_init   ('!'); */
+  DBG_CMD_INIT(show, 'S');
+  /* dbg_cmd_skip_init    ('k'); */
+  DBG_CMD_INIT(source, '<');
+  DBG_CMD_INIT(step, 's');
+  DBG_CMD_INIT(target, 't');
+  DBG_CMD_INIT(up, 'u');
+  DBG_CMD_INIT(where, 'T');
+  /* dbg_cmd_write_init   ('w'); */
 }
 
 /* Execute a command line. */

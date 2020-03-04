@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 R. Bernstein
+Copyright (C) 2015, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -44,10 +44,6 @@ dbg_cmd_step_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_step;
   short_command[c].use = _("step [AMOUNT]");
-  short_command[c].doc =
-    _("Step execution until another stopping point is reached.\n"
-      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
-      "reason to stop.");
 }
 
 

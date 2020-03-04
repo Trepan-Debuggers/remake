@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011, 2015 R. Bernstein
+Copyright (C) 2004-2005, 2007-2009, 2011, 2015, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -45,7 +45,7 @@ dbg_cmd_next_init(unsigned int c)
     _("Continue until the next command to be executed.\n"
       "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
       "reason to stop.");
-
+  short_command[c].long_name = "next";
 }
 
 /*

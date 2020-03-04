@@ -1,6 +1,6 @@
 /* Continue until the next command to be executed. */
 #define DEPENDS_COMMANDS " depends commands"
-static debug_return_t 
+static debug_return_t
 dbg_cmd_list(char *psz_arg)
 {
   const char *psz_target = NULL;
@@ -17,7 +17,7 @@ dbg_cmd_list(char *psz_arg)
 	dbg_errmsg(_("We don't seem to have a target to get parent of."));
 	return debug_cmd_error;
       }
-    
+
       p = p->p_parent;
       if (!p) {
 	dbg_errmsg(_("We don't seem to have a parent target."));
@@ -37,8 +37,8 @@ dbg_cmd_list(char *psz_arg)
         p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
                                             u_lineno, &entry_type);
         if (!p_target) {
-          dbg_errmsg("Can't find target or pattern on line %s.\n" 
-                     "Use 'info lines' to get a list of and pattern lines.", 
+          dbg_errmsg("Can't find target or pattern on line %s.\n"
+                     "Use 'info lines' to get a list of and pattern lines.",
                      psz_arg);
           return debug_cmd_error;
         }
@@ -47,7 +47,7 @@ dbg_cmd_list(char *psz_arg)
 	dbg_errmsg(_("We don't seem to have a target stack to get parent of."));
 	return debug_cmd_error;
       }
-    } else 
+    } else
       p_target = get_target(&psz_arg, &psz_target);
   }
 
@@ -62,19 +62,20 @@ dbg_cmd_list(char *psz_arg)
 }
 
 static void
-dbg_cmd_list_init(unsigned int c) 
+dbg_cmd_list_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_list;
   short_command[c].use = _("list [TARGET|LINE-NUMBER]");
-  short_command[c].doc = 
+  short_command[c].doc =
     _("List target dependencies and commands for TARGET or LINE NUMBER.\n"
 "Without a target name or line number, use the current target.\n"
 "A target name of '-' will use the parent target on the target stack.\n"
  );
+  short_command[c].long_name = "list";
 }
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

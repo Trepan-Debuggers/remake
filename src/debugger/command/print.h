@@ -1,6 +1,6 @@
 /* Show a variable definition. */
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t 
-dbg_cmd_print(char *psz_args) 
+static debug_return_t
+dbg_cmd_print(char *psz_args)
 {
   char *psz_name;
   static char *psz_last_name = NULL;
@@ -35,7 +35,7 @@ dbg_cmd_print(char *psz_args)
   } else {
     psz_name = get_word(&psz_args);
   }
-  
+
   if (dbg_cmd_show_exp(psz_name, false)) {
     if (psz_last_name) free(psz_last_name);
     psz_last_name = strdup(psz_name);
@@ -45,21 +45,22 @@ dbg_cmd_print(char *psz_args)
 }
 
 static void
-dbg_cmd_print_init(unsigned int c) 
+dbg_cmd_print_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_print;
   short_command[c].use = _("print {VARIABLE [attrs...]}");
-  short_command[c].doc = 
+  short_command[c].doc =
     _("Show a variable definition.\n"
       "The value is shown with embedded\n"
       "variable-references unexpanded. Don't include $ before a variable\n"
       "name. See also \"examine\".\n\n"
       "If no variable is supplied, we try to use the\n"
-      "last value given."				
+      "last value given."
       );
+  short_command[c].long_name = "print";
 }
 
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  indent-tabs-mode: nil

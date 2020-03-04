@@ -59,6 +59,7 @@ dbg_cmd_edit_init(unsigned int c)
       "Enter an editor using the current location. "
       "Uses EDITOR environment variable contents as editor (or ex as default)."
       "Assumes the editor positions at a file using options +linenumber filename.");
+  short_command[c].long_name = "edit";
 }
 
 /*

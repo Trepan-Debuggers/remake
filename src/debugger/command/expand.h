@@ -1,6 +1,6 @@
 /* Show a string with variable references expanded. */
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t 
+static debug_return_t
 dbg_cmd_expand (char *psz_string)
 {
   static char *psz_last_string = NULL;
@@ -32,7 +32,7 @@ dbg_cmd_expand (char *psz_string)
       return debug_readloop;
     }
   }
-  
+
   if (dbg_cmd_show_exp(psz_string, true)) {
     if (psz_last_string) free(psz_last_string);
     psz_last_string = strdup(psz_string);
@@ -41,21 +41,21 @@ dbg_cmd_expand (char *psz_string)
 }
 
 static void
-dbg_cmd_expand_init(unsigned int c) 
+dbg_cmd_expand_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_expand;
   short_command[c].use  = _("expand STRING");
-  short_command[c].doc  = 
+  short_command[c].doc  =
     _("Show string with internal variables references expanded. See also \n"
       "\t\"print\".");
+  short_command[c].long_name = "expand";
 }
 
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil
  * End:
  */
-
