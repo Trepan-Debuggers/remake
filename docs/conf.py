@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# zshdb documentation build configuration file, created by
+# remake documentation build configuration file, created by
 # sphinx-quickstart on Fri Sep 29 07:09:20 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -119,7 +119,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'zshdbdoc'
+htmlhelp_basename = 'remakedoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -146,7 +146,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'zshdb.tex', 'zshdb Documentation',
+    (master_doc, 'remake.tex', 'remake Documentation',
      'Rocky Bernstein', 'manual'),
 ]
 
@@ -156,7 +156,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'zshdb', 'zshdb Documentation',
+    (master_doc, 'remake', 'remake Documentation',
      [author], 1)
 ]
 
@@ -167,7 +167,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'zshdb', 'zshdb Documentation',
-     author, 'zshdb', 'gdb-like debugger for zsh.',
+    (master_doc, 'remake', 'remake Documentation',
+     author, 'remake', 'GNU Make with lots more.',
      'Programming'),
 ]

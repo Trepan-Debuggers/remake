@@ -110,12 +110,6 @@ Features of the debugger:
 .. _trepanning: https://pypi.python.org/pypi/trepan2
 .. _debuggers: https://metacpan.org/pod/Devel::Trepan
 .. _this: http://bashdb.sourceforge.net/pydb/features.html
-.. _set_substitute:  https://zshdb.readthedocs.org/en/latest/commands/set/substitute.html
-.. _set_style:  https://zshdb.readthedocs.org/en/latest/commands/set/style.html
-.. _set_width:  https://zshdb.readthedocs.org/en/latest/commands/set/width.html
-.. _eval: https://zshdb.readthedocs.org/en/latest/commands/data/eval.html
-.. _step: https://zshdb.readthedocs.org/en/latest/commands/running/step.html
-.. _install: http://zshdb.readthedocs.org/en/latest/install.html
 .. _Format: https://valgrind.org/docs/manual/cl-format.html
 .. _KCachegrind: https://kcachegrind.github.io/html/Home.html
 .. _gprof2dot: https://github.com/jrfonseca/gprof2dot

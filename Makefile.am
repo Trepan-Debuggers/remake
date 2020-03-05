@@ -39,53 +39,9 @@ DEBUGGER_SRC = 	\
 		src/debugger/stack.c
 
 DEBUGGER_H = \
-		src/debugger/break.h 		\
-		src/debugger/cmd.h 			\
-		src/debugger/fns.h 			\
-		src/debugger/msg.h 			\
-		src/debugger/command/break.h 	\
-		src/debugger/command/chdir.h  	\
-		src/debugger/command/comment.h 	\
-		src/debugger/command/continue.h	\
-		src/debugger/command/delete.h 	\
-		src/debugger/command/down.h 	\
-		src/debugger/command/edit.h 	\
-		src/debugger/command/eval.h 	\
-		src/debugger/command/expand.h	\
-		src/debugger/command/finish.h	\
-		src/debugger/command/frame.h	\
-		src/debugger/command/help.h		\
-		src/debugger/command/help/break.h	\
-		src/debugger/command/help/delete.h	\
-		src/debugger/command/help/down.h	\
-		src/debugger/command/help/help.h	\
-		src/debugger/command/help/source.h	\
-		src/debugger/command/help/up.h		\
-		src/debugger/command/info.h		\
-		src/debugger/command/list.h		\
-		src/debugger/command/load.h		\
-		src/debugger/command/next.h		\
-		src/debugger/command/print.h	\
-		src/debugger/command/pwd.h		\
-		src/debugger/command/quit.h		\
-		src/debugger/command/run.h		\
-		src/debugger/command/set.h		\
-		src/debugger/command/setq.h		\
-		src/debugger/command/setqx.h	\
-		src/debugger/command/shell.h	\
-		src/debugger/command/show.h		\
-		src/debugger/command/skip.h		\
-		src/debugger/command/source.h	\
-		src/debugger/command/step.h		\
-		src/debugger/command/target.h	\
-		src/debugger/command/up.h		\
-		src/debugger/command/where.h	\
-		src/debugger/command/write.h	\
-		src/debugger/file2line.h 	        \
-		src/debugger/fns.h 			\
-		src/debugger/info.h			\
-		src/debugger/stack.h		\
-		src/debugger/subcmd.h
+	$(wildcard src/debugger/*.h) \
+	$(wildcard src/debugger/command/*.h) \
+	$(wildcard src/debugger/command/help/*.h)
 
 make_SRCS =	\
 		src/alloc.c src/ar.c src/arscan.c src/buildargv.c \
@@ -104,6 +60,7 @@ w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
 		src/w32/include/sub_proc.h src/w32/include/w32err.h \
 		src/w32/subproc/misc.c src/w32/subproc/proc.h \
 		src/w32/subproc/sub_proc.c src/w32/subproc/w32err.c
+
 
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 

@@ -135,7 +135,6 @@ typedef struct {
 alias_cmd_t aliases[] = {
   { "shell",    "!!" },
   { "help",     "?" },
-  { "help",     "??" },
   { "break",    "L" },
   { "where",    "backtrace" },
   { "where",    "bt" },
@@ -148,7 +147,9 @@ alias_cmd_t aliases[] = {
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
-                                     (const char *) '\0' }, };
+                                     (const char *) '\0',
+                                     (uint8_t) 255,
+                                    }, };
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -171,7 +172,7 @@ find_command (const char *psz_name)
   for (i = 0; commands[i].long_name; i++) {
     const int cmp = strcmp (psz_name, commands[i].long_name);
     if ( 0 == cmp ) {
-      return (&short_command[(uint8_t) commands[i].short_name]);
+      return &(short_command[(uint8_t) commands[i].short_name]);
     } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
@@ -213,44 +214,83 @@ find_command (const char *psz_name)
 #include "command/where.h"
 #include "command/write.h"
 
-/* Needs to come after dbg_cmd_show */
+/* Needs to come after command/show.h */
 #include "command/help.h"
+
+#include "command/help/break.h"
+#include "command/help/chdir.h"
+#include "command/help/comment.h"
+#include "command/help/continue.h"
+#include "command/help/delete.h"
+#include "command/help/down.h"
+#include "command/help/edit.h"
+#include "command/help/expand.h"
+#include "command/help/eval.h"
+#include "command/help/finish.h"
+#include "command/help/frame.h"
+#include "command/help/help.h"
+#include "command/help/info.h"
+#include "command/help/load.h"
+#include "command/help/next.h"
+#include "command/help/list.h"
+#include "command/help/print.h"
+#include "command/help/pwd.h"
+#include "command/help/quit.h"
+#include "command/help/run.h"
+#include "command/help/set.h"
+#include "command/help/setq.h"
+#include "command/help/setqx.h"
+#include "command/help/shell.h"
+#include "command/help/show.h"
+#include "command/help/skip.h"
+#include "command/help/step.h"
+#include "command/help/target.h"
+#include "command/help/up.h"
+#include "command/help/where.h"
+#include "command/help/write.h"
+
+
+#define DBG_CMD_INIT(CMD, LETTER)                       \
+  dbg_cmd_ ## CMD ## _init(LETTER);                     \
+  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);   \
+  short_command[LETTER].id = id++
 
 static void
 cmd_initialize(void)
 {
-  dbg_cmd_break_init   ('b');
-  dbg_cmd_chdir_init   ('C');
-  dbg_cmd_continue_init('c');
-  dbg_cmd_delete_init  ('d');
-  dbg_cmd_down_init    ('D');
-  dbg_cmd_edit_init    ('e');
-  dbg_cmd_eval_init    ('E');
-  dbg_cmd_finish_init  ('F');
-  dbg_cmd_frame_init   ('f');
-  dbg_cmd_help_init    ('h');
-  dbg_cmd_info_init    ('i');
-  dbg_cmd_skip_init    ('k');
-  dbg_cmd_list_init    ('l');
-  dbg_cmd_load_init    ('M');
-  dbg_cmd_next_init    ('n');
-  dbg_cmd_print_init   ('p');
-  dbg_cmd_pwd_init     ('P');
-  dbg_cmd_quit_init    ('q');
-  dbg_cmd_run_init     ('R');
-  dbg_cmd_source_init  ('<');
-  dbg_cmd_show_init    ('S');
-  dbg_cmd_step_init    ('s');
-  dbg_cmd_target_init  ('t');
-  dbg_cmd_up_init      ('u');
-  dbg_cmd_where_init   ('T');
-  dbg_cmd_write_init   ('w');
-  dbg_cmd_expand_init  ('x');
-  dbg_cmd_comment_init ('#');
-  dbg_cmd_set_init     ('=');
-  dbg_cmd_setq_init    ('"');
-  dbg_cmd_setqx_init   ('`');
-  dbg_cmd_shell_init   ('!');
+  int id=0;
+  DBG_CMD_INIT(break, 'b');
+  DBG_CMD_INIT(chdir, 'C');
+  DBG_CMD_INIT(comment, '#');
+  DBG_CMD_INIT(continue, 'c');
+  DBG_CMD_INIT(delete, 'd');
+  DBG_CMD_INIT(down, 'D');
+  DBG_CMD_INIT(edit, 'e');
+  DBG_CMD_INIT(eval, 'E');
+  DBG_CMD_INIT(expand, 'x');
+  DBG_CMD_INIT(finish, 'F');
+  DBG_CMD_INIT(frame, 'f');
+  DBG_CMD_INIT(help, 'h');
+  DBG_CMD_INIT(info, 'i');
+  DBG_CMD_INIT(list, 'l');
+  DBG_CMD_INIT(load, 'M');
+  DBG_CMD_INIT(next, 'n');
+  DBG_CMD_INIT(print, 'p');
+  DBG_CMD_INIT(pwd, 'P');
+  DBG_CMD_INIT(quit, 'q');
+  DBG_CMD_INIT(run, 'R');
+  DBG_CMD_INIT(set, '=');
+  DBG_CMD_INIT(setq, '"');
+  DBG_CMD_INIT(setqx, '`');
+  DBG_CMD_INIT(shell, '!');
+  DBG_CMD_INIT(show, 'S');
+  DBG_CMD_INIT(skip, 'k');
+  DBG_CMD_INIT(source, '<');
+  DBG_CMD_INIT(step, 's');
+  DBG_CMD_INIT(target, 't');
+  DBG_CMD_INIT(up, 'u');
+  DBG_CMD_INIT(where, 'T');
+  DBG_CMD_INIT(write, 'w');
 }
 
 /* Execute a command line. */

@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=zshdb
+set SPHINXPROJ=remake
 
 if "%1" == "" goto help
 

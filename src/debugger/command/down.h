@@ -18,8 +18,6 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "help/down.h"
-
 debug_return_t
 dbg_cmd_frame_down(char *psz_amount)
 {
@@ -38,7 +36,6 @@ dbg_cmd_down_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_frame_down;
   short_command[c].use  = _("down [AMOUNT]");
-  short_command[c].doc  = _(DOWN_HELP_TEXT);
 }
 
 /*

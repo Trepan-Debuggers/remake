@@ -1,4 +1,4 @@
-#define HELP_TEXT							\
+#define help_HELP_TEXT							\
   "Get help for a debugger command or subcommand.\n"			\
   "\n"									\
   "Without an argument, print the list of available debugger commands.\n" \

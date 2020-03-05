@@ -321,7 +321,7 @@ dbg_cmd_info(char *psz_args)
 	  if (r)
 	    print_rule(r, true);
 	  else
-	    dbg_errmsg(_("Rule %s not found.\n"), psz_args);
+	    dbg_errmsg(_("Rule %s not found."), psz_args);
 	}
     } else if (is_abbrev_of (psz_subcmd, "stack", 1)) {
         print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);

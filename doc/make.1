@@ -94,10 +94,23 @@ updates a target if it depends on prerequisite files
 that have been modified since the target was last modified,
 or if the target does not exist.
 .SH OPTIONS
-.LP Below we give options that are specific to
+.LP
+Below we give options that are specific to
 .BR remake .
 For the other options, please refer to the GNU Make documentation
 
+.TP 0.5i
+\fB\-c\fR, \fB\-\-show-parent\fR
+if a Makefile or goal target isn't found in the current directory,
+.B remake
+will search in the parent directory for a Makefile. On finding a parent the
+closest parent directory with a Makefile,
+.B remake
+will set its current working
+directory to the directory where the Makefile was found.
+.sp 1
+In this respect the short option '\-c', is like '\-C' except no
+directory need to be specified.
 .sp 1
 .TP 0.5i
 \fB\-!\fR, \fB\-\-post\-mortem\fR
@@ -178,7 +191,9 @@ programs are properly installed at your site, the command
 .IP
 .B info remake
 .PP
-should give you access to the complete manual.
+should give you access to the
+.B remake
+manual.
 .SH BUGS
 Since this is derived from GNU Make, it most of its bugs.
 

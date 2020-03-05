@@ -55,7 +55,6 @@ dbg_cmd_delete_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_delete;
   short_command[c].use  = _("delete BREAKPOINT_NUMBERS...");
-  short_command[c].doc  = _(DELETE_HELP_TEXT);
 }
 
 /*

@@ -62,9 +62,15 @@ dbg_help_subcmd(const char *psz_subcmd_name,
 		return debug_readloop;
 	    }
 	}
-	printf("There is no \"%s %s\" command.\n", psz_subcmd_name, psz_args);
+	dbg_errmsg("There is no \"%s %s\" command.", psz_subcmd_name, psz_args);
     }
     return debug_readloop;
+}
+
+static bool
+is_alias(const char *psz_command_name, const alias_cmd_t *p_alias)
+{
+  return strcmp (psz_command_name, p_alias->command) == 0;
 }
 
 debug_return_t
@@ -82,7 +88,7 @@ dbg_cmd_help(char *psz_args)
       printf("  %-31s (%c)",
 	     short_command[s].use, commands[i].short_name);
       for (j = 0; aliases[j].alias; j++) {
-	if (strcmp (commands[i].long_name, aliases[j].command) == 0) {
+	if (is_alias(commands[i].long_name, &aliases[j])) {
 	  if (!b_alias) {
 	    printf("  %s", aliases[j].alias);
 	    b_alias = true;
@@ -94,7 +100,7 @@ dbg_cmd_help(char *psz_args)
       printf("\n");
     }
 
-    printf("\nReadline command line editing (emacs/vi mode) is available.\n"
+    dbg_msg("\nReadline command line editing (emacs/vi mode) is available.\n"
 "For more detailed help, type 'help COMAMND-NAME' or consult\n"
 "the online-documentation.\n");
 
@@ -119,12 +125,21 @@ dbg_cmd_help(char *psz_args)
 	  } else if ( p_command->func == &dbg_cmd_set ) {
 	      return dbg_help_subcmd("set", p_command, psz_args, set_subcommands);
 	  } else {
-	      printf("%s\n\n", p_command->use);
-	      printf("%s\n", p_command->doc);
+            const long_cmd_t *p_long_command = &commands[p_command->id];
+            printf("%s\n\n", p_command->use);
+            printf("%s\n", p_command->doc);
+            printf("\nShort name and aliases: %c", p_long_command->short_name);
+            for (int j = 0; aliases[j].alias; j++) {
+              if (p_long_command->long_name && is_alias(p_long_command->long_name, &aliases[j])) {
+                printf(", %s", aliases[j].alias);
+              }
+            }
+            printf("\n");
 	  }
+
       } else {
-	  printf("Undefined command `%s'. Try help for a list of commands.\n",
-		 psz_command);
+	  dbg_errmsg("Undefined command `%s'. Try help for a list of commands.\n",
+                     psz_command);
       }
   }
 
@@ -136,7 +151,6 @@ dbg_cmd_help_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_help;
   short_command[c].use  = _("help [COMMAND]");
-  short_command[c].doc  = _(HELP_TEXT);
 }
 
 

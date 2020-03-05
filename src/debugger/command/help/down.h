@@ -1,4 +1,4 @@
-#define DOWN_HELP_TEXT \
+#define down_HELP_TEXT \
   "Select and print the target this one caused to be examined.\n"	\
   "\n"									\
   "If *count* is given then select that many targets down; the default" \

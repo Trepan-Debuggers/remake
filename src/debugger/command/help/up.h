@@ -1,4 +1,4 @@
-#define UP_HELP_TEXT \
+#define up_HELP_TEXT \
   "Select and print the immediate child dependency target that is\n"	\
   "currently under consideration.\n"					\
   "\n"									\
