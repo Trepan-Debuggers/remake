@@ -29,7 +29,7 @@ dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
       const char *doc = p_subcmd->doc ?
 	p_subcmd->doc : p_subcmd->short_doc;
       printf("%s ", psz_subcmd_name);
-      printf("%s%s", p_subcmd->name, doc);
+      printf("%s\n%s.", p_subcmd->name, doc);
     } else {
       printf("%s ", psz_subcmd_name);
       printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
@@ -57,7 +57,7 @@ dbg_help_subcmd(const char *psz_subcmd_name,
 	for (i = 0; subcommands[i].name; i++) {
 	    if (is_abbrev_of(psz_args, subcommands[i].name,
 			     subcommands[i].min_abbrev)) {
-		dbg_help_subcmd_entry(psz_subcmd_name, "%s%s",
+		dbg_help_subcmd_entry(psz_subcmd_name, "%s. %s",
 				      &(subcommands[i]), true);
 		return debug_readloop;
 	    }

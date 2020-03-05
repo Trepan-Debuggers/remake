@@ -30,10 +30,6 @@ dbg_cmd_setq_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_setq;
   short_command[c].use  = _("setq VARIABLE VALUE");
-  short_command[c].doc  =
-    _("Set MAKE variable VARIABLE to VALUE. Variable definitions\n"
-      "\tinside VALUE is expanded before assignment occurs."
-"\nSee also 'setqx'.");
 }
 
 

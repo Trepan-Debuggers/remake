@@ -1,8 +1,8 @@
 .. index:: info; variables
-.. _info_program:
+.. _info_variables:
 
 Info Variables
-------------
+--------------
 
 **info variables**
 

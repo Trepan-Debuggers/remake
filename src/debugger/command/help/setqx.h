@@ -1,6 +1,8 @@
 #define setqx_HELP_TEXT							\
-  "Set MAKE variable VARIABLE to VALUE. Variable definitions\n"		\
-  "inside VALUE is expanded before assignment occurs.\n"		\
+  "Set GNU Make variable VARIABLE to VALUE.\n"				\
+  "\n"									\
+  "In contrast to `setq`, variable definitions inside VALUE are\n"	\
+  "expanded before assignment occurs.\n"				\
   "\n"									\
   "See also:\n"								\
   "---------\n"								\
