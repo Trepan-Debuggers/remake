@@ -113,16 +113,16 @@ If you are interested in learning about how GNU Make works, you might find it ea
 
 In contrast to GNU Make, we don't even attempt to support:
 
-* VMS (whether on [VAX](https://en.wikipedia.org/wiki/VAX) or the [OpenVMS](https://en.wikipedia.org/wiki/OpenVMS) variant)
-* DOS (with or without [EMX](https://en.wikipedia.org/wiki/EMX_(programming_environment) and [DJGCC](https://en.wikipedia.org/wiki/DJGPP)),
+* VMS (whether on VAX_ or the OpenVMS_  variant)
+* DOS (with or without EMX_ and DJGCC_),
 * native MS/Windows,
-* [acorn/OS](https://9to5mac.com/2017/01/06/apple-history-acorn-a-virtual-click-wheel-based-os-which-lost-out-to-ios-shown-in-its-2006-era-glory-video/)
-* [RISC OS](https://en.wikipedia.org/wiki/RISC_OS)
-* [Xenix](https://en.wikipedia.org/wiki/Xenix)
-* [Amiga](https://en.wikipedia.org/wiki/Amiga), or
-* [OS/2](https://en.wikipedia.org/wiki/OS/2)
+* acornOS_
+* RiscOS_
+* Xenix_
+* Amiga_, or
+* OS2_
 
-This is 2020, not the late 1970-80's. And yes, you can fin C-preprocessor checks and C code in GNU Make for all of the above.
+This is 2020, not the late 1970-80's. And yes, you can find C-preprocessor checks and C code in GNU Make for all of the above.
 
 By eliminating support for the above, thousands of lines of code in support of the above has been removed.
 
@@ -193,3 +193,12 @@ Overall, I view this as a plus for developers who would like to extend GNU Make 
 .. _KCachegrind: https://kcachegrind.github.io/html/Home.html
 .. _gprof2dot: https://github.com/jrfonseca/gprof2dot
 .. _callgrind_annotate: http://man7.org/linux/man-pages/man1/callgrind_annotate.1.html
+.. _VAX: https://en.wikipedia.org/wiki/VAX
+.. _OpenVMS: https://en.wikipedia.org/wiki/OpenVMS
+.. _EMX: https://en.wikipedia.org/wiki/EMX_(programming_environment)
+.. _DJGCC: https://en.wikipedia.org/wiki/DJGPP
+.. _acornOS: https://9to5mac.com/2017/01/06/apple-history-acorn-a-virtual-click-wheel-based-os-which-lost-out-to-ios-shown-in-its-2006-era-glory-video/
+.. _RiscOS: https://en.wikipedia.org/wiki/RISC_OS
+.. _Xenix: https://en.wikipedia.org/wiki/Xenix
+.. _Amiga: https://en.wikipedia.org/wiki/Amiga
+.. _OS2: https://en.wikipedia.org/wiki/OS/2
