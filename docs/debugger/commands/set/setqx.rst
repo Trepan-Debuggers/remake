@@ -1,10 +1,10 @@
 .. index:: setqx
 .. _setqx
 
-Basename only in File Path (set basename)
------------------------------------------
+Set GNU Make Variable with Expansion (setqx)
+--------------------------------------------
 
-**setqx** *basename* *value*
+**setqx** *variable* *value*
 
 
 Set GNU Make variable *variable* to *value*.
