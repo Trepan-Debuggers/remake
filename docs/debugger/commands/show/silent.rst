@@ -1,8 +1,8 @@
 .. index:: show; silent
 .. _show_silent:
 
-Show Style (pygments formatting style)
---------------------------------------
+Show GNU Make `-s` flag (show silent)
+-------------------------------------
 **show silent**
 
 Show the value of the GNU Make `--silent` (or `-s`) flag.
