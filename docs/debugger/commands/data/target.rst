@@ -1,8 +1,8 @@
 .. index:: target
 .. _target:
 
-Examining Targets (target)
---------------------------
+Examining Targets (`target`)
+----------------------------
 
 **target** [*target-name*] [*info1* [*info2*...]]
 

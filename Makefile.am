@@ -201,6 +201,9 @@ check-regression: tests/config-flags.pm
 	  echo "Can't find the GNU Make test suite ($(top_srcdir)/tests)."; \
 	fi
 
+#: Generate the ReadTheDocs manul in HTML format
+readthedocs:
+	$(MAKE) -C docs html
 
 # --------------- Maintainer's Section
 

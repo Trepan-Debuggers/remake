@@ -1,6 +1,6 @@
 /* Show debugger settings. */
 /*
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein
+Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 subcommand_var_info_t show_subcommands[] = {
   { "args",
-    "Show argument list to give program when it is started",
+    "Show the command-line invocation",
     NULL,
     NULL,
     false, 1},
@@ -36,31 +36,36 @@ subcommand_var_info_t show_subcommands[] = {
     NULL,
     false, 1},
   { "debug",
-    "GNU Make debug mask (set via --debug or -d)",
+    "Show the value of the GNU Make debug mask (set via `--debug` or `-d`)",
     NULL,
     &db_level, false, 1},
   { "ignore-errors",
-    "Value of GNU Make --ignore-errors (or -i) flag",
+    "Show the value of the GNU Make `--ignore-errors` (or `-i`) flag",
     NULL,
     &ignore_errors_flag, true, 1},
   { "keep-going",
-    "Value of GNU Make --keep-going (or -k) flag",
+    "Show the value of the GNU Make `--keep-going` (or `-k`) flag",
     NULL,
     &keep_going_flag,
     true, 1},
   { "silent",
-    "Value of GNU Make --silent (or -s) flags",
+    "Show the value of the GNU Make `--silent` (or `-s`) flag",
     NULL,
     &silent_flag,
     true, 1},
 #ifdef FIXED
   { "trace",
-    "Value of GNU Make --silent (or -s) flags",
+    "Value of GNU Make `--trace` (or `-t`) flag",
     NULL,
     &no_shell_trace,
     true, 1},
 #endif
-  { "version",       "Show the version of GNU Make + dbg.",
+  { "version",
+    "Show the remake version.\n"
+    "\n"
+    "The first number part of the version is the GNU Make base version.\n"
+    "After that comes a remake-specific value which indicates its release iteration."
+    ,
     NULL,
     NULL,
     false, 1},

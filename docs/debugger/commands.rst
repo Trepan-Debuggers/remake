@@ -1,3 +1,6 @@
+.. index:: debugger
+.. _debugger:
+
 Debugger Commands
 *****************
 
@@ -12,6 +15,9 @@ new, like `set`, `show`, and `info`.
    commands/breakpoints
    commands/data
    commands/files
+   commands/info
    commands/running
+   commands/set
+   commands/show
    commands/stack
    commands/support

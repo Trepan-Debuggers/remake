@@ -1,8 +1,8 @@
 .. index:: print
 .. _print:
 
-Print Variable Information (print)
-----------------------------------
+Print Variable Information (`print`)
+------------------------------------
 
 **print** [*variable*]
 

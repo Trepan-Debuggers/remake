@@ -3,14 +3,19 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = python -msphinx
+SPHINXBUILD   = /usr/bin/env python3 -msphinx
 SPHINXPROJ    = remake
 SOURCEDIR     = .
 BUILDDIR      = _build
 
 # Put it first so that "make" without argument is like "make help".
+#: Show help on useful targets
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+#: Make docs used in readthedocs.io
+readthedocs:
+	$(MAKE) html
 
 .PHONY: help Makefile
 

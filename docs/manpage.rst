@@ -21,12 +21,21 @@ debugger.
 See GNU Make_ for information on GNU Make and its use.
 
 
-
 Options
 -------
 
 Below we give options that are specific to `remake`. For the other options,
 please refer to the GNU Make documentation
+
+:-c | --search-parent:
+
+if a Makefile or goal target isn't found in the current directory, `remake`
+will search in the parent directory for a Makefile. On finding a parent the
+closest parent directory with a Makefile, `remake` will set its current working
+directory to the directory where the Makefile was found.
+
+In this respect the short option `-c`, is like `-C` except no
+directory need to be specified.
 
 :-! | --post-mortem:
 

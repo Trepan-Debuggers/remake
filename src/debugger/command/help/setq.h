@@ -1,7 +1,9 @@
 #define setq_HELP_TEXT							\
-  "Set debugger boolean value for OPTION.\n"				\
-  "Run `set' for a list of options and current values\n"		\
+  "Set MAKE variable VARIABLE to VALUE.\n"				\
+  "\n"									\
+  "In contrast to `setqx`, variable definitions inside VALUE* are\n"	\
+  "not expanded before assignment occurs.\n"				\
   "\n"									\
   "See also:\n"								\
   "---------\n"								\
-  "`setq` and `setqx`."
+  "`setqx` and `set`."

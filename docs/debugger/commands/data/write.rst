@@ -1,8 +1,8 @@
 .. index:: write
 .. _write:
 
-Write the Commands of a Target (write)
---------------------------------------
+Write the Commands of a Target (`write`)
+----------------------------------------
 
 **write** [*target* [[*filename|**here**]]]
 

@@ -1,8 +1,8 @@
 .. index:: break
 .. _break:
 
-Set a breakpoint (break)
-------------------------
+Set a breakpoint (`break`)
+--------------------------
 
 **break** {*target* | *line-number*} [ **all** | **run** | **prereq** | **end** ]*
 
