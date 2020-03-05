@@ -1,8 +1,8 @@
 .. index:: set; ignore-errors
 .. _set_ignore-errors:
 
-Set to Ignore Make Errors (set ingore-errors)
----------------------------------------------
+Set to Ignore Make Errors (`set ignore-errors`)
+-----------------------------------------------
 
 **set ignore-errors** [ **on** | **off** | **toggle** ]
 

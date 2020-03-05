@@ -1,8 +1,8 @@
-.. index:: set; trace-commands
-.. _set_trace-commands:
+.. index:: set; silent
+.. _set_silent:
 
-Set GNU Make Silent Flag (set silent)
-----------------------------------------------------------
+Set GNU Make `-s` Flag (`set silent`)
+-------------------------------------
 
 **set silent** [ **on** | **off** | **toggle** ]
 

@@ -23,6 +23,7 @@ environment settings with the :ref:`show <show>` command.
    set/basename
    set/debug
    set/ignore-errors
+   set/keep-going
    set/setq
    set/setqx
    set/silent

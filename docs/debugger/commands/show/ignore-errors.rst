@@ -1,8 +1,8 @@
 .. index:: show; ignore-errors
 .. _show_ignore-errors:
 
-Show GNU Make `-i` flag (show ignore-errors)
---------------------------------------------
+Show GNU Make `-i` flag (`show ignore-errors`)
+----------------------------------------------
 
 **show ignore-errors**
 

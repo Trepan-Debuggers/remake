@@ -1,8 +1,8 @@
 .. index:: show; basename
 .. _show_basename:
 
-Show Basename (basename only in file path)
-------------------------------------------
+Status basename-only in Path setting (`show basename`)
+------------------------------------------------------
 
 **show basename**
 

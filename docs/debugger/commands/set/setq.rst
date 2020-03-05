@@ -1,8 +1,8 @@
-.. index:: setq
+.. index:: set; setq
 .. _setq:
 
-Set GNU Make Variable without Expansion (setq)
-----------------------------------------------
+Set GNU Make Variable without Expansion (`setq`)
+------------------------------------------------
 
 **setq** *basename* *value*
 

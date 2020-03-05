@@ -1,8 +1,8 @@
 .. index:: show; version
 .. _show_version:
 
-Show remake version (show version)
-----------------------------------
+Show remake version (`show version`)
+------------------------------------
 
 **show version**
 
@@ -12,7 +12,7 @@ The first number part of the version is the GNU Make base version.
 After that comes a remake-specific value which indicates its release iteration.
 
 Example:
---------
+++++++++
 
 ::
       show version

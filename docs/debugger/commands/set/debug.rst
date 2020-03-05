@@ -1,8 +1,8 @@
-.. index:: debug
-.. _debug:
+.. index:: set; debug
+.. _set_debug:
 
-Set GNU Make Debug Mask Debug (set debug)
------------------------------------------
+Set GNU Make Debug Mask Debug (`set debug`)
+-------------------------------------------
 
 **set debug** *value*
 

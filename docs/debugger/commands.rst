@@ -1,3 +1,6 @@
+.. index:: debugger
+.. _debugger:
+
 Debugger Commands
 *****************
 

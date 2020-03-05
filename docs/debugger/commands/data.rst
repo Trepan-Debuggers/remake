@@ -9,5 +9,4 @@ Examining data.
    data/print
    data/target
    data/expand
-   data/info-variables
    data/write

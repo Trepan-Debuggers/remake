@@ -104,6 +104,8 @@ Features of the debugger:
   shell code can be run (and debugged) outside of make.
 * Enter debugger at the outset, call it from inside a Makefile, or enter it upon the first error
 
+See  :ref:`debugger <debugger>` for more information on the built-in debugger.
+
 .. _pygments:  http://pygments.org
 .. _pygments_style:  http://pygments.org/docs/styles/
 .. _other: https://www.npmjs.com/package/trepanjs

@@ -1,8 +1,8 @@
 .. index:: disable
 .. _disable:
 
-disable breakpoints (disable)
------------------------------
+disable breakpoints (`disable`)
+-------------------------------
 
 **disable** *bpnumber* [*bpnumber* ...]
 

@@ -1,8 +1,8 @@
-.. index:: setqx
-.. _setqx
+.. index:: set; setqx
+.. _setqx:
 
-Set GNU Make Variable with Expansion (setqx)
---------------------------------------------
+Set GNU Make Variable with Expansion (`setqx`)
+----------------------------------------------
 
 **setqx** *variable* *value*
 

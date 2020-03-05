@@ -9,8 +9,13 @@ SOURCEDIR     = .
 BUILDDIR      = _build
 
 # Put it first so that "make" without argument is like "make help".
+#: Show help on useful targets
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+#: Make docs used in readthedocs.io
+readthedocs:
+	$(MAKE) html
 
 .PHONY: help Makefile
 

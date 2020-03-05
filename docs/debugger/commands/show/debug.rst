@@ -1,8 +1,8 @@
 .. index:: show; debug
 .. _show_debug:
 
-Show GNU Make debug flag setting (show debug)
----------------------------------------------
+Show GNU Make `-d` flag setting (`show debug`)
+----------------------------------------------
 
 **show debug**
 

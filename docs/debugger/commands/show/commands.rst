@@ -1,8 +1,8 @@
 .. index:: show; commands
 .. _show_commands:
 
-Command History (show commands)
--------------------------------
+See Command History (`show commands`)
+-------------------------------------
 
 **show commands**
 

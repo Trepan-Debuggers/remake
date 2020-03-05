@@ -31,4 +31,4 @@ Example:
 
 .. seealso::
 
-   :ref:`target>`, and :ref:`info target <info_target>`.
+   :ref:`target <target>`, and :ref:`info target <info_target>`.

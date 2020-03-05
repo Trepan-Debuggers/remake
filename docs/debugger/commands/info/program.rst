@@ -25,4 +25,4 @@ Example:
 
 .. seealso::
 
-   :ref:`info line <info_line>`, and :ref:`info source <info_source>`.
+   :ref:`info line <info_line>`.
