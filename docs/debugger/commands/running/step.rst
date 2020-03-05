@@ -1,8 +1,8 @@
 .. index:: step
 .. _step:
 
-Step into (step)
-----------------
+Step into target (`step`)
+-------------------------
 
 **step** [ *count* ]
 

@@ -1,8 +1,8 @@
 .. index:: down
 .. _down:
 
-Relative Motion towards a more-recent Target (down)
----------------------------------------------------
+Relative Motion towards a more-recent Target (`down`)
+-----------------------------------------------------
 
 **down** [ *count* ]
 

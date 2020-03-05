@@ -1,8 +1,8 @@
 .. index:: finish
 .. _finish:
 
-Step out (finish)
------------------
+Step out (`finish`)
+-------------------
 
 **finish** [ *count* ]
 

@@ -1,8 +1,8 @@
 .. index:: source
 .. _source:
 
-Read and Run Debugger Commands from a File (source)
----------------------------------------------------
+Read and Run Debugger Commands from a File (`source`)
+-----------------------------------------------------
 
 **source** *file-glob*
 

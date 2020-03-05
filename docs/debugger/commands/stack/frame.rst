@@ -1,8 +1,8 @@
 .. index:: frame
 .. _frame:
 
-Absolute Target Stack Positioning (frame)
-------------------------------------------
+Absolute Target Stack Positioning (`frame`)
+-------------------------------------------
 
 **frame** [ *number* ]
 

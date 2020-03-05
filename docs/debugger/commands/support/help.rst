@@ -1,8 +1,8 @@
 .. index:: help
 .. _help:
 
-Command Documentation (help)
-----------------------------
+Command Documentation (`help`)
+------------------------------
 
 **help** [ *command* [ *subcommand* ]
 

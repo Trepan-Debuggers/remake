@@ -1,8 +1,8 @@
 .. index:: continue
 .. _continue:
 
-Continue Program execution (continue)
---------------------------------------
+Continue Program execution (`continue`)
+---------------------------------------
 
 **continue** [ *target* [**all** | **run** | **prereq** | **end** ]* ]
 

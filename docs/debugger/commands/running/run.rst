@@ -1,8 +1,8 @@
 .. index:: run
 .. _run:
 
-Restart Program Execution (run)
--------------------------------
+Restart Program Execution (`run`)
+---------------------------------
 
 **run** [ *args* ]
 

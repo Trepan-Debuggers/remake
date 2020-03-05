@@ -1,8 +1,8 @@
 .. index:: skip
 .. _skip:
 
-Skip target (skip)
-------------------
+Skip over target (`skip`)
+-------------------------
 
 **skip**
 

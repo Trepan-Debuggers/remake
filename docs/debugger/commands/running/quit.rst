@@ -1,8 +1,8 @@
 .. index:: quit
 .. _quit:
 
-Quit (gentle termination)
--------------------------
+Gentle termination (`quit`)
+---------------------------
 
 **quit** [ *exit-code* ]
 
