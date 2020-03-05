@@ -109,7 +109,7 @@ See  :ref:`debugger <debugger>` for more information on the built-in debugger.
 For Developers
 --------------
 
-If you are interested in learning about how GNU Make works, you might find it easier to start out working with this code because it has been simplified as a result of the removal of lesser-used OS's.
+If you are interested in learning about how GNU Make works, you might find it easier to start out working with this code because it has been simplified as a result of the removal of lesser-used OS's (from the standpoint of GNU Make use).
 
 In contrast to GNU Make, we don't even attempt to support:
 
