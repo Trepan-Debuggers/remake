@@ -6,8 +6,14 @@ Step out (`finish`)
 
 **finish** [ *count* ]
 
-Run (step out) until finishing *count* target levels up.
-The default value is 0, or after commands have been run.
+With no arguments, `remake` runs to the end of the target. Any prerequisite
+checking and building that needs to occur is done and any shell commands
+that occur get run.
+
+This is analogous to "step out" in programming-language debuggers.
+
+When *count* is a positive number, run `finish` *count* additional times.
+The default value is 0.
 
 .. seealso::
 

@@ -1213,7 +1213,7 @@ just @key{RET}. Some commands which require a parameter, such as
 @menu
 * Command Syntax::        How to give commands to the @value{DBG}
 * Help::                  How to ask for help (help)
-* Quit::                  Leaving the debugger (quit)
+* Quit::                  Leaving the remake (quit)
 * Stopping::              Stopping and continuing (break, watch, step, cont...)
 * Information::           Status and Debugger settings (info, set, show)
 * Stack::                 Examining the stack (where, up, down, frame)
@@ -1349,7 +1349,7 @@ remake<0> @b{help info}
 @end table
 
 @node Quit
-@section Quitting @value{DBG} (@samp{quit})
+@section Gentle termination of @value{DBG} (@samp{quit})
 
 @table @code
 @kindex quit @ovar{return-code}
@@ -1357,18 +1357,18 @@ remake<0> @b{help info}
 @item quit @ovar{return-code}
 @itemx q  @ovar{return-code}
 
-To exit @value{DBG}, use the @code{quit} command (abbreviated
+To exit @value{REMAKE}, use the @code{quit} command (abbreviated
 @code{q}), or type an end-of-file character (usually @kbd{C-d}).  If
-you do not supply @var{return-code}, @value{DBG} will terminate
+you do not supply @var{return-code}, @value{REMAKE} will terminate
 normally or with exit code 0. Otherwise it use the value of the
 @var{return-code} as the exit code. Usually a 0 exit is a normal exit.
 
-Often when running @value{REMAKE}, a recursive call is made or made in
-another directory. The @code{quit} only terminates only the last one:
-the one that the debugger is in. @value{dBG} arranges for the debug
-flags to get passed down in recursive calls. Consequently when you
-quit one of the inner make calls, you may find yourself still in the
-debugger but up a call level.
+Often when running @value{MAKE} or @value{REMAKE}, a recursive call is
+made or made in another directory. The @code{quit} only terminates
+only the last one: the one that the debugger is in. @value{dBG}
+arranges for the debug flags to get passed down in recursive
+calls. Consequently when you quit one of the inner make calls, you may
+find yourself still in the debugger but up a call level.
 
 @end table
 
@@ -1398,12 +1398,18 @@ continue execution.
 @subsection Breakpoints
 
 @cindex breakpoints
-A @dfn{breakpoint} arranges for @value{REMAKE} to stop whenever a
-certain point in the Makefile is reached.
+A @dfn{breakpoint} arranges for @value{REMAKE} to stop when it reaches
+a Makefile target.
 
 You can set breakpoints with the @code{break} command and its variants
 (@pxref{Set Breaks, ,Setting breakpoints}), to specify the place where
 your script should stop by target name.
+
+The debugger assigns a number to each breakpoint when you create it;
+these numbers are successive integers starting with 1. In many of the
+commands for controlling various features of breakpoints you use this
+number.
+
 
 @menu
 * Set Breaks::                      Setting breakpoints (break)
@@ -1498,7 +1504,7 @@ your script may stop even sooner, due to a breakpoint or a signal.
 * Next::          running the next target (next)
 * Step::          running the next target in smaller increments (step)
 * Finish::        step out
-* Skip::          skipping the next statement (skip)
+* Skip::          skipping over a target (skip)
 * Continue::      continuing execution (continue)
 @end menu
 
@@ -1510,10 +1516,10 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @item next
 Continue processing your Makefile until control reaches the next
 interesting target, then stop and return control to @value{DBG}.  This
-command is abbreviated @code{n}. If you want more fine-graned stepping
-use @code{step}. See @ref{Step}. If you want to not stop at targets this
-depends and run until after this target is remade, use
-@code{finish}. See @ref{Finish}.
+command is abbreviated @code{n}. If you want more fine-grained
+stepping use @code{step}. See @ref{Step}. If you want to not stop at
+any of targets the current target depends on, but instead run until
+after this target is remade, use @code{finish}. See @ref{Finish}.
 
 @item next @ovar{count}
 Continue running as in @code{next}, but do so @var{count} times.  If a
@@ -1551,17 +1557,21 @@ breakpoint is reached, or a signal not related to stepping occurs before
 @kindex finish
 @kindex F @r{(@code{finish})}
 @item finish
-With no arguments we step to the end of the target. Any prerequisite
+
+With no arguments, @value{DBG} runs to the end of the target. Any prerequisite
 checking and building that needs to occur is done and any shell commands
 that occur get run.
 
+This is analogous to ``step out'' in programming-language debuggers.
+
 @item finish @ovar{count}
-This is a step out, but to the target @emph{count} levels up. A count of
-0 is the current target and that's the same as giving no count.
+Runs a ``finish'' @emph{count} times, putting the program that many
+levels up the current target stack. A count of 0 is the current target
+and that's the same as giving no count.
 @end table
 
 @node Skip
-@subsubsection Skip (@samp{skip})
+@subsubsection Skip over tareget (@samp{skip})
 @table @code
 @kindex skip
 @item skip @ovar{count}

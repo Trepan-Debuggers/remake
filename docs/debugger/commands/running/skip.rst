@@ -6,7 +6,9 @@ Skip over target (`skip`)
 
 **skip**
 
-Skip execution of next command or action.
+Skip executing the remaining commands of the target you are stopped
+at. This may be useful if you have an action that "fixes" existing
+code in a Makefile.
 
 .. seealso::
 

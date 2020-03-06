@@ -24,8 +24,6 @@ that name can be given as a last option. The stopping points are:
 
 Giving `all` will stop in all of the above places. The default behavior is `run`.
 
-If no location specification is given, use the current target.
-
 Examples:
 +++++++++
 
