@@ -663,10 +663,9 @@ AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
 
 # Specify what files are to be created.
 AC_CONFIG_FILES([ \
-Makefile build.cfg lib/Makefile po/Makefile.in doc/Makefile \
+Makefile lib/Makefile po/Makefile.in doc/Makefile \
   glob/Makefile \
   unittest/Makefile \
-  src/w32/Makefile \
   tests/config-flags.pm
 ])
 # We don't need this: the standard automake output suffices for POSIX systems.
