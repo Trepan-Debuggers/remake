@@ -7,6 +7,8 @@
 # --------------------- #
 
 .PHONY: update
+
+#: update everything
 update:
 
 BUGLIST := bug-make@gnu.org
@@ -51,16 +53,15 @@ AM_CPPFLAGS += $(MAKE_MAINTAINER_MODE)
 globsrc := $(wildcard glob/*.c)
 globhdr := $(wildcard glob/*.h)
 
-TEMPLATES = README README.W32
+TEMPLATES = README
 
 all: $(TEMPLATES)
 
-# Create preprocessor output files--GCC specific!
+#: Create preprocessor output files--GCC specific!
 %.i : %.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -E -dD -o $@ $<
 
-# General rule for turning a .template into a regular file.
-#
+#: General rule for turning a .template into a regular file.
 $(TEMPLATES) : % : %.template Makefile
 	rm -f $@
 	sed -e 's@%VERSION%@$(MAKE_VERSION)@g' \
@@ -121,12 +122,13 @@ DEP_FILES := $(wildcard src/$(DEPDIR)/*.Po)
 
 GIT :=	git
 
-# git-clean:      Clean all "ignored" files.  Leave untracked files.
-# git-very-clean: Clean all files that aren't stored in source control.
-
 .PHONY: git-clean git-very-clean
+
+#: Clean all "ignored" files.  Leave untracked files.
 git-clean:
 	-$(GIT) clean -fdX
+
+#: Clean all files that aren't stored in source control.
 git-very-clean: git-clean
 	-$(GIT) clean -fd
 
@@ -171,7 +173,7 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 # Updating PO files.  #
 # ------------------- #
 
-# NOTE: This is handled by the bootstrap script now
+# NOTE: In GNU Make this is handled by the bootstrap script now. In remake, we still use this.
 
 update: po-check
 
@@ -195,6 +197,7 @@ do-po-update:
 	cd po && $(MAKE) update-po
 	$(MAKE) po-check
 
+#: Pull in translation files from https://translationproject.org
 po-update:
 	[ -d "po" ] && $(MAKE) do-po-update
 
@@ -337,10 +340,11 @@ checkcfg.basicmk: checkcfg.% : distdir
 
 # Checks that don't require Git.  Run 'changelog-check' last as
 # previous test may reveal problems requiring new ChangeLog entries.
+
+#: run checks that don't require Git.
 local-check: po-check changelog-check
 
-# copyright-check writable-files
-
+#: check writable-files
 changelog-check:
 	if head $(top_srcdir)/ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
 	  :; \
@@ -353,7 +357,7 @@ changelog-check:
 # Ignore src/makeint.h; it defines _().
 # FIXME: Also ignore files in lib. remake has more of these than make. Why?
 
-#: Pull in translation files from https://translationproject.org
+#: See if translation files (*.po) need updating
 po-check:
 	if test -f po/POTFILES.in; then \
 	  $(GREP) '^[^#]' po/POTFILES.in | sort > $@-1; \
@@ -361,50 +365,6 @@ po-check:
 	  diff -u $@-1 $@-2 || exit 1; \
 	  rm -f $@-1 $@-2; \
 	fi
-
-
-## --------------- ##
-## Generate docs.  ##
-## --------------- ##
-
-.PHONY: update-makeweb gendocs
-
-CVS = cvs
-
-makeweb-repo = $(USER)@cvs.sv.gnu.org:/web/make
-gnuweb-repo = :pserver:anonymous@cvs.sv.gnu.org:/web/www
-gnuweb-dir = www/server/standards
-
-# Get the GNU make web page boilerplate etc.
-update-makeweb:
-	[ -d '$(MAKEWEBDIR)' ] || mkdir -p '$(MAKEWEBDIR)'
-	[ -d '$(MAKEWEBDIR)'/CVS ] \
-	    && { cd '$(MAKEWEBDIR)' && $(CVS) update; } \
-	    || { mkdir -p '$(dir $(MAKEWEBDIR))' && cd '$(dir $(MAKEWEBDIR))' \
-		 && $(CVS) -d $(makeweb-repo) co -d '$(notdir $(MAKEWEBDIR))' make; }
-
-# Get the GNU web page boilerplate etc.
-update-gnuweb:
-	[ -d '$(GNUWEBDIR)' ] || mkdir -p '$(GNUWEBDIR)'
-	[ -d '$(GNUWEBDIR)/$(gnuweb-dir)'/CVS ] \
-	    && { cd '$(GNUWEBDIR)/$(gnuweb-dir)' && $(CVS) update; } \
-	    || { cd '$(GNUWEBDIR)' && $(CVS) -d $(gnuweb-repo) co '$(gnuweb-dir)'; }
-
-gendocs: update-gnuweb update-makeweb
-	cp $(GNULIBDIR)/doc/gendocs_template doc
-	cd doc \
-	  && rm -rf doc/manual \
-	  && $(GNULIBDIR)/build-aux/gendocs.sh --email '$(BUGLIST)' \
-		make 'GNU Make Manual'
-	find '$(MAKEWEBDIR)'/manual \( -name CVS -prune \) -o \( -name '[!.]*' -type f -exec rm -f '{}' \; \)
-	cp -r doc/manual '$(MAKEWEBDIR)'
-	@echo 'Status of $(MAKEWEBDIR) repo:' && cd '$(MAKEWEBDIR)' \
-	    && cvs -q -n update | grep -v '^M '
-	@echo '- cvs add <new files>' \
-	    && echo '- cvs remove <deleted files>' \
-	    && echo '- cvs commit' \
-	    && echo '- cvs tag make-$(subst .,-,$(VERSION))'
-
 
 ## --------------------------------------------- ##
 ## Submitting Coverity cov-build results to Scan ##
@@ -454,66 +414,7 @@ $(COV_BUILD_FILE)-submitted: $(COV_BUILD_FILE)
 	cp '$<' '$@'
 
 
-## ------------------------- ##
-## Make release targets.     ##
-## ------------------------- ##
-
-.PHONY: tag-release
-tag-release:
-	case '$(VERSION)' in \
-	    (*.*.9*) message=" candidate" ;; \
-	    (*)      message= ;; \
-	esac; \
-	$(GIT) tag -m "GNU Make release$$message $(VERSION)" -u '$(GPG_KEYID)' '$(VERSION)'
-
-
-## ------------------------- ##
-## GNU FTP upload artifacts. ##
-## ------------------------- ##
-
-# This target creates the upload artifacts.
-# Sign it with my key.  If you don't have my key/passphrase then sorry,
-# you're SOL! :)
-
-GPG = gpg
-GPGFLAGS = -u $(GPG_KEYID)
-
-DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
-DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
-
-# A simple rule to test signing, etc.
-.PHONY: distsign
-distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
-
-%.sig : %
-	@echo "Signing file '$<':"
-	$(GPG) $(GPGFLAGS) -o "$@" -b "$<"
-
-%.directive.asc: %
-	@echo "Creating signed directive file '$@':"
-	@( \
-	   echo 'version: 1.2'; \
-	   echo 'directory: make'; \
-	   echo 'filename: $*'; \
-	   echo 'comment: Official upload of GNU make version $(VERSION)'; \
-	 ) > "$*.directive"
-	$(GPG) $(GPGFLAGS) -o "$@" --clearsign "$*.directive"
-	@rm -f "$*.directive"
-
-# Upload the artifacts
-
-FTPPUT = ncftpput
-gnu-upload-host = ftp-upload.gnu.org
-gnu-upload-dir  = /incoming
-
-
-UPLOADS = upload-alpha upload-ftp
-.PHONY: $(UPLOADS)
-$(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
-	$(FTPPUT) "$(gnu-upload-host)" "$(gnu-upload-dir)/$(@:upload-%=%)" $^
-
-
-# Rebuild Makefile.in if this file is modifed.
+#: Rebuild Makefile.in if Makefile.am file is modified.
 Makefile.in: maintMakefile
 
 # Copyright (C) 1997-2020 Free Software Foundation, Inc.

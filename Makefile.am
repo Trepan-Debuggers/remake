@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-lzip silent-rules std-options subdir-objects nostdinc check-news
+AUTOMAKE_OPTIONS = 1.8 dist-lzip silent-rules std-options subdir-objects nostdinc
 ACLOCAL_AMFLAGS = -I m4
 
 transform = s,make,@MAKE_NAME@,
@@ -110,7 +110,7 @@ endif
 
 # Extra stuff to include in the distribution.
 
-mk_FILES =	Basic.mk mk/Windows32.mk
+mk_FILES =	Basic.mk
 # We don't need this, since the standard automake output will do.
 #mk/Posix.mk.in
 
@@ -125,7 +125,6 @@ test_FILES =	tests/run_make_tests \
 
 EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
 		README.customs \
-		README.W32 src/config.h.W32 \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS-remake.md README.remake REMAKE.todo Rakefile \
@@ -149,7 +148,7 @@ src/gmk-default.h: $(top_srcdir)/src/gmk-default.scm
 
 # --------------- Local DIST Section
 
-#: Install the mk and tests subdirectories
+#: Install the tests subdirectories
 dist-hook:
 	(cd $(top_srcdir); \
 	 sub=`find src tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
@@ -159,7 +158,7 @@ dist-hook:
 
 # --------------- Local CHECK Section
 
-#: run regression tests and show a banner
+#: run check-regression and show a banner
 check-local: check-regression
 	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
 	dashes=`echo "$$banner" | sed s/./=/g`; \

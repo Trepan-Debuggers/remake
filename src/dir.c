@@ -1006,22 +1006,9 @@ print_dir_data_base (void)
                         ++f;
                     }
                 }
-#ifdef WINDOWS32
-              printf (_("# %s (key %s, mtime %I64u): "),
-                      dir->name, dir->contents->path_key,
-                      (unsigned long long)dir->contents->mtime);
-#else  /* WINDOWS32 */
-#ifdef VMS_INO_T
-              printf (_("# %s (device %d, inode [%d,%d,%d]): "),
-                      dir->name, dir->contents->dev,
-                      dir->contents->ino[0], dir->contents->ino[1],
-                      dir->contents->ino[2]);
-#else
               printf (_("# %s (device %ld, inode %ld): "),
                       dir->name,
                       (long)dir->contents->dev, (long)dir->contents->ino);
-#endif
-#endif /* WINDOWS32 */
               if (f == 0)
                 fputs (_("No"), stdout);
               else
