@@ -115,6 +115,7 @@ AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
                   sys/select.h sys/file.h spawn.h])
 
 AM_PROG_CC_C_O
+AC_PROG_CC_C99
 AC_C_CONST
 AC_TYPE_SIGNAL
 AC_TYPE_UID_T
