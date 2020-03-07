@@ -1340,21 +1340,19 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
 
 
 /*
-  $(debugger )
+  $(debugger "tag-name")
 
-  Always resolves to the empty string.
+  Always returns the empty string.
 
-  Treat the arguments as a segment of makefile, and parse them.
+  Call the internal debugger.
 */
 
 static char *
-func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
+func_debugger (char *o, char **argv, const char *funcname UNUSED)
 {
-  debug_return_t rc;
-  static char buffer[10];
-  rc = enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
-  snprintf(buffer, sizeof(buffer), "%u", rc);
-  o = buffer;
+  printf("debugger() function caled with parameter %s\n", argv[0]);
+  (void) enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  o = variable_buffer_output (o, "", 0);
   return o;
 }
 
