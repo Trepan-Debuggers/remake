@@ -20,8 +20,8 @@ by KCachegrind_, callgrind_annotate_, or gprof2dot_ or other tools that understa
 You can get not only timings, but a graph of the target dependencies
 checked.
 
-Documenting Makefile Targets
-----------------------------
+Listing and Documenting Makefile Targets
+----------------------------------------
 
 Have you ever wanted `rake tasks` for GNU Make?  That is, you have
 some strange `Makefile` and you want to see the interesting targets,
@@ -62,8 +62,8 @@ Running `remake --tasks` gives:
     check       # test things
     dist        # Build distribution
 
-Makefile searching in Parent Directories
-----------------------------------------
+Searching for a Makefile in Parent Directories
+----------------------------------------------
 
 When the `-c` flag is given (or `--search-parent`), if a Makefile or
 goal target isn't found in the current directory, `remake` will search

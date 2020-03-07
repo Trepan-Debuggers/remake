@@ -69,17 +69,17 @@
 @c manuals to an info tree.
 @dircategory Programming & development tools.
 @direntry
-* remake: (@value{DBG}).                     The @MAKE debugger.
+* remake: (@value{DBG}).                     The @MAKE extensions and debugger.
 @end direntry
 
 @ifinfo
-This file documents the @sc{gnu} MAKE debugger, Remake
+This file documents the @sc{gnu} MAKE extensions and debugger, Remake
 
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
-of @cite{Debugging with REMAKE: the @sc{gnu} Make Debugger}
+of @cite{MAKE extenstions and Debugging with REMAKE: the @sc{gnu} Make Debugger}
 
-Copyright (C) 2004, 2005, 2011, 2012 Rocky Bernstein for the Free Software Foundation.
+Copyright (C) 2004, 2005, 2011, 2012, 2020 Rocky Bernstein for the Free Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -95,7 +95,7 @@ development.''
 @end ifinfo
 
 @titlepage
-@title The @sc{gnu} MAKE debugger
+@title @sc{gnu} MAKE extensions and debugger
 @sp 1
 @subtitle @value{EDITION} Edition, for MAKE
 @subtitle @value{UPDATED-MONTH}
@@ -134,10 +134,9 @@ Copyright (C) 2004, 2005, 2006, 2011, 2012, 2020 Rocky Bernstein
 @menu
 * Summary::                     Overview of Debugger with a sample session
 
+* Features::                    Extensions to @value{MAKE}
 * Invocation::                  Getting in and out and GNU Make command options
 * Debugger Command Reference::  @value{DBG} command reference
-
-* Profiling and Visualization::
 
 * Front Ends::                  Using @value{DBG} from a front-end user interface
 
@@ -1055,6 +1054,118 @@ If you are at a target and want to continue to the end of the target you
 can use the command @code{finish} which is the same as @code{finish
 0}. See @ref{Finish}.
 
+@node Features
+@chapter Extensions to @value{MAKE}
+
+Although the bulk of this document is devoted to @value{DBG}, there
+are a number of handy extensions to @value{MAKE} that we list here.
+
+@menu
+* Profiling and Visualization:: Getting data on where build time is spent
+* Comments::     Listing and Documenting Makefile Targets
+* Searching::    Searching for a Makefile in Parent Directories
+* Improved-Tracing::      Improved Execution Tracing
+@end menu
+
+@node Profiling and Visualization
+@section Getting data on where build time is spent
+
+If you want to know where most of the time goes in building your system with Makefiles,
+there is a @code{--profile} option which times the targets.
+@cindex @code{--profile}
+
+
+@smallexample
+  $ remake --profile # target...
+@end smallexample
+
+@value{REMAKE} outputs callgrind profile format data
+@footnote{@url{http://valgrind.org/docs/manual/cl-format.html}} which
+can be used with
+@code{kcachegrind}@footnote{http://kcachegrind.sourceforge.net/html/Home.html}
+or other
+tools@footnote{@url{https://github.com/icefox/callgrind_tools},
+@url{https://github.com/zenkj/callgrind2dot}} that work with this
+format. that work with this format.
+
+You can get not only timings, but a graph of the target dependencies
+checked.
+
+@node Comments
+@section Listing and Documenting Makefile Targets
+
+Have you ever wanted @code{rake tasks} for @value{MAKE}?  That is, you
+have some strange Makefile and you want to see the interesting
+targets, that you can run ``make @emph{target-name}'' on?
+
+There are two new options added to `remake` to assist this:
+
+@itemize @bullet
+@item @code{--tasks}  gives a list of ``interesting'' targets
+@item @code{--targets} gives a list of @emph{all} targets
+@end itemize
+
+Before each target in the Makefile, you can give add a one-line comment
+describing what the target does, starting the comment with @code{#:}.
+
+If you do this, when either of these options is shown it will also be shown
+with next to the target name.
+
+Here is an example. Consider this Makefile:
+
+@smallexample
+
+#: This is the main target
+all:
+	echo all here
+
+#: test things
+check:
+	echo check here
+
+#: Build distribution
+dist:
+	echo dist here
+@end smallexample
+
+Running @code{remake --tasks} gives:
+
+@smallexample
+all         # This is the main target
+check       # test things
+dist        # Build distribution
+@end smallexample
+
+@node Searching
+@section Searching for a Makefile in Parent Directories
+
+@cindex @code{-c}
+@cindex @code{--search-parent}
+When the @code{-c} flag is given (or @code{--search-parent}), if a
+Makefile or goal target isn't found in the current directory,
+@value{REMAKE} will search in the parent directory for a Makefile. On
+finding a parent the closest parent directory with a Makefile,
+@value{REMAKE} will set its current working directory to the directory
+where the Makefile was found.
+
+In this respect the short option @code{-c}, is like @code{-C} except no
+directory need to be specified.
+
+@node Improved-Tracing
+@section Improved Execution Tracing
+
+@cindex @code{-x}
+When the @code{-x} flag is given (or @code{--trace=normal}), any
+commands that are about to be run are shown as seen in the `Makefile`
+along with @code{set -x} tracing when run in a POSIX shell. Also, we
+override or rather ignore, any non-echo prefix @code{@@} directive listed at
+the beginning of target commands.
+
+If different granularity of tracing is desired the @code{--trace} option
+has other settings. See the relevant parts of this manual for more information.
+
+And, if you the most flexibility in tracing there is a built-in debugger.
+
 @node Invocation
 @chapter Getting in and out and new @value{REMAKE} Command Options
 
@@ -1213,7 +1324,7 @@ just @key{RET}. Some commands which require a parameter, such as
 @menu
 * Command Syntax::        How to give commands to the @value{DBG}
 * Help::                  How to ask for help (help)
-* Quit::                  Leaving the debugger (quit)
+* Quit::                  Leaving the remake (quit)
 * Stopping::              Stopping and continuing (break, watch, step, cont...)
 * Information::           Status and Debugger settings (info, set, show)
 * Stack::                 Examining the stack (where, up, down, frame)
@@ -1349,7 +1460,7 @@ remake<0> @b{help info}
 @end table
 
 @node Quit
-@section Quitting @value{DBG} (@samp{quit})
+@section Gentle termination of @value{DBG} (@samp{quit})
 
 @table @code
 @kindex quit @ovar{return-code}
@@ -1357,18 +1468,18 @@ remake<0> @b{help info}
 @item quit @ovar{return-code}
 @itemx q  @ovar{return-code}
 
-To exit @value{DBG}, use the @code{quit} command (abbreviated
+To exit @value{REMAKE}, use the @code{quit} command (abbreviated
 @code{q}), or type an end-of-file character (usually @kbd{C-d}).  If
-you do not supply @var{return-code}, @value{DBG} will terminate
+you do not supply @var{return-code}, @value{REMAKE} will terminate
 normally or with exit code 0. Otherwise it use the value of the
 @var{return-code} as the exit code. Usually a 0 exit is a normal exit.
 
-Often when running @value{REMAKE}, a recursive call is made or made in
-another directory. The @code{quit} only terminates only the last one:
-the one that the debugger is in. @value{dBG} arranges for the debug
-flags to get passed down in recursive calls. Consequently when you
-quit one of the inner make calls, you may find yourself still in the
-debugger but up a call level.
+Often when running @value{MAKE} or @value{REMAKE}, a recursive call is
+made or made in another directory. The @code{quit} only terminates
+only the last one: the one that the debugger is in. @value{dBG}
+arranges for the debug flags to get passed down in recursive
+calls. Consequently when you quit one of the inner make calls, you may
+find yourself still in the debugger but up a call level.
 
 @end table
 
@@ -1398,12 +1509,18 @@ continue execution.
 @subsection Breakpoints
 
 @cindex breakpoints
-A @dfn{breakpoint} arranges for @value{REMAKE} to stop whenever a
-certain point in the Makefile is reached.
+A @dfn{breakpoint} arranges for @value{REMAKE} to stop when it reaches
+a Makefile target.
 
 You can set breakpoints with the @code{break} command and its variants
 (@pxref{Set Breaks, ,Setting breakpoints}), to specify the place where
 your script should stop by target name.
+
+The debugger assigns a number to each breakpoint when you create it;
+these numbers are successive integers starting with 1. In many of the
+commands for controlling various features of breakpoints you use this
+number.
+
 
 @menu
 * Set Breaks::                      Setting breakpoints (break)
@@ -1498,7 +1615,7 @@ your script may stop even sooner, due to a breakpoint or a signal.
 * Next::          running the next target (next)
 * Step::          running the next target in smaller increments (step)
 * Finish::        step out
-* Skip::          skipping the next statement (skip)
+* Skip::          skipping over a target (skip)
 * Continue::      continuing execution (continue)
 @end menu
 
@@ -1510,10 +1627,10 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @item next
 Continue processing your Makefile until control reaches the next
 interesting target, then stop and return control to @value{DBG}.  This
-command is abbreviated @code{n}. If you want more fine-graned stepping
-use @code{step}. See @ref{Step}. If you want to not stop at targets this
-depends and run until after this target is remade, use
-@code{finish}. See @ref{Finish}.
+command is abbreviated @code{n}. If you want more fine-grained
+stepping use @code{step}. See @ref{Step}. If you want to not stop at
+any of targets the current target depends on, but instead run until
+after this target is remade, use @code{finish}. See @ref{Finish}.
 
 @item next @ovar{count}
 Continue running as in @code{next}, but do so @var{count} times.  If a
@@ -1551,17 +1668,21 @@ breakpoint is reached, or a signal not related to stepping occurs before
 @kindex finish
 @kindex F @r{(@code{finish})}
 @item finish
-With no arguments we step to the end of the target. Any prerequisite
+
+With no arguments, @value{DBG} runs to the end of the target. Any prerequisite
 checking and building that needs to occur is done and any shell commands
 that occur get run.
 
+This is analogous to ``step out'' in programming-language debuggers.
+
 @item finish @ovar{count}
-This is a step out, but to the target @emph{count} levels up. A count of
-0 is the current target and that's the same as giving no count.
+Runs a ``finish'' @emph{count} times, putting the program that many
+levels up the current target stack. A count of 0 is the current target
+and that's the same as giving no count.
 @end table
 
 @node Skip
-@subsubsection Skip (@samp{skip})
+@subsubsection Skip over tareget (@samp{skip})
 @table @code
 @kindex skip
 @item skip @ovar{count}
@@ -2549,25 +2670,6 @@ Above we see the script source code followed by the trace information
 Sets @var{variable} to the value @var{string}, but @var{string} is
 @emph{not} expanded first as it is not you use @code{print}.
 @end table
-
-@node Profiling and Visualization
-@chapter Profiling and Visualization
-
-To profile and get a graph of targets encountered use the
-@code{--profile} option. For example:
-
-@smallexample
-  $ remake --profile # target...
-@end smallexample
-
-@value{REMAKE} outputs callgrind profile format data
-@footnote{@url{http://valgrind.org/docs/manual/cl-format.html}} which
-can be used with
-@code{kcachegrind}@footnote{http://kcachegrind.sourceforge.net/html/Home.html}
-or other
-tools@footnote{@url{https://github.com/icefox/callgrind_tools},
-@url{https://github.com/zenkj/callgrind2dot}} that work with this
-format. that work with this format.
 
 @node Front Ends
 @chapter Using @value{DBG} from a front-end user interface
