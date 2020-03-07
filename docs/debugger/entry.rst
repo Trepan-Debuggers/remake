@@ -8,8 +8,8 @@ Entering the Debugger
 Invoking the Debugger Initially
 ===============================
 
-The simplest way to debug your program is to call run `remake -X`. Give
-the name of your Makefile:
+The simplest way to debug your program is to call run `remake -X` or
+`remake --debugger`.
 
 Example Debugger Sessions
 -------------------------
