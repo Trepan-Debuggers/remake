@@ -1311,7 +1311,7 @@ baz: debug
 
 @smallexample
 $ remake -f /tmp/foo.Makefile
-debugger() function caled with parameter "bar called"
+debugger() function called with parameter "first bar command"
 break
 :o (/tmp/foo.Makefile:3)
 bar
@@ -1322,7 +1322,7 @@ remake<0> where
   remake: That's all, folks...
 
 $ remake -f /tmp/foo.Makefile baz
-debugger() function caled with parameter "debug target break"
+debugger() function called with parameter "debug target break"
  break
 :o (/src/external-vcs/github/rocky/remake/tmp/debugger.Makefile:3)
 debug

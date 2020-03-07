@@ -1350,7 +1350,7 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_debugger (char *o, char **argv, const char *funcname UNUSED)
 {
-  printf("debugger() function caled with parameter %s\n", argv[0]);
+  printf("debugger() function called with parameter %s\n", argv[0]);
   (void) enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
   o = variable_buffer_output (o, "", 0);
   return o;
