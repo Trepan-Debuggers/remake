@@ -47,20 +47,40 @@ Here is an Example:
 
           foo: bar
 
+	  debug:
+                $(debugger "debug target break")
+
           bar:
-                $(debugger "bar called")
+                $(debugger "first bar command")
+		@echo hi
+
+	  baz: debug
+	        @echo hello again
 
 
 .. code:: console
 
-          ./make -f /tmp/foo.Makefile
-          :o (/tmp/foo.Makefile:3)
+          $ remake -f /tmp/foo.Makefile
+	  debugger() function caled with parameter "bar called"
+	  break
+	  :o (/tmp/foo.Makefile:3)
           bar
           remake<0> where
-          =>#0  bar at /tmp/foo.Makefile:3
+          =>#0  bar at /tmp/foo.Makefile:6
             #1  foo at /tmp/foo.Makefile:1
-          foo: bar
+          remake<0> quit
+	  remake: That's all, folks...
+
+          $ remake -f /tmp/foo.Makefile baz
+	  debugger() function caled with parameter "debug target break"
+	  break
+	  :o (/src/external-vcs/github/rocky/remake/tmp/debugger.Makefile:3)
+          debug
+          remake<0> where
+          =>#0  debug at /tmp/foo.Makefile:3
+            #1  baz at /tmp/foo.Makefile:10
           remake<0>
+
 
 Entering the debugger when `remake` encounters an error
 =======================================================
