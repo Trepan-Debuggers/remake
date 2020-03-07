@@ -19,7 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <wordexp.h>
+#include <glob.h>
 #include "read.h"
 #include "filedef.h"
 
@@ -27,12 +27,12 @@ static debug_return_t
 dbg_cmd_load(char *psz_filename)
 {
   if (psz_filename && *psz_filename) {
-    wordexp_t p;
+    glob_t p;
     char *psz_expanded_file;
     struct goaldep *p_goaldep;
 
-    wordexp(psz_filename, &p, 0);
-    if (0 == p.we_wordc) {
+    glob(psz_filename, 0, NULL, &p);
+    if (0 == p.gl_pathc) {
       struct stat stat_buf;
       int ret = stat(psz_filename, &stat_buf);
       if (ret != 0) {
@@ -41,14 +41,14 @@ dbg_cmd_load(char *psz_filename)
       }
       psz_expanded_file = psz_filename;
 
-    } else if (1 != p.we_wordc) {
+    } else if (1 != p.gl_pathc) {
       dbg_errmsg("Expansion of %s doesn't lead to a single filename. \n"
                  "Got %zu matches",
-                 psz_filename, p.we_wordc);
+                 psz_filename, p.gl_pathc);
       return debug_cmd_error;
 
     } else {
-      psz_expanded_file = p.we_wordv[0];
+      psz_expanded_file = p.gl_pathv[0];
     }
 
     snapped_deps = 0;
@@ -63,6 +63,7 @@ dbg_cmd_load(char *psz_filename)
       snap_deps();
       free_goaldep(p_goaldep);
     }
+    globfree(&p);
   } else {
     dbg_errmsg("load command expects a filename");
   }
