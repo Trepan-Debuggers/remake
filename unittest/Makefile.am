@@ -3,7 +3,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/lib
 test_profile_SOURCES = test_profile.c
 
 test_profile_LDADD = \
-	../src/mock.o \
 	../src/version.o \
 	../src/alloc.o \
 	../src/globals.o \

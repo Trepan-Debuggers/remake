@@ -1018,7 +1018,9 @@ main (int argc, const char **argv, char **envp)
 #endif
 
   /* Useful for attaching debuggers, etc.  */
+#ifdef SPIN
   SPIN ("main-entry");
+#endif
 
   argv0 = strdup(argv[0]);
   output_init (&make_sync);
@@ -1497,57 +1499,15 @@ main (int argc, const char **argv, char **envp)
   if (ISDB (DB_BASIC) && makelevel == 0 && b_show_version)
     print_version ();
 
-#ifndef VMS
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
      so the result will run the same program regardless of the current dir.
      If it is a name with no slash, we can only hope that PATH did not
      find it in the current directory.)  */
-#ifdef WINDOWS32
-  /*
-   * Convert from backslashes to forward slashes for
-   * programs like sh which don't like them. Shouldn't
-   * matter if the path is one way or the other for
-   * CreateProcess().
-   */
-  if (strpbrk (argv[0], "/:\\") || strstr (argv[0], "..")
-      || strneq (argv[0], "//", 2))
-    argv[0] = xstrdup (w32ify (argv[0], 1));
-#else /* WINDOWS32 */
-#if defined (__MSDOS__) || defined (__EMX__)
-  if (strchr (argv[0], '\\'))
-    {
-      char *p;
-
-      argv[0] = xstrdup (argv[0]);
-      for (p = argv[0]; *p; p++)
-        if (*p == '\\')
-          *p = '/';
-    }
-  /* If argv[0] is not in absolute form, prepend the current
-     directory.  This can happen when Make is invoked by another DJGPP
-     program that uses a non-absolute name.  */
-  if (current_directory[0] != '\0'
-      && argv[0] != 0
-      && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':'))
-# ifdef __EMX__
-      /* do not prepend cwd if argv[0] contains no '/', e.g. "make" */
-      && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
-# endif
-      )
-    argv[0] = xstrdup (concat (3, current_directory, "/", argv[0]));
-#else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0
-#ifdef HAVE_DOS_PATHS
-      && (argv[0][0] != '\\' && (!argv[0][0] || argv[0][1] != ':'))
-      && strchr (argv[0], '\\') != 0
-#endif
       )
     argv[0] = xstrdup (concat (3, current_directory, "/", argv[0]));
-#endif /* !__MSDOS__ */
-#endif /* WINDOWS32 */
-#endif
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
@@ -1640,9 +1600,6 @@ main (int argc, const char **argv, char **envp)
          a reference to this hidden variable is written instead. */
       define_variable_cname ("MAKEOVERRIDES", "${-*-command-variables-*-}",
                              o_env, 1);
-#ifdef VMS
-      vms_export_dcl_symbol ("MAKEOVERRIDES", "${-*-command-variables-*-}");
-#endif
     }
 
   /* If there were -C flags, move ourselves about.  */
@@ -1738,14 +1695,10 @@ main (int argc, const char **argv, char **envp)
               O (fatal, NILF,
                  _("Makefile from standard input specified twice."));
 
-#ifdef VMS
-# define DEFAULT_TMPDIR     "/sys$scratch/"
+#ifdef P_tmpdir
+# define DEFAULT_TMPDIR    P_tmpdir
 #else
-# ifdef P_tmpdir
-#  define DEFAULT_TMPDIR    P_tmpdir
-# else
-#  define DEFAULT_TMPDIR    "/tmp"
-# endif
+# define DEFAULT_TMPDIR    "/tmp"
 #endif
 #define DEFAULT_TMPFILE     "GmXXXXXX"
 
@@ -2017,9 +1970,6 @@ main (int argc, const char **argv, char **envp)
 
 #if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
   if (job_slots != 1
-# ifdef __EMX__
-      && _osmode != OS2_MODE /* turn off -j if we are in DOS mode */
-# endif
       )
     {
       O (error, NILF,
@@ -2373,9 +2323,6 @@ main (int argc, const char **argv, char **envp)
                   {
                     *p = alloca (40);
                     sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
-#ifdef VMS
-                    vms_putenv_symbol (*p);
-#endif
                   }
                 else if (strneq (*p, "MAKE_RESTARTS=", CSTRLEN ("MAKE_RESTARTS=")))
                   {
@@ -2662,31 +2609,6 @@ handle_non_switch_argument (const char *arg, int env)
     /* Ignore plain '-' for compatibility.  */
     return;
 
-#ifdef VMS
-  {
-    /* VMS DCL quoting can result in foo="bar baz" showing up here.
-       Need to remove the double quotes from the value. */
-    char * eq_ptr;
-    char * new_arg;
-    eq_ptr = strchr (arg, '=');
-    if ((eq_ptr != NULL) && (eq_ptr[1] == '"'))
-      {
-         int len;
-         int seg1;
-         int seg2;
-         len = strlen(arg);
-         new_arg = alloca(len);
-         seg1 = eq_ptr - arg + 1;
-         strncpy(new_arg, arg, (seg1));
-         seg2 = len - seg1 - 1;
-         strncpy(&new_arg[seg1], &eq_ptr[2], seg2);
-         new_arg[seg1 + seg2] = 0;
-         if (new_arg[seg1 + seg2 - 1] == '"')
-           new_arg[seg1 + seg2 - 1] = 0;
-         arg = new_arg;
-      }
-  }
-#endif
   v = try_variable_definition (0, arg, o_command, 0);
   if (v != 0)
     {

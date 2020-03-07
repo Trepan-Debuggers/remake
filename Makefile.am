@@ -91,7 +91,6 @@ AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
 		-DLOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS += $(GUILE_CFLAGS)
-make_CFLAGS    = $(AM_CFLAGS)
 
 if WINDOWSENV
   make_SOURCES += $(w32_SRCS)
@@ -119,11 +118,10 @@ m4_FILES =	m4/gnulib-cache.m4
 test_FILES =	tests/run_make_tests \
 		tests/run_make_tests.pl tests/test_driver.pl \
 		tests/config-flags.pm.in tests/config_flags_pm.com \
-		tests/config-flags.pm.W32 \
 		tests/mkshadow tests/thelp.pl tests/guile.supp tests/README
 # test/scripts are added via dist-hook below.
 
-EXTRA_DIST =	ChangeLog README build.sh.in build.cfg.in $(man_MANS) \
+EXTRA_DIST =	ChangeLog README $(man_MANS) \
 		README.customs \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \

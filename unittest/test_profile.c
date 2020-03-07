@@ -21,6 +21,14 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/types.h"
 #include "../src/file_basic.h"
 #include "../src/profile.h"
+
+void
+die (int status)
+{
+  exit (status);
+}
+
+
 int main(int argc, const char * const* argv) {
   bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
   (void)argc;
