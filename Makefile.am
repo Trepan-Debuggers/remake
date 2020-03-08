@@ -54,14 +54,6 @@ make_SRCS =	\
 		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
 		$(DEBUGGER_SRC)
 
-w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
-		src/w32/compat/posixfcn.c src/w32/include/dirent.h \
-		src/w32/include/dlfcn.h src/w32/include/pathstuff.h \
-		src/w32/include/sub_proc.h src/w32/include/w32err.h \
-		src/w32/subproc/misc.c src/w32/subproc/proc.h \
-		src/w32/subproc/sub_proc.c src/w32/subproc/w32err.c
-
-
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
 alloca_SRCS =	lib/alloca.c
@@ -92,12 +84,7 @@ AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
 
 AM_CFLAGS += $(GUILE_CFLAGS)
 
-if WINDOWSENV
-  make_SOURCES += $(w32_SRCS)
-  AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
-else
-  make_SOURCES += src/posixos.c
-endif
+make_SOURCES += src/posixos.c
 
 if USE_CUSTOMS
   # make_SOURCES += src/remote-cstms.c src/mock.c
@@ -109,7 +96,6 @@ endif
 
 # Extra stuff to include in the distribution.
 
-mk_FILES =	Basic.mk
 # We don't need this, since the standard automake output will do.
 #mk/Posix.mk.in
 
@@ -126,13 +112,7 @@ EXTRA_DIST =	ChangeLog README $(man_MANS) \
 		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS-remake.md README.remake REMAKE.todo Rakefile \
-		$(mk_FILES) $(m4_FILES) $(test_FILES)
-
-# FIXME: Not sure why these src/w32 *.Po's & Makefile are left over
-#       but distcheck fails with them so they have to go, hasta la vista
-distclean-local:
-	find src/w32 -type f  -name 'libw32*.Po' -delete
-	rm -f src/w32/Makefile
+		$(m4_FILES) $(test_FILES)
 
 # --------------- Generate the Guile default module content
 

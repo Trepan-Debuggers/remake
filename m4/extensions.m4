@@ -39,20 +39,6 @@ AC_DEFUN_ONCE([AC_USE_SYSTEM_EXTENSIONS],
 [AC_BEFORE([$0], [AC_COMPILE_IFELSE])dnl
 AC_BEFORE([$0], [AC_RUN_IFELSE])dnl
 
-  AC_CHECK_HEADER([minix/config.h], [MINIX=yes], [MINIX=])
-  if test "$MINIX" = yes; then
-    AC_DEFINE([_POSIX_SOURCE], [1],
-      [Define to 1 if you need to in order for 'stat' and other
-       things to work.])
-    AC_DEFINE([_POSIX_1_SOURCE], [2],
-      [Define to 2 if the system does not provide POSIX.1 features
-       except with this defined.])
-    AC_DEFINE([_MINIX], [1],
-      [Define to 1 if on MINIX.])
-    AC_DEFINE([_NETBSD_SOURCE], [1],
-      [Define to 1 to make NetBSD features available.  MINIX 3 needs this.])
-  fi
-
 dnl Use a different key than __EXTENSIONS__, as that name broke existing
 dnl configure.ac when using autoheader 2.62.
   AH_VERBATIM([USE_SYSTEM_EXTENSIONS],

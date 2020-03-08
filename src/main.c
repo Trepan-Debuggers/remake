@@ -1250,7 +1250,6 @@ main (int argc, const char **argv, char **envp)
      done before $(MAKE) is figured out so its definitions will not be
      from the environment.  */
 
-#ifndef _AMIGA
   {
     unsigned int i;
 
@@ -1268,18 +1267,6 @@ main (int argc, const char **argv, char **envp)
         /* If there's no equals sign it's a malformed environment.  Ignore.  */
         if (*ep == '\0')
           continue;
-
-#ifdef WINDOWS32
-        if (!unix_path && strneq (envp[i], "PATH=", 5))
-          unix_path = ep+1;
-        else if (!strnicmp (envp[i], "Path=", 5))
-          {
-            if (!windows32_path)
-              windows32_path = ep+1;
-            /* PATH gets defined after the loop exits.  */
-            continue;
-          }
-#endif
 
         /* Length of the variable name, and skip the '='.  */
         len = ep++ - envp[i];
@@ -1303,9 +1290,7 @@ main (int argc, const char **argv, char **envp)
            value of SHELL given to subprocesses.  */
         if (streq (v->name, "SHELL"))
           {
-#ifndef __MSDOS__
             export = v_noexport;
-#endif
             shell_var.name = xstrdup ("SHELL");
             shell_var.length = 5;
             shell_var.value = xstrdup (ep);
@@ -1314,43 +1299,6 @@ main (int argc, const char **argv, char **envp)
         v->export = export;
       }
   }
-#ifdef WINDOWS32
-    /* If we didn't find a correctly spelled PATH we define PATH as
-     * either the first misspelled value or an empty string
-     */
-    if (!unix_path)
-      define_variable_cname ("PATH", windows32_path ? windows32_path : "",
-                             o_env, 1)->export = v_export;
-#endif
-#else /* For Amiga, read the ENV: device, ignoring all dirs */
-    {
-        BPTR env, file, old;
-        char buffer[1024];
-        int len;
-        __aligned struct FileInfoBlock fib;
-
-        env = Lock ("ENV:", ACCESS_READ);
-        if (env)
-          {
-            old = CurrentDir (DupLock (env));
-            Examine (env, &fib);
-
-            while (ExNext (env, &fib))
-              {
-                if (fib.fib_DirEntryType < 0) /* File */
-                  {
-                    /* Define an empty variable. It will be filled in
-                       variable_lookup(). Makes startup quite a bit faster. */
-                    define_variable (fib.fib_FileName,
-                                     strlen (fib.fib_FileName),
-                                     "", o_env, 1)->export = v_export;
-                  }
-              }
-            UnLock (env);
-            UnLock (CurrentDir (old));
-          }
-    }
-#endif
 
   /* Decode the switches.  */
   decode_env_switches (STRING_SIZE_TUPLE ("GNUMAKEFLAGS"));
@@ -1703,11 +1651,6 @@ main (int argc, const char **argv, char **envp)
 #define DEFAULT_TMPFILE     "GmXXXXXX"
 
             if (((tmpdir = getenv ("TMPDIR")) == NULL || *tmpdir == '\0')
-#if defined (__MSDOS__) || defined (WINDOWS32) || defined (__EMX__)
-                /* These are also used commonly on these platforms.  */
-                && ((tmpdir = getenv ("TEMP")) == NULL || *tmpdir == '\0')
-                && ((tmpdir = getenv ("TMP")) == NULL || *tmpdir == '\0')
-#endif
                )
               tmpdir = DEFAULT_TMPDIR;
 
@@ -1967,18 +1910,6 @@ main (int argc, const char **argv, char **envp)
     job_slots = 1;
   else
     job_slots = arg_job_slots;
-
-#if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
-  if (job_slots != 1
-      )
-    {
-      O (error, NILF,
-         _("Parallel jobs (-j) are not supported on this platform."));
-      O (error, NILF, _("Resetting to single job (-j1) mode."));
-      arg_job_slots = INVALID_JOB_SLOTS;
-      job_slots = 1;
-    }
-#endif
 
   /* If we have >1 slot at this point, then we're a top-level make.
      Set up the jobserver.
@@ -2314,7 +2245,6 @@ main (int argc, const char **argv, char **envp)
               fflush (stdout);
             }
 
-#ifndef _AMIGA
           {
             char **p;
             for (p = environ; *p != 0; ++p)
@@ -2333,18 +2263,6 @@ main (int argc, const char **argv, char **envp)
                   }
               }
           }
-#else /* AMIGA */
-          {
-            char buffer[256];
-
-            sprintf (buffer, "%u", makelevel);
-            SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
-
-            sprintf (buffer, "%s%u", OUTPUT_IS_TRACED () ? "-" : "", restarts);
-            SetVar ("MAKE_RESTARTS", buffer, -1, GVF_GLOBAL_ONLY);
-            restarts = 0;
-          }
-#endif
 
           /* If we didn't set the restarts variable yet, add it.  */
           if (restarts)
@@ -2361,41 +2279,12 @@ main (int argc, const char **argv, char **envp)
           /* The exec'd "child" will be another make, of course.  */
           jobserver_pre_child(1);
 
-#ifdef _AMIGA
-          exec_command (nargv);
-          exit (0);
-#elif defined (__EMX__)
-          {
-            /* It is not possible to use execve() here because this
-               would cause the parent process to be terminated with
-               exit code 0 before the child process has been terminated.
-               Therefore it may be the best solution simply to spawn the
-               child process including all file handles and to wait for its
-               termination. */
-            pid_t pid;
-            int r;
-            struct childbase child;
-            child.cmd_name = NULL;
-            child.output.syncout = 0;
-            child.environment = environ;
-
-            pid = child_execute_job (&child, 1, nargv);
-
-            /* is this loop really necessary? */
-            do {
-              pid = wait (&r);
-            } while (pid <= 0);
-            /* use the exit code of the child process */
-            exit (WIFEXITED(r) ? WEXITSTATUS(r) : EXIT_FAILURE);
-          }
-#else
 #ifdef SET_STACK_SIZE
           /* Reset limits, if necessary.  */
           if (stack_limit.rlim_cur)
             setrlimit (RLIMIT_STACK, &stack_limit);
 #endif
           exec_command ((char **)nargv, environ);
-#endif
 
           /* We shouldn't get here but just in case.  */
           jobserver_post_child(1);
