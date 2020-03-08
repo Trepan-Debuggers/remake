@@ -996,7 +996,7 @@ File "/tmp/make.txt.sh" written.
 @end smallexample
 
 We can issue a shell command @code{cat -n /tmp/make.txt.sh} to see what
-was written. (See @ref{Shell}.)
+was written.
 
 @smallexample
 @group
@@ -1360,7 +1360,6 @@ just @key{RET}. Some commands which require a parameter, such as
 * Stack::                 Examining the stack (where, up, down, frame)
 * Data::                  Examining data (print, target, expand, info variables)
 * Files::                 Specifying and examining files (load, edit)
-* Evaluation/Execution::  Arbitrary execution (eval, shell)
 * Interfacing to the OS:: Interfacing to the OS (cd, pwd, source)
 * Controlling Make::      Controlling make (annotate, file, prompt...)
 @end menu
