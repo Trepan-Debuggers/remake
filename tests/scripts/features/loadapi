@@ -88,6 +88,7 @@ my $sobuild = "$cc ".($srcdir? "-I$srcdir/src":'')." $cppflags $cflags -shared -
 my $clog = `$sobuild 2>&1`;
 if ($? != 0) {
     $verbose and print "Failed to build testapi.so:\n$sobuild\n$_";
+    unlink(qw(testapi.c testapi.so));
     return -1;
 }
 
