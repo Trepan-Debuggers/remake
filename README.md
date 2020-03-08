@@ -1,5 +1,20 @@
 [![Build Status](https://travis-ci.org/rocky/remake.svg?branch=remake-4-3)](https://travis-ci.org/rocky/remake)
 
+Example showing `--tasks` feature:
+
+![--tasks](screenshots/remake-session0.gif)
+
+Example showing `--trace` feature:
+
+![--trace](screenshots/remake-session2.gif)
+
+
+Example showing `--show-parent` feature:
+
+![--show-parent](screenshots/remake-session3.gif)
+
+
+
 [![Packaging status](https://repology.org/badge/vertical-allrepos/remake.svg)](https://repology.org/project/remake/versions)
 
 Patched GNU Make 4.3 sources to add improved error reporting, tracing, target listing, graph visualization, and profiling and more. It also
