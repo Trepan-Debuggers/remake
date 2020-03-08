@@ -2513,52 +2513,8 @@ Another use is to have pecific "debug"-oriented Makefiles that aren't
 normally used, but when you want to trace things are avialable.
 This is an aspect of aspect-oriented programming. See @url{https://en.wikipedia.org/wiki/Aspect-oriented_programming}.
 
-@node Evaluation/Execution
-@section Evaluation and Execution (@samp{eval}, @samp{shell})
-
-@menu
-* Eval::                 Evaluate a GNU Makefile string
-* Shell::                Execute a Shell command
-@end menu
-
-@node Eval
-@subsection Subsection Evaluating GNU MAKE commands (@samp{eval})
-@table @code
-@kindex eval
-@kindex e @r{(@code{eval})}
-@item eval @var{command string}
-@itemx e
-
-A powerful command is the ability to enter MAKE fragments and have
-them interpreted on the fly. This can be done using the @code{eval}
-command. For example to ``include'' a makefile, you might enter
-@code{eval include test1.mk}. Some of the other commands given
-elsewhere can be performed by @code{eval}. In particular, instead of
-using the @code{setq} debugger command, one could issue the command as
-@code{eval VAR=value}.
-
-@end table
-
-@node Shell
-@subsection Running Shell commands ( @samp{shell})
-
-@table @code
-@kindex shell
-@kindex ! @r{(@code{shell})}
-@cindex shell escape
-@item shell @var{command string}
-@itemx !
-
-If you need to execute occasional shell commands during your
-debugging session, there is no need to leave or suspend @value{DBG}; you can
-just use the @code{shell} command or its alias @code{!}.
-
-Invoke a shell to execute @var{command string}.
-
-@end table
-
 @node Interfacing to the OS
-@section Interfacing to the OS (@samp{cd}, @samp{pwd}, @samp{source})
+@section Interfacing to the OS (@samp{cd}, @samp{pwd}, @samp{source}, @samp{shell})
 
 @table @code
 @kindex cd @var{directory}
@@ -2579,6 +2535,21 @@ Prints the working directory as the program sees things.
 @item source @var{filename}
 
 Reads each line of @emph{filename} and runs that as a debugger command.
+
+@end table
+
+@table @code
+@kindex shell
+@kindex ! @r{(@code{shell})}
+@cindex shell escape
+@item shell @var{command string}
+@itemx !
+
+If you need to execute occasional shell commands during your
+debugging session, there is no need to leave or suspend @value{DBG}; you can
+just use the @code{shell} command or its alias @code{!}.
+
+Invoke a shell to execute @var{command string}.
 
 @end table
 

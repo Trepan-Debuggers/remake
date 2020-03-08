@@ -16,6 +16,7 @@ new, like `set`, `show`, and `info`.
    commands/data
    commands/files
    commands/info
+   commands/os
    commands/running
    commands/set
    commands/show

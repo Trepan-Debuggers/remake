@@ -134,7 +134,7 @@ However the *way* this code has been added makes already difficult-code to read 
 
 For example here is GNU Make 4.3 code from `job.c`
 
-.. code:: C
+.. code:: cpp
 
     #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
             remote_status_lose:
@@ -173,7 +173,14 @@ Can you spot which code is used in the most-often POSIX unixy case? In some case
 such as in the above, the most-often case is indented incorrectly because in
 of one of less-frequent cases it is say in an `else` clause (as appears above).
 
-Again, I understand how this most likely came about in GNU Make. Been there and done that myself too.
+*Note: If you have trouble parsing the above, the Pygments parser used
+in this document has trouble too.  After adding mismatched braces in
+the above for context, I couldn't get Pygments to parse this after
+specifying C source with C-preprocessor directives. So I gave up, and
+opted for the slightly shorter source code without some enclosing braces.*
+
+I understand how this ugly code hard-to-read code most likely came
+about in GNU Make. Been there and done that myself too.
 
 In the early days to gain traction and support, a project wants to support lots of different platforms and OS's, even obscure ones. To get going, you'll probably do that in the most expedient day.
 
