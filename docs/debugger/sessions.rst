@@ -1,11 +1,136 @@
 Sample Debugger Sessions
 ========================
 
-Debugging Debug Session
-------------------------
+An Extended Debug Session
+-------------------------
 
-oLet's go into the debugger initially. To do this, use the `--debugger`
-or `-X` option. We'll use the Makefile from the source code of
+In this session we will go into the debugger initially using the
+`--debugger` or `-X` option. We'll use the Makefile from the source
+code from cd-paranoia_
+
+Basic Information when stopped inside Debugger
+++++++++++++++++++++++++++++++++++++++++++++++
+
+.. code:: console
+
+    $ remake -X
+    Reading makefiles...
+    Updating makefiles...
+    -> (/tmp/libcdio-paranoia/Makefile:428)
+    Makefile: Makefile.in config.status
+    remake<0>
+
+Immediately the prompt `remake<0>`, we show the the target name,
+`Makefile` and its dependencies `Makefile.in` and `config.status`.
+
+The line before that has position information
+`(/tmp/libcdio-paranoia/Makefile:428)`. But at the beginning of the
+line is and arrow made up of two characters, `->`. This indicates that
+we have not done prerequisite checking for this target yet.  Later we
+will come across other two-character icons like `--`, `++` and `<-`,
+to name few.
+
+The 0 in the prompt `remake<0>` is the command history number.  If GNU
+Readline history support has it increments as we enter commands,
+otherwise it stays 0.
+
+For each recursive call to `remake` we'll add another pair of angle
+brackets `<>` around the number.
+
+Some of the information is given in more verbose format using :ref:`info program <info_program>`:
+
+.. code:: console
+
+    remake<0> info program
+    Starting directory `/tmp/libcdio-paranoia'
+    Program invocation:
+	remake/make  -X
+    Recursion level: 0
+    Line 428 of "/tmp/libcdio-paranoia/Makefile"
+    Program stopped before rule-prequisite checking.
+    remake<1>
+
+Notice that the prompt has incremented to 1 after entering the a command.
+
+Stepping
+++++++++
+
+We can use the :ref:`step, <step>` command to progress a little
+in the interpretation or execution of the makefile:
+
+.. code:: console
+
+    remake<1> step
+    -> (/tmp/libcdio-paranoia/Makefile:415)
+    Makefile.in: Makefile.am m4/ld-version-script.m4 ...
+    remake<2> step
+    -> (/src/external-vcs/github/rocky/libcdio-paranoia/Makefile:443)
+    aclocal.m4: m4/ld-version-script.m4 ...
+    remake<3>
+
+I have elided the list of dependecies listed above an put `...`.
+
+There is a slight difference in the target output seen above and what you will find in the Makefile. Below
+I'll list the line as shown above versus what is in the file.
+
+For line 415:
+
+.. code:: makefile
+
+    Makefile.in: Makefile.am m4/ld-version-script.m4 ...
+    $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+
+while line 443:
+
+.. code:: makefile
+
+    aclocal.m4: m4/ld-version-script.m4 ...
+    $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+
+In the debugger, variables have been expanded and file paths have been
+canonicalized. Therefore you see `Makefile.in` for `$(srcdir)/Makefile.in` and
+`aclocal.m4` for `$(ACLOCAL_M4)`.
+
+Let's recap where `remake` is in the process of running the Makefile.
+The first thing that seems to be done is that the `Makefile`
+dependecies needs to checked. A dependency of `Makefile` is
+`Makefile.in` and that in turn depends on target `aclocal.m4`. We have
+now stepped into and stopped at that target. At the `remake<3>` prompt then
+before checking for the dependencies of `aclocal.m4`.
+
+You can see this dependency nesting that got us to this state using
+the :ref:`backtrace <backtrace>` command:
+
+.. code:: console
+
+    remake<3> backtrace
+    =>#0  aclocal.m4 at /tmp/libcdio-paranoia/Makefile:443
+      #1  Makefile.in at /tmp/libcdio-paranoia/Makefile:415
+      #2  Makefile at /tmp/libcdio-paranoia/Makefile:428
+    remake<4>
+
+Stepping through the program can be illumnating as far as
+what is going on, especially when the Makefile has been derived in
+some way. Here this make file was created via `autotools`.
+
+I had assumed that when I run `make` it looks for a default target and
+runs that. But as we see here, the first thing that goes on is to
+check to see if the Makefile is being used is itself out of date. If
+that is the situation, then the Makefile will get recreated and you
+start again.
+
+However while all of this may be interesting, stepping can be a bit
+tedious. Often, when I am debugging I am interested in the parts *I*
+wrote not the additional boilerplate that the tool-building system
+added, as is going on here.
+
+*to be continued...*
+
+Post-Mortem Debug Session
+-------------------------
+
+In this session we'll go into the debugger on encountering an error. For this the `--post-mortem`
+or `-!` option is used. We'll use the Makefile from the source code of
 this distribution.
 
 *to be continued...*
@@ -50,7 +175,7 @@ narrow the information to just the automatic variables that get set. The
 following commands do this are all mean the same thing: `target make.txt variables`,
 `target @ variables`, and `info locals`.
 
-.. code:: console
+.. code:: makefile
 
     @ := all
     % :=
@@ -74,7 +199,7 @@ target:
 
 We can see a full expansion of the command that is about to be run:
 
-.. code::
+.. code:: console
 
     remake<5> target @ expand
 
@@ -145,3 +270,5 @@ icon means that have finished with this target and are about to return.
 
 If you are at a target and want to continue to the end of the target you
 can use the command `finish` which is the same as `finish 0`.
+
+.. _cd-paranoia: https://github.com/rocky/libcdio-paranoia

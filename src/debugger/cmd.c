@@ -42,10 +42,9 @@ Boston, MA 02111-1307, USA.  */
 #include <readline/readline.h>
 #endif
 
-#ifdef HAVE_HISTORY_LIST
+#ifdef HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
 #endif
-
 
 #ifdef _GNU_SOURCE
 # define ATTRIBUTE_UNUSED __attribute__((unused))
@@ -81,7 +80,7 @@ debug_enter_reason_t last_stop_reason;
 /* From readline. ?? Should this be in configure?  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#endif
+#endif /* HAVE_LIBREADLINE */
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -97,7 +96,6 @@ long_cmd_t commands[] = {
   { "delete",   'd' },
   { "down",     'D' },
   { "edit" ,    'e' },
-  { "eval" ,    'E' },
   { "expand" ,  'x' },
   { "finish"  , 'F' },
   { "frame"   , 'f' },
@@ -189,7 +187,6 @@ find_command (const char *psz_name)
 #include "command/delete.h"
 #include "command/down.h"
 #include "command/edit.h"
-#include "command/eval.h"
 #include "command/expand.h"
 #include "command/finish.h"
 #include "command/frame.h"
@@ -225,7 +222,6 @@ find_command (const char *psz_name)
 #include "command/help/down.h"
 #include "command/help/edit.h"
 #include "command/help/expand.h"
-#include "command/help/eval.h"
 #include "command/help/finish.h"
 #include "command/help/frame.h"
 #include "command/help/help.h"
@@ -266,7 +262,6 @@ cmd_initialize(void)
   DBG_CMD_INIT(delete, 'd');
   DBG_CMD_INIT(down, 'D');
   DBG_CMD_INIT(edit, 'e');
-  DBG_CMD_INIT(eval, 'E');
   DBG_CMD_INIT(expand, 'x');
   DBG_CMD_INIT(finish, 'F');
   DBG_CMD_INIT(frame, 'f');
@@ -335,7 +330,7 @@ dbg_cmd_show_command (const char
     ;
     } */
 
-#ifdef HAVE_HISTORY_LIST
+#ifdef HAVE_READLINE_HISTORY_H
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
   UNUSED_ARGUMENT(psz_args);
@@ -343,7 +338,7 @@ dbg_cmd_show_command (const char
   for (i=0; hist_list[i]; i++) {
     dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
-#endif
+#endif /* HAVE_READLINE_HISTORY_H */
   return debug_readloop;
 }
 
@@ -447,7 +442,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
       add_history ("");
       b_readline_init = true;
   }
-#endif
+#endif /* HAVE_LIBREADLINE */
   if (!b_init) {
     cmd_initialize();
     file2lines.ht_size = 0;
@@ -530,7 +525,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
         line = readline (prompt);
       } else
-#endif
+#endif /* HAVE_LIBREADLINE */
         {
           snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth,
                    close_depth);

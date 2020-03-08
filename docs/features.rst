@@ -111,24 +111,25 @@ For Developers
 
 If you are interested in learning about how GNU Make works, you might find it easier to start out working with this code because it has been simplified as a result of the removal of lesser-used OS's (from the standpoint of GNU Make use).
 
-In contrast to GNU Make, we don't even attempt to support:
+We don't even attempt to support:
 
 * VMS (whether on VAX_ or the OpenVMS_  variant)
 * DOS (with or without EMX_ and DJGCC_),
 * native MS/Windows,
 * acornOS_
+* Amiga_,
+* OS2_
+* MINIX_,
 * RiscOS_
 * Xenix_
-* Amiga_, or
-* OS2_
 
-This is 2020, not the late 1970-80's. And yes, you can find C-preprocessor checks and C code in GNU Make for all of the above.
+This is 2020, not the late 1970-80's. Although GNU make is phasing some of these out out you can find C-preprocessor checks and C code in GNU Make for the above.
 
 By eliminating support for the above, thousands of lines of code in support of the above has been removed.
 
 And the remaining code is easier to read.
 
-Sure, it has annoyed (and still annoys?) those who still work on and develop on the above. I get it. If it is any consolation, there is still GNU Make for such people.
+Sure, it has annoyed (and still annoys?) those who still work on and develop on the above. I get it. If it is any consolation, there is still GNU Make or GNU Make in older versions for such people.
 
 However the *way* this code has been added makes already difficult-code to read even more difficult.
 
@@ -174,7 +175,7 @@ such as in the above, the most-often case is indented incorrectly because in
 of one of less-frequent cases it is say in an `else` clause (as appears above).
 
 *Note: If you have trouble parsing the above, the Pygments parser used
-in this document has trouble too.  After adding mismatched braces in
+in this document has trouble too.  Even after adding mismatched braces in
 the above for context, I couldn't get Pygments to parse this after
 specifying C source with C-preprocessor directives. So I gave up, and
 opted for the slightly shorter source code without some enclosing braces.*
@@ -186,26 +187,27 @@ In the early days to gain traction and support, a project wants to support lots 
 
 But again, that was then and this is now.
 
-If it happens that support for another OS or one of the ones above is necessary, *it needs to be added in a more modular way*.
+If there are folks in the affected communities that would like `remake` added and are willing to code and do the testing, I am open to this. But *it needs to be added in a more modular way than was done in the past*.
 
 Overall, I view this as a plus for developers who would like to extend GNU Make or understand the code.
 
-.. _pygments:  http://pygments.org
-.. _pygments_style:  http://pygments.org/docs/styles/
-.. _other: https://www.npmjs.com/package/trepanjs
-.. _trepanning: https://pypi.python.org/pypi/trepan2
-.. _debuggers: https://metacpan.org/pod/Devel::Trepan
-.. _this: http://bashdb.sourceforge.net/pydb/features.html
+.. _Amiga: https://en.wikipedia.org/wiki/Amiga
+.. _DJGCC: https://en.wikipedia.org/wiki/DJGPP
+.. _EMX: https://en.wikipedia.org/wiki/EMX_(programming_environment)
 .. _Format: https://valgrind.org/docs/manual/cl-format.html
 .. _KCachegrind: https://kcachegrind.github.io/html/Home.html
-.. _gprof2dot: https://github.com/jrfonseca/gprof2dot
-.. _callgrind_annotate: http://man7.org/linux/man-pages/man1/callgrind_annotate.1.html
-.. _VAX: https://en.wikipedia.org/wiki/VAX
-.. _OpenVMS: https://en.wikipedia.org/wiki/OpenVMS
-.. _EMX: https://en.wikipedia.org/wiki/EMX_(programming_environment)
-.. _DJGCC: https://en.wikipedia.org/wiki/DJGPP
-.. _acornOS: https://9to5mac.com/2017/01/06/apple-history-acorn-a-virtual-click-wheel-based-os-which-lost-out-to-ios-shown-in-its-2006-era-glory-video/
-.. _RiscOS: https://en.wikipedia.org/wiki/RISC_OS
-.. _Xenix: https://en.wikipedia.org/wiki/Xenix
-.. _Amiga: https://en.wikipedia.org/wiki/Amiga
+.. _MINIX: https://en.wikipedia.org/wiki/MINIX
 .. _OS2: https://en.wikipedia.org/wiki/OS/2
+.. _OpenVMS: https://en.wikipedia.org/wiki/OpenVMS
+.. _RiscOS: https://en.wikipedia.org/wiki/RISC_OS
+.. _VAX: https://en.wikipedia.org/wiki/VAX
+.. _Xenix: https://en.wikipedia.org/wiki/Xenix
+.. _acornOS: https://9to5mac.com/2017/01/06/apple-history-acorn-a-virtual-click-wheel-based-os-which-lost-out-to-ios-shown-in-its-2006-era-glory-video/
+.. _callgrind_annotate: http://man7.org/linux/man-pages/man1/callgrind_annotate.1.html
+.. _debuggers: https://metacpan.org/pod/Devel::Trepan
+.. _gprof2dot: https://github.com/jrfonseca/gprof2dot
+.. _other: https://www.npmjs.com/package/trepanjs
+.. _pygments:  http://pygments.org
+.. _pygments_style:  http://pygments.org/docs/styles/
+.. _this: http://bashdb.sourceforge.net/pydb/features.html
+.. _trepanning: https://pypi.python.org/pypi/trepan2

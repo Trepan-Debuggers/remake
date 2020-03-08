@@ -128,7 +128,7 @@ bool b_post_mortem_flag = false;
 
 /*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
-#ifdef HAVE_READLINE_READLINE_H
+#ifdef HAVE_LIBREADLINE
     1
 #else
     0
