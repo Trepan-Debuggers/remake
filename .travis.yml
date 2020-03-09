@@ -6,6 +6,10 @@ compiler:
 addons:
   homebrew:
     update: yes
+    before_script:
+      # if macOS then LDFLAGS & CPPFLAGS for readline
+      - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CPPFLAGS="-I/usr/local/opt/readline/include";
+              export LDFLAGS="-L/usr/local/opt/readline/lib"; fi
     packages:
       - autoconf automake gettext gcc guile lzip pkg-config readline texinfo
   apt:
