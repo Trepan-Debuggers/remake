@@ -330,7 +330,7 @@ dbg_cmd_show_command (const char
     ;
     } */
 
-#ifdef HAVE_READLINE_HISTORY_H
+#ifdef HAVE_HISTORY_LIST
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
   UNUSED_ARGUMENT(psz_args);
@@ -338,7 +338,7 @@ dbg_cmd_show_command (const char
   for (i=0; hist_list[i]; i++) {
     dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
-#endif /* HAVE_READLINE_HISTORY_H */
+#endif /* HAVE_HISTORY_LIST */
   return debug_readloop;
 }
 
