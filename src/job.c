@@ -31,50 +31,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "os.h"
 
 /* Default shell to use.  */
-#ifdef WINDOWS32
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>	/* for strcasecmp, strncasecmp */
-# endif
-# include <windows.h>
-
-const char *default_shell = "sh.exe";
-int no_default_sh_exe = 1;
-int batch_mode_shell = 1;
-HANDLE main_thread;
-
-#elif defined (__MSDOS__)
-
-/* The default shell is a pointer so we can change it if Makefile
-   says so.  It is without an explicit path so we get a chance
-   to search the $PATH for it (since MSDOS doesn't have standard
-   directories we could trust).  */
-const char *default_shell = "command.com";
-int batch_mode_shell = 0;
-
-#else
-
 const char *default_shell = "/bin/sh";
 int batch_mode_shell = 0;
-
-#endif
-
-#ifdef __MSDOS__
-# include <process.h>
-static int execute_by_shell;
-static int dos_pid = 123;
-int dos_status;
-int dos_command_running;
-#endif /* __MSDOS__ */
-
-#ifdef WINDOWS32
-# include <windows.h>
-# include <io.h>
-# include <process.h>
-# include "sub_proc.h"
-# include "w32err.h"
-# include "pathstuff.h"
-# define WAIT_NOHANG 1
-#endif /* WINDOWS32 */
 
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
 # include <sys/wait.h>

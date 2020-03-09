@@ -124,7 +124,10 @@ char *starting_directory;
    of each job stay together.  */
 int output_sync = OUTPUT_SYNC_NONE;
 
-const char *default_shell;
+/*! This is the path to the shell used run Makefile commands.
+The value is set in job.c.
+*/
+extern const char *default_shell;
 
 char *remote_description = 0;
 
