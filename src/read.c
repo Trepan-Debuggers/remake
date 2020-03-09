@@ -1441,13 +1441,11 @@ remove_comments (char *line, char **target_description,
   comment = find_map_unquote (line, MAP_COMMENT|MAP_VARIABLE);
 
   if (comment != 0) {
-    if (show_tasks_flag || show_targets_flag) {
-      if (0 == strncmp(comment, "#: ", 3) && target_description) {
-	  *prev_target_description = *target_description;
-	  prev_target_description_lineno = target_description_lineno;
-	  *target_description = xstrdup(&comment[3]);
-	  target_description_lineno = lineno;
-      }
+    if (0 == strncmp(comment, "#: ", 3) && target_description) {
+      *prev_target_description = *target_description;
+      prev_target_description_lineno = target_description_lineno;
+      *target_description = xstrdup(&comment[3]);
+      target_description_lineno = lineno;
     }
     /* Cut off the line at the #.  */
     *comment = '\0';
@@ -2122,10 +2120,8 @@ record_files (struct nameseq *filenames, int are_also_makes,
         }
       else if (!second_expansion && streq (name, ".SECONDEXPANSION"))
         second_expansion = 1;
-#if !defined (__MSDOS__) && !defined (__EMX__)
       else if (!one_shell && streq (name, ".ONESHELL"))
         one_shell = 1;
-#endif
 
       /* If this is a static pattern rule:
          'targets: target%pattern: prereq%pattern; recipe',

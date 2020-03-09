@@ -34,7 +34,6 @@ dbg_cmd_frame(char *psz_frame)
 static void
 dbg_cmd_frame_init(unsigned int c)
 {
-  printf("%s\n", commands[0].long_name);
   short_command[c].func = &dbg_cmd_frame;
   short_command[c].use  = _("frame N");
 }

@@ -337,56 +337,14 @@ AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
 #
 # Check for readline to see if we can add debugging support.
 #
-AC_CHECK_HEADER(readline/readline.h, [have_readline=yes], [have_readline=no])
-
-if test "$have_readline" != yes; then
-   AC_MSG_ERROR([GNU Readline and its headers files are needed. See http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html])
-fi
-
-AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
-AC_TRY_RUN([
-#include <stdio.h>
-#include <readline/readline.h>
-
-int main(int argc, char **argv) {
-  char *s = tilde_expand ("~");
-  return 0;
-}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes;
-     AC_DEFINE(HAVE_TILDE_EXPAND, [],
-     [Define this <readline/readline.h> defines tilde_expand()])],
-     [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
-     [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
-
+AC_CHECK_HEADERS([readline/readline.h readline/history.h])
 AC_CHECK_LIB(readline, readline)
-AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
-AC_TRY_RUN([
-#include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+AC_SUBST(HAVE_LIBREADLINE)
 
-int main(int argc, char **argv) {
-  HIST_ENTRY **hist_list;
-
-      rl_initialize ();
-   hist_list = history_list();
-  return 0;
-}], [AC_MSG_RESULT(yes); ac_have_history_list=yes;
-     AC_DEFINE(HAVE_HISTORY_LIST, [],
-     [Define this <readline/readline.h> defines history_list()])],
-     [AC_MSG_RESULT(no); ac_have_history_list=no],
-     [AC_MSG_RESULT(no); ac_have_history_list=no])
-
-AC_SUBST(HAVE_READLINE)
 REMAKE_SOURCE_PATH="`pwd`"
 AC_DEFINE_UNQUOTED(REMAKE_SOURCE_PATH, "$REMAKE_SOURCE_PATH",
 	[Full path to remake top_sourcedir.])
 AC_SUBST(REMAKE_SOURCE_PATH)
-
-# If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
-AS_IF([test "$PATH_SEPARATOR" = ';'],
-[ AC_DEFINE([HAVE_DOS_PATHS], [1],
-            [Define to 1 if your system requires backslashes or drive specs in pathnames.])
-])
 
 # See if the user wants to use pmake's "customs" distributed build capability
 AC_SUBST([REMOTE]) REMOTE=stub

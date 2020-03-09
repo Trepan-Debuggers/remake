@@ -333,7 +333,11 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
   }
 #else
   {
+#ifndef M_XENIX
     int buf;
+#else
+    unsigned short int buf;
+#endif
     int nread;
     nread = readbuf (desc, &buf, sizeof (buf));
     if (nread != sizeof (buf) || buf != ARMAG)

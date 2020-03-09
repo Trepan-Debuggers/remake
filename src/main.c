@@ -128,7 +128,7 @@ bool b_post_mortem_flag = false;
 
 /*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
-#ifdef HAVE_READLINE_READLINE_H
+#ifdef HAVE_LIBREADLINE
     1
 #else
     0
@@ -2374,11 +2374,15 @@ main (int argc, const char **argv, char **envp)
 
       O (fatal, NILF, _("No targets specified and no makefile found"));
     }
-  if (show_tasks_flag || show_task_comments_flag) {
-      dbg_cmd_info_targets(show_task_comments_flag
-                           ? INFO_TARGET_TASKS_WITH_COMMENTS
-                           : INFO_TARGET_TASKS);
-      die(0);
+  if (show_task_comments_flag) {
+    dbg_cmd_info_targets(show_task_comments_flag
+			 ? INFO_TARGET_TASKS_WITH_COMMENTS
+			 : INFO_TARGET_TASKS);
+    die(0);
+  }
+  if (show_tasks_flag) {
+    dbg_cmd_info_tasks();
+    die(0);
   } else if (show_targets_flag) {
       dbg_cmd_info_targets(INFO_TARGET_NAME);
       die(0);

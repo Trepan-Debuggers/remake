@@ -24,5 +24,6 @@ how GNU `make` or `remake` processes a Makefile.
    :caption: Contents:
 
    debugger/entry
+   debugger/sessions
    debugger/syntax
    debugger/commands
