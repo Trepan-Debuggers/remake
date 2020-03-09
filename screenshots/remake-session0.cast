@@ -15,6 +15,6 @@
 [6.205204, "o", "k"]
 [6.365242, "o", "s"]
 [6.621395, "o", "\r\n"]
-[6.624906, "o", "all\t# This is the default target\r\ndist\r\nwhich-make\t# Which version of make you are running?\r\n"]
+[6.624906, "o", "all                  This is the default target\r\nwhich-make           Which version of make you are running?\r\n"]
 [6.625077, "o", "$ "]
 [10.444945, "o", "\r\n"]
