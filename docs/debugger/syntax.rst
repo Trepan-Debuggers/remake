@@ -1,4 +1,5 @@
 .. _syntax_command:
+.. _icons:
 
 Debugger Command Syntax
 =======================
@@ -26,3 +27,45 @@ are dispatched to that command.
 
 GNU Readline is used to read commands, so it's capabilities are
 available, such as `vi` or `emacs` editing.
+
+Event Icons
+-----------
+
+In the debugger, before showing position information there is a two-character event icon.
+
+For example, in his line:
+
+.. code:: console
+
+   !! (/tmp/project/errors.Makefile:1)
+   ^^ event icon is here
+
+The `!!` indicates an error occurred and we have gone into post-mortem debugging.
+
+Here is a list of event icons:
+
+.. index:: icons; event
+
+.. list-table::
+   :header-rows: 1
+
+   * - Icon
+     - Event
+   * - `->`
+     - Stopped before checking target prerequisites.
+   * - `..`
+     - Stopped after checking target prerequisites.
+   * - `<-`
+     - Stopped after running target commands.
+   * - rd
+     - About to read a Makefile
+   * - `!!`
+     - Error encountered and `--post-mortem flag given`. In post-mortem debugging.
+   * - `- -`
+     - Ran a debugger step of a Makefile target and it's not one of the above.
+   * - `++`
+     - Ran a debugger step in a POSIX command and it's not one of the above.
+   * - :o
+     - A call to the debugger using the $(debugger) function in the Makefile
+   * - `||`
+     - Finished making the goal target
