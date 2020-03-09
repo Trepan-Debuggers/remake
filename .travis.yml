@@ -6,10 +6,6 @@ compiler:
 addons:
   homebrew:
     update: yes
-    before_script:
-      # if macOS then LDFLAGS & CPPFLAGS for readline
-      - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CPPFLAGS="-I/usr/local/opt/readline/include";
-              export LDFLAGS="-L/usr/local/opt/readline/lib"; fi
     packages:
       - autoconf automake gettext gcc guile lzip pkg-config readline texinfo
   apt:
@@ -30,6 +26,11 @@ jobs:
 before_install:
   # if macOS then add autopoint/gettext path to the PATH variable
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then eval "${GETTEXT_EVAL}" ; fi
+
+before_script:
+  # if macOS then LDFLAGS & CPPFLAGS for readline
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CPPFLAGS="-I/usr/local/opt/readline/include";
+        export LDFLAGS="-L/usr/local/opt/readline/lib"; fi
 
 # run the tests
 script: autoreconf -i && ./configure && make po-update && (cd doc && make stamp-1 stamp-vti) && make && make check
