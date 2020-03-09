@@ -22,10 +22,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef  HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
-# ifdef VMS
-/* its prototype is in vmsdir.h, which is not needed for HAVE_DIRENT_H */
-const char *vmsify (const char *name, int type);
-# endif
 #else
 # define dirent direct
 # define NAMLEN(dirent) (dirent)->d_namlen
@@ -38,9 +34,6 @@ const char *vmsify (const char *name, int type);
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
-# ifdef HAVE_VMSDIR_H
-#  include "vmsdir.h"
-# endif /* HAVE_VMSDIR_H */
 #endif
 
 /* In GNU systems, <dirent.h> defines this macro for us.  */
@@ -49,7 +42,7 @@ const char *vmsify (const char *name, int type);
 # define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if (defined (POSIX) || defined (VMS) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
+#if defined (POSIX) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 # define REAL_DIR_ENTRY(dp) 1
@@ -326,30 +319,9 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   const struct directory_contents *y = yv;
   int result;
 
-#ifdef WINDOWS32
-  ISTRING_COMPARE (x->path_key, y->path_key, result);
-  if (result)
-    return result;
-  result = MAKECMP(x->ctime, y->ctime);
-  if (result)
-    return result;
-#else
-# ifdef VMS_INO_T
-  result = MAKECMP(x->ino[0], y->ino[0]);
-  if (result)
-    return result;
-  result = MAKECMP(x->ino[1], y->ino[1]);
-  if (result)
-    return result;
-  result = MAKECMP(x->ino[2], y->ino[2]);
-  if (result)
-    return result;
-# else
   result = MAKECMP(x->ino, y->ino);
   if (result)
     return result;
-# endif
-#endif /* WINDOWS32 */
 
   return MAKECMP(x->dev, y->dev);
 }
@@ -458,40 +430,12 @@ find_directory (const char *name)
       int r;
 
       dir = xmalloc (sizeof (struct directory));
-#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
-      /* Todo: Why is this only needed on VMS? */
-      {
-        char *lname = downcase_inplace (xstrdup (name));
-        dir->name = strcache_add_len (lname, p - name);
-        free (lname);
-      }
-#else
       dir->name = strcache_add_len (name, p - name);
-#endif
       hash_insert_at (&directories, dir, dir_slot);
       /* The directory is not in the name hash table.
          Find its device and inode numbers, and look it up by them.  */
 
-#if defined(WINDOWS32)
-      {
-        char tem[MAXPATHLEN], *tstart, *tend;
-
-        /* Remove any trailing slashes.  Windows32 stat fails even on
-           valid directories if they end in a slash. */
-        memcpy (tem, name, p - name + 1);
-        tstart = tem;
-        if (tstart[1] == ':')
-          tstart += 2;
-        for (tend = tem + (p - name - 1);
-             tend > tstart && (*tend == '/' || *tend == '\\');
-             tend--)
-          *tend = '\0';
-
-        r = stat (tem, &st);
-      }
-#else
       EINTRLOOP (r, stat (name, &st));
-#endif
 
       if (r < 0)
         {
@@ -503,71 +447,24 @@ find_directory (const char *name)
         {
           /* Search the contents hash table; device and inode are the key.  */
 
-#ifdef WINDOWS32
-          char *w32_path;
-#endif
           struct directory_contents *dc;
           struct directory_contents **dc_slot;
           struct directory_contents dc_key;
 
           dc_key.dev = st.st_dev;
-#ifdef WINDOWS32
-          dc_key.path_key = w32_path = w32ify (name, 1);
-          dc_key.ctime = st.st_ctime;
-#else
-# ifdef VMS_INO_T
-          dc_key.ino[0] = st.st_ino[0];
-          dc_key.ino[1] = st.st_ino[1];
-          dc_key.ino[2] = st.st_ino[2];
-# else
           dc_key.ino = st.st_ino;
-# endif
-#endif
           dc_slot = (struct directory_contents **) hash_find_slot (&directory_contents, &dc_key);
           dc = *dc_slot;
 
           if (HASH_VACANT (dc))
             {
               /* Nope; this really is a directory we haven't seen before.  */
-#ifdef WINDOWS32
-              char  fs_label[BUFSIZ];
-              char  fs_type[BUFSIZ];
-              unsigned long  fs_serno;
-              unsigned long  fs_flags;
-              unsigned long  fs_len;
-#endif
               dc = (struct directory_contents *)
                 xmalloc (sizeof (struct directory_contents));
 
               /* Enter it in the contents hash table.  */
               dc->dev = st.st_dev;
-#ifdef WINDOWS32
-              dc->path_key = xstrdup (w32_path);
-              dc->ctime = st.st_ctime;
-              dc->mtime = st.st_mtime;
-
-              /* NTFS is the only WINDOWS32 filesystem that bumps mtime on a
-                 directory when files are added/deleted from a directory.  */
-              w32_path[3] = '\0';
-              if (GetVolumeInformation (w32_path, fs_label, sizeof (fs_label),
-                                        &fs_serno, &fs_len, &fs_flags, fs_type,
-                                        sizeof (fs_type)) == FALSE)
-                dc->fs_flags = FS_UNKNOWN;
-              else if (!strcmp (fs_type, "FAT"))
-                dc->fs_flags = FS_FAT;
-              else if (!strcmp (fs_type, "NTFS"))
-                dc->fs_flags = FS_NTFS;
-              else
-                dc->fs_flags = FS_UNKNOWN;
-#else
-# ifdef VMS_INO_T
-              dc->ino[0] = st.st_ino[0];
-              dc->ino[1] = st.st_ino[1];
-              dc->ino[2] = st.st_ino[2];
-# else
               dc->ino = st.st_ino;
-# endif
-#endif /* WINDOWS32 */
               hash_insert_at (&directory_contents, dc, dc_slot);
               ENULLLOOP (dc->dirstream, opendir (name));
               if (dc->dirstream == 0)
@@ -604,27 +501,15 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 {
   struct dirfile *df;
   struct dirent *d;
-#ifdef WINDOWS32
-  struct stat st;
-  int rehash = 0;
-#endif
 
   if (dir == 0 || dir->dirfiles.ht_vec == 0)
     /* The directory could not be stat'd or opened.  */
     return 0;
 
-#ifdef __MSDOS__
-  filename = dosify (filename);
-#endif
-
 #ifdef HAVE_CASE_INSENSITIVE_FS
   filename = downcase (filename);
 #endif
 
-#ifdef __EMX__
-  if (filename != 0)
-    _fnlwr (filename); /* lower case for FAT drives */
-#endif
   if (filename != 0)
     {
       struct dirfile dirfile_key;
@@ -646,37 +531,6 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 
   if (dir->dirstream == 0)
     {
-#ifdef WINDOWS32
-      /*
-       * Check to see if directory has changed since last read. FAT
-       * filesystems force a rehash always as mtime does not change
-       * on directories (ugh!).
-       */
-      if (dir->path_key)
-        {
-          if ((dir->fs_flags & FS_FAT) != 0)
-            {
-              dir->mtime = time ((time_t *) 0);
-              rehash = 1;
-            }
-          else if (stat (dir->path_key, &st) == 0 && st.st_mtime > dir->mtime)
-            {
-              /* reset date stamp to show most recent re-process.  */
-              dir->mtime = st.st_mtime;
-              rehash = 1;
-            }
-
-          /* If it has been already read in, all done.  */
-          if (!rehash)
-            return 0;
-
-          /* make sure directory can still be opened; if not return.  */
-          dir->dirstream = opendir (dir->path_key);
-          if (!dir->dirstream)
-            return 0;
-        }
-      else
-#endif
         /* The directory has been all read in.  */
         return 0;
     }
@@ -696,16 +550,6 @@ dir_contents_file_exists_p (struct directory_contents *dir,
           break;
         }
 
-#if defined(VMS) && defined(HAVE_DIRENT_H)
-      /* In VMS we get file versions too, which have to be stripped off.
-         Some versions of VMS return versions on Unix files even when
-         the feature option to strip them is set.  */
-      {
-        char *p = strrchr (d->d_name, ';');
-        if (p)
-          *p = '\0';
-      }
-#endif
       if (!REAL_DIR_ENTRY (d))
         continue;
 
@@ -713,13 +557,6 @@ dir_contents_file_exists_p (struct directory_contents *dir,
       dirfile_key.name = d->d_name;
       dirfile_key.length = len;
       dirfile_slot = (struct dirfile **) hash_find_slot (&dir->dirfiles, &dirfile_key);
-#ifdef WINDOWS32
-      /*
-       * If re-reading a directory, don't cache files that have
-       * already been discovered.
-       */
-      if (! rehash || HASH_VACANT (*dirfile_slot))
-#endif
         {
           df = xmalloc (sizeof (struct dirfile));
 #if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
@@ -860,39 +697,10 @@ file_impossible_p (const char *filename)
   struct directory_contents *dir;
   struct dirfile *dirfile;
   struct dirfile dirfile_key;
-#ifdef VMS
-  int want_vmsify = 0;
-#endif
 
   dirend = strrchr (filename, '/');
-#ifdef VMS
-  if (dirend == NULL)
-    {
-      want_vmsify = (strpbrk (filename, "]>:^") != NULL);
-      dirend = strrchr (filename, ']');
-    }
-  if (dirend == NULL && want_vmsify)
-    dirend = strrchr (filename, '>');
-  if (dirend == NULL && want_vmsify)
-    dirend = strrchr (filename, ':');
-#endif
-#ifdef HAVE_DOS_PATHS
-  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
-  {
-    const char *bslash = strrchr (filename, '\\');
-    if (!dirend || bslash > dirend)
-      dirend = bslash;
-    /* The case of "d:file".  */
-    if (!dirend && filename[0] && filename[1] == ':')
-      dirend = filename + 1;
-  }
-#endif /* HAVE_DOS_PATHS */
   if (dirend == 0)
-#ifdef _AMIGA
-    dir = find_directory ("")->contents;
-#else /* !AMIGA */
     dir = find_directory (".")->contents;
-#endif /* AMIGA */
   else
     {
       const char *dirname;
@@ -902,41 +710,21 @@ file_impossible_p (const char *filename)
       else
         {
           char *cp;
-#ifdef HAVE_DOS_PATHS
-          /* d:/ and d: are *very* different...  */
-          if (dirend < filename + 3 && filename[1] == ':' &&
-              (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
-            dirend++;
-#endif
           cp = alloca (dirend - filename + 1);
           memcpy (cp, filename, dirend - filename);
           cp[dirend - filename] = '\0';
           dirname = cp;
         }
       dir = find_directory (dirname)->contents;
-#ifdef VMS
-      if (*slash == '/')
-        filename = slash + 1;
-      else
-        filename = slash;
-#else
       filename = slash + 1;
-#endif
     }
 
   if (dir == 0 || dir->dirfiles.ht_vec == 0)
     /* There are no files entered for this directory.  */
     return 0;
 
-#ifdef __MSDOS__
-  filename = dosify (filename);
-#endif
 #ifdef HAVE_CASE_INSENSITIVE_FS
   filename = downcase (filename);
-#endif
-#ifdef VMS
-  if (want_vmsify)
-    filename = vmsify (filename, 1);
 #endif
 
   dirfile_key.name = filename;
@@ -1153,24 +941,6 @@ static int
 local_stat (const char *path, struct stat *buf)
 {
   int e;
-#ifdef WINDOWS32
-  size_t plen = strlen (path);
-
-  /* Make sure the parent of "." exists and is a directory, not a
-     file.  This is because 'stat' on Windows normalizes the argument
-     foo/. => foo without checking first that foo is a directory.  */
-  if (plen > 1 && path[plen - 1] == '.'
-      && (path[plen - 2] == '/' || path[plen - 2] == '\\'))
-    {
-      char parent[MAXPATHLEN];
-
-      strncpy (parent, path, plen - 2);
-      parent[plen - 2] = '\0';
-      if (stat (parent, buf) < 0 || !_S_ISDIR (buf->st_mode))
-        return -1;
-    }
-#endif
-
   EINTRLOOP (e, stat (path, buf));
   return e;
 }

@@ -33,14 +33,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/file.h>
 #endif
 
-#ifdef VMS
-#include <starlet.h>
-#endif
-#ifdef WINDOWS32
-#include <io.h>
-#endif
-
-
 /* The test for circular dependencies is based on the 'updating' bit in
    'struct file'.  However, double colon targets have separate 'struct
    file's; make sure we always use the base of the double colon chain. */
@@ -1419,13 +1411,9 @@ f_mtime (struct file *file, int search)
               /* If we found it in VPATH, see if it's in GPATH too; if so,
                  change the name right now; if not, defer until after the
                  dependencies are updated. */
-#ifndef VMS
-              name_len = strlen (name) - strlen (file->name) - 1;
-#else
               name_len = strlen (name) - strlen (file->name);
               if (name[name_len - 1] == '/')
                   name_len--;
-#endif
               if (gpath_search (name, name_len))
                 {
                   rename_file (file, name);
