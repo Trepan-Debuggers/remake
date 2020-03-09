@@ -18,7 +18,10 @@ This option creates Callgrind Profile Format_ output which can be read
 by KCachegrind_, callgrind_annotate_, or gprof2dot_ or other tools that understand this format.
 
 You can get not only timings, but a graph of the target dependencies
-checked.
+checked. Below is an image rendered from a profiling of a `remake` build:
+
+..image:: ../screenshots/remake-profiled2.png
+
 
 Listing and Documenting Makefile Targets
 ----------------------------------------
