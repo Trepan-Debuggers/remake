@@ -338,7 +338,7 @@ dbg_cmd_show_command (const char
   for (i=1; hist_list[i]; i++) {
     dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
-#endif /* HAVE_HISTORY_LIST */
+#endif /* HAVE_READLINE_HISTORY_H */
   return debug_readloop;
 }
 
