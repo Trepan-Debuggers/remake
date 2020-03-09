@@ -330,12 +330,12 @@ dbg_cmd_show_command (const char
     ;
     } */
 
-#ifdef HAVE_HISTORY_LIST
+#ifdef HAVE_READLINE_HISTORY_H
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
   UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
-  for (i=0; hist_list[i]; i++) {
+  for (i=1; hist_list[i]; i++) {
     dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
 #endif /* HAVE_HISTORY_LIST */
