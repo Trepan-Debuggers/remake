@@ -13,12 +13,12 @@ Example showing `--tasks` feature:
 
 Example showing `--trace` (short option `-x) feature:
 
-![--trace](screenshots/remake-session1.gif)
+![--trace](screenshots/remake-trace.gif)
 
 
 Example showing `--show-parent` (short option `-c`) feature:
 
-![--show-parent](screenshots/remake-session2.gif)
+![--show-parent](screenshots/remake-search-parent.gif)
 
 Example showing `--profiling` output (displayed via [KCachegrind](https://kcachegrind.github.io/html/Home.htmlkcachegrind)):
 
