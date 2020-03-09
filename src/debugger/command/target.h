@@ -1,5 +1,5 @@
 /* Show a variable or target definition. */
-/* 
+/*
 Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-debug_return_t 
-dbg_cmd_target(char *psz_args) 
+debug_return_t
+dbg_cmd_target(char *psz_args)
 {
   const char *psz_target;
   file_t *p_target = get_target(&psz_args, &psz_target);
@@ -26,7 +26,7 @@ dbg_cmd_target(char *psz_args)
   if (p_target) {
     print_target_mask_t i_mask = 0;
     char *psz_word;
-    
+
     while( (psz_word = get_word(&psz_args))) {
       if (!*psz_word) {
 	break;
@@ -55,7 +55,7 @@ dbg_cmd_target(char *psz_args)
 	return debug_readloop;
       }
     }
-    
+
     if (0 == i_mask) i_mask = PRINT_TARGET_ALL & (~PRINT_TARGET_VARS_HASH);
 
     if (i_mask & PRINT_TARGET_VARS) {
@@ -63,38 +63,23 @@ dbg_cmd_target(char *psz_args)
       set_file_variables (p_target);
     }
 
+    if (p_target->description) {
+      printf("#: %s", p_target->description);
+    }
     print_target_props(p_target, i_mask);
   }
   return debug_readloop;
 }
 
 static void
-dbg_cmd_target_init(unsigned int c) 
+dbg_cmd_target_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_target;
   short_command[c].use =  _("target [TARGET-NAME] [info1 [info2...]]");
-  short_command[c].doc  = 
-    _("Show information about a target.\n" 
-"\nThe following attributes names can be given after a target name:\n"
-"  attributes - rule attributes: precious, rule search, and pattern stem\n"
-"  commands   - shell commands that are run to update the target\n"
-"  expand     - like 'commands', but Makefile variables are expanded\n"
-"  nonorder   - non-order dependencies\n"
-"  order      - order dependencies\n"
-"  depends    - all target dependencies, i.e. order and non-order\n"
-"  previous   - previous target name hwen there are multiple double-colons\n"
-"  state      - shell command state\n"
-"  time       - last modification time and whether file has been updated\n"
-"  variables  - automatically set variables such as  @ or  <\n"
-"\n"
-"TARGET-NAME can be a variable like `@' (current target) or `<'\n" 
-"(first dependency). If no variable or target name is supplied\n"
-"we to use the current target name.\n"				
-      );
 }
 
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil
