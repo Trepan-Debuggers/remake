@@ -5,6 +5,7 @@ compiler:
 
 addons:
   homebrew:
+    update: yes
     packages:
       - autoconf automake gettext gcc guile lzip pkg-config readline texinfo
   apt:
