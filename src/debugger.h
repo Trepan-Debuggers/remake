@@ -18,6 +18,7 @@ typedef struct {
   const char *doc;	/* Documentation for this function.  */
   const char *use;	/* short command usage.  */
   uint8_t id;	        /* index into global commands, and short_command arrays.
-                           255 is uninitialized.
-                        */
+                           255 is uninitialized. */
+  bool needs_running;   /* true if this command needs needs to be running, i.e.
+                           not in post-mortem state. */
 } short_cmd_t;

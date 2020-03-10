@@ -147,6 +147,7 @@ short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
                                      (const char *) '\0',
                                      (uint8_t) 255,
+                                     false,
                                     }, };
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -246,46 +247,47 @@ find_command (const char *psz_name)
 #include "command/help/write.h"
 
 
-#define DBG_CMD_INIT(CMD, LETTER)                       \
+#define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \
   dbg_cmd_ ## CMD ## _init(LETTER);                     \
-  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);   \
+  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);     \
+  short_command[LETTER].needs_running = NEEDS_RUNNING;  \
   short_command[LETTER].id = id++
 
 static void
 cmd_initialize(void)
 {
   int id=0;
-  DBG_CMD_INIT(break, 'b');
-  DBG_CMD_INIT(chdir, 'C');
-  DBG_CMD_INIT(comment, '#');
-  DBG_CMD_INIT(continue, 'c');
-  DBG_CMD_INIT(delete, 'd');
-  DBG_CMD_INIT(down, 'D');
-  DBG_CMD_INIT(edit, 'e');
-  DBG_CMD_INIT(expand, 'x');
-  DBG_CMD_INIT(finish, 'F');
-  DBG_CMD_INIT(frame, 'f');
-  DBG_CMD_INIT(help, 'h');
-  DBG_CMD_INIT(info, 'i');
-  DBG_CMD_INIT(list, 'l');
-  DBG_CMD_INIT(load, 'M');
-  DBG_CMD_INIT(next, 'n');
-  DBG_CMD_INIT(print, 'p');
-  DBG_CMD_INIT(pwd, 'P');
-  DBG_CMD_INIT(quit, 'q');
-  DBG_CMD_INIT(run, 'R');
-  DBG_CMD_INIT(set, '=');
-  DBG_CMD_INIT(setq, '"');
-  DBG_CMD_INIT(setqx, '`');
-  DBG_CMD_INIT(shell, '!');
-  DBG_CMD_INIT(show, 'S');
-  DBG_CMD_INIT(skip, 'k');
-  DBG_CMD_INIT(source, '<');
-  DBG_CMD_INIT(step, 's');
-  DBG_CMD_INIT(target, 't');
-  DBG_CMD_INIT(up, 'u');
-  DBG_CMD_INIT(where, 'T');
-  DBG_CMD_INIT(write, 'w');
+  DBG_CMD_INIT(break, 'b', false);
+  DBG_CMD_INIT(chdir, 'C', false);
+  DBG_CMD_INIT(comment, '#', false);
+  DBG_CMD_INIT(continue, 'c', true);
+  DBG_CMD_INIT(delete, 'd', false);
+  DBG_CMD_INIT(down, 'D', false);
+  DBG_CMD_INIT(edit, 'e', false);
+  DBG_CMD_INIT(expand, 'x', false);
+  DBG_CMD_INIT(finish, 'F', true);
+  DBG_CMD_INIT(frame, 'f', false);
+  DBG_CMD_INIT(help, 'h', false);
+  DBG_CMD_INIT(info, 'i', false);
+  DBG_CMD_INIT(list, 'l', false);
+  DBG_CMD_INIT(load, 'M', false);
+  DBG_CMD_INIT(next, 'n', true);
+  DBG_CMD_INIT(print, 'p', false);
+  DBG_CMD_INIT(pwd, 'P', false);
+  DBG_CMD_INIT(quit, 'q', false);
+  DBG_CMD_INIT(run, 'R', false);
+  DBG_CMD_INIT(set, '=', false);
+  DBG_CMD_INIT(setq, '"', false);
+  DBG_CMD_INIT(setqx, '`', false);
+  DBG_CMD_INIT(shell, '!', false);
+  DBG_CMD_INIT(show, 'S', false);
+  DBG_CMD_INIT(skip, 'k', true);
+  DBG_CMD_INIT(source, '<', false);
+  DBG_CMD_INIT(step, 's', true);
+  DBG_CMD_INIT(target, 't', false);
+  DBG_CMD_INIT(up, 'u', false);
+  DBG_CMD_INIT(where, 'T', false);
+  DBG_CMD_INIT(write, 'w', false);
 }
 
 /* Execute a command line. */
@@ -309,6 +311,11 @@ execute_line (char *psz_line)
       dbg_errmsg(_("No such debugger command: %s."), psz_word);
       return debug_readloop;
     }
+
+  if (command->needs_running && last_stop_reason == DEBUG_ERROR_HIT) {
+      dbg_errmsg(_("command: %s is only valid when `remake` not in post-mortem debugging."), psz_word);
+      return debug_readloop;
+  }
 
   /* Get argument to command, if any. */
   while (whitespace (psz_line[i]))
