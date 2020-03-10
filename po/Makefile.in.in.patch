@@ -1,0 +1,60 @@
+--- po/Makefile.in.in	2020-03-10 12:03:00.485271934 -0400
++++ po/Makefile.in.in-save	2020-03-10 12:07:30.509474441 -0400
+@@ -133,6 +133,7 @@
+ # if updating the $(CATALOGS) would always touch them; however, the rule for
+ # $(POFILES) has been designed to not touch files that don't need to be
+ # changed.
++#: Rebuild the timestamp indicating when CATALOGS have been updated
+ stamp-po: $(srcdir)/$(DOMAIN).pot
+ 	@$(CHECK_MACRO_VERSION)
+ 	test ! -f $(srcdir)/$(DOMAIN).pot || \
+@@ -152,6 +153,7 @@
+ # The determination of whether the package xyz is a GNU one is based on the
+ # heuristic whether some file in the top level directory mentions "GNU xyz".
+ # If GNU 'find' is available, we avoid grepping through monster files.
++#: Rebuild remake.pot, an expensive operation
+ $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in remove-potcdate.sed
+ 	package_gnu="$(PACKAGE_GNU)"; \
+ 	test -n "$$package_gnu" || { \
+@@ -219,6 +221,7 @@
+ 
+ # This target rebuilds a PO file if $(DOMAIN).pot has changed.
+ # Note that a PO file is not touched if it doesn't need to be changed.
++#: Rebuild this language file from remake.pot
+ $(POFILES): $(POFILESDEPS)
+ 	@lang=`echo $@ | sed -e 's,.*/,,' -e 's/\.po$$//'`; \
+ 	if test -f "$(srcdir)/$${lang}.po"; then \
+@@ -237,7 +240,7 @@
+ 	  $(MAKE) $${lang}.po-create; \
+ 	fi
+ 
+-
++#: Install remake translation files
+ install: install-exec install-data
+ install-exec:
+ install-data: install-data-@USE_NLS@
+@@ -416,14 +419,14 @@
+ 	test -z "$(UPDATEPOFILES)" || $(MAKE) $(UPDATEPOFILES)
+ 	$(MAKE) update-gmo
+ 
+-# General rule for creating PO files.
++#: Create PO files
+ 
+ .nop.po-create:
+ 	@lang=`echo $@ | sed -e 's/\.po-create$$//'`; \
+ 	echo "File $$lang.po does not exist. If you are a translator, you can create it through 'msginit'." 1>&2; \
+ 	exit 1
+ 
+-# General rule for updating PO files.
++#: Update PO files
+ 
+ .nop.po-update:
+ 	@lang=`echo $@ | sed -e 's/\.po-update$$//'`; \
+@@ -464,6 +467,7 @@
+ # because execution permission bits may not work on the current file system.
+ # Use @SHELL@, which is the shell determined by autoconf for the use by its
+ # scripts, not $(SHELL) which is hardwired to /bin/sh and may be deficient.
++#: Recreate Makefile by invoking config.status
+ Makefile: Makefile.in.in Makevars $(top_builddir)/config.status @POMAKEFILEDEPS@
+ 	cd $(top_builddir) \
+ 	  && @SHELL@ ./config.status $(subdir)/$@.in po-directories
