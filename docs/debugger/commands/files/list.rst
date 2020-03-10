@@ -29,4 +29,4 @@ Examples:
 
 .. seealso::
 
-   :ref:`edit <edit>`.
+   ref:`target <target>`, :ref:`edit <edit>`.

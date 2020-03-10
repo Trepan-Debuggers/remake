@@ -193,7 +193,9 @@ opted for the slightly shorter source code without some enclosing braces.*
 I understand how this ugly code hard-to-read code most likely came
 about in GNU Make. Been there and done that myself too.
 
-In the early days to gain traction and support, a project wants to support lots of different platforms and OS's, even obscure ones. To get going, you'll probably do that in the most expedient day.
+In the early days to gain traction and support, a project wants to
+support lots of different platforms and OS's, even obscure ones. To
+get going, you'll probably do that in the most expedient way.
 
 But again, that was then and this is now.
 
