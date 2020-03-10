@@ -47,23 +47,23 @@ Here is an example. Consider this `Makefile`:
 
     #: This is the main target
     all:
-  	echo all here
+  	@echo all here
 
-    #: test things
+    #: Test things
     check:
-	echo check here
+	@echo check here
 
     #: Build distribution
     dist:
-	echo dist here
+	@echo dist here
 
 Running `remake --tasks` gives:
 
 .. code:: console
 
-    all         # This is the main target
-    check       # test things
-    dist        # Build distribution
+    all                  This is the main target
+    check                Test things
+    dist                 Build distribution
 
 Searching for a Makefile in Parent Directories
 ----------------------------------------------

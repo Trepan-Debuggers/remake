@@ -329,8 +329,8 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n\
-                              have commands associated with them.\n"),
+  --tasks                     Give list of targets which have descriptions\n\
+                              associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
