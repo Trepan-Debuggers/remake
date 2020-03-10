@@ -77,6 +77,10 @@ directory to the directory where the Makefile was found.
 In this respect the short option `-c`, is like `-C` except no
 directory need to be specified.
 
+Here is a screenshot that shows `make` behavior versus `remake`:
+
+.. image:: ../screenshots/remake-search-parent.gif
+
 
 Improved Execution Tracing
 --------------------------
@@ -92,6 +96,9 @@ has other settings. See the relevant parts of this manual for more information.
 
 And, if you the most flexibility in tracing there is a built-in debugger.
 
+Here is a screenshot that shows tracing:
+
+.. image:: ../screenshots/remake-search-parent.gif
 
 Debugger
 --------
