@@ -1,6 +1,8 @@
 How to install
 ****************
 
+.. contents:: :local:
+
 .. toctree::
 
 

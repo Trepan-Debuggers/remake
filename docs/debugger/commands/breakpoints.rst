@@ -1,3 +1,6 @@
+.. index:: breakpoints
+.. _breakpoints:
+
 Breakpoints
 ===========
 

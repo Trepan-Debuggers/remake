@@ -77,30 +77,40 @@ in the interpretation or execution of the makefile:
 
 I have elided the list of dependencies listed above and substituted ellipses (`...`).
 
-There is a slight difference in the target output seen above and what you will find in the Makefile. Below
-I'll list the line as shown above versus what is in the file.
+There is a slight difference between what you will find in the
+Makefile and the target output seen above. Below I'll list the what is
+in the Makefile versus what is line as shown above.
 
 For line 415:
 
 .. code:: makefile
 
-    Makefile.in: Makefile.am m4/ld-version-script.m4 ...
     $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+    Makefile.in: Makefile.am m4/ld-version-script.m4 ...
 
 while line 443:
 
 .. code:: makefile
 
-    aclocal.m4: m4/ld-version-script.m4 ...
     $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+    aclocal.m4: m4/ld-version-script.m4 ...
 
 In the debugger, variables have been expanded and file paths have been
-canonicalized. Therefore you see `Makefile.in` for `$(srcdir)/Makefile.in` and
-`aclocal.m4` for `$(ACLOCAL_M4)`.
+canonicalized. Therefore you see:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Makefile
+     - remake output
+   * - `$(srcdir)/Makefile.in`
+     - `Makefile.in`
+   * - `$(ACLOCAL_M4)`
+     - `aclocal.m4 ...`
 
 Let's recap where `remake` is in the process of running the Makefile.
 The first thing that seems to be done is that the `Makefile`
-dependencies needs to checked. A dependency of `Makefile` is
+dependencies need to checked. A dependency of `Makefile` is
 `Makefile.in` and that in turn depends on target `aclocal.m4`. We have
 now stepped into and stopped at that target. At the `remake<3>` prompt then
 before checking for the dependencies of `aclocal.m4`.
@@ -118,7 +128,7 @@ the :ref:`backtrace <backtrace>` command:
 
 Stepping through the program can be illuminating as far as what is
 going on, especially when the Makefile has been derived in some way,
-is the case here. This make file was created via `autotools`.
+as is the case here. This Makefile was created via `autotools`.
 
 I had assumed that when I run `make` it looks for a default target and
 runs that. But as we see here, the first thing that goes on is to
@@ -129,17 +139,17 @@ start again.
 However while all of this may be interesting, stepping can be a bit
 tedious.
 
-In the next section, we talk about :ref:`breakpoints` can get you to
-where you want to debug faster. To finish this session though use the
-:ref:`quit <quit>` command.
+In the next section, we talk about :ref:`breakpoints <breakpoints>`
+which can get you to where you want to debug faster. To finish this
+session though use the :ref:`quit <quit>` command.
 
 .. code:: console
 
    remake<4> quit
    remake: That's all, folks...
 
-Breakpoints
-+++++++++++
+Stopping with Continue
+++++++++++++++++++++++
 
 Let's say I am interested in what goes on when `make dist` is run.
 Again, I'll invoke the debugger initially.
@@ -183,25 +193,53 @@ Now when I issue a `step`, I will step into the commands associated with the `di
 Notice that the event icon above is `++` which means I am stepping shell commands, here those associated with the Make target `dist`.
 Above the line with the event icon in between the two chevrons is the command that is *about* to be run.
 
+To see the entire build commands, there is the :ref:`list <list>` command. Here is that:
+
+.. code:: console
+
+    remake<2> list
+    /tmp/libcdio-paranoia/Makefile:705
+    dist:
+    #  recipe to execute (from 'Makefile', line 706):
+    	$(MAKE) $(AM_MAKEFLAGS) $(DIST_TARGETS) am__post_remove_distdir='@:'
+    	$(am__post_remove_distdir)
+
+A form of the :ref:`target <target>` command, `target @ command` does
+about the same thing. Note that in both cases variables are not
+expanded as the are in the trace output shown above between chevrons.
 
 Debugging Make Variables
 -------------------------
 
-In the above session we have seen that output has variables expanded. You can query any GNU Make variable
-that has been set in the program without variables inside expanded using the :ref:`print <print>` command.
+In the above session we have seen that output has variables expanded,
+while in the `list` and `target` commands variables were not
+expanded.
+
+You can query any GNU Make variable that has been set in the program
+*without* variables inside expanded using the :ref:`print <print>`
+command.
 
 .. code:: console
 
     remake<2> print MAKE
     (origin default) MAKE = $(MAKE_COMMAND)
 
-The `(origin default)` means this is a built-in definition. The other
-kind of print which does full expansion of the variables is called
-`expand` or `x`. Here is an example
+The `(origin default)` means this is a built-in definition. Many
+variables that you will be interested in though, are set somewhere,
+and the variable is not a default it's location is also shown:
+
 
 .. code:: console
 
-    remake<3> expand MAKE
+    remake<3> print DATA
+    Makefile:168 (origin: makefile) DATA := libcdio_paranoia.pc libcdio_cdda.pc
+
+The other kind of print which does full expansion of the variables is
+called `expand` or `x`. Here is an example
+
+.. code:: console
+
+    remake<4> expand MAKE
     (origin default) MAKE := remake
 
 Note that in printing expanded values we use `:=` while non-expanded
@@ -209,12 +247,11 @@ values we use `=` This output matches the semantics of these
 assignment operators.
 
 In fact, `expand` doesn't need a variable name, it will work with a
-string. So I could type `x This is $(MAKE)` or `x $(MAKE) $(DIST_TARGETS)`
-For the latter, I get:
+string. For example:
 
 .. code:: console
 
-    remake<4> x $(MAKE) $(DIST_TARGETS)
+    remake<5> x $(MAKE) $(DIST_TARGETS)
     remake dist-bzip2 dist-gzip
 
 No location identification is given here since what I put in isn't a
@@ -225,15 +262,15 @@ about the variable you can leave that off.
 However for `print` you *never* add the dollar sign; printing only
 prints *variables* not strings.
 
-I change values too using either the :ref:`set <set>`, :ref:`set <setq>` or
+You can change values too using either the :ref:`set <set>`, :ref:`set <setq>` or
 :ref:`setqx <setqx>` commands. Let's see the difference between `set`
 and `setq`:
 
 .. code:: console
 
-    remake<5> set MAKE $(MAKE_COMMAND)
+    remake<6> set MAKE $(MAKE_COMMAND)
     Variable MAKE now has value 'remake'
-    remake<6>  setq MAKE $(MAKE_COMMAND)
+    remake<7>  setq MAKE $(MAKE_COMMAND)
     Variable MAKE now has value '$(MAKE_COMMAND)'
 
 So with `set`, the value in the expression `$(MAKE_COMMAND)` is
@@ -246,16 +283,16 @@ between the variable and the expression. That is, `set MAKE = $(MAKE_COMMAND)` g
 
 .. code:: console
 
-    remake<7> set MAKE = $(MAKE_COMMAND)
+    remake<8> set MAKE = $(MAKE_COMMAND)
     Variable MAKE now has value '= remake'
 
-which is probably not what you want.  You can optionally put in the the
+which is probably not what you want.  You can optionally put in the
 word "variable" when using `set` and "variable" is ignored. But
 it won't be if you use `setq`.
 
 
 Debugging POSIX Shell Commands
--------------------------------
+------------------------------
 
 Now consider the following sample Makefile `test2.mk`:
 
@@ -282,14 +319,15 @@ Running this entering the debugger initially:
     -> (/tmp/test2.mk:5)
     make.txt: ../doc/remake.texi
 
-We could use the `target` command to show information about
+We could use the :ref:`target <target>` command to show information about
 the current target, but that returns lots if information. So let us instead
 narrow the information to just the automatic variables that get set. The
 following commands do this are all mean the same thing: `target make.txt variables`,
 `target @ variables`, and `info locals`.
 
-.. code:: makefile
+.. code::
 
+    remake<1> target @ variables
     @ := all
     % :=
     * :=
@@ -304,7 +342,7 @@ target:
 
 .. code::
 
-    remake<2> target make.txt commands
+    remake<2> target @ commands
 
     make.txt:
     #  commands to execute (from `test2.mk', line 6):
@@ -312,7 +350,7 @@ target:
 
 We can see a full expansion of the command that is about to be run:
 
-.. code:: console
+.. code::
 
     remake<5> target @ expand
 
