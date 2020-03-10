@@ -76,6 +76,7 @@ dbg_cmd_list(char *psz_arg)
     return debug_cmd_error;
   }
   print_floc_prefix(&p_target->floc);
+  if (p_target->description) printf("\n");
   target_cmd = CALLOC(char, strlen(psz_target) + 1 + strlen(DEPENDS_COMMANDS));
   sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
   return dbg_cmd_target(target_cmd);
@@ -86,11 +87,6 @@ dbg_cmd_list_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_list;
   short_command[c].use = _("list [TARGET|LINE-NUMBER]");
-  short_command[c].doc =
-    _("List target dependencies and commands for TARGET or LINE NUMBER.\n"
-"Without a target name or line number, use the current target.\n"
-"A target name of '-' will use the parent target on the target stack.\n"
- );
 }
 
 
