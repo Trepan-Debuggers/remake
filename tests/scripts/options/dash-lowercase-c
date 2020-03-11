@@ -1,7 +1,13 @@
 #                                                                    -*-perl-*-
 
-$description = "This script tests to make sure that Remke looks for
-parent default makefiles in the correct order (GNUmakefile,makefile,Makefile)";
+$description = "This script tests to make sure that Remake looks for
+parent Makefiles which -c option is given";
+
+# Rocky: skip for now
+$details = "\
+FIXME: figure out how to test in a way that doesn't mess up surrounding test
+that might be run in parallel.";
+return -1;
 
 mkdir "work/options/testing";
 chdir "work/options/testing";
