@@ -1,7 +1,9 @@
-Data
-====
+.. index: data
+.. _data:
 
-Examining data.
+
+Examining data (`print`, `target`, `expand`, `write`)
+=====================================================
 
 .. toctree::
    :maxdepth: 1

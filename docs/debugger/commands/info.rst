@@ -1,5 +1,8 @@
-Info
-====
+.. index:: info
+.. _info:
+
+Information from the Debugged Session (`break`, `files`, `line`, `program`, `rules`, `target`, `targets`, `tasks`, `variables`)
+===============================================================================================================================
 
 **info** [ *info-subcommand* ]
 
@@ -21,4 +24,5 @@ Type `info` for a list of info subcommands and what they do. Type ``help info`` 
    info/rules
    info/target
    info/targets
+   info/tasks
    info/variables

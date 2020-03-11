@@ -1,4 +1,5 @@
-.. _eval:
+.. index:: OS-interfacing commmands
+.. _os:
 
 Interfacing to the OS (`cd`, `pwd`, `shell`)
 ============================================

@@ -1,8 +1,8 @@
 .. index:: info; line
 .. _info_line:
 
-Info Line
----------
+`Show the Current Line (`info line`)
+------------------------------------
 
 **info line**
 

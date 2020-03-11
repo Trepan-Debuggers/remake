@@ -1,8 +1,8 @@
 .. index:: breakpoints
 .. _breakpoints:
 
-Breakpoints
-===========
+Breakpoints (`break`, `delete`)
+===============================
 
 A *breakpoint* causes `remake` to stop when it reaches a Makefile target.
 

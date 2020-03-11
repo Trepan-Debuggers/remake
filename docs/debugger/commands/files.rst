@@ -1,7 +1,9 @@
-Files
-=====
+.. index:: files
+.. _files:
 
-Specifying and examining files.
+Specifying and examining files (`edit`, `list`, `load`)
+=======================================================
+
 
 .. toctree::
    :maxdepth: 1

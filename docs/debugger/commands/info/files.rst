@@ -1,8 +1,8 @@
 .. index:: info; files
 .. _info_files:
 
-Info Files
-------------
+Show Read-in Files (`info files`)
+---------------------------------
 
 **info files**
 

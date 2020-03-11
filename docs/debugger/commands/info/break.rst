@@ -1,8 +1,8 @@
 .. index:: info; breakpoints
 .. _info_breakpoints:
 
-Info Breakpoints
-----------------
+List all Breakpoints (`info break`)
+-----------------------------------
 
 **info break**
 

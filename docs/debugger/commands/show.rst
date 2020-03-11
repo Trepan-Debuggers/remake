@@ -1,4 +1,6 @@
+.. index:: show
 .. _show:
+
 
 **show**  [ *subcommand* ]
 
@@ -7,8 +9,8 @@ nn
 Type `show` for a list of show subcommands and what they do. Type ``help show`` for a summmary list of show subcommands.  Many of the "show"
 commands have a corresponding :ref:`set <set>` command.
 
-Show
-====
+Show (`args`, `basename`, `commands`, `debug`, `ignore-errors`, `keep-going`, `silent`, `version`)
+==================================================================================================
 
 .. toctree::
    :maxdepth: 1

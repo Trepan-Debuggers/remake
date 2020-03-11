@@ -1,8 +1,8 @@
 .. index:: info; frame
 .. _info_frame:
 
-Info Frame
------------
+Show Target Stack Frame (`info frame`)
+--------------------------------------
 
 **info frame**
 

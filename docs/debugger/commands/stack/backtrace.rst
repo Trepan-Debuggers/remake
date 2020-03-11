@@ -1,7 +1,7 @@
 .. index:: backtrace
 .. _backtrace:
 
-Show target stack (`backtrace`)
+Show Target Stack (`backtrace`)
 -------------------------------
 
 **backtrace** [*count*]

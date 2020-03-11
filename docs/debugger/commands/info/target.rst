@@ -1,8 +1,8 @@
 .. index:: info; target
 .. _info_target:
 
-Info Target
------------
+Show Target Name `info target`)
+-------------------------------
 
 **info target**
 
