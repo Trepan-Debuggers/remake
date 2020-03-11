@@ -1035,50 +1035,9 @@ start_job_command (child_t *child,
   /* Figure out an argument list from this command line.  */
   {
     char *end = 0;
-#ifdef VMS
-    /* Skip any leading whitespace */
-    while (*p)
-      {
-        if (!ISSPACE (*p))
-          {
-            if (*p != '\\')
-              break;
-            if ((p[1] != '\n') && (p[1] != 'n') && (p[1] != 't'))
-              break;
-          }
-        p++;
-      }
-
-    argv = p;
-    /* Although construct_command_argv contains some code for VMS, it was/is
-       not called/used.  Please note, for VMS argv is a string (not an array
-       of strings) which contains the complete command line, which for
-       multi-line variables still includes the newlines.  So detect newlines
-       and set 'end' (which is used for child->command_ptr) instead of
-       (re-)writing construct_command_argv */
-    if (!one_shell)
-      {
-        char *s = p;
-        int instring = 0;
-        while (*s)
-          {
-            if (*s == '"')
-              instring = !instring;
-            else if (*s == '\\' && !instring && *(s+1) != 0)
-              s++;
-            else if (*s == '\n' && !instring)
-              {
-                end = s;
-                break;
-              }
-            ++s;
-          }
-      }
-#else
     argv = construct_command_argv (p, &end, child->file,
                                    child->file->cmds->lines_flags[child->command_line - 1],
                                    &child->sh_batch_file);
-#endif
     if (end == NULL)
       child->command_ptr = NULL;
     else
@@ -1094,21 +1053,11 @@ start_job_command (child_t *child,
      error is 2.  */
   if (argv != 0 && question_flag && !(flags & COMMANDS_RECURSE))
     {
-#ifndef VMS
       free (argv[0]);
       free (argv);
-#endif
-#ifdef VMS
-      /* On VMS, argv[0] can be a null string here */
-      if (argv[0] != 0)
-        {
-#endif
-          child->file->update_status = us_question;
-          notice_finished_file (child->file);
-          return;
-#ifdef VMS
-        }
-#endif
+      child->file->update_status = us_question;
+      notice_finished_file (child->file);
+      return;
     }
 
   if (touch_flag && !(flags & COMMANDS_RECURSE))
