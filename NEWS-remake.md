@@ -1,7 +1,43 @@
-Version 4.3.1+dbg-1.4
+Here we have note remake changes. For changes to GNU Make see its NEWS file.
+
+Version 4.3.1+dbg-1.5
 ======================
 
-Rebase code on GNU Make 4.3. This was made possible by Thomas Kupper (boretom) who did all the heavy lifting while rocky looked on in amazement.
+Rebase code on GNU Make 4.3.
+
+This was made possible by Thomas Kupper (boretom) who did all the heavy lifting while rocky looked on in amazement.
+
+Thomas also added OS/X CI testing, and tested on the BSD-ish platforms.
+
+With this release, we've started redoing the texinfo documentation in [sphinx](https://www.sphinx-doc.org) and put on [readthedocs](https://remake.readthedocs.io/en/latest/). Since sphinx supports output into LaTeX, TeXinfo, pdf, epub, and info as well as HTML, the TeXinfo document will be removed when the sphinx documentation is more stable. I expect the in next release to work on this.
+
+Similarly, you'll see that [`README.md`](https://github.com/rocky/remake) has been redone and includes screencasts. The install docs have also been corrected and expanded.
+
+New and Changed Features
+-------------------------
+
+* [`--search parent`](https://remake.readthedocs.io/en/latest/features.html#searching-for-a-makefile-in-parent-directories) -- I really like this one.
+* [`--tasks`](https://remake.readthedocs.io/en/latest/features.html#listing-and-documenting-makefile-targets) -- the definition of a "tasks" has been simplified.
+  Now, it is simply a target that has a description comment (`#:`) before it.
+  After many years of using this myself, I highly encourage people to start using decription comments more.
+  Output from runing `remake --tasks` is nicer because we use spaces to align columns rather than tabs.
+
+Debugger Changes
+----------------
+
+* Commands with file expansion now use `glob()`, not `word_expand()` (Thomas did this too).
+  Previously [`source`](https://remake.readthedocs.io/en/latest/debugger/commands/support/source.html) used to POSIX.1-2008 `wordexp()`, but this is not available on BSD-ish systems.`
+  glob()` is more general, and GNU make ships with its own `glob()` function when none is provided in the underlying OS library.
+* [`load`](https://remake.readthedocs.io/en/latest/debugger/commands/files/load.html#read-and-evaluate-makefile-load) command added `eval` command removed.
+  `eval` never worked and it attempted to be the same thing as `load`; `load` is the _gdb_ name.
+* `$(debugger)` function fixed.
+   This function gave an `virtual memory exhausted` on exit. This has been fixed. The required parameter for this function, a tag name, is now shown on entry
+* `info tasks` has been added. It is basically the same thing as `remake --tasks`
+* Description lines are now shown on in [`info targets`](https://remake.readthedocs.io/en/latest/debugger/commands/info/target.html) and   [`list`](https://remake.readthedocs.io/en/latest/debugger/commands/files/list.html) commands
+* The debugger now disallows any ["running" command](https://remake.readthedocs.io/en/latest/debugger/commands/running.html) inside post-mortem debugging
+* Help as shown inside the debugger has been greatly expanded and more closely matches the sphinx docs.
+   We now show in help text the short command name and any aliases attached to the command
+
 
 Version 4.2.1+dbg-1.4 (2017-11-21)
 ==================================
