@@ -109,7 +109,6 @@ test_FILES =	tests/run_make_tests \
 
 EXTRA_DIST =	ChangeLog README $(man_MANS) \
 		README.customs \
-		src/debugger/Makefile \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS-remake.md README.remake REMAKE.todo Rakefile \
 		$(m4_FILES) $(test_FILES)

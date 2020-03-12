@@ -21,8 +21,6 @@ Boston, MA 02111-1307, USA.  */
    in between."To delete all breakpoints, give no argument.
 */
 
-#include "help/delete.h"
-
 static debug_return_t
 dbg_cmd_delete(char *psz_args)
 {

@@ -76,24 +76,6 @@ $is_posix_sh = 1;
 
 $CMD_rmfile = 'rm -f';
 
-# rmdir broken in some Perls on VMS.
-if ($^O eq 'VMS')
-{
-  require VMS::Filespec;
-  VMS::Filespec->import();
-
-  sub vms_rmdir {
-    my $vms_file = vmspath($_[0]);
-    $vms_file = fileify($vms_file);
-    my $ret = unlink(vmsify($vms_file));
-    return $ret
-  };
-
-  *CORE::GLOBAL::rmdir = \&vms_rmdir;
-
-  $CMD_rmfile = 'delete_file -no_ask';
-}
-
 %CONFIG_FLAGS = ();
 
 # Find the strings that will be generated for various error codes.

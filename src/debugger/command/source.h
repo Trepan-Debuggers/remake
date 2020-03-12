@@ -61,7 +61,7 @@ static void
 dbg_cmd_source_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_source;
-  short_command[c].use = _("source FILE-GLOB");
+  short_command[c].use = _("source *file-glob*");
 }
 
 

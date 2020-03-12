@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2004, 2005, 2007, 2008 Rocky Bernstein <rocky@gnu.org>
+Copyright (C) 2004-2005, 2007-2008, 2020 Rocky Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make (remake variant).
 
