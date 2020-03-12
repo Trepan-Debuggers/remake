@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 silent-rules std-options check-news
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 silent-rules std-options
 ACLOCAL_AMFLAGS = -I config
 
 transform = s,make,@MAKE_NAME@,
@@ -45,46 +45,9 @@ DEBUGGER_SRC = 	\
 		debugger/stack.c
 
 DEBUGGER_H = \
-		debugger/break.h 		\
-		debugger/cmd.h 			\
-		debugger/fns.h 			\
-		debugger/msg.h 			\
-		debugger/command/break.h 	\
-		debugger/command/chdir.h  	\
-		debugger/command/comment.h 	\
-		debugger/command/continue.h	\
-		debugger/command/delete.h 	\
-		debugger/command/down.h 	\
-		debugger/command/edit.h 	\
-		debugger/command/eval.h 	\
-		debugger/command/expand.h	\
-		debugger/command/finish.h	\
-		debugger/command/frame.h	\
-		debugger/command/help.h		\
-		debugger/command/info.h		\
-		debugger/command/list.h		\
-		debugger/command/next.h		\
-		debugger/command/print.h	\
-		debugger/command/pwd.h		\
-		debugger/command/quit.h		\
-		debugger/command/run.h		\
-		debugger/command/set.h		\
-		debugger/command/setq.h		\
-		debugger/command/setqx.h	\
-		debugger/command/shell.h	\
-		debugger/command/show.h		\
-		debugger/command/skip.h		\
-		debugger/command/source.h	\
-		debugger/command/step.h		\
-		debugger/command/target.h	\
-		debugger/command/up.h		\
-		debugger/command/where.h	\
-		debugger/command/write.h	\
-		debugger/file2line.h 	        \
-		debugger/fns.h 			\
-		debugger/info.h			\
-		debugger/stack.h		\
-		debugger/subcmd.h
+	$(wildcard debugger/*.h) \
+	$(wildcard debugger/command/*.h) \
+	$(wildcard debugger/command/help/*.h)
 
 make_SOURCES =	alloc.c ar.c arscan.c \
 		buildargv.c commands.c default.c \
@@ -127,20 +90,15 @@ AM_CFLAGS =	$(GUILE_CFLAGS)
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
+EXTRA_DIST =	ChangeLog README.md $(man_MANS) \
 		README.customs \
-		SCOPTIONS SMakefile \
-		Makefile.ami make.lnk  \
-		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
-		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		gmk-default.scm gmk-default.h \
-	        debugger/Makefile \
-		NEWS.remake README.remake REMAKE.todo Rakefile
+		NEWS NEWS-remake.md REMAKE.todo Rakefile
 
 
 # This is built during configure, but behind configure's back
 
-DISTCLEANFILES = build.sh ./tests/testload.c ./tests/testapi.c
+DISTCLEANFILES = ./tests/testload.c ./tests/testapi.c
 
 MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
 

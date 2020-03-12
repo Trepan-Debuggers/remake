@@ -113,10 +113,6 @@ dosify (const char *filename)
 #include "pathstuff.h"
 #endif
 
-#ifdef _AMIGA
-#include <ctype.h>
-#endif
-
 #ifdef HAVE_CASE_INSENSITIVE_FS
 static const char *
 downcase (const char *filename)
@@ -758,15 +754,6 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 int
 dir_file_exists_p (const char *dirname, const char *filename)
 {
-#ifdef VMS
-  if ((filename != NULL) && (dirname != NULL))
-    {
-      int want_vmsify;
-      want_vmsify = (strpbrk (dirname, ":<[") != NULL);
-      if (want_vmsify)
-        filename = vmsify (filename, 0);
-    }
-#endif
   return dir_contents_file_exists_p (find_directory (dirname)->contents,
                                      filename);
 }
@@ -789,40 +776,8 @@ file_exists_p (const char *name)
 #endif
 
   dirend = strrchr (name, '/');
-#ifdef VMS
   if (dirend == 0)
-    {
-      dirend = strrchr (name, ']');
-      dirend == NULL ? dirend : dirend++;
-    }
-  if (dirend == 0)
-    {
-      dirend = strrchr (name, '>');
-      dirend == NULL ? dirend : dirend++;
-    }
-  if (dirend == 0)
-    {
-      dirend = strrchr (name, ':');
-      dirend == NULL ? dirend : dirend++;
-    }
-#endif /* VMS */
-#ifdef HAVE_DOS_PATHS
-  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
-  {
-    const char *bslash = strrchr (name, '\\');
-    if (!dirend || bslash > dirend)
-      dirend = bslash;
-    /* The case of "d:file".  */
-    if (!dirend && name[0] && name[1] == ':')
-      dirend = name + 1;
-  }
-#endif /* HAVE_DOS_PATHS */
-  if (dirend == 0)
-#ifndef _AMIGA
     return dir_file_exists_p (".", name);
-#else /* !AMIGA */
-    return dir_file_exists_p ("", name);
-#endif /* AMIGA */
 
   slash = dirend;
   if (dirend == name)
@@ -830,23 +785,12 @@ file_exists_p (const char *name)
   else
     {
       char *p;
-#ifdef HAVE_DOS_PATHS
-  /* d:/ and d: are *very* different...  */
-      if (dirend < name + 3 && name[1] == ':' &&
-          (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
-        dirend++;
-#endif
       p = alloca (dirend - name + 1);
       memcpy (p, name, dirend - name);
       p[dirend - name] = '\0';
       dirname = p;
     }
-#ifdef VMS
-  if (*slash == '/')
-    slash++;
-#else
   slash++;
-#endif
   return dir_file_exists_p (dirname, slash);
 }
 
@@ -863,40 +807,8 @@ file_impossible (const char *filename)
   struct dirfile *new;
 
   dirend = strrchr (p, '/');
-#ifdef VMS
-  if (dirend == NULL)
-    {
-      dirend = strrchr (p, ']');
-      dirend == NULL ? dirend : dirend++;
-    }
-  if (dirend == NULL)
-    {
-      dirend = strrchr (p, '>');
-      dirend == NULL ? dirend : dirend++;
-    }
-  if (dirend == NULL)
-    {
-      dirend = strrchr (p, ':');
-      dirend == NULL ? dirend : dirend++;
-    }
-#endif
-#ifdef HAVE_DOS_PATHS
-  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
-  {
-    const char *bslash = strrchr (p, '\\');
-    if (!dirend || bslash > dirend)
-      dirend = bslash;
-    /* The case of "d:file".  */
-    if (!dirend && p[0] && p[1] == ':')
-      dirend = p + 1;
-  }
-#endif /* HAVE_DOS_PATHS */
   if (dirend == 0)
-#ifdef _AMIGA
-    dir = find_directory ("");
-#else /* !AMIGA */
     dir = find_directory (".");
-#endif /* AMIGA */
   else
     {
       const char *dirname;
@@ -906,26 +818,13 @@ file_impossible (const char *filename)
       else
         {
           char *cp;
-#ifdef HAVE_DOS_PATHS
-          /* d:/ and d: are *very* different...  */
-          if (dirend < p + 3 && p[1] == ':' &&
-              (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
-            dirend++;
-#endif
           cp = alloca (dirend - p + 1);
           memcpy (cp, p, dirend - p);
           cp[dirend - p] = '\0';
           dirname = cp;
         }
       dir = find_directory (dirname);
-#ifdef VMS
-      if (*slash == '/')
-        filename = p = slash + 1;
-      else
-        filename = p = slash;
-#else
       filename = p = slash + 1;
-#endif
     }
 
   if (dir->contents == 0)
@@ -943,12 +842,7 @@ file_impossible (const char *filename)
 
   new = xmalloc (sizeof (struct dirfile));
   new->length = strlen (filename);
-#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
-  /* todo: Why is this only needed on VMS? */
-  new->name = strcache_add_len (downcase (filename), new->length);
-#else
   new->name = strcache_add_len (filename, new->length);
-#endif
   new->impossible = 1;
   hash_insert (&dir->contents->dirfiles, new);
 }

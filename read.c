@@ -222,23 +222,37 @@ read_all_makefiles (const char **makefiles)
 
   if (num_makefiles == 0)
     {
+      PATH_VAR (current_directory);
       static const char *default_makefiles[] =
-#ifdef WINDOWS32
-        { "GNUmakefile", "makefile", "Makefile", "makefile.mak", 0 };
-#else
         { "GNUmakefile", "makefile", "Makefile", 0 };
-#endif /* !WINDOWS32 */
-      const char **p = default_makefiles;
-      while (*p != 0 && !file_exists_p (*p))
-        ++p;
+      const char **p;
 
-      if (*p != 0)
-        {
-          eval_makefile (*p, 0);
-          if (errno)
-            perror_with_name ("", *p);
-        }
-      else
+      while (1) {
+	p = default_makefiles;
+	if (getcwd (current_directory, GET_PATH_MAX) == NULL)
+	  break;
+	while (*p != 0 && !dir_file_exists_p (current_directory, *p))
+	  ++p;
+
+	if (*p != 0)
+	  {
+	    eval_makefile (*p, 0);
+	    if (errno)
+	      {
+		perror_with_name ("", *p);
+		p = 0;
+	      }
+	    else
+	      break;
+	  }
+
+	/* Do we try looking for Makefile in the parent directory? */
+	if (!search_parent_flag) break;
+	if (0 == strncmp(current_directory, "/", GET_PATH_MAX)) break;
+	if (chdir("..") != 0) break;
+      }
+
+      if (p == 0)
         {
           /* No default makefile was found.  Add the default makefiles to the
              'read_files' chain so they will be updated if possible.  */
