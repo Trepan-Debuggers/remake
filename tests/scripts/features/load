@@ -46,6 +46,7 @@ my $sobuild = "$CONFIG_FLAGS{CC} ".($srcdir? "-I$srcdir":'')." $CONFIG_FLAGS{CPP
 my $clog = `$sobuild 2>&1`;
 if ($? != 0) {
     $verbose and print "Failed to build testload.so:\n$sobuild\n$_";
+    unlink(qw(testload.c testload.so));
     return -1;
 }
 
