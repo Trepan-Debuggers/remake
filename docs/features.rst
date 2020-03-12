@@ -119,7 +119,11 @@ See  :ref:`debugger <debugger>` for more information on the built-in debugger.
 For Developers
 --------------
 
-If you are interested in learning about how GNU Make works, you might find it easier to start out working with this code because it has been simplified as a result of the removal of lesser-used OS's (from the standpoint of GNU Make use).
+If you are interested in learning about how GNU Make works, you might find it easier to start out working with this code.
+
+First, some Doxygen_ comments have been added.
+
+Second, it has been simplified as a result of the removal of lesser-used OS's (from the standpoint of GNU Make use).
 
 We don't even attempt to support:
 
@@ -223,3 +227,4 @@ Overall, I view this as a plus for developers who would like to extend GNU Make 
 .. _pygments_style:  http://pygments.org/docs/styles/
 .. _this: http://bashdb.sourceforge.net/pydb/features.html
 .. _trepanning: https://pypi.python.org/pypi/trepan2
+.. _Doxygen: http://www.doxygen.nl/
