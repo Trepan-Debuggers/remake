@@ -1,5 +1,6 @@
 /*
-Copyright (C) 2004-2005, 2007-2009, 2011, 2014-2015 R. Bernstein
+Copyright (C) 2004-2005, 2007-2009, 2011,
+              2014-2015, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -41,10 +42,9 @@ Boston, MA 02111-1307, USA.  */
 #include <readline/readline.h>
 #endif
 
-#ifdef HAVE_HISTORY_LIST
+#ifdef HAVE_READLINE_HISTORY_H
 #include <readline/history.h>
 #endif
-
 
 #ifdef _GNU_SOURCE
 # define ATTRIBUTE_UNUSED __attribute__((unused))
@@ -80,7 +80,7 @@ debug_enter_reason_t last_stop_reason;
 /* From readline. ?? Should this be in configure?  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#endif
+#endif /* HAVE_LIBREADLINE */
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -96,13 +96,13 @@ long_cmd_t commands[] = {
   { "delete",   'd' },
   { "down",     'D' },
   { "edit" ,    'e' },
-  { "eval" ,    'E' },
   { "expand" ,  'x' },
   { "finish"  , 'F' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
   { "list"    , 'l' },
+  { "load"    , 'M' },
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "pwd"     , 'P' },
@@ -113,8 +113,8 @@ long_cmd_t commands[] = {
   { "setqx"   , '`' },
   { "shell"   , '!' },
   { "show"    , 'S' },
-  { "source"  , '<' },
   { "skip"    , 'k' },
+  { "source"  , '<' },
   { "step"    , 's' },
   { "target"  , 't' },
   { "up"      , 'u' },
@@ -133,7 +133,6 @@ typedef struct {
 alias_cmd_t aliases[] = {
   { "shell",    "!!" },
   { "help",     "?" },
-  { "help",     "??" },
   { "break",    "L" },
   { "where",    "backtrace" },
   { "where",    "bt" },
@@ -146,7 +145,10 @@ alias_cmd_t aliases[] = {
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
-                                     (const char *) '\0' }, };
+                                     (const char *) '\0',
+                                     (uint8_t) 255,
+                                     false,
+                                    }, };
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -169,7 +171,7 @@ find_command (const char *psz_name)
   for (i = 0; commands[i].long_name; i++) {
     const int cmp = strcmp (psz_name, commands[i].long_name);
     if ( 0 == cmp ) {
-      return (&short_command[(uint8_t) commands[i].short_name]);
+      return &(short_command[(uint8_t) commands[i].short_name]);
     } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
@@ -186,11 +188,11 @@ find_command (const char *psz_name)
 #include "command/delete.h"
 #include "command/down.h"
 #include "command/edit.h"
-#include "command/eval.h"
 #include "command/expand.h"
 #include "command/finish.h"
 #include "command/frame.h"
 #include "command/info.h"
+#include "command/load.h"
 #include "command/next.h"
 #include "command/list.h"
 #include "command/print.h"
@@ -210,43 +212,83 @@ find_command (const char *psz_name)
 #include "command/where.h"
 #include "command/write.h"
 
-/* Needs to come after dbg_cmd_show */
+/* Needs to come after command/show.h */
 #include "command/help.h"
+
+#include "command/help/break.h"
+#include "command/help/chdir.h"
+#include "command/help/comment.h"
+#include "command/help/continue.h"
+#include "command/help/delete.h"
+#include "command/help/down.h"
+#include "command/help/edit.h"
+#include "command/help/expand.h"
+#include "command/help/finish.h"
+#include "command/help/frame.h"
+#include "command/help/help.h"
+#include "command/help/info.h"
+#include "command/help/load.h"
+#include "command/help/next.h"
+#include "command/help/list.h"
+#include "command/help/print.h"
+#include "command/help/pwd.h"
+#include "command/help/quit.h"
+#include "command/help/run.h"
+#include "command/help/set.h"
+#include "command/help/setq.h"
+#include "command/help/setqx.h"
+#include "command/help/shell.h"
+#include "command/help/show.h"
+#include "command/help/skip.h"
+#include "command/help/source.h"
+#include "command/help/step.h"
+#include "command/help/target.h"
+#include "command/help/up.h"
+#include "command/help/where.h"
+#include "command/help/write.h"
+
+
+#define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \
+  dbg_cmd_ ## CMD ## _init(LETTER);                     \
+  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);     \
+  short_command[LETTER].needs_running = NEEDS_RUNNING;  \
+  short_command[LETTER].id = id++
 
 static void
 cmd_initialize(void)
 {
-  dbg_cmd_break_init   ('b');
-  dbg_cmd_chdir_init   ('C');
-  dbg_cmd_continue_init('c');
-  dbg_cmd_delete_init  ('d');
-  dbg_cmd_down_init    ('D');
-  dbg_cmd_edit_init    ('e');
-  dbg_cmd_eval_init    ('E');
-  dbg_cmd_finish_init  ('F');
-  dbg_cmd_frame_init   ('f');
-  dbg_cmd_help_init    ('h');
-  dbg_cmd_info_init    ('i');
-  dbg_cmd_skip_init    ('k');
-  dbg_cmd_list_init    ('l');
-  dbg_cmd_next_init    ('n');
-  dbg_cmd_print_init   ('p');
-  dbg_cmd_pwd_init     ('P');
-  dbg_cmd_quit_init    ('q');
-  dbg_cmd_run_init     ('R');
-  dbg_cmd_source_init  ('<');
-  dbg_cmd_show_init    ('S');
-  dbg_cmd_step_init    ('s');
-  dbg_cmd_target_init  ('t');
-  dbg_cmd_up_init      ('u');
-  dbg_cmd_where_init   ('T');
-  dbg_cmd_write_init   ('w');
-  dbg_cmd_expand_init  ('x');
-  dbg_cmd_comment_init ('#');
-  dbg_cmd_set_init     ('=');
-  dbg_cmd_setq_init    ('"');
-  dbg_cmd_setqx_init   ('`');
-  dbg_cmd_shell_init   ('!');
+  int id=0;
+  DBG_CMD_INIT(break, 'b', false);
+  DBG_CMD_INIT(chdir, 'C', false);
+  DBG_CMD_INIT(comment, '#', false);
+  DBG_CMD_INIT(continue, 'c', true);
+  DBG_CMD_INIT(delete, 'd', false);
+  DBG_CMD_INIT(down, 'D', false);
+  DBG_CMD_INIT(edit, 'e', false);
+  DBG_CMD_INIT(expand, 'x', false);
+  DBG_CMD_INIT(finish, 'F', true);
+  DBG_CMD_INIT(frame, 'f', false);
+  DBG_CMD_INIT(help, 'h', false);
+  DBG_CMD_INIT(info, 'i', false);
+  DBG_CMD_INIT(list, 'l', false);
+  DBG_CMD_INIT(load, 'M', false);
+  DBG_CMD_INIT(next, 'n', true);
+  DBG_CMD_INIT(print, 'p', false);
+  DBG_CMD_INIT(pwd, 'P', false);
+  DBG_CMD_INIT(quit, 'q', false);
+  DBG_CMD_INIT(run, 'R', false);
+  DBG_CMD_INIT(set, '=', false);
+  DBG_CMD_INIT(setq, '"', false);
+  DBG_CMD_INIT(setqx, '`', false);
+  DBG_CMD_INIT(shell, '!', false);
+  DBG_CMD_INIT(show, 'S', false);
+  DBG_CMD_INIT(skip, 'k', true);
+  DBG_CMD_INIT(source, '<', false);
+  DBG_CMD_INIT(step, 's', true);
+  DBG_CMD_INIT(target, 't', false);
+  DBG_CMD_INIT(up, 'u', false);
+  DBG_CMD_INIT(where, 'T', false);
+  DBG_CMD_INIT(write, 'w', false);
 }
 
 /* Execute a command line. */
@@ -271,6 +313,11 @@ execute_line (char *psz_line)
       return debug_readloop;
     }
 
+  if (command->needs_running && last_stop_reason == DEBUG_ERROR_HIT) {
+      dbg_errmsg(_("command: %s is only valid when `remake` not in post-mortem debugging."), psz_word);
+      return debug_readloop;
+  }
+
   /* Get argument to command, if any. */
   while (whitespace (psz_line[i]))
     i++;
@@ -291,15 +338,15 @@ dbg_cmd_show_command (const char
     ;
     } */
 
-#ifdef HAVE_HISTORY_LIST
+#ifdef HAVE_READLINE_HISTORY_H
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
   UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
-  for (i=0; hist_list[i]; i++) {
+  for (i=1; hist_list[i]; i++) {
     dbg_msg("%5u  %s", i, hist_list[i]->line);
   }
-#endif
+#endif /* HAVE_READLINE_HISTORY_H */
   return debug_readloop;
 }
 
@@ -403,7 +450,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
       add_history ("");
       b_readline_init = true;
   }
-#endif
+#endif /* HAVE_LIBREADLINE */
   if (!b_init) {
     cmd_initialize();
     file2lines.ht_size = 0;
@@ -486,7 +533,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
         line = readline (prompt);
       } else
-#endif
+#endif /* HAVE_LIBREADLINE */
         {
           snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth,
                    close_depth);

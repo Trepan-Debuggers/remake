@@ -23,15 +23,7 @@ transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-# Only process if target is MS-Windows
-if WINDOWSENV
-  MAYBE_W32 =	w32
-  W32INC =	-I $(top_srcdir)/w32/include
-  W32LIB =	-Lw32 -lw32
-  ossrc =
-else
-  ossrc =	posixos.c
-endif
+ossrc =	posixos.c
 
 SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
 
@@ -125,10 +117,6 @@ noinst_HEADERS = buildargv.h commands.h \
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 		$(GUILE_LIBS)
-# Only process if target is MS-Windows
-if WINDOWSENV
-    make_LDADD += $(W32LIB)
-endif
 
 man_MANS =	make.1
 
@@ -136,11 +124,6 @@ DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(inc
 
 AM_CPPFLAGS =	$(GLOBINC)
 AM_CFLAGS =	$(GUILE_CFLAGS)
-# Only process if target is MS-Windows
-if WINDOWSENV
-    AM_CPPFLAGS +=	$(W32INC)
-endif
-
 
 # Extra stuff to include in the distribution.
 

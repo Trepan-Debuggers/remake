@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2004, 2005, 2007, 2008 Rocky Bernstein <rocky@gnu.org>
+Copyright (C) 2004-2005, 2007-2008, 2020 Rocky Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make (remake variant).
 
@@ -114,5 +114,8 @@ extern void trace_pop_floc (void);
 
 /*! Show just a list of targets */
 extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
+
+/*! Show just a list of tasks */
+extern void dbg_cmd_info_tasks();
 
 #endif /*REMAKE_TRACE_H*/

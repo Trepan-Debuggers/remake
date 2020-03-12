@@ -1,4 +1,4 @@
-/* 
+/*
 Copyright (C) 2011
 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -69,6 +69,7 @@ void
 #if __STDC__ && HAVE_STDVARARGS
 dbg_msg(const char *fmt, ...)
 #else
+// dbg_msg (const char *fmt, va_alist)
 dbg_msg (const char *fmt, va_alist)
 #endif
 {

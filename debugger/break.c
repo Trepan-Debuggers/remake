@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2005, 2007-2008, 2015 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2005, 2007-2008, 2015, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ struct breakpoint_node
 breakpoint_node_t *p_breakpoint_top    = NULL;
 breakpoint_node_t *p_breakpoint_bottom = NULL;
 
-brkpt_mask_t i_breakpoints = BRK_NONE;
+unsigned int i_breakpoints = 0;
 
 /*! Add "p_target" to the list of breakpoints. Return true if
     there were no errors
@@ -77,7 +77,7 @@ add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
             p_target->name);
   }
   p_target->tracing = brkpt_mask;
-  printf(_("Breakpoint %u on target %s, mask 0x%02x"), i_breakpoints,
+  printf(_("Breakpoint %u on target `%s', mask 0x%02x"), i_breakpoints,
          p_target->name, brkpt_mask);
   if (p_target->floc.filenm)
     dbg_msg(": file %s, line %lu.", p_target->floc.filenm,
@@ -98,15 +98,15 @@ add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask)
     there were no errors
 */
 bool
-remove_breakpoint (unsigned int i)
+remove_breakpoint (unsigned int i, bool silent)
 {
   if (!i) {
-    dbg_msg(_("Invalid Breakpoint number 0."));
+    dbg_errmsg(_("Invalid Breakpoint number 0."));
     return false;
   }
   if (i > i_breakpoints) {
-    dbg_msg(_("Breakpoint number %u is too high. "
-	   "%u is the highest breakpoint number."), i, i_breakpoints);
+    dbg_errmsg(_("Breakpoint number %u is too high. "
+                 "%u is the highest breakpoint number."), i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
@@ -125,18 +125,19 @@ remove_breakpoint (unsigned int i)
 
       if (p->p_target->tracing) {
 	p->p_target->tracing = BRK_NONE;
-	dbg_msg(_("Breakpoint %u on target %s cleared"),
+	dbg_msg(_("Breakpoint %u on target `%s' cleared."),
 	       i, p->p_target->name);
 	free(p);
 	return true;
       } else {
-	dbg_msg(_("No breakpoint at target %s; nothing cleared."),
+	dbg_msg(_("No breakpoint at target `%s'; nothing cleared."),
 	       p->p_target->name);
 	free(p);
 	return false;
       }
     } else {
-      dbg_msg(_("No Breakpoint number %u set."), i);
+      if (!silent)
+        dbg_errmsg(_("No Breakpoint number %u set."), i);
       return false;
     }
   }

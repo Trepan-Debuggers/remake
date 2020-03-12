@@ -119,7 +119,7 @@ static const char **include_directories;
 
 static unsigned int max_incl_len;
 
-static struct goaldep *eval_makefile (const char *filename, int flags);
+struct goaldep *eval_makefile (const char *filename, int flags);
 static void eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
@@ -293,7 +293,7 @@ restore_conditionals (struct conditionals *saved)
   conditionals = saved;
 }
 
-static struct goaldep *
+struct goaldep *
 eval_makefile (const char *filename, int flags)
 {
   struct goaldep *deps;
