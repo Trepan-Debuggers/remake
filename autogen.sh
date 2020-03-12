@@ -2,6 +2,8 @@
 # Run this to generate all the initial makefiles, etc.
 # Additional options go to configure.
 
+MAKE=${MAKE:-make}
+
 echo "Rebuilding ./configure with autoreconf..."
 autoreconf -f -i
 if [ $? -ne 0 ]; then
@@ -13,5 +15,5 @@ fi
 patch -p0 < po/Makefile.in.in.patch
 
 ./configure --enable-maintainer-mode "$@"
-make po-update
-(cd doc && make stamp-1 stamp-vti)
+${MAKE} po-update
+(cd doc && ${MAKE} stamp-1 stamp-vti)
