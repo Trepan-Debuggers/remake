@@ -24,6 +24,7 @@ and optionally:
 
 * `gzip` and `lzip` if building a compressed tarball
 * `guile` version 2 or greater if you want Guile support in `remake`
+* `patch` add remake comments to the po/Makefile
 
 Here is a `apt-get` command you can use to install on Debian-ish systems:
 
@@ -105,6 +106,7 @@ So the full sequence is:
 
    $ cd remake*
    $ autoreconf -f -i
+   $ patch -p0 < po/Makefile.in.in.patch # this step is optional
    $ ./configure
    $ make po-update
    $ (cd doc && make stamp-1 stamp-vti)

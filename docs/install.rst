@@ -151,6 +151,7 @@ Creating and running configure script
 .. code:: console
 
     $ autoreconf -f -i
+    $ patch -p0 < po/Makefile.in.in.patch # this step is optional
     $ ./configure --enable-maintainer-mode "$@"
     $ make po-update
     $ (cd doc && make stamp-1 stamp-vti)
@@ -185,6 +186,7 @@ So the full sequence is:
 
    $ cd remake*
    $ autoreconf -f -i
+   $ patch -p0 < po/Makefile.in.in.patch # this step is optional
    $ ./configure
    $ make po-update
    $ (cd doc && make stamp-1 stamp-vti)
