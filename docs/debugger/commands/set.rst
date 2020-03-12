@@ -12,8 +12,8 @@ for a summary list of set subcommands.
 
 All of the "set" commands have a corresponding :ref:`show <show>` command.
 
-Set (`basename`, `debug`, `ignore-errors`, `keep-going`, `setq`, `setx`, `silent`)
-==================================================================================
+Set (`basename`, `debug`, `ignore-errors`, `keep-going`, `setq`, `setqx`, `silent`)
+===================================================================================
 
 Modifies parts of the debugger environment.  You can see these
 environment settings with the :ref:`show <show>` command.
