@@ -13,4 +13,4 @@ void dbg_msg();
 void dbg_errmsg();
 #endif
 
-#endif
+#endif // REMAKE_DBG_MSG_H

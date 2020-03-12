@@ -9,6 +9,9 @@ if [ $? -ne 0 ]; then
   exit $?
 fi
 
+# Add our target descriptions to po/Makefile.in.in
+patch -p0 < po/Makefile.in.in.patch
+
 ./configure --enable-maintainer-mode "$@"
 make po-update
 (cd doc && make stamp-1 stamp-vti)

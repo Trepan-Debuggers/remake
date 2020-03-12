@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988-2016 Free Software Foundation, Inc.
-Copyright (C) 2015, 2017 Rocky Bernstein
+Copyright (C) 2015, 2017, 2020 Rocky Bernstein
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -268,6 +268,8 @@ static const char *const usage[] =
     N_("\
   -B, --always-make           Unconditionally make all targets.\n"),
     N_("\
+  -c, --search-parent         Search parent directories for Makefile.\n"),
+    N_("\
   -C DIRECTORY, --directory=DIRECTORY\n\
                               Change to DIRECTORY before doing anything.\n"),
     N_("\
@@ -375,15 +377,14 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
-    { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
-#ifdef WINDOWS32
-    { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
-#endif
-    { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
-    { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
+    { 'B', flag, &always_make_set,    1, 1, 0, 0, 0, "always-make" },
+    { 'c', flag, &search_parent_flag, 1, 1, 0, 0, 0, "search-parent" },
+    { 'd', flag, &debug_flag,         1, 1, 0, 0, 0, 0 },
+    { 'e', flag, &env_overrides,      1, 1, 0, 0, 0, "environment-overrides", },
+    { 'E', strlist, &eval_strings,    1, 0, 0, 0, 0, "eval" },
+    { 'h', flag, &print_usage_flag,   0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
-    { 'k', flag, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
+    { 'k', flag, &keep_going_flag,    1, 1, 0, 0, &default_keep_going_flag,
       "keep-going" },
     { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },

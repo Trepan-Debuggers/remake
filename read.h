@@ -62,7 +62,7 @@ nameseq_t * multi_glob (struct nameseq *chain, unsigned int size);
 
 /*! Read a Makefile and save information in our database about it.
  */
-extern int eval_makefile (const char *filename, int flags);
+struct goaldep *eval_makefile (const char *filename, int flags);
 
 
 #endif /*REMAKE_READ_H*/

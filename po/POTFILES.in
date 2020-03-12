@@ -35,6 +35,7 @@ debugger/command/frame.h
 debugger/command/help.h
 debugger/command/info.h
 debugger/command/list.h
+debugger/command/load.h
 debugger/command/next.h
 debugger/command/print.h
 debugger/command/pwd.h

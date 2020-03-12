@@ -40,8 +40,12 @@ extern int print_version_flag;
 /*! Nonzero means --trace and shell trace with input.  */
 extern int shell_trace;
 
-/* Nonzero means profile calls (option --profile).  */
+/*! Nonzero means profile calls (option --profile).  */
 extern int profile_flag;
+
+/*! Nonzero means look in parent directories for a Makefile if one isn't found
+   in the current directory (option --search-parent).  */
+extern int search_parent_flag;
 
 /* Nonzero means do extra verification (that may slow things down).  */
 extern int verify_flag;
