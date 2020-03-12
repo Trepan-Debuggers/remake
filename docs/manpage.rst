@@ -55,8 +55,32 @@ Print a list of explicitly named targets found in read-in makefiles.
 
 :--tasks:
 
-Print a list of explicitly named targets found in read-in makefiles which
-have commands associated with them and are either phony or are not implicit.
+Print a list of explicitly-named targets found in read-in makefiles which
+have description comments. A description comment is added by putting
+a single comment before the target that starts with `#:`. For example,
+for this Makefile:
+
+.. code:: Makefile
+
+    #: This is the main target
+    all:
+  	@echo all here
+
+    #: Test things
+    check:
+	@echo check here
+
+    #: Build distribution
+    dist:
+	@echo dist here
+
+Running `remake --tasks` gives:
+
+.. code:: console
+
+    all                  This is the main target
+    check                Test things
+    dist                 Build distribution
 
 :-x | --trace:
 
