@@ -11,6 +11,13 @@ exists $FEATURES{'output-sync'} or return -1;
 $parallel_jobs or return -1;
 
 
+if ($vos) {
+  $sleep_command = "sleep -seconds";
+}
+else {
+  $sleep_command = "sleep";
+}
+
 # The following subdirectories with Makefiles are used in several
 # of the following tests.  The model is:
 #   foo/Makefile - has a "foo" target that waits for the bar target
@@ -38,10 +45,10 @@ sub output_sync_clean {
 # reliable.  If things are too fast, then sometimes a different job will steal
 # the output sync lock and the output is mis-ordered from what we expect.
 sub output_sync_wait {
-    return subst_make_string("#HELPER# -q wait ../mksync.$_[0] sleep 1");
+    return "while [ ! -f ../mksync.$_[0] ]; do :; done; $CMD_rmfile ../mksync.$_[0].wait; $sleep_command 1";
 }
 sub output_sync_set {
-    return subst_make_string("#HELPER# -q file ../mksync.$_[0]");
+    return "date > ../mksync.$_[0]";
 }
 
 @syncfiles = qw(mksync.foo mksync.foo_start mksync.bar mksync.bar_start);
@@ -151,10 +158,10 @@ all: make-foo make-bar
 
 make-foo: ; \$(MAKE) -C foo
 
-make-bar: ; #HELPER# -q sleep 1 ; \$(MAKE) -C bar!,
+make-bar: ; $sleep_command 1 ; \$(MAKE) -C bar!,
               '-j --output-sync=target',
 "#MAKEPATH# -C foo
-#HELPER# -q sleep 1 ; #MAKEPATH# -C bar
+$sleep_command 1 ; #MAKEPATH# -C bar
 #MAKE#[1]: Entering directory '#PWD#/bar'
 bar: start
 bar: end
@@ -172,7 +179,7 @@ baz: end
 unlink(@syncfiles);
 run_make_test(undef, '-j --output-sync=target x=',
               "#MAKEPATH# -C foo
-#HELPER# -q sleep 1 ; #MAKEPATH# -C bar
+$sleep_command 1 ; #MAKEPATH# -C bar
 bar: start
 bar: end
 foo: start
@@ -218,10 +225,10 @@ all: make-foo make-bar
 
 make-foo: ; \$(MAKE) -C foo foo-job
 
-make-bar: ; #HELPER# -q sleep 1 ; \$(MAKE) -C bar bar-job!,
+make-bar: ; $sleep_command 1 ; \$(MAKE) -C bar bar-job!,
               '-j --output-sync=line',
 "#MAKEPATH# -C foo foo-job
-#HELPER# -q sleep 1 ; #MAKEPATH# -C bar bar-job
+$sleep_command 1 ; #MAKEPATH# -C bar bar-job
 #MAKE#[1]: Entering directory '#PWD#/foo'
 foo: start
 #MAKE#[1]: Leaving directory '#PWD#/foo'
@@ -234,6 +241,7 @@ bar: end
 #MAKE#[1]: Entering directory '#PWD#/foo'
 foo: end
 #MAKE#[1]: Leaving directory '#PWD#/foo'\n", 0, $tmout);
+
 
 # Remove temporary directories and contents.
 output_sync_clean();
