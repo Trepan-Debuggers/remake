@@ -19,8 +19,8 @@ New and Changed Features
 * [`--search parent`](https://remake.readthedocs.io/en/latest/features.html#searching-for-a-makefile-in-parent-directories) -- I really like this one.
 * [`--tasks`](https://remake.readthedocs.io/en/latest/features.html#listing-and-documenting-makefile-targets) -- the definition of a "tasks" has been simplified.
   Now, it is simply a target that has a description comment (`#:`) before it.
-  After many years of using this myself, I highly encourage people to start using decription comments more.
-  Output from runing `remake --tasks` is nicer because we use spaces to align columns rather than tabs.
+  After many years of using this myself, I highly encourage people to start using description comments more.
+  Output from running `remake --tasks` is nicer because we use spaces to align columns rather than tabs.
 
 Debugger Changes
 ----------------
