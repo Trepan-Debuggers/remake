@@ -6,12 +6,6 @@ $details = "Test dynamic loading of modules.";
 # Don't do anything if this system doesn't support "load"
 exists $FEATURES{load} or return -1;
 
-my $cc = get_config('CC');
-if (! $cc) {
-    $verbose and print "Skipping load test: no CC defined\n";
-    return -1;
-}
-
 # First build a shared object
 # Provide both a default and non-default load symbol
 
@@ -45,11 +39,9 @@ EOF
 close($F) or die "close: testload.c: $!\n";
 
 # Make sure we can compile
+# CONFIG_FLAGS are loaded from config-flags.pm and set by configure
 
-my $cflags = get_config('CFLAGS');
-my $cppflags = get_config('CPPFLAGS');
-my $ldflags = get_config('LDFLAGS');
-my $sobuild = "$cc ".($srcdir? "-I$srcdir/src":'')." $cppflags $cflags -shared -fPIC $ldflags -o testload.so testload.c";
+my $sobuild = "$CONFIG_FLAGS{CC} ".($srcdir? "-I$srcdir":'')." $CONFIG_FLAGS{CPPFLAGS} $CONFIG_FLAGS{CFLAGS} -shared -fPIC $CONFIG_FLAGS{LDFLAGS} -o testload.so testload.c";
 
 my $clog = `$sobuild 2>&1`;
 if ($? != 0) {
