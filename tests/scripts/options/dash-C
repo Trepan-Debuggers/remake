@@ -23,11 +23,9 @@ touch($example);
 
 run_make_with_options("${testname}.mk", "-C $workdir clean", &get_logfile);
 
-use Cwd;
-
 chdir $workdir;
-$wpath = cwd();
-chdir $cwdpath;
+$wpath = &get_this_pwd;
+chdir $pwd;
 
 if (-f $example) {
   $test_passed = 0;
@@ -50,6 +48,10 @@ $example .= "slash";
 touch($example);
 
 run_make_with_options("${testname}.mk", "-C $workdir/ clean ext=slash", &get_logfile);
+
+chdir $workdir;
+$wpath = &get_this_pwd;
+chdir $pwd;
 
 if (-f $example) {
   $test_passed = 0;

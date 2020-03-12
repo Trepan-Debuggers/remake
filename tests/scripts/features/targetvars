@@ -255,38 +255,6 @@ a: ; @echo $(A)
 !,
               '', "hello; world\n");
 
-# TEST #21: SV-56834 Ensure setting PATH in a target var works properly
-my $sname = "foobar$scriptsuffix";
-
-mkdir('sd', 0775);
-create_file("sd/$sname", "exit 0\n");
-chmod 0755, "sd/$sname";
-
-run_make_test(qq!
-all: PATH := sd
-all: ; $sname >/dev/null
-!,
-              '', "$sname >/dev/null\n");
-
-# Don't use the general PATH if not found on the target path
-
-$extraENV{PATH} = "$ENV{PATH}:sd";
-
-my $answer = "$sname
-#MAKE#: $sname: $ERR_no_such_file
-#MAKEFILE#:3: *** [all] error 127
-
-#0  all at $fulltestdir/#MAKEFILE#:3
-";
-run_make_test(qq!
-all: PATH := ..
-all: ; $sname
-!,
-              '', $answer, 512);
-
-unlink("sd/$sname");
-rmdir ('sd');
-
 # TEST #19: Test define/endef variables as target-specific vars
 
 # run_make_test('
