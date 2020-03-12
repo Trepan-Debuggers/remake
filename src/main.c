@@ -124,7 +124,7 @@ bool b_show_version = false;
 
 /*! If true, go into debugger on error.
 Sets --debugger --debugger-stop=error. */
-bool b_post_mortem_flag = false;
+int post_mortem_flag = 0;
 
 /*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
@@ -381,7 +381,6 @@ static const struct command_switch switches[] =
     { 'c', flag, &search_parent_flag, 1, 1, 0, 0, 0, "search-parent" },
     { 'd', flag, &debug_flag,         1, 1, 0, 0, 0, 0 },
     { 'e', flag, &env_overrides,      1, 1, 0, 0, 0, "environment-overrides", },
-    { 'E', strlist, &eval_strings,    1, 0, 0, 0, 0, "eval" },
     { 'h', flag, &print_usage_flag,   0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
     { 'k', flag, &keep_going_flag,    1, 1, 0, 0, &default_keep_going_flag,
@@ -401,11 +400,12 @@ static const struct command_switch switches[] =
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
-    { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, "debugger" },
+    { '!', flag, &post_mortem_flag, 1, 1, 0, 0, 0, "post-mortem" },
 
     /* These options take arguments.  */
     { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'E', strlist, &eval_strings,    1, 0, 0, 0, 0, "eval" },
     { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'I', filename, &include_directories, 1, 1, 0, 0, 0,
       "include-dir" },
@@ -416,8 +416,7 @@ static const struct command_switch switches[] =
     { 'o', filename, &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'O', string, &output_sync_option, 1, 1, 0, "target", 0, "output-sync" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { '!', flag, &b_post_mortem_flag, 1, 1, 0, 0, 0,
-      "post-mortem" },
+    { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
 
     /* These are long-style options.  */
     { CHAR_MAX+1, strlist, &db_flags, 1, 1, 0, "basic", 0, "debug" },
@@ -1375,7 +1374,7 @@ main (int argc, const char **argv, char **envp)
   decode_verbosity_flags (verbosity_opts);
 
   /* FIXME: put into a subroutine like decode_trace_flags */
-  if (b_post_mortem_flag) {
+  if (post_mortem_flag) {
     debugger_on_error   |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
     debugger_enabled     =  1;
   } else if (debugger_flag) {
