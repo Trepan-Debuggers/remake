@@ -1,8 +1,8 @@
 .. index:: info; target
 .. _info_targets:
 
-Info Targets
-------------
+Show Targets found in Makefiles (`info targets`)
+------------------------------------------------
 
 **info targets** [ **names** | **positions** | **tasks** | **all** ]
 
@@ -31,4 +31,4 @@ Example:
 
 .. seealso::
 
-   :ref:`target <target>`, and :ref:`info target <info_target>`.
+   :ref:`info tasks <info_tasks>`, :ref:`target <target>`, and :ref:`info target <info_target>`.

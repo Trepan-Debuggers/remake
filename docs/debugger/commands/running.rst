@@ -1,5 +1,8 @@
-Running
-=======
+.. index:: running
+.. _running:
+
+Run-Changing Commands (`continue`, `finish`, `next`, `quit`, `run`, `skip`, `step`)
+===================================================================================
 
 Running, restarting, or stopping the program.
 

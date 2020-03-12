@@ -1,8 +1,8 @@
 .. index:: info; rules
 .. _info_rules:
 
-Info Rules
-------------
+Show Implicit or Pattern Rules (`info rules`)
+---------------------------------------------
 
 **info rules** [ **verbose** ]
 

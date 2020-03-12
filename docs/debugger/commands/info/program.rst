@@ -1,8 +1,8 @@
 .. index:: info; program
 .. _info_program:
 
-Info Program
-------------
+Show Makefile Information (`info program`)
+------------------------------------------
 
 **info program**
 

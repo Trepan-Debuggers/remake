@@ -1,17 +1,17 @@
-Stack
-=====
+.. index:: stack
+.. _stack:
 
-Examining the call stack.
+Examining the Target Stack (`backtrace`, `frame`, `up`, `down`)
+===============================================================
 
-The call stack is made up of stack frames.  The debugger assigns
-numbers to stack frames counting from zero for the innermost
-(currently executing) frame.
+The target stack is made up of targets linked by a dependency
+from one target on the next.  The debugger assigns numbers to target frames counting
+from zero for the innermost or currently executing target.
 
-At any time the debugger identifies one frame as the "selected" frame.
-Variable lookups are done with respect to the selected frame.  When
-the program being debugged stops, the debugger selects the innermost
-frame.  The commands below can be used to select other frames by
-number or address.
+At any time the debugger identifies one target as the "selected"
+target.  When the program being debugged stops, the debugger selects
+the innermost targets.  The commands below can be used to select other
+targets in the target stack by number.
 
 
 .. toctree::
