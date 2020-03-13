@@ -1,5 +1,5 @@
 #define source_HELP_TEXT \
-  "Read debugger commands from the glob expansion of FILE-GLOB.\n"	\
+  "Read debugger commands from the glob expansion of *file-glob*.\n"	\
   "\n"									\
   "Examples:\n"								\
   "--------\n"								\
