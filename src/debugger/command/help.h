@@ -19,8 +19,6 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Debugger help command. */
 
-#include "help/help.h"
-
 void
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
 		      subcommand_var_info_t *p_subcmd, bool full_info)

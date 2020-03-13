@@ -4,11 +4,12 @@
 Read and Evaluate Makefile (`load`)
 -----------------------------------
 
-**load** *Makefile*
+**load** *file-glob*
 
-Read in and evaluate *Makefile*.
+Read in and evaluate GNU Makefile *file-glob*..
 
-Note that dependencies are updated after reading the file in.
+*file-glob* should resolve after glob expansion to single GNU
+Makefile. Target dependencies are updated after reading in the file.
 
 Here are several possible uses of this command.
 

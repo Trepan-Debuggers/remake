@@ -22,9 +22,18 @@ Boston, MA 02111-1307, USA.  */
    make mock.o
    gcc mock.o version.o alloc.o globals.o misc.o output.o file_basic.o hash.o strcache.o test-profile.o -o test-profile
 */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <config.h>
+
+/* _LARGE_FILES can get set in <config.h>. However this messes up
+AIX #include headers which presumably it was there for.
+There is *nothing* in this file that needs or wants large-file access.
+So we'll disable it, independent of what config.h says.
+*/
+#undef _LARGE_FILES
+
 #include <unistd.h>
 #include <errno.h>
 

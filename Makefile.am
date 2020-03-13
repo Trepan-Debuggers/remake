@@ -177,7 +177,7 @@ check-regression: tests/config-flags.pm
 	  echo "Can't find the GNU Make test suite ($(top_srcdir)/tests)."; \
 	fi
 
-#: Generate the ReadTheDocs manul in HTML format
+#: Generate the ReadTheDocs manual in HTML format
 readthedocs:
 	$(MAKE) -C docs html
 
@@ -195,8 +195,9 @@ README:
 GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
-#: create ChangeLog for distribution from 'git log'
+@MAINTAINER_MODE_TRUE@#: create ChangeLog for distribution from 'git log'
 ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
+#:
 
 endif
