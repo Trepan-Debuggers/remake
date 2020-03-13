@@ -8,6 +8,8 @@ Read and Run Debugger Commands from a File (`source`)
 
 Read debugger commands from the glob expansion of *file-glob*;
 
+*file-glob* should resolve after glob expansion to single file.
+
 Examples:
 +++++++++
 
