@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2011, 2015 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2011, 2015, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -71,16 +71,6 @@ dbg_cmd_continue_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_continue;
   short_command[c].use  = _("continue [TARGET [all|run|prereq|end]*]");
-  short_command[c].doc  =
-    _("Continue executing debugged Makefile until another breakpoint or\n"
-"stopping point. If a target is given and valid we set a temporary\n"
-"breakpoint at that target before continuing.\n"
-"\n"
-"When a target name is given, breakpoint properties can be given after\n"
-"the target name\n"
-"\n"
-"See also \"break\" and \"finish\".\n"
-);
 }
 
 /*

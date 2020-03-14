@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2008, 2011 R. Bernstein rocky@gnu.org
+Copyright (C) 2008, 2011, 2020 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -378,9 +378,6 @@ dbg_cmd_info_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_info;
   short_command[c].use = _("info [SUBCOMMAND]");
-  short_command[c].doc =
-    _("Show program information regarding SUBCOMMAND.\n"
-      "If SUBCOMMAND is not specified, give list of \"info\" subcommands.");
 }
 
 /*

@@ -21,14 +21,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "expand.h"
-#ifdef WINDOWS32
-#include <windows.h>
-#include "w32err.h"
-#endif
 
 #define FILE_LIST_SEPARATOR ' '
-
-int remote_kill (int id, int sig);
 
 #ifndef HAVE_UNISTD_H
 int getpid ();

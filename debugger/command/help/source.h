@@ -1,6 +1,8 @@
 #define source_HELP_TEXT \
   "Read debugger commands from the glob expansion of *file-glob*.\n"	\
   "\n"									\
+  "*file-glob* should resolve after glob expansion to single file.\n"	\
+  "\n"									\
   "Examples:\n"								\
   "--------\n"								\
   "\n"									\
