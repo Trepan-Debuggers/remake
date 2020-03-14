@@ -10,4 +10,4 @@
   "\n"									\
   "See also:\n"								\
   "---------\n"								\
-  "`examine`, and `eval`"
+  "`expand`, and `info variables`"

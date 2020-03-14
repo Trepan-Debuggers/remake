@@ -248,7 +248,7 @@ README:
 GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
-#: create ChangeLog for distirbution from 'git log'
+@MAINTAINER_MODE_TRUE@#: create ChangeLog for distirbution from 'git log'
 ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
 
