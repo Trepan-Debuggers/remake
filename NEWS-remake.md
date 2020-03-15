@@ -1,7 +1,7 @@
 Here we have note remake changes. For changes to GNU Make see its NEWS file.
 
-Version 4.2.1+dbg-1.5
-======================
+Version 4.2.1+dbg-1.5 (2020-03-15) Ron Frankel
+==============================================
 
 All of the below changes are backports from 4.3+dbg-1.5
 
