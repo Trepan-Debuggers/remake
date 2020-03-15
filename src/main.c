@@ -27,6 +27,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "rule.h"
 #include "debug.h"
 #include "getopt.h"
+// debugger include(s)
+#include "cmd.h"
 
 #include <assert.h>
 #ifdef WINDOWS32
