@@ -200,7 +200,6 @@ AC_CHECK_FUNCS([strcasecmp strncasecmp strcmpi strncmpi stricmp strnicmp])
 # Tell automake about this, so it can build the right .c files.
 AM_CONDITIONAL([USE_LOCAL_GLOB], [test "$make_cv_sys_gnu_glob" = no])
 
-# TOMTOM let's see if that help
 AC_FUNC_VPRINTF
 
 # strcoll() is used by the GNU glob library

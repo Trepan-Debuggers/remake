@@ -62,9 +62,9 @@ make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
 
 localedir =	$(datadir)/locale
 
-AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
-		-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" \
-		-DLOCALEDIR=\"$(localedir)\"
+AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/libdebugger \
+		-I$(top_srcdir)/libdebugger -DLIBDIR=\"$(libdir)\" \
+		-DINCLUDEDIR=\"$(includedir)\" -DLOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS += $(GUILE_CFLAGS)
 

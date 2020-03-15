@@ -29,7 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "print.h"
 #include "debug.h"
-#include "../libdebugger/cmd.h"
+// debugger include(s)
+#include "cmd.h"
 
 /** Pointer to top of current target call stack */
 target_stack_node_t *p_stack_top;
