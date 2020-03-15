@@ -23,7 +23,7 @@ transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-SUBDIRS =	lib po doc glob unittest
+SUBDIRS =	lib po doc glob unittest libdebugger
 
 bin_PROGRAMS =	make
 include_HEADERS = src/gnuremake.h
@@ -74,7 +74,7 @@ noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
 				$(DEBUGGER_H)
 
 make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
-		@LIBINTL@
+				libdebugger/libdebugger.a @LIBINTL@
 
 localedir =	$(datadir)/locale
 

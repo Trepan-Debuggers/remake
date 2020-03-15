@@ -613,7 +613,8 @@ AC_CONFIG_FILES([ \
 Makefile lib/Makefile po/Makefile.in doc/Makefile \
   glob/Makefile \
   unittest/Makefile \
-  tests/config-flags.pm
+  tests/config-flags.pm \
+  libdebugger/Makefile
 ])
 # We don't need this: the standard automake output suffices for POSIX systems.
 #mk/Posix.mk
