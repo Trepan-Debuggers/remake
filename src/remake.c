@@ -17,7 +17,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "makeint.h"
 #include "globals.h"
 #include "profile.h"
-#include "debugger/cmd.h"
+#include "../libdebugger/cmd.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"

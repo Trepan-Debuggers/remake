@@ -24,7 +24,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "debug.h"
 
-#include "debugger/cmd.h"
+#include "../libdebugger/cmd.h"
 
 struct function_table_entry
   {

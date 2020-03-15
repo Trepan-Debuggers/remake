@@ -24,9 +24,9 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef REMAKE_DBG_CMD_H
 #define REMAKE_DBG_CMD_H
-#include "../job.h"
-#include "../buildargv.h"
-#include "../trace.h"
+#include "../src/job.h"
+#include "../src/buildargv.h"
+#include "../src/trace.h"
 
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int errcode,

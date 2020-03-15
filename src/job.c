@@ -17,7 +17,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "types.h"
 #include "makeint.h"
 #include "globals.h"
-#include "debugger/cmd.h"
+#include "../libdebugger/cmd.h"
 
 #include <assert.h>
 #include <string.h>

@@ -1,7 +1,7 @@
 /*! Versions of error and fatal with the ability to show call-stack. */
 #ifndef REMAKE_DBG_MSG_H
 #define REMAKE_DBG_MSG_H
-#include "../make.h"
+#include "../src/make.h"
 
 #if defined __STDC__ && __STDC__
 void dbg_msg (const char *fmt, ...)
