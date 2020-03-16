@@ -6,7 +6,7 @@ Debugger Command Syntax
 
 Command names and arguments are separated with spaces like POSIX shell
 syntax. Parenthesis around the arguments and commas between them are
-not used. If the character of a line starts with `#`,
+not used. If the character of a line starts with ``#``,
 the command is ignored. (Actually, what is going on here is that it is
 a "comment" commant.)
 
@@ -26,7 +26,7 @@ commands. If an exact match is found, the command name and arguments
 are dispatched to that command.
 
 GNU Readline is used to read commands, so it's capabilities are
-available, such as `vi` or `emacs` editing.
+available, such as ``vi`` or ``emacs`` editing.
 
 Event Icons
 -----------
@@ -40,7 +40,7 @@ For example, in his line:
    !! (/tmp/project/errors.Makefile:1)
    ^^ event icon is here
 
-The `!!` indicates an error occurred and we have gone into post-mortem debugging.
+The ``!!`` indicates an error occurred and we have gone into post-mortem debugging.
 
 Here is a list of event icons:
 
@@ -51,21 +51,21 @@ Here is a list of event icons:
 
    * - Icon
      - Event
-   * - `->`
+   * - ``->``
      - Stopped before checking target prerequisites.
-   * - `..`
+   * - ``..``
      - Stopped after checking target prerequisites.
-   * - `<-`
+   * - ``<-``
      - Stopped after running target commands.
-   * - rd
+   * - ``rd``
      - About to read a Makefile
-   * - `!!`
-     - Error encountered and `--post-mortem flag given`. In post-mortem debugging.
-   * - `- -`
+   * - ``!!``
+     - Error encountered and ``--post-mortem flag given``. In post-mortem debugging.
+   * - ``- -``
      - Ran a debugger step of a Makefile target and it's not one of the above.
-   * - `++`
+   * - ``++``
      - Ran a debugger step in a POSIX command and it's not one of the above.
-   * - :o
+   * - ``:o``
      - A call to the debugger using the $(debugger) function in the Makefile
-   * - `||`
+   * - ``||``
      - Finished making the goal target

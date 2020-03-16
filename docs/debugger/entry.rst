@@ -8,8 +8,8 @@ Entering the Debugger
 Invoking the Debugger Initially
 ===============================
 
-The simplest way to debug your program is to run `remake -X` or
-`remake --debugger`.
+The simplest way to debug your program is to run ``remake -X`` or
+``remake --debugger``.
 
 Example Debugger Sessions
 -------------------------
@@ -82,10 +82,10 @@ Here is an Example:
           remake<0>
 
 
-Entering the debugger when `remake` encounters an error
-=======================================================
+Entering the debugger when ``remake`` encounters an error
+=========================================================
 
-This is done by supplying the `--post-mortem` or `-!` option on invocation.
+This is done by supplying the ``--post-mortem`` or ``-!`` option on invocation.
 
 Note that in contrast to the situations above. although you can examine state and evaluating expressions, execution
 has terminated. Therefore, some of the execution-specific commands are no longer applicable.

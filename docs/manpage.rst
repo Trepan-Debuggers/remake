@@ -14,7 +14,7 @@ Synopsis
 Description
 -----------
 
-`remake` remake is forked and enahanced version of GNU Make that
+``remake`` remake is forked and enahanced version of GNU Make that
 adds improved error reporting, better tracing, profiling and a
 debugger.
 
@@ -24,14 +24,14 @@ See GNU Make_ for information on GNU Make and its use.
 Options
 -------
 
-Below we give options that are specific to `remake`. For the other options,
+Below we give options that are specific to ``remake``. For the other options,
 please refer to the GNU Make documentation
 
 :-c | --search-parent:
 
-if a Makefile or goal target isn't found in the current directory, `remake`
+if a Makefile or goal target isn't found in the current directory, ``remake``
 will search in the parent directory for a Makefile. On finding a parent the
-closest parent directory with a Makefile, `remake` will set its current working
+closest parent directory with a Makefile, ``remake`` will set its current working
 directory to the directory where the Makefile was found.
 
 In this respect the short option `-c`, is like `-C` except no
@@ -115,19 +115,19 @@ Bugs
 Since this is derived from GNU Make, it most of its bugs.
 See the chapter *Problems and Bugs* in "The GNU Make Manual" .
 
-For `remake`-specific bugs see https://github.com/rocky/remake/issues.
+For ``remake``-specific bugs see https://github.com/rocky/remake/issues.
 
 
 Authors
 -------
 
-GNU Make from which `remake` is derived, was written by Richard
+GNU Make from which ``remake`` is derived, was written by Richard
 Stallman and Roland McGrath, and is currently maintained by Paul
 Smith.
 
-However `remake` is the brainstorm of Rocky
+However ``remake`` is the brainstorm of Rocky
 Bernstein. The help of others though has been, and is, greatly appreciated.
-Michael Lord Welles however thought of the name, `remake`.
+Michael Lord Welles however thought of the name, ``remake``.
 
 Copyright
 ---------

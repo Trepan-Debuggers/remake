@@ -12,13 +12,13 @@ Profiling
 ---------
 
 If you want to know where most of the time goes in building your system with Makefiles,
-there is a `--profile` option which times the targets.
+there is a ``--profile`` option which times the targets.
 
 This option creates Callgrind Profile Format_ output which can be read
 by KCachegrind_, callgrind_annotate_, or gprof2dot_ or other tools that understand this format.
 
 You can get not only timings, but a graph of the target dependencies
-checked. Below is an image rendered from a profiling of a `remake` build:
+checked. Below is an image rendered from a profiling of a ``remake`` build:
 
 .. image:: ../screenshots/remake-profiled2.png
 
@@ -26,22 +26,22 @@ checked. Below is an image rendered from a profiling of a `remake` build:
 Listing and Documenting Makefile Targets
 ----------------------------------------
 
-Have you ever wanted `rake tasks` for GNU Make?  That is, you have
-some strange `Makefile` and you want to see the targets,
+Have you ever wanted ``rake tasks`` for GNU Make?  That is, you have
+some strange ``Makefile`` and you want to see the targets,
 that you can run "make *target-name*" on?
 
-There are two new options added to `remake` to assist this:
+There are two new options added to ``remake`` to assist this:
 
-* `--tasks`  gives a list of targets with `remake` descriptions
-* `--targets` gives a list of *all* targets
+* ``--tasks``  gives a list of targets with ``remake`` descriptions
+* ``--targets`` gives a list of *all* targets
 
-A target with a `remake` description is just a one-line comment before the
-the target in the Makefile that describes what the target does and starts with `#:`
+A target with a ``remake`` description is just a one-line comment before the
+the target in the Makefile that describes what the target does and starts with ``#:``
 
 If you do this, when either of these options is shown it will also be shown
-with next to the target name when `--tasks` is run.
+with next to the target name when ``--tasks`` is run.
 
-Here is an example. Consider this `Makefile`:
+Here is an example. Consider this ``Makefile``:
 
 .. code:: Makefile
 
@@ -57,7 +57,7 @@ Here is an example. Consider this `Makefile`:
     dist:
 	@echo dist here
 
-Let's run `remake --tasks`:
+Let's run ``remake --tasks``:
 
 .. code:: console
 
@@ -68,10 +68,10 @@ Let's run `remake --tasks`:
 
 Many legacay [#f1]_ Makefiles don't have descriptive comment in them
 yet. So you can get a list of *all* targets using optoin
-`--targets`.  But be warned, since GNU Make comes with lots of
+``--targets``.  But be warned, since GNU Make comes with lots of
 implicit rule defaults, this list can be quite large.
 
-Here is an example of runnint `--targets` on the above file:
+Here is an example of runnint ``--targets`` on the above file:
 
 .. code:: console
 
@@ -89,16 +89,16 @@ Here is an example of runnint `--targets` on the above file:
 Searching for a Makefile in Parent Directories
 ----------------------------------------------
 
-When the `-c` flag is given (or `--search-parent`), if a Makefile or
-goal target isn't found in the current directory, `remake` will search
+When the ``-c`` flag is given (or ``--search-parent``), if a Makefile or
+goal target isn't found in the current directory, ``remake`` will search
 in the parent directory for a Makefile. On finding a parent the
-closest parent directory with a Makefile, `remake` will set its current working
+closest parent directory with a Makefile, ``remake`` will set its current working
 directory to the directory where the Makefile was found.
 
-In this respect the short option `-c`, is like `-C` except no
+In this respect the short option ``-c``, is like ``-C`` except no
 directory need to be specified.
 
-Here is a screenshot that shows `make` behavior versus `remake`:
+Here is a screenshot that shows ``make`` behavior versus ``remake``:
 
 .. image:: ../screenshots/remake-search-parent.gif
 
@@ -106,13 +106,13 @@ Here is a screenshot that shows `make` behavior versus `remake`:
 Improved Execution Tracing
 --------------------------
 
-When the `-x` flag is given (or `--trace=normal`), any commands that
-are about to be run are shown as seen in the `Makefile` along with
-`set -x` tracing when run in a POSIX shell. Also, we override or
-rather ignore, any non-echo prefix `@` directive listed at the
+When the ``-x`` flag is given (or ``--trace=normal``), any commands that
+are about to be run are shown as seen in the ``Makefile`` along with
+``set -x`` tracing when run in a POSIX shell. Also, we override or
+rather ignore, any non-echo prefix ``@`` directive listed at the
 beginning of target commands.
 
-If different granularity of tracing is desired the `--trace` option
+If different granularity of tracing is desired the ``--trace`` option
 has other settings. See the relevant parts of this manual for more information.
 
 And, if you the most flexibility in tracing there is a built-in debugger.
@@ -207,7 +207,7 @@ For example here is GNU Make 4.3 code from `job.c`
 
 Can you spot which code is used in the most-often POSIX unixy case? In some cases
 such as in the above, the most-often case is indented incorrectly because in
-of one of less-frequent cases it is say in an `else` clause (as appears above).
+of one of less-frequent cases it is say in an ``else`` clause (as appears above).
 
 *Note: If you have trouble parsing the above, the Pygments parser used
 in this document has trouble too.  Even after adding mismatched braces in
@@ -224,7 +224,7 @@ get going, you'll probably do that in the most expedient way.
 
 But again, that was then and this is now.
 
-If there are folks in the affected communities that would like `remake` added and are willing to code and do the testing, I am open to this. But *it needs to be added in a more modular way than was done in the past*.
+If there are folks in the affected communities that would like ``remake`` added and are willing to code and do the testing, I am open to this. But *it needs to be added in a more modular way than was done in the past*.
 
 Overall, I view this as a plus for developers who would like to extend GNU Make or understand the code.
 
