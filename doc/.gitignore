@@ -1,3 +1,4 @@
+/*.am*
 /*.html
 /*.pdf
 /*~
@@ -23,6 +24,7 @@
 /remake.log
 /remake.pdf
 /remake.pg
+/remake.t2d
 /remake.t2p
 /remake.toc
 /remake.tp

@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/rocky/remake.svg?branch=remake-4-3)](https://travis-ci.org/rocky/remake) [![Packaging status](https://repology.org/badge/tiny-repos/remake.svg)](https://repology.org/project/remake/versions)
 
+[![Download remake](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/bashdb/files/remake/4.3%2Bdbg-1.5/)
+
 Here we have patched GNU Make 4.3 sources to add improved error reporting, tracing, target listing, graph visualization, profiling, and more. It also
 contains a [debugger](https://remake.readthedocs.io/en/latest/debugger.html). Branches [`remake-4-2`](https://github.com/rocky/remake/tree/remake-4-2), [`remake-4-1`](https://github.com/rocky/remake/tree/remake-4-1), [`remake-3-82`](https://github.com/rocky/remake/tree/remake-3-82), and [`remake-3-81`](https://github.com/rocky/remake/tree/remake-3-81) for patched GNU Make 4.2, 4.1, 3.82, and 3.81 respectively.
 

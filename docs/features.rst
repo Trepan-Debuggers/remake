@@ -27,19 +27,19 @@ Listing and Documenting Makefile Targets
 ----------------------------------------
 
 Have you ever wanted `rake tasks` for GNU Make?  That is, you have
-some strange `Makefile` and you want to see the interesting targets,
+some strange `Makefile` and you want to see the targets,
 that you can run "make *target-name*" on?
 
 There are two new options added to `remake` to assist this:
 
-* `--tasks`  gives a list of "interesting" targets
+* `--tasks`  gives a list of targets with `remake` descriptions
 * `--targets` gives a list of *all* targets
 
-Before each target in the Makefile, you can give add a one-line comment
-describing what the target does, starting the comment with `#:`.
+A target with a `remake` description is just a one-line comment before the
+the target in the Makefile that describes what the target does and starts with `#:`
 
 If you do this, when either of these options is shown it will also be shown
-with next to the target name.
+with next to the target name when `--tasks` is run.
 
 Here is an example. Consider this `Makefile`:
 
@@ -57,13 +57,34 @@ Here is an example. Consider this `Makefile`:
     dist:
 	@echo dist here
 
-Running `remake --tasks` gives:
+Let's run `remake --tasks`:
 
 .. code:: console
 
+    $ remake --tasks
     all                  This is the main target
     check                Test things
     dist                 Build distribution
+
+Many legacay [#f1]_ Makefiles don't have descriptive comment in them
+yet. So you can get a list of *all* targets using optoin
+`--targets`.  But be warned, since GNU Make comes with lots of
+implicit rule defaults, this list can be quite large.
+
+Here is an example of runnint `--targets` on the above file:
+
+.. code:: console
+
+    $ remake --targets -f comment.Makefile
+   	      .C
+	      .C.o
+	      .DEFAULT
+	      ... # about 70 more lines!
+	      all	# This is the main target
+	      check	# Test things
+	      Makefile
+	      dist	# Build distribution
+
 
 Searching for a Makefile in Parent Directories
 ----------------------------------------------
@@ -98,7 +119,7 @@ And, if you the most flexibility in tracing there is a built-in debugger.
 
 Here is a screenshot that shows tracing:
 
-.. image:: ../screenshots/remake-search-parent.gif
+.. image:: ../screenshots/remake-trace.gif
 
 Debugger
 --------
@@ -228,3 +249,4 @@ Overall, I view this as a plus for developers who would like to extend GNU Make 
 .. _this: http://bashdb.sourceforge.net/pydb/features.html
 .. _trepanning: https://pypi.python.org/pypi/trepan2
 .. _Doxygen: http://www.doxygen.nl/
+..  [#f1] As Ryan Davis explains: "legacy code" is any code you didn't write.
