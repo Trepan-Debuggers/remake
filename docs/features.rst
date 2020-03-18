@@ -158,7 +158,7 @@ We don't even attempt to support:
 * RiscOS_
 * Xenix_
 
-This is 2020, not the late 1970-80's. Although GNU make is phasing some of these out out you can find C-preprocessor checks and C code in GNU Make for the above.
+This is 2020, not the late 1970-80's. Although GNU make is phasing some of these out, you can find C-preprocessor checks and C code in GNU Make for the above.
 
 By eliminating support for the above, thousands of lines of code in support of the above has been removed.
 
