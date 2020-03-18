@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/quit.h
+ *
+ *  \brief Help text for debugger command `quit`.
+ *
+ */
 #define quit_HELP_TEXT							\
   "Exit make. If a numeric argument is given, it will be the exit\n"	\
   "status reported back. A status of 77 in a nested make will signals\n" \

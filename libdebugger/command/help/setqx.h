@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/setqx.h
+ *
+ *  \brief Help text for debugger command `setqx`.
+ *
+ */
 #define setqx_HELP_TEXT							\
   "Set GNU Make variable VARIABLE to VALUE.\n"				\
   "\n"									\

@@ -1,5 +1,3 @@
-/* Set a variable definition with all variable references in the value
-   part of psz_string expanded. */
 /*
   "Copyright (C) 2011, 2015, 2020 R. Bernstein <rocky@gnu.org>\n" \
   This file is part of GNU Make (remake variant).
@@ -18,6 +16,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file libdebugger/command/set.h
+ *
+ *  \brief Debugger command to change various debugger and Makefile settings and values.
+ */
 
 /* Documentation for help set, and help set xxx. Note the format has
    been customized to make ddd work. In particular for "basename" it should

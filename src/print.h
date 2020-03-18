@@ -1,6 +1,6 @@
-/* $Id: print.h,v 1.10 2005/12/23 03:29:34 rockyb Exp $
+/*
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
-Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2008, 2020 R. Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make.
 
@@ -19,9 +19,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file print.h
+/** \file src/print.h
  *
- *  \brief Header for output or logging functions for GNU Make.
+ *  \brief Header for src/print.h - output or logging functions
  */
 
 

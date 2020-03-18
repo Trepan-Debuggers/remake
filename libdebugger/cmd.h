@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2005, 2008, 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,9 +17,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file dbg_cmd.h 
+/** \file libdebugger/cmd.h
  *
- *  \brief GNU Make debugger interface
+ *  \brief Debugger interface header
  */
 
 #ifndef REMAKE_DBG_CMD_H
@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/buildargv.h"
 #include "../src/trace.h"
 
-extern debug_return_t enter_debugger (target_stack_node_t *p, 
+extern debug_return_t enter_debugger (target_stack_node_t *p,
 				      file_t *p_target, int errcode,
 				      debug_enter_reason_t reason);
 
@@ -45,7 +45,7 @@ extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
 extern void dbg_cmd_info_tasks();
 
 #endif /* DBG_CMD_H*/
-/* 
+/*
  * Local variables:
  *  c-file-style: "gnu"
  *  indent-tabs-mode: nil

@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/target.h
+ *
+ *  \brief Help text for debugger command `target`.
+ *
+ */
 #define target_HELP_TEXT						\
   "Show information about a target.\n"					\
   "\nThe following attributes names can be given after a target name:\n" \

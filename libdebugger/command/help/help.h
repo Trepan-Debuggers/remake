@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/help.h
+ *
+ *  \brief Help text for debugger command `help`.
+ *
+ */
 #define help_HELP_TEXT							\
   "Get help for a debugger command or subcommand.\n"			\
   "\n"									\

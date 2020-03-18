@@ -16,6 +16,13 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+
+/** \file src/gnuremake.h
+ *
+ *  \brief header for external interfaces usable by dynamic objects loaded into GNU Remake.
+ */
+
+
 #ifndef _REMAKE_GNUMAKE_H_
 #define _REMAKE_GNUMAKE_H_
 

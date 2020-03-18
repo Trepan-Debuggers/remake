@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/setq.h
+ *
+ *  \brief Help text for debugger command `setq`.
+ *
+ */
 #define setq_HELP_TEXT							\
   "Set MAKE variable VARIABLE to VALUE.\n"				\
   "\n"									\

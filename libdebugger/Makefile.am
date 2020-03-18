@@ -8,6 +8,10 @@ libdebugger_a_SOURCES =  \
 	msg.c 	\
 	stack.c
 
+#: Reissue building this target in parent directory
+doxygen readthedocs:
+	$(MAKE) -C .. $@
+
 #DEBUGGER_H = \
 #	$(wildcard src/debugger/*.h) \
 #	$(wildcard src/debugger/command/*.h) \

@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/pwd.h
+ *
+ *  \brief Help text for debugger command `pwd`.
+ *
+ */
 #define pwd_HELP_TEXT							\
   "Print working directory.\n"						\
   "\n"									\

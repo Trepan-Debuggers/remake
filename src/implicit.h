@@ -1,6 +1,6 @@
-/** \file implicit.h
+/** \file src/implicit.h
  *
- *  \brief header for impilict.c
+ *  \brief Header for src/implicit.c - implicit rules
  */
 
 #ifndef REMAKE_IMPLICIT_H
@@ -14,4 +14,3 @@
    or returns 0 if no implicit rule was found.  */
 extern int try_implicit_rule (file_t *file, unsigned int depth);
 #endif
-

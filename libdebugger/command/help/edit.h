@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/continue.h
+ *
+ *  \brief Help text for debugger command `continue`.
+ *
+ */
 #define edit_HELP_TEXT \
   "Enter an editor using the current location.\n"			\
   "\n"									\
