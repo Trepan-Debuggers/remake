@@ -17,6 +17,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file libdebugger/command/info.h
+ *
+ *  \brief Debugger command to get various pieces of information about program being debugged.
+*/
+
+
 #include "../../src/file.h"
 #include "../../src/implicit.h"
 #include "../../src/print.h"

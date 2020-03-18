@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/print.h
+ *
+ *  \brief Help text for debugger command `print`.
+ *
+ */
 #define print_HELP_TEXT							\
   "Show a variable definition.\n"					\
   "\n"									\

@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/source.h
+ *
+ *  \brief Help text for debugger command `source`.
+ *
+ */
 #define source_HELP_TEXT \
   "Read debugger commands from the glob expansion of *file-glob*.\n"	\
   "\n"									\

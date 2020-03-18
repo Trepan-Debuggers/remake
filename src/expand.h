@@ -1,5 +1,5 @@
 /* $Id: expand.h,v 1.9 2006/12/18 10:12:25 rockyb Exp $
-Copyright (C) 2005 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2005, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,9 +17,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file expand.h
+/** \file src/expand.h
  *
- *  \brief Header for variable expansion functions for GNU Make.
+ *  \brief Header for src/expand.c - variable expansion functions
  */
 
 #ifndef REMAKE_EXPAND_H
@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 /*! Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
 
-extern char *allocated_variable_expand_for_file(const char *psz_line, 
+extern char *allocated_variable_expand_for_file(const char *psz_line,
 						file_t *p_file);
 
 
@@ -66,7 +66,7 @@ extern char *allocated_variable_expand_for_file(const char *psz_line,
 //extern void restore_variable_buffer(char *p_buf, unsigned int len);
 
 /** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
-extern char *variable_expand_set (char *psz_line, 
+extern char *variable_expand_set (char *psz_line,
 				  variable_set_list_t *p_file_set);
 
 #endif /*REMAKE_EXPAND_H*/

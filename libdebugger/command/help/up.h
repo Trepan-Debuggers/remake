@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/up.h
+ *
+ *  \brief Help text for debugger command `up`.
+ *
+ */
 #define up_HELP_TEXT \
   "Select and print the immediate child dependency target that is\n"	\
   "currently under consideration.\n"					\

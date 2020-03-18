@@ -1,5 +1,5 @@
-/* $Id: dbg_info.h,v 1.11 2006/03/19 12:17:44 rockyb Exp $
-Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2008, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file dbg_info.h 
+/** \file libdebugger/info.h
  *
  *  \brief debugger info headers
 */
