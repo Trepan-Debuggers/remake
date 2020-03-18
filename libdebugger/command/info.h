@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Debugger command to get various pieces of information about program being debugged.
 */
 
-
+#include "../../src/commands.h"
 #include "../../src/file.h"
 #include "../../src/implicit.h"
 #include "../../src/print.h"

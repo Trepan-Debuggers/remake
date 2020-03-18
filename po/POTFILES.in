@@ -17,7 +17,6 @@
 
 libdebugger/break.c
 libdebugger/cmd.c
-libdebugger/command/break.h
 libdebugger/command/chdir.h
 libdebugger/command/comment.h
 libdebugger/command/continue.h

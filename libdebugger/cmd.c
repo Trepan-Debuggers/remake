@@ -181,7 +181,6 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/break.h"
 #include "command/chdir.h"
 #include "command/comment.h"
 #include "command/continue.h"
@@ -245,6 +244,15 @@ find_command (const char *psz_name)
 #include "command/help/up.h"
 #include "command/help/where.h"
 #include "command/help/write.h"
+
+/* FIXME this can be folded into the below macro */
+static void
+dbg_cmd_break_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_break;
+  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]*");
+}
+
 
 
 #define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \

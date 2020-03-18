@@ -1,6 +1,7 @@
-noinst_HEADERS = debugger.h
+noinst_HEADERS = commands.h debugger.h
 noinst_LIBRARIES = libdebugger.a
 libdebugger_a_SOURCES =  \
+	command/break.c \
 	break.c \
 	cmd.c 	\
 	fns.c 	\
