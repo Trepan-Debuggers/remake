@@ -13,7 +13,7 @@ Example showing `--tasks` feature:
 
 ![--tasks](screenshots/remake-session0.gif)
 
-Example showing `--trace` (short option `-x) feature:
+Example showing `--trace` (short option `-x`) feature:
 
 ![--trace](screenshots/remake-trace.gif)
 
