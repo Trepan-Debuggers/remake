@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/down.h
+ *
+ *  \brief Help text for debugger command `down`.
+ *
+ */
 #define down_HELP_TEXT \
   "Select and print the target this one caused to be examined.\n"	\
   "\n"									\

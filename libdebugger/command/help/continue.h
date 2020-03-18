@@ -1,6 +1,6 @@
 /** \file libdebugger/command/help/continue.h
  *
- *  \brief Help texct for debugger command "continue".
+ *  \brief Help text for debugger command `continue`.
  *
  */
 #define continue_HELP_TEXT						\

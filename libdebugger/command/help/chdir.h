@@ -1,6 +1,6 @@
 /** \file libdebugger/command/help/chdir.h
  *
- *  \brief Help text for debugger command "chdir".
+ *  \brief Help text for debugger command `chdir`.
  *
  */
 

@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/write.h
+ *
+ *  \brief Help text for debugger command `write`.
+ *
+ */
 #define write_HELP_TEXT							\
   "Writes the commands associated of a target to a file with MAKE\n"	\
   "variables expanded.\n"						\

@@ -1,6 +1,6 @@
 /** \file libdebugger/command/help/break.h
  *
- *  \brief Help text for debugger command "break".
+ *  \brief Help text for debugger command `break`.
  *
  */
 #define break_HELP_TEXT							\
