@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/continue.h
+ *
+ *  \brief Help texct for debugger command "continue".
+ *
+ */
 #define continue_HELP_TEXT						\
   "Continue executing debugged Makefile until another breakpoint or\n"	\
   "stopping point. If a target is given and valid we set a temporary\n" \

@@ -19,7 +19,7 @@ Boston, MA 02111-1307, USA.  */
 
 /** \file libdebugger/command/pwd.h
  *
- *  \brief Debugger command to show print working directory
+ *  \brief Debugger command to show working directory
  */
 
 static debug_return_t

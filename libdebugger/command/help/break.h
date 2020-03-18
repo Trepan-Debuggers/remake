@@ -1,3 +1,8 @@
+/** \file libdebugger/command/help/break.h
+ *
+ *  \brief Help text for debugger command "break".
+ *
+ */
 #define break_HELP_TEXT							\
   "Set a breakpoint at a target or line number; also show breakpoints.\n" \
   "\n"									\

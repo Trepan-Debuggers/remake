@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 /** \file libdebugger/command/break.h
  *
- *  \brief Deugger command to set a breakpoint at a target.
+ *  \brief Debugger command to set a breakpoint at a target.
  *
  * With a target name, set a break before  running commands of that target.
    Without argument, list all breaks.

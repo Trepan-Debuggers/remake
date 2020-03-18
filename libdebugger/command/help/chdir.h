@@ -1,3 +1,9 @@
+/** \file libdebugger/command/help/chdir.h
+ *
+ *  \brief Help text for debugger command "chdir".
+ *
+ */
+
 #define chdir_HELP_TEXT \
   "Set the working directory to DIR.\n"					\
   "\n"									\
