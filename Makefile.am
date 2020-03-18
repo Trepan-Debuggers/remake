@@ -4,8 +4,7 @@
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 3 of the License, or (at your option) any later
+# the terms of the GNU General Public License as published by the Free Software # Foundation; either version 3 of the License, or (at your option) any later
 # version.
 #
 # GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -23,25 +22,12 @@ transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-SUBDIRS =	lib po doc glob unittest
+SUBDIRS =	lib po doc glob unittest libdebugger
 
 bin_PROGRAMS =	make
 include_HEADERS = src/gnuremake.h
 
 man_MANS =	doc/make.1
-
-DEBUGGER_SRC = 	\
-		src/debugger/break.c \
-		src/debugger/cmd.c 	\
-		src/debugger/fns.c 	\
-		src/debugger/file2line.c 	\
-		src/debugger/msg.c 	\
-		src/debugger/stack.c
-
-DEBUGGER_H = \
-	$(wildcard src/debugger/*.h) \
-	$(wildcard src/debugger/command/*.h) \
-	$(wildcard src/debugger/command/help/*.h)
 
 make_SRCS =	\
 		src/alloc.c src/ar.c src/arscan.c src/buildargv.c \
@@ -51,8 +37,7 @@ make_SRCS =	\
 		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
 		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
 		src/rule.c src/rule.h src/signame.c src/strcache.c \
-		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
-		$(DEBUGGER_SRC)
+		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c
 
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
@@ -64,23 +49,22 @@ make_SOURCES =	$(make_SRCS)
 
 EXTRA_make_SOURCES = src/mock.c
 
-noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
+noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h \
 				src/dep.h src/expand.h src/file.h src/file_basic.h \
 				src/filedef.h src/function.h src/getopt.h src/gettext.h \
 				src/globals.h src/hash.h src/implicit.h src/job.h \
 				src/main.h src/make.h src/makeint.h src/mock.h src/os.h \
 				src/output.h src/print.h src/profile.h src/read.h \
-				src/rule.h src/trace.h src/types.h src/variable.h src/vpath.h \
-				$(DEBUGGER_H)
+				src/rule.h src/trace.h src/types.h src/variable.h src/vpath.h
 
 make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
-		@LIBINTL@
+				libdebugger/libdebugger.a @LIBINTL@
 
 localedir =	$(datadir)/locale
 
-AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
-		-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" \
-		-DLOCALEDIR=\"$(localedir)\"
+AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/libdebugger \
+		-I$(top_srcdir)/libdebugger -DLIBDIR=\"$(libdir)\" \
+		-DINCLUDEDIR=\"$(includedir)\" -DLOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS += $(GUILE_CFLAGS)
 

@@ -17,13 +17,13 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "../../file.h"
-#include "../../implicit.h"
-#include "../../print.h"
-#include "../../main.h"
-#include "../../rule.h"
-#include "../../debug.h"
-#include "../../vpath.h"
+#include "../../src/file.h"
+#include "../../src/implicit.h"
+#include "../../src/print.h"
+#include "../../src/main.h"
+#include "../../src/rule.h"
+#include "../../src/debug.h"
+#include "../../src/vpath.h"
 #include "../info.h"
 #include "../msg.h"
 #include "../stack.h"

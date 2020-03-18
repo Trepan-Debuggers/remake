@@ -18,12 +18,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Create filename to line number table used by breakpoints */
-#include "../make.h"
+#include "../src/make.h"
 #include <assert.h>
-#include "../filedef.h"
-#include "../file.h"
-#include "../read.h"
-#include "../rule.h"
+#include "../src/filedef.h"
+#include "../src/file.h"
+#include "../src/read.h"
+#include "../src/rule.h"
 #include "./file2line.h"
 
 unsigned long

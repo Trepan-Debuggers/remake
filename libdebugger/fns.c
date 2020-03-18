@@ -20,10 +20,10 @@ Boston, MA 02111-1307, USA.  */
 
 /* Helper routines for debugger command interface. */
 
-#include "../rule.h"
-#include "../trace.h"
-#include "../commands.h"
-#include "../expand.h"
+#include "../src/rule.h"
+#include "../src/trace.h"
+#include "../src/commands.h"
+#include "../src/expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"

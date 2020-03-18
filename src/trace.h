@@ -112,10 +112,4 @@ extern void trace_push_floc (gmk_floc *p_floc);
 /*! Pop the next floc from the call stack.. */
 extern void trace_pop_floc (void);
 
-/*! Show just a list of targets */
-extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
-
-/*! Show just a list of tasks */
-extern void dbg_cmd_info_tasks();
-
 #endif /*REMAKE_TRACE_H*/

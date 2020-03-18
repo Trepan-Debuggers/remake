@@ -24,9 +24,9 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef REMAKE_DBG_CMD_H
 #define REMAKE_DBG_CMD_H
-#include "../job.h"
-#include "../buildargv.h"
-#include "../trace.h"
+#include "../src/job.h"
+#include "../src/buildargv.h"
+#include "../src/trace.h"
 
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int errcode,
@@ -39,6 +39,10 @@ extern debug_return_t dbg_cmd_target(char *psz_args);
 extern debug_return_t dbg_cmd_show(char *psz_args);
 extern debug_return_t dbg_cmd_where(char *psz_args);
 extern debug_return_t dbg_cmd_show_command(const char *psz_args);
+/*! Show just a list of targets */
+extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
+/*! Show just a list of tasks */
+extern void dbg_cmd_info_tasks();
 
 #endif /* DBG_CMD_H*/
 /* 

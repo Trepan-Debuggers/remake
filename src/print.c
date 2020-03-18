@@ -23,7 +23,8 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "main.h"
 #include "commands.h"
-#include "debugger/cmd.h"
+// debugger include(s)
+#include "cmd.h"
 #include "debug.h"
 #include "dep.h"
 #include "read.h"
