@@ -74,7 +74,7 @@ static void
 dbg_cmd_load_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_load;
-  short_command[c].use = _("load *Makefile*");
+  short_command[c].use = _("load *file-glob*");
 }
 
 
