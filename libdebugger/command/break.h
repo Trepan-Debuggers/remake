@@ -1,8 +1,4 @@
 /*
-Set a breakpoint at a target.  With a target name, set a break before
-running commands of that target.  Without argument, list all breaks.
-*/
-/*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -21,6 +17,14 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file libdebugger/command/break.h
+ *
+ *  \brief Deugger command to set a breakpoint at a target.
+ *
+ * With a target name, set a break before  running commands of that target.
+   Without argument, list all breaks.
+*/
 
 static debug_return_t
 dbg_cmd_break (char *psz_args)

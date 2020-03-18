@@ -1,4 +1,3 @@
-/* Step over the next command to be executed. */
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2015, 2020 R. Bernstein
 <rocky@gnu.org>
@@ -18,6 +17,13 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+
+/** \file libdebugger/command/next.h
+ *
+ *  \brief Debugger command to step over the next command or target to be executed.
+ */
+
 static debug_return_t
 dbg_cmd_next(char *psz_arg)
 {

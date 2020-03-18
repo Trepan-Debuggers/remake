@@ -1,4 +1,3 @@
-/* Show a variable definition. */
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
@@ -18,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file libdebugger/command/print.h
+ *
+ *  \brief Debugger command to show a variable definition.
+*/
+
 static debug_return_t
 dbg_cmd_print(char *psz_args)
 {

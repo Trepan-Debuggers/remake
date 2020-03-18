@@ -1,4 +1,3 @@
-/* Read and evaluate a Makefile. */
 /*
 Copyright (C) 2020 R. Bernstein <rocky@gnu.org>
 
@@ -18,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file libdebugger/command/load.h
+ *
+ *  \brief Debugger command to read and evaluate a Makefile.
+ */
 
 #include <glob.h>
 #include "read.h"
