@@ -5,9 +5,9 @@ Debugger Commands
 *****************
 
 Following *gdb* and the other trepanning debuggers, we classify
-commands into categories. Note though that some commands, like `quit`,
+commands into categories. Note though that some commands, like ``quit``,
 and `run`, are in different categories and some categories are
-new, like `set`, `show`, and `info`.
+new, like ``set``, ``show``, and ``info``.
 
 .. toctree::
    :maxdepth: 1

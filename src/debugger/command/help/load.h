@@ -1,4 +1,5 @@
 #define load_HELP_TEXT							\
-  "Read in and evaluate *Makefile*.\n"					\
+  "Read in and evaluate GNU Makefile *file-glob*.\n"			\
   "\n"									\
-  "Note that dependencies are updated after reading the file in."
+  "*file-glob* should resolve after glob expansion to single GNU\n"	\
+  "Makefile. Target dependencies are updated after reading in the file."
