@@ -611,6 +611,7 @@ AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
 # Specify what files are to be created.
 AC_CONFIG_FILES([ \
 Makefile lib/Makefile po/Makefile.in doc/Makefile \
+  doc/doxygen/Doxyfile \
   glob/Makefile \
   unittest/Makefile \
   tests/config-flags.pm

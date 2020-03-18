@@ -181,6 +181,10 @@ check-regression: tests/config-flags.pm
 readthedocs:
 	$(MAKE) -C docs html
 
+#: Generate the Doxygen source code documentation (in HTML format)
+doxygen:
+	cd doc/doxygen && $(SHELL) ./run_doxygen
+
 # --------------- Maintainer's Section
 
 # Tell automake that I haven't forgotten about this file and it will be

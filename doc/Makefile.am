@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+EXTRA_DIST = doxygen/Doxyfile.in doxygen/run_doxygen
+
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
