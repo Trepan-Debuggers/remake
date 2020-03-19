@@ -20,10 +20,11 @@ Boston, MA 02111-1307, USA.  */
 
 /** \file libdebugger/command/break.c
  *
- *  \brief Debugger command to set a breakpoint at a target.
+ *  \brief Debugger `break` command.
  *
- * With a target name, set a break before  running commands of that target.
-   Without argument, list all breaks.
+ * Debugger command to set a breakpoint.
+ * With a target name, set a break before running commands of that target.
+ * Without an argument, list all breaks.
 */
 
 #include "../../src/makeint.h"

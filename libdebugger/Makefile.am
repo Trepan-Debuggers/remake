@@ -1,7 +1,17 @@
 noinst_HEADERS = commands.h debugger.h
 noinst_LIBRARIES = libdebugger.a
-libdebugger_a_SOURCES =  \
+
+# Because there is both a break.c and a command/break.c we need
+# to specify the latter explicitly.
+DEBUGGER_COMMANDS_C = \
 	command/break.c \
+	command/info.c \
+	$(wildcard command/*.c)
+
+libdebugger_a_SOURCES =  \
+	$(DEBUGGER_COMMANDS_C) \
+	command/chdir.c \
+	command/comment.c \
 	break.c \
 	cmd.c 	\
 	fns.c 	\
@@ -12,9 +22,3 @@ libdebugger_a_SOURCES =  \
 #: Reissue building this target in parent directory
 doxygen readthedocs:
 	$(MAKE) -C .. $@
-
-#DEBUGGER_H = \
-#	$(wildcard src/debugger/*.h) \
-#	$(wildcard src/debugger/command/*.h) \
-#	$(wildcard src/debugger/command/help/*.h)
-#

@@ -181,8 +181,6 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/chdir.h"
-#include "command/comment.h"
 #include "command/continue.h"
 #include "command/delete.h"
 #include "command/down.h"
@@ -190,7 +188,6 @@ find_command (const char *psz_name)
 #include "command/expand.h"
 #include "command/finish.h"
 #include "command/frame.h"
-#include "command/info.h"
 #include "command/load.h"
 #include "command/next.h"
 #include "command/list.h"
@@ -245,15 +242,34 @@ find_command (const char *psz_name)
 #include "command/help/where.h"
 #include "command/help/write.h"
 
-/* FIXME this can be folded into the below macro */
+/* FIXME: folded "init" routines into the macro them. */
 static void
 dbg_cmd_break_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_break;
-  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]*");
+  short_command[c].use  = _("break [*target*|*linenum*] [all|run|prereq|end]*");
 }
 
+static void
+dbg_cmd_chdir_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_chdir;
+  short_command[c].use  = _("cd DIR");
+}
 
+static void
+dbg_cmd_comment_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_comment;
+  short_command[c].use  = _("comment *text*");
+}
+
+static void
+dbg_cmd_info_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_info;
+  short_command[c].use = _("info [*subcommand*]");
+}
 
 #define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \
   dbg_cmd_ ## CMD ## _init(LETTER);                     \

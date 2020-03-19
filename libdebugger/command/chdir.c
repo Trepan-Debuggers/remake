@@ -1,3 +1,4 @@
+/* Write commands associated with a given target. */
 /*
 Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -16,23 +17,31 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Comment line - ingore text on line. */
-static debug_return_t
-dbg_cmd_comment (char *psz_args)
+
+/** \file libdebugger/command/chdir.c
+ *
+ *  \brief Debugger `chdir` command.
+ *
+ *  Debugger command to set working directory to `dir`.
+ */
+
+#include "../../src/trace.h"
+
+extern debug_return_t
+dbg_cmd_chdir (char *psz_args)
 {
-  UNUSED_ARGUMENT(psz_args);
+  if (!psz_args || 0==strlen(psz_args)) {
+    printf(_("Argument required (new working directory).\n"));
+  } else {
+    if ( 0 != chdir(psz_args) ) {
+      printf("%s: %s\n", psz_args, strerror(1));
+    } else {
+      printf (_("Working directory %s.\n"), psz_args);
+    }
+  }
   return debug_readloop;
 }
 
-static void
-dbg_cmd_comment_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_comment;
-  short_command[c].use  = _("comment TEXT");
-}
-
-
-
 /*
  * Local variables:
  * eval: (c-set-style "gnu")

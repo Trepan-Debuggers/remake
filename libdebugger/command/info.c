@@ -17,9 +17,11 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/info.h
+/** \file libdebugger/command/info.c
  *
- *  \brief Debugger command to get various pieces of information about program being debugged.
+ *  \brief Debugger `info` command
+ *
+ *  command to get various pieces of information about program being debugged.
 */
 
 #include "../../src/commands.h"
@@ -30,6 +32,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../../src/rule.h"
 #include "../../src/debug.h"
 #include "../../src/vpath.h"
+#include "../break.h"
+#include "../fns.h"
 #include "../info.h"
 #include "../msg.h"
 #include "../stack.h"
@@ -401,16 +405,6 @@ dbg_cmd_info(char *psz_args)
   }
 
   return debug_readloop;
-}
-
-static void
-dbg_cmd_info_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_info;
-  short_command[c].use = _("info [SUBCOMMAND]");
-  short_command[c].doc =
-    _("Show program information regarding SUBCOMMAND.\n"
-      "If SUBCOMMAND is not specified, give list of \"info\" subcommands.");
 }
 
 /*
