@@ -27,3 +27,4 @@ Boston, MA 02111-1307, USA.  */
 extern debug_return_t dbg_cmd_break (char *psz_args);
 extern debug_return_t dbg_cmd_chdir (char *psz_args);
 extern debug_return_t dbg_cmd_comment (char *psz_args);
+extern debug_return_t dbg_cmd_delete(char *psz_args);

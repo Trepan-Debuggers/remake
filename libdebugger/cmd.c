@@ -182,7 +182,6 @@ find_command (const char *psz_name)
 }
 
 #include "command/continue.h"
-#include "command/delete.h"
 #include "command/down.h"
 #include "command/edit.h"
 #include "command/expand.h"
@@ -262,6 +261,13 @@ dbg_cmd_comment_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_comment;
   short_command[c].use  = _("comment *text*");
+}
+
+static void
+dbg_cmd_delete_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_delete;
+  short_command[c].use  = _("delete *breakpoint-numbers*...");
 }
 
 static void

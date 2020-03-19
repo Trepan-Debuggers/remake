@@ -18,9 +18,9 @@
 libdebugger/break.c
 libdebugger/cmd.c
 libdebugger/command/chdir.c
+libdebugger/command/delete.c
 libdebugger/command/info.c
 libdebugger/command/continue.h
-libdebugger/command/delete.h
 libdebugger/command/down.h
 libdebugger/command/edit.h
 libdebugger/command/eval.h

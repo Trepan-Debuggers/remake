@@ -51,6 +51,7 @@ libdebugger_a_SOURCES =  \
 	$(DEBUGGER_COMMANDS_C) \
 	command/chdir.c \
 	command/comment.c \
+	command/delete.c \
 	break.c \
 	cmd.c 	\
 	fns.c 	\

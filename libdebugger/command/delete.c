@@ -25,7 +25,12 @@ Boston, MA 02111-1307, USA.  */
  *  in between. To delete all breakpoints, give no arguments.
  */
 
-static debug_return_t
+#include "../../src/trace.h"
+#include "../break.h"
+#include "../fns.h"
+#include "../msg.h"
+
+extern debug_return_t
 dbg_cmd_delete(char *psz_args)
 {
   int i_brkpt;
@@ -50,13 +55,6 @@ dbg_cmd_delete(char *psz_args)
   }
 
   return debug_readloop;
-}
-
-static void
-dbg_cmd_delete_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_delete;
-  short_command[c].use  = _("delete *breakpoint-numbers*...");
 }
 
 /*
