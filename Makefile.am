@@ -137,7 +137,7 @@ check-local: check-regression
 #
 MAKETESTFLAGS =
 
-.PHONY: check-regression
+.PHONY: check-regression readthedocs
 
 #: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
@@ -163,7 +163,7 @@ check-regression: tests/config-flags.pm
 
 #: Generate the ReadTheDocs manual in HTML format
 readthedocs:
-	$(MAKE) -C docs html
+	$(MAKE) -C readthedocs html
 
 #: Generate the Doxygen source code documentation (in HTML format)
 doxygen:
