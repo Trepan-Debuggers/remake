@@ -177,15 +177,6 @@ unsigned int get_path_max (void);
 # define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
 #endif
 
-#ifdef VMS
-# include <types.h>
-# include <unixlib.h>
-# include <unixio.h>
-# include <perror.h>
-/* Needed to use alloca on VMS.  */
-# include <builtins.h>
-#endif
-
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
 # if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__

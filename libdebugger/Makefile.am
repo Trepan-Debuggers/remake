@@ -1,4 +1,42 @@
-noinst_HEADERS = commands.h debugger.h
+noinst_HEADERS = \
+	break.h \
+	cmd.h \
+	commands.h \
+	debugger.h \
+	command/help/break.h \
+	command/help/chdir.h \
+	command/help/comment.h \
+	command/help/continue.h \
+	command/help/delete.h \
+	command/help/down.h \
+	command/help/edit.h \
+	command/help/expand.h \
+	command/help/finish.h \
+	command/help/frame.h \
+	command/help/help.h \
+	command/help/info.h \
+	command/help/list.h \
+	command/help/load.h \
+	command/help/next.h \
+	command/help/print.h \
+	command/help/pwd.h \
+	command/help/quit.h \
+	command/help/run.h \
+	command/help/set.h \
+	command/help/setq.h \
+	command/help/setqx.h \
+	command/help/shell.h \
+	command/help/show.h \
+	command/help/skip.h \
+	command/help/source.h \
+	command/help/step.h \
+	command/help/target.h \
+	command/help/up.h \
+	command/help/where.h \
+	command/help/write.h \
+	file2line.h \
+	subcmd.h
+
 noinst_LIBRARIES = libdebugger.a
 
 # Because there is both a break.c and a command/break.c we need
@@ -6,6 +44,7 @@ noinst_LIBRARIES = libdebugger.a
 DEBUGGER_COMMANDS_C = \
 	command/break.c \
 	command/info.c \
+	$(wildcard command/*.h)
 	$(wildcard command/*.c)
 
 libdebugger_a_SOURCES =  \
@@ -15,9 +54,21 @@ libdebugger_a_SOURCES =  \
 	break.c \
 	cmd.c 	\
 	fns.c 	\
+	fns.h \
 	file2line.c 	\
+	info.h \
 	msg.c 	\
-	stack.c
+	msg.h \
+	stack.c \
+	stack.h
+
+# FIXME: In order to make "make distcheck" work, we need to include
+# things from the top src directory. In particular this includes
+# "src/gettext.h" which is used by "src/makeint.h" when <gettext.h> is not
+# found.
+#
+# Some debugger commands include "makeint.h".
+DEFAULT_INCLUDES = -I$(top_srcdir)/src -I.@am__isrc@ -I$(top_builddir)/src
 
 #: Reissue building this target in parent directory
 doxygen readthedocs:

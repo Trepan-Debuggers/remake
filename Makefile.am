@@ -70,6 +70,12 @@ AM_CFLAGS += $(GUILE_CFLAGS)
 
 make_SOURCES += src/posixos.c
 
+# FIXME: In order to make "make distcheck" work, we need to include
+# things from the top lib directory. In particular this includes
+# "lib/findprog.h" which is used by "src/jobs.c" for POSIX spawn.
+DEFAULT_INCLUDES = -I$(top_srcdir)/lib -I.@am__isrc@ -I$(top_builddir)/src
+
+
 if USE_CUSTOMS
   # make_SOURCES += src/remote-cstms.c src/mock.c
   make_SOURCES += src/remote-cstms.c
