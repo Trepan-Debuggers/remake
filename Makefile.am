@@ -163,7 +163,7 @@ check-regression: tests/config-flags.pm
 
 #: Generate the ReadTheDocs manual in HTML format
 readthedocs:
-	$(MAKE) -C readthedocs html
+	$(MAKE) -C doc/readthedocs html
 
 #: Generate the Doxygen source code documentation (in HTML format)
 doxygen:

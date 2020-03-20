@@ -1,3 +1,0 @@
-
-
-int printIt( char *msg );
