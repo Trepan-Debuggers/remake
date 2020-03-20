@@ -20,7 +20,7 @@ by KCachegrind_, callgrind_annotate_, or gprof2dot_ or other tools that understa
 You can get not only timings, but a graph of the target dependencies
 checked. Below is an image rendered from a profiling of a ``remake`` build:
 
-.. image:: ../screenshots/remake-profiled2.png
+.. image:: ../../screenshots/remake-profiled2.png
 
 
 Listing and Documenting Makefile Targets
@@ -100,7 +100,7 @@ directory need to be specified.
 
 Here is a screenshot that shows ``make`` behavior versus ``remake``:
 
-.. image:: ../screenshots/remake-search-parent.gif
+.. image:: ../../screenshots/remake-search-parent.gif
 
 
 Improved Execution Tracing
@@ -119,7 +119,7 @@ And, if you the most flexibility in tracing there is a built-in debugger.
 
 Here is a screenshot that shows tracing:
 
-.. image:: ../screenshots/remake-trace.gif
+.. image:: ../../screenshots/remake-trace.gif
 
 Debugger
 --------
