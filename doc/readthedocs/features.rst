@@ -66,8 +66,8 @@ Let's run ``remake --tasks``:
     check                Test things
     dist                 Build distribution
 
-Many legacay [#f1]_ Makefiles don't have descriptive comment in them
-yet. So you can get a list of *all* targets using optoin
+Many legacy [#f1]_ Makefiles don't have descriptive comment in them
+yet. So you can get a list of *all* targets using option
 ``--targets``.  But be warned, since GNU Make comes with lots of
 implicit rule defaults, this list can be quite large.
 
