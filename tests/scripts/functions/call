@@ -4,11 +4,7 @@ $description = "Test the call function.\n";
 $details = "Try various uses of call and ensure they all give the correct
 results.\n";
 
-open(MAKEFILE, "> $makefile");
-
-# The Contents of the MAKEFILE ...
-
-print MAKEFILE <<'EOMAKE';
+run_make_test(q!
 # Simple, just reverse two things
 #
 reverse = $2 $1
@@ -48,35 +44,22 @@ all: ; @echo '$(call reverse,bar,foo)'; \
         echo '$(call my-foreach,a,,,)'; \
         echo '$(call my-if,a,b,c)'; \
         echo '$(call two,bar,baz)'; \
-	echo '$(call tclose,foo)'
+	echo '$(call tclose,foo)';
+!,
+              "", "foo bar\ndefault file file\nb d f\n\n\nb\nbar foo baz\nfoo bar baz blarp quux \n");
 
-
-
-EOMAKE
-
-# These won't work until/unless PR/1527 is resolved.
-#        echo '$(call my-foreach,a,x y z,$(a)$(a))'; \
-#        echo '$(call my-if,,$(warning don't print this),ok)'
+# These won't work because call expands all its arguments first, before
+# passing them on, then marks them as resolved/simple, so they're not
+# expanded again by the function.
 #
-# $answer = "xx yy zz\nok\n";
-
-# END of Contents of MAKEFILE
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile, "", &get_logfile);
-$answer = "foo bar\ndefault file file\nb d f\n\n\nb\nbar foo baz\nfoo bar baz blarp quux \n";
-&compare_output($answer, &get_logfile(1));
-
+#        echo '$(call my-foreach,a,x y z,$$(a)$$(a))'; \
+#        echo '$(call my-if,,$$(info don't print this),$$(info do print this))'
+#
+# $answer = "xx yy zz\ndo print this\n";
 
 # TEST eclipsing of arguments when invoking sub-calls
 
-$makefile2 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile2");
-
-print MAKEFILE <<'EOF';
-
+run_make_test(q!
 all = $1 $2 $3 $4 $5 $6 $7 $8 $9
 
 level1 = $(call all,$1,$2,$3,$4,$5)
@@ -88,13 +71,8 @@ all:
 	@echo $(call level1,1,2,3,4,5,6,7,8)
 	@echo $(call level2,1,2,3,4,5,6,7,8)
 	@echo $(call level3,1,2,3,4,5,6,7,8)
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile2, "", &get_logfile);
-$answer = "1 2 3 4 5 6 7 8 9\n1 2 3 4 5\n1 2 3\n1 2 3\n";
-&compare_output($answer,&get_logfile(1));
+!,
+              "", "1 2 3 4 5 6 7 8 9\n1 2 3 4 5\n1 2 3\n1 2 3\n");
 
 # Ensure that variables are defined in global scope even in a $(call ...)
 
@@ -108,3 +86,7 @@ all: ; @echo "$${X123-not set}"
               '', "\n");
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

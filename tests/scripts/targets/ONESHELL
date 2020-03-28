@@ -4,10 +4,14 @@ $description = "Test the behaviour of the .ONESHELL target.";
 
 $details = "";
 
-# Some shells (*shakes fist at Solaris*) cannot handle multiple flags in
-# separate arguments.
-my $t = `/bin/sh -e -c true 2>/dev/null`;
-my $multi_ok = $? == 0;
+my $multi_ok = 0;
+
+if ($port_type ne 'W32') {
+    # Some shells (*shakes fist at Solaris*) cannot handle multiple flags in
+    # separate arguments.
+    my $t = `$sh_name -e -c true 2>/dev/null`;
+    my $multi_ok = $? == 0;
+}
 
 # Simple
 
@@ -71,8 +75,9 @@ all:
 
 
 # Now try using a different interpreter
-
-run_make_test(q!
+# This doesn't work on Windows right now
+if ($port_type ne 'W32') {
+    run_make_test(q!
 .RECIPEPREFIX = >
 .ONESHELL:
 SHELL = #PERL#
@@ -83,6 +88,7 @@ all:
 >	@y=qw(a b c);
 >print "a = $$a, y = (@y)\n";
 !,
-              '', "a = 12, y = (a b c)\n");
+                  '', "a = 12, y = (a b c)\n");
+}
 
 1;

@@ -1,3 +1,5 @@
+#                                                                    -*-perl-*-
+
 $description = "The following test creates a makefile to override part\n"
               ."of one Makefile with Another Makefile with the .DEFAULT\n"
               ."rule.";
@@ -9,41 +11,21 @@ $details = "This tests the use of the .DEFAULT special target to say that \n"
           ."defined here but passes the target bar on to another makefile\n"
           ."which does have the target bar defined.\n";
 
-$makefile2 = &get_tmpfile;
+create_file('defsub.mk', q!
+bar: ; @echo Executing rule BAR
+!);
 
-open(MAKEFILE,"> $makefile");
+run_make_test(q!
+foo:; @echo Executing rule FOO
 
-# The Contents of the MAKEFILE ...
+.DEFAULT: ; @$(MAKE) -f defsub.mk $@
+!,
+                       'bar',"#MAKE#[1]: Entering directory '#PWD#'\n"
+                       . "Executing rule BAR\n"
+                       . "#MAKE#[1]: Leaving directory '#PWD#'\n");
 
-print MAKEFILE "foo:\n";
-print MAKEFILE "\t\@echo Executing rule FOO\n\n";
-print MAKEFILE ".DEFAULT:\n";
-print MAKEFILE "\t\@\$(MAKE) -f $makefile2 \$\@ \n";
+unlink('defsub.mk');
 
-# END of Contents of MAKEFILE
-
-close(MAKEFILE);
-
-
-open(MAKEFILE,"> $makefile2");
-
-print MAKEFILE "bar:\n";
-print MAKEFILE "\t\@echo Executing rule BAR\n\n";
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile,'bar',&get_logfile);
-
-# Create the answer to what should be produced by this Makefile
-$answer = "${make_name}[1]: Entering directory '$pwd'\n"
-        . "Executing rule BAR\n"
-        . "${make_name}[1]: Leaving directory '$pwd'\n";
-
-# COMPARE RESULTS
-
-&compare_output($answer,&get_logfile(1));
-
-# This tells the test driver that the perl test script executed properly.
 1;
 
 

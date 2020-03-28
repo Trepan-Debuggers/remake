@@ -141,6 +141,22 @@ all: ; @:',
               '',
               'success');
 
+# SV 47960 : ensure variable assignments in non-taken legs don't cause problems
+run_make_test('
+ifneq ($(FOO),yes)
+target:
+else
+BAR = bar
+target:
+endif
+	@echo one
+',
+              '', "one\n");
+
 
 # This tells the test driver that the perl test script executed properly.
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

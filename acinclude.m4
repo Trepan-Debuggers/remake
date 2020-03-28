@@ -1,7 +1,7 @@
 dnl acinclude.m4 -- Extra macros needed for GNU make.
 dnl
 dnl Automake will incorporate this into its generated aclocal.m4.
-dnl Copyright (C) 1998-2014 Free Software Foundation, Inc.
+dnl Copyright (C) 1998-2016 Free Software Foundation, Inc.
 dnl This file is part of GNU Make.
 dnl
 dnl GNU Make is free software; you can redistribute it and/or modify it under

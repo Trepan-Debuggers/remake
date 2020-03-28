@@ -1,8 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 1993-2014 Free Software Foundation, Inc.
+# Copyright (C) 1993-2020 Free Software Foundation, Inc.
 # This file is part of GNU Make.
-# Copyright (C) 2008, 2011, 2014, 2017 rocky@gnu.org
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -17,25 +16,56 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg1.3],[https://github.com/rocky/remake/issues])
+define(_MAKE_VERSION_, 4.3)
+AC_INIT([remake],[_MAKE_VERSION_+dbg-1.5],[https://github.com/rocky/remake/issues])
 
-AC_PREREQ([2.62])
+# These are used in maintMakefile
+MAKE_VERSION=_MAKE_VERSION_
+MAKE_PACKAGE=make
+AC_SUBST(MAKE_VERSION)
+AC_SUBST(MAKE_PACKAGE)
+
+AC_PREREQ([2.69])
 
 # Autoconf setup
-AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([vpath.c])
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_SRCDIR([src/vpath.c])
+AC_CONFIG_HEADERS([src/config.h])
+
+AM_MAINTAINER_MODE
+
+AC_CONFIG_LIBOBJ_DIR([lib])
+
+AH_TOP(
+/* Guard against #including config.h more than once */
+#ifndef INCLUDED_REMAKE_CONFIG_H
+#define INCLUDED_REMAKE_CONFIG_H
+)
+AH_BOTTOM(
+#endif /*INCLUDED_REMAKE_CONFIG_H*/
+)
 
 # Automake setup
 # We have to enable "foreign" because ChangeLog is auto-generated
-# We cannot enable -Werror because gettext 0.18.1 has invalid content
-# When we update gettext to 0.18.3 or better we can add it again.
-AM_INIT_AUTOMAKE([subdir-objects 1.11.1 silent-rules foreign -Wall])
-AM_MAINTAINER_MODE
+# Automake 1.15 and gnulib don't get along: gnulib has some strange error
+# in the way it handles getloadavg.c which causes make distcheck to fail.
+# http://lists.gnu.org/archive/html/bug-gnulib/2018-06/msg00024.html
+#
+# We have to enable "info-in-builddir" because future versions of automake
+# would place generated .info files in srcdir instead of builddir. Using that
+# option everything stays as it is.
+# https://www.gnu.org/software/automake/manual/html_node/List-of-Automake-options.html
+AM_INIT_AUTOMAKE([subdir-objects 1.14 silent-rules foreign -Wall
+                  info-in-builddir])
 
 # Checks for programs.
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
+
+# Configure gnulib
+gl_EARLY
+gl_INIT
+
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_CPP
@@ -43,6 +73,9 @@ AC_PROG_LN_S
 AC_CHECK_PROG([AR], [ar], [ar], [ar])
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG([PERL], [perl], [perl], [perl])
+# GNU grep is needed (OpenBSD)
+#AC_CHECK_PROG([ggrep], [grep])
+AC_PROG_GREP
 
 # Ruby 1.9 and RSPec are needed for the debugger test suite (only)
 AC_CHECK_PROG(RUBY, ruby, ruby, none)
@@ -55,12 +88,12 @@ AM_PROG_AR
 AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
-AC_MINIX
+AC_C_BIGENDIAN
 
 AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 
 # Enable gettext, in "external" mode.
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT_VERSION([0.19.3])
 AM_GNU_GETTEXT([external])
 
 # This test must come as early as possible after the compiler configuration
@@ -78,22 +111,18 @@ AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS([stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h \
-                  sys/user.h linux/binfmts.h])
+                  sys/select.h sys/file.h spawn.h])
 
 AM_PROG_CC_C_O
+AC_PROG_CC_C99
 AC_C_CONST
 AC_TYPE_SIGNAL
 AC_TYPE_UID_T
 AC_TYPE_PID_T
-
-# Find some definition for uintmax_t
-
-AC_CHECK_TYPE([uintmax_t],[],
-[ uintmax_t="unsigned long"
-  AC_CHECK_TYPE([unsigned long long],[uintmax_t="unsigned long long"])
-  AC_DEFINE_UNQUOTED([uintmax_t], [$uintmax_t],
-    [Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])
-])
+AC_TYPE_OFF_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINTMAX_T
 
 # Find out whether our struct stat returns nanosecond resolution timestamps.
 
@@ -135,8 +164,8 @@ AC_CACHE_CHECK([for standard gettimeofday], [ac_cv_func_gettimeofday],
                   int main ()
                   {
                     struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
-                    exit (gettimeofday (&t, 0) != 0
-                          || t.tv_sec < 0 || t.tv_usec < 0);
+                    return gettimeofday (&t, 0) != 0
+                          || t.tv_sec < 0 || t.tv_usec < 0;
                   }]])],
                   [ac_cv_func_gettimeofday=yes],
                   [ac_cv_func_gettimeofday=no],
@@ -146,17 +175,20 @@ AS_IF([test "$ac_cv_func_gettimeofday" = yes],
             [Define to 1 if you have a standard gettimeofday function])
 ])
 
-AC_CHECK_FUNCS([strdup strndup mkstemp mktemp fdopen fileno \
+AC_CHECK_FUNCS([strdup strndup memrchr umask mkstemp mktemp fdopen \
                 dup dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
-                getrlimit setrlimit setvbuf pipe strerror strsignal \
-                lstat readlink atexit isatty ttyname])
+                getrlimit setrlimit setvbuf pipe strsignal \
+                lstat readlink atexit isatty ttyname pselect posix_spawn \
+                posix_spawnattr_setsigmask])
 
 # We need to check declarations, not just existence, because on Tru64 this
 # function is not declared without special flags, which themselves cause
 # other problems.  We'll just use our own.
 AC_CHECK_DECLS([bsd_signal], [], [], [[#define _GNU_SOURCE 1
 #include <signal.h>]])
+
+AC_FUNC_FORK
 
 AC_FUNC_SETVBUF_REVERSED
 
@@ -165,49 +197,51 @@ AC_FUNC_SETVBUF_REVERSED
 # make the effort here.
 AC_CHECK_FUNCS([strcasecmp strncasecmp strcmpi strncmpi stricmp strnicmp])
 
+# Tell automake about this, so it can build the right .c files.
+AM_CONDITIONAL([USE_LOCAL_GLOB], [test "$make_cv_sys_gnu_glob" = no])
+
+# TOMTOM let's see if that help
+AC_FUNC_VPRINTF
+
 # strcoll() is used by the GNU glob library
 AC_FUNC_STRCOLL
-
-AC_FUNC_ALLOCA
-AC_FUNC_VPRINTF
 AC_FUNC_CLOSEDIR_VOID
 
+# dir.c and our glob.c use dirent.d_type if available
+AC_STRUCT_DIRENT_D_TYPE
+
 # See if the user wants to add (or not) GNU Guile support
-PKG_PROG_PKG_CONFIG
 AC_ARG_WITH([guile], [AS_HELP_STRING([--with-guile],
             [Support GNU Guile for embedded scripting])])
 
-# For some strange reason, at least on Ubuntu, each version of Guile
-# comes with it's own PC file so we have to specify them as individual
-# packages.  Ugh.
+# Annoyingly, each version of Guile comes with it's own PC file so we have to
+# specify them as individual packages.  Ugh.
+PKG_PROG_PKG_CONFIG
+
 AS_IF([test "x$with_guile" != xno],
-[ PKG_CHECK_MODULES([GUILE], [guile-2.0], [have_guile=yes],
-  [PKG_CHECK_MODULES([GUILE], [guile-1.8], [have_guile=yes],
-    [have_guile=no])])
-])
-
-AS_IF([test "$have_guile" = yes],
-      [AC_DEFINE([HAVE_GUILE], [1], [Embed GNU Guile support])])
-
-AM_CONDITIONAL([HAVE_GUILE], [test "$have_guile" = yes])
-
-AC_FUNC_GETLOADAVG
-
-# AC_FUNC_GETLOADAVG is documented to set the NLIST_STRUCT value, but it
-# doesn't.  So, we will.
-
-AS_IF([test "$ac_cv_header_nlist_h" = yes],
-[ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <nlist.h>]],
-        [[struct nlist nl;
-          nl.n_name = "string";
-          return 0;]])],
-        [make_cv_nlist_struct=yes],
-        [make_cv_nlist_struct=no])
-  AS_IF([test "$make_cv_nlist_struct" = yes],
-  [ AC_DEFINE([NLIST_STRUCT], [1],
-       [Define to 1 if struct nlist.n_name is a pointer rather than an array.])
+[ guile_versions="3.0 2.2 2.0 1.8"
+  guile_version=no
+  have_guile=no
+  AC_MSG_CHECKING([for GNU Guile])
+  for v in $guile_versions; do
+    PKG_CHECK_EXISTS([guile-$v], [guile_version=$v; have_guile=yes; break], [])
+  done
+  AC_MSG_RESULT([$guile_version])
+  AS_IF([test "$have_guile" = yes],
+  [ PKG_CHECK_MODULES(GUILE, [guile-$guile_version])
+    # Unfortunately Guile requires a C99 compiler but GNU make doesn't, so
+    # verify we can actually compile the header.
+    keep_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS $pkg_cv_GUILE_CFLAGS"
+    AC_CHECK_HEADER([libguile.h],
+                    [AC_DEFINE([HAVE_GUILE], [1], [Embed GNU Guile support])],
+                    [have_guile=no],
+                    [/* Avoid configuration error warnings. */])
+    CPPFLAGS="$keep_CPPFLAGS"
   ])
 ])
+
+AM_CONDITIONAL([HAVE_GUILE], [test "$have_guile" = "yes"])
 
 AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], , ,
   [AC_INCLUDES_DEFAULT
@@ -303,57 +337,14 @@ AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
 #
 # Check for readline to see if we can add debugging support.
 #
-AC_CHECK_HEADER(readline/readline.h, [have_readline=yes], [have_readline=no])
-
-if test "$have_readline" != yes; then
-   AC_MSG_ERROR([GNU Readline and its headers files are needed. See http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html])
-fi
-
-VL_LIB_READLINE
-AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
-AC_TRY_RUN([
-#include <stdio.h>
-#include <readline/readline.h>
-
-int main(int argc, char **argv) {
-  char *s = tilde_expand ("~");
-  return 0;
-}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes;
-     AC_DEFINE(HAVE_TILDE_EXPAND, [],
-     [Define this <readline/readline.h> defines tilde_expand()])],
-     [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
-     [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
-
+AC_CHECK_HEADERS([readline/readline.h readline/history.h])
 AC_CHECK_LIB(readline, readline)
-AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
-AC_TRY_RUN([
-#include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+AC_SUBST(HAVE_LIBREADLINE)
 
-int main(int argc, char **argv) {
-  HIST_ENTRY **hist_list;
-
-      rl_initialize ();
-   hist_list = history_list();
-  return 0;
-}], [AC_MSG_RESULT(yes); ac_have_history_list=yes;
-     AC_DEFINE(HAVE_HISTORY_LIST, [],
-     [Define this <readline/readline.h> defines history_list()])],
-     [AC_MSG_RESULT(no); ac_have_history_list=no],
-     [AC_MSG_RESULT(no); ac_have_history_list=no])
-
-AC_SUBST(HAVE_READLINE)
 REMAKE_SOURCE_PATH="`pwd`"
 AC_DEFINE_UNQUOTED(REMAKE_SOURCE_PATH, "$REMAKE_SOURCE_PATH",
 	[Full path to remake top_sourcedir.])
 AC_SUBST(REMAKE_SOURCE_PATH)
-
-# If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
-AS_IF([test "$PATH_SEPARATOR" = ';'],
-[ AC_DEFINE([HAVE_DOS_PATHS], [1],
-            [Define to 1 if your system requires backslashes or drive specs in pathnames.])
-])
 
 # See if the user wants to use pmake's "customs" distributed build capability
 AC_SUBST([REMOTE]) REMOTE=stub
@@ -476,6 +467,43 @@ AS_IF([test "$ac_cv_func_lstat" = yes && test "$ac_cv_func_readlink" = yes],
               [Define to 1 to enable symbolic link timestamp checking.])
 ])
 
+# Use posix_spawn if we have support and the user didn't disable it
+
+AC_ARG_ENABLE([posix-spawn],
+  AC_HELP_STRING([--disable-posix-spawn],
+                 [disable support for posix_spawn()]),
+  [make_cv_posix_spawn="$enableval" user_posix_spawn="$enableval"],
+  [make_cv_posix_spawn="yes"])
+
+AS_CASE([/$ac_cv_header_spawn/$ac_cv_func_posix_spawn/],
+  [*/no/*], [make_cv_posix_spawn=no])
+
+AS_IF([test "$make_cv_posix_spawn" = yes],
+  AC_CACHE_CHECK([for posix_spawn that fails synchronously],
+    [make_cv_synchronous_posix_spawn],
+    [make_cv_synchronous_posix_spawn=no
+     AC_RUN_IFELSE([AC_LANG_SOURCE([[
+       #include <spawn.h>
+       #include <string.h>
+
+       extern char **environ;
+
+       int main() {
+         char* path = strdup("./non-existent");
+         char *argv[[2]];
+         argv[[0]] = path;
+         argv[[1]] =  0;
+         return posix_spawn(0, path, 0, 0, argv, environ);
+       }]])],
+       [make_cv_synchronous_posix_spawn=no],
+       [make_cv_synchronous_posix_spawn=yes],
+       [make_cv_synchronous_posix_spawn="no (cross-compiling)"])]))
+
+AS_CASE([/$user_posix_spawn/$make_cv_posix_spawn/$make_cv_synchronous_posix_spawn/],
+  [*/no/*], [make_cv_posix_spawn=no],
+  [AC_DEFINE(USE_POSIX_SPAWN, 1, [Define to 1 to use posix_spawn().])
+  ])
+
 # Find the SCCS commands, so we can include them in our default rules.
 
 AC_CACHE_CHECK([for location of SCCS get command], [make_cv_path_sccs_get], [
@@ -503,49 +531,11 @@ AS_IF([(/usr/sccs/admin -n s.conftest || admin -n s.conftest) >/dev/null 2>&1 &&
 ])
 rm -f s.conftest conftoast
 
-# Check the system to see if it provides GNU glob.  If not, use our
-# local version.
-AC_CACHE_CHECK([if system libc has GNU glob], [make_cv_sys_gnu_glob],
-[ AC_EGREP_CPP([gnu glob],[
-#include <features.h>
-#include <glob.h>
-#include <fnmatch.h>
-
-#define GLOB_INTERFACE_VERSION 1
-#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
-# include <gnu-versions.h>
-# if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
-   gnu glob
-# endif
-#endif],
-        [make_cv_sys_gnu_glob=yes],
-        [make_cv_sys_gnu_glob=no])])
-AS_IF([test "$make_cv_sys_gnu_glob" = no],
-[ GLOBINC='-I$(srcdir)/glob'
-  GLOBLIB=glob/libglob.a
-])
-AC_SUBST([GLOBINC])
-AC_SUBST([GLOBLIB])
-
-# Tell automake about this, so it can build the right .c files.
-AM_CONDITIONAL([USE_LOCAL_GLOB], [test "$make_cv_sys_gnu_glob" = no])
-
 # Let the makefile know what our build host is
 
 AC_DEFINE_UNQUOTED([MAKE_HOST],["$host"],[Build host information.])
 MAKE_HOST="$host"
 AC_SUBST([MAKE_HOST])
-
-w32_target_env=no
-AM_CONDITIONAL([WINDOWSENV], [false])
-
-AS_CASE([$host],
-  [*-*-mingw32],
-   [AM_CONDITIONAL([WINDOWSENV], [true])
-    w32_target_env=yes
-    AC_DEFINE([WINDOWS32], [1], [Use platform specific coding])
-    AC_DEFINE([HAVE_DOS_PATHS], [1], [Use platform specific coding])
-  ])
 
 AC_DEFINE_UNQUOTED([PATH_SEPARATOR_CHAR],['$PATH_SEPARATOR'],
         [Define to the character that separates directories in PATH.])
@@ -612,30 +602,75 @@ AS_IF([test "x$make_cv_load" = xno && test "x$user_load" = xyes],
   echo
 ])
 
+AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
+[ echo
+  echo "WARNING: posix_spawn() is not supported on this system."
+  echo
+])
+
 # Specify what files are to be created.
 AC_CONFIG_FILES([ \
-	Makefile \
-	glob/Makefile \
-	po/Makefile.in \
-	config/Makefile \
-        doc/Makefile \
-	unittest/Makefile \
-	w32/Makefile \
-	tests/config-flags.pm
-	])
+Makefile lib/Makefile po/Makefile.in doc/Makefile \
+  glob/Makefile \
+  unittest/Makefile \
+  tests/config-flags.pm
+])
+# We don't need this: the standard automake output suffices for POSIX systems.
+#mk/Posix.mk
+
+# We like mondo-warnings!
+# Also force comments to be preserved.  This helps when using ccache, in
+# combination with GCC 7's implicit-fallthrough warning.
+# check for some supported compiler flags, instead of have 'em hard coded in
+# maintMakefile
+# -Werror is too much, on different platform we get different warnings FOR
+# e.g. guile headers.
+# rocky: However to *test* for whether to use options below, we want to turn
+# warnings into errors, hence, the separate check for -Werror.
+WARN_TO_ERROR_CFLAG=""
+AX_CHECK_COMPILE_FLAG([-Werror], [WARN_TO_ERROR_CFLAG="-Werror "])
+CHECK_CFLAGS="
+        -C
+	-Wall
+	-Wbad-function-cast
+	-Wchar-subscripts
+	-Wdeclaration-after-statement
+	-Wdisabled-optimization
+	-Wduplicate-conk
+	-Wduplicate-enum
+	-Wendif-labels
+	-Wextra
+	-Wformat-security
+	-Wformat-signedness
+	-Wignore-qualifiers
+	-Winline
+	-Wlogical-op
+	-Wlong-long
+	-Wnested-externs
+	-Wno-sign-compare
+	-Wpointer-arith
+	-Wshadow
+	-Wtype-limits
+	-Wunused
+	-Wunused-but-set-parameter
+	-Wunused-parameter
+	-Wwrite-strings
+"
+
+# Warnings not used (because they trigger messages):
+#   -Wmissing-declarations
+#   -Wstrict-prototypes
+#   -Wundef
+
+for OPT in $CHECK_CFLAGS; do
+    AX_CHECK_COMPILE_FLAG([$OPT $WARN_TO_ERROR_CFLAG], [AM_CFLAGS="$AM_CFLAGS $OPT"])
+done
+
+AC_SUBST([AM_CFLAGS])
 
 # OK, do it!
 
 AC_OUTPUT
-
-# We only generate the build.sh if we have a build.sh.in; we won't have
-# one before we've created a distribution.
-AS_IF([test -f "$srcdir/build.sh.in"],
-[ ./config.status --file build.sh
-  chmod +x build.sh
-])
-
-AC_MSG_NOTICE([Will install the 'make' binary under the name: $make_name])
 
 dnl Local Variables:
 dnl comment-start: "dnl "

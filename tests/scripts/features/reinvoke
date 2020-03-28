@@ -41,8 +41,6 @@ run_make_test(undef, '', "rebuilding #MAKEFILE#\nrunning rules.\n");
 &touch('c');
 
 run_make_test('
-SHELL = /bin/sh
-
 all: ; @echo hello
 
 a : b ; echo >> $@
@@ -57,7 +55,7 @@ include $(F)',
 # Now try with the file we're not updating being the actual file we're
 # including: this and the previous one test different parts of the code.
 
-run_make_test(undef, 'F=b', "[ -f b ] || echo >> b\nhello\n")
+run_make_test(undef, 'F=b', "[ -f b ] || echo >> b\nhello\n");
 
 &rmfiles('a','b','c');
 
@@ -78,3 +76,7 @@ unlink('foo30723');
 
 # This tells the test driver that the perl test script executed properly.
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

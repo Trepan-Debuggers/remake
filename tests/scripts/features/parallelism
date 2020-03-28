@@ -24,7 +24,7 @@ else {
   $sleep_command = "sleep";
 }
 
-
+# Test #0
 run_make_test("
 all : def_1 def_2 def_3
 def_1 : ; \@echo ONE; $sleep_command 3 ; echo TWO
@@ -32,6 +32,7 @@ def_2 : ; \@$sleep_command 2 ; echo THREE
 def_3 : ; \@$sleep_command 1 ; echo FOUR",
               '-j4', "ONE\nFOUR\nTHREE\nTWO");
 
+# Test #1
 # Test parallelism with included files.  Here we sleep/echo while
 # building the included files, to test that they are being built in
 # parallel.
@@ -46,6 +47,7 @@ all: 1 2; \@echo success
 rmfiles(qw(1.inc 2.inc));
 
 
+# Test #2
 # Test parallelism with included files--this time recurse first and make
 # sure the jobserver works.
 run_make_test("
@@ -64,6 +66,7 @@ endif
 
 rmfiles(qw(1.inc 2.inc));
 
+# Test #3
 # Grant Taylor reports a problem where tokens can be lost (not written back
 # to the pipe when they should be): this happened when there is a $(shell ...)
 # function in an exported recursive variable.  I added some code to check
@@ -82,58 +85,55 @@ all: first second
 first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
               '-j2', "first\nfirst\nsecond\nsecond", 0, 7);
 
-# Michael Matz <matz@suse.de> reported a bug where if make is running in
-# parallel without -k and two jobs die in a row, but not too close to each
-# other, then make will quit without waiting for the rest of the jobs to die.
+# # Test #4
+# # Michael Matz <matz@suse.de> reported a bug where if make is running in
+# # parallel without -k and two jobs die in a row, but not too close to each
+# # other, then make will quit without waiting for the rest of the jobs to die.
 
-run_make_test("
-.PHONY: all fail.1 fail.2 fail.3 ok
-all: fail.1 ok fail.2 fail.3
+# run_make_test("
+# .PHONY: all fail.1 fail.2 fail.3 ok
+# all: fail.1 ok fail.2 fail.3
 
-fail.1 fail.2 fail.3:
-	\@$sleep_command \$(patsubst fail.%,%,\$\@)
-	\@echo Fail
-	\@exit 1
+# fail.1 fail.2 fail.3:
+# 	\@$sleep_command \$(patsubst fail.%,%,\$\@)
+# 	\@echo Fail
+# 	\@exit 1
 
-ok:
-	\@$sleep_command 4
-	\@echo Ok done",
-              '-rR -j5', "Fail
-#MAKEFILE#:6: recipe for target 'fail.1' failed
-#MAKE#: directory '#PWD#'
-#MAKE#: *** [fail.1] Error 1
-#MAKE#: *** Waiting for unfinished jobs....
-Fail
-#MAKEFILE#:6: recipe for target 'fail.2' failed
-#MAKE#: directory '#PWD#'
-#MAKE#: *** [fail.2] Error 1
-Fail
-#MAKEFILE#:6: recipe for target 'fail.3' failed
-#MAKE#: directory '#PWD#'
-#MAKE#: *** [fail.3] Error 1
-Ok done",
-             512);
+# ok:
+# > \@#HELPER# sleep 4
+# > \@#HELPER# out OK",
+#               '-rR -j5', "sleep 1\nFail\nfail 1
+# make: directory '$fulltestdir'
+# #MAKE#: *** [fail.1] error 1
+# #MAKE#: *** Waiting for unfinished jobs....
+# sleep 2\nFail\nfail 1
+# make: directory '$fulltestdir'
+# #MAKE#: *** [fail.2] error 1
+# sleep 3\nFail\nfail 1
+# make: directory '$fulltestdir'
+# #MAKE#: *** [fail.3] error 1
+# sleep 4\nOK",
+#              512);
 
 
-# Test for Savannah bug #15641.
-#
-run_make_test('
-.PHONY: all
-all:; @:
+# # Test for Savannah bug #15641.
+# #
+# run_make_test('
+# .PHONY: all
+# all:; @:
 
--include foo.d
+# -include foo.d
 
-foo.d: comp
-	@echo building $@
+# foo.d: comp
+# 	@echo building $@
 
-comp: mod_a.o mod_b.o; @:
+# comp: mod_a.o mod_b.o; @:
 
-mod_a.o mod_b.o:
-	@exit 1
-', '-j2', '');
+# mod_a.o mod_b.o: ; @#HELPER# fail 1
+# ', '-j2', "fail 1\nfail 1\n");
 
 
-# TEST #9 -- Savannah bugs 3330 and 15919
+# TEST #5 -- Savannah bugs 3330 and 15919
 # In earlier versions of make this will either give the wrong answer, or hang.
 
 utouch(-10, 'target');
@@ -146,40 +146,40 @@ intermed: | phony ; touch $@
 phony: ; : phony', '-rR -j', ': phony');
 rmfiles('target');
 
-# TEST #11: Make sure -jN from MAKEFLAGS is processed even when we re-exec
-# See Savannah bug #33873
+# # TEST #11: Make sure -jN from MAKEFLAGS is processed even when we re-exec
+# # See Savannah bug #33873
 
-$extraENV{MAKEFLAGS} = '-j4';
+# $extraENV{MAKEFLAGS} = '-j4';
 
-run_make_test(q!
-things = thing1 thing2
-all: $(things)
-thing1:; @sleep 1; echo '$@ start'; sleep 2; echo '$@ end'
-thing2:; @echo '$@ start'; sleep 2; echo '$@ end'
--include inc.mk
-inc.mk: ; @touch $@
-!,
-              '', "thing2 start\nthing1 start\nthing2 end\nthing1 end\n");
+# run_make_test(q!
+# things = thing1 thing2
+# all: $(things)
+# thing1:; @#HELPER# wait thing2start file $@start wait thing2end out $@end
+# thing2:; @#HELPER# file $@start wait thing1start file $@end
+# -include inc.mk
+# inc.mk: ; @touch $@
+# !,
+#               '', "thing2 start\nthing1 start\nthing2 end\nthing1 end\n");
 
-delete $extraENV{MAKEFLAGS};
-rmfiles('inc.mk');
+# delete $extraENV{MAKEFLAGS};
+# rmfiles('inc.mk');
 
-# Ensure intermediate/secondary files are not pruned incorrectly.
-# See Savannah bug #30653
+# # Ensure intermediate/secondary files are not pruned incorrectly.
+# # See Savannah bug #30653
 
-utouch(-15, 'file2');
-utouch(-10, 'file4');
-utouch(-5,  'file1');
+# utouch(-15, 'file2');
+# utouch(-10, 'file4');
+# utouch(-5,  'file1');
 
-run_make_test(q!
-.INTERMEDIATE: file3
-file4: file3 ; @mv -f $< $@
-file3: file2 ; touch $@
-file2: file1 ; @touch $@
-!,
-              '--no-print-directory -j2', "touch file3");
+# run_make_test(q!
+# .INTERMEDIATE: file3
+# file4: file3 ; @mv -f $< $@
+# file3: file2 ; touch $@
+# file2: file1 ; @touch $@
+# !,
+#               '--no-print-directory -j2', "touch file3");
 
-rmfiles('file1', 'file2', 'file3', 'file4');
+# rmfiles('file1', 'file2', 'file3', 'file4');
 
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.
@@ -217,3 +217,7 @@ rmfiles('file1', 'file2', 'file3', 'file4');
 # rmfiles(qw(dependfile output));
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

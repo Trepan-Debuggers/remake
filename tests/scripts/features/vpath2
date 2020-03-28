@@ -13,10 +13,10 @@ open(MAKEFILE,"> $makefile");
 
 # The Contents of the MAKEFILE ...
 
-print MAKEFILE "VPATH = $workdir:$sourcedir\n";
+print MAKEFILE "VPATH = $workdir:$scriptdir\n";
 print MAKEFILE "vpath %.c foo\n";
 print MAKEFILE "vpath %.c $workdir\n";
-print MAKEFILE "vpath %.c $sourcedir\n";
+print MAKEFILE "vpath %.c $scriptdir\n";
 print MAKEFILE "vpath %.h $workdir\n";
 print MAKEFILE "vpath %.c\n";
 print MAKEFILE "vpath\n";

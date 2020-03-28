@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997-2014 Free Software Foundation, Inc.
+# Copyright (C) 1997-2020 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -16,214 +16,127 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 silent-rules std-options check-news
-ACLOCAL_AMFLAGS = -I config
+AUTOMAKE_OPTIONS = 1.8 dist-lzip silent-rules std-options subdir-objects nostdinc
+ACLOCAL_AMFLAGS = -I m4
 
 transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-# Only process if target is MS-Windows
-if WINDOWSENV
-  MAYBE_W32 =	w32
-  W32INC =	-I $(top_srcdir)/w32/include
-  W32LIB =	-Lw32 -lw32
-endif
-
-SUBDIRS =	glob config po doc $(MAYBE_W32) unittest
+SUBDIRS =	lib po doc glob unittest
 
 bin_PROGRAMS =	make
-include_HEADERS = gnumake.h
+include_HEADERS = src/gnuremake.h
 
-if USE_CUSTOMS
-  remote =	remote-cstms.c
-else
-  remote =	remote-stub.c
-endif
+man_MANS =	doc/make.1
 
 DEBUGGER_SRC = 	\
-		debugger/break.c \
-		debugger/cmd.c 	\
-		debugger/fns.c 	\
-		debugger/file2line.c 	\
-		debugger/msg.c 	\
-		debugger/stack.c
+		src/debugger/break.c \
+		src/debugger/cmd.c 	\
+		src/debugger/fns.c 	\
+		src/debugger/file2line.c 	\
+		src/debugger/msg.c 	\
+		src/debugger/stack.c
 
 DEBUGGER_H = \
-		debugger/break.h 		\
-		debugger/cmd.h 			\
-		debugger/fns.h 			\
-		debugger/msg.h 			\
-		debugger/command/break.h 	\
-		debugger/command/chdir.h  	\
-		debugger/command/comment.h 	\
-		debugger/command/continue.h	\
-		debugger/command/delete.h 	\
-		debugger/command/down.h 	\
-		debugger/command/edit.h 	\
-		debugger/command/eval.h 	\
-		debugger/command/expand.h	\
-		debugger/command/finish.h	\
-		debugger/command/frame.h	\
-		debugger/command/help.h		\
-		debugger/command/info.h		\
-		debugger/command/list.h		\
-		debugger/command/next.h		\
-		debugger/command/print.h	\
-		debugger/command/pwd.h		\
-		debugger/command/quit.h		\
-		debugger/command/run.h		\
-		debugger/command/set.h		\
-		debugger/command/setq.h		\
-		debugger/command/setqx.h	\
-		debugger/command/shell.h	\
-		debugger/command/show.h		\
-		debugger/command/skip.h		\
-		debugger/command/source.h	\
-		debugger/command/step.h		\
-		debugger/command/target.h	\
-		debugger/command/up.h		\
-		debugger/command/where.h	\
-		debugger/command/write.h	\
-		debugger/file2line.h 	        \
-		debugger/fns.h 			\
-		debugger/info.h			\
-		debugger/stack.h		\
-		debugger/subcmd.h
+	$(wildcard src/debugger/*.h) \
+	$(wildcard src/debugger/command/*.h) \
+	$(wildcard src/debugger/command/help/*.h)
 
-make_SOURCES =	alloc.c ar.c arscan.c \
-	buildargv.c commands.c default.c \
-	debug.c dir.c \
-	expand.c file_basic.c file.c function.c \
-	getopt.c getopt1.c globals.c guile.c \
-	hash.c implicit.c job.c load.c loadapi.c main.c misc.c output.c \
-	profile.c print.c \
-	read.c remake.c rule.c \
-	signame.c strcache.c \
-	trace.c variable.c version.c vpath.c \
-	$(remote) \
-	$(DEBUGGER_SRC)
+make_SRCS =	\
+		src/alloc.c src/ar.c src/arscan.c src/buildargv.c \
+		src/commands.c src/debug.c src/default.c src/dir.c src/expand.c \
+		src/file.c src/file_basic.c src/function.c src/getopt.c \
+		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \
+		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
+		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
+		src/rule.c src/rule.h src/signame.c src/strcache.c \
+		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
+		$(DEBUGGER_SRC)
 
-EXTRA_make_SOURCES = remote-stub.c remote-cstms.c mock.c
+glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
-noinst_HEADERS = buildargv.h commands.h \
-	debug.h debugger.h dep.h expand.h \
-	file_basic.h file.h function.h filedef.h \
-	getopt.h gettext.h  globals.h hash.h \
-	job.h main.h make.h makeint.h mock.h \
-	output.h implicit.h \
-	print.h profile.h \
-	read.h rule.h \
-	trace.h types.h variable.h vpath.h  \
-	$(DEBUGGER_H)
+alloca_SRCS =	lib/alloca.c
 
-make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
-		$(GUILE_LIBS)
-# Only process if target is MS-Windows
-if WINDOWSENV
-    make_LDADD += $(W32LIB)
-endif
+loadavg_SRCS =	lib/getloadavg.c
 
-man_MANS =	make.1
+make_SOURCES =	$(make_SRCS)
 
-DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+EXTRA_make_SOURCES = src/mock.c
 
-AM_CPPFLAGS =	$(GLOBINC)
-AM_CFLAGS =	$(GUILE_CFLAGS)
-# Only process if target is MS-Windows
-if WINDOWSENV
-    AM_CPPFLAGS +=	$(W32INC)
-endif
+noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h src/debugger.h \
+				src/dep.h src/expand.h src/file.h src/file_basic.h \
+				src/filedef.h src/function.h src/getopt.h src/gettext.h \
+				src/globals.h src/hash.h src/implicit.h src/job.h \
+				src/main.h src/make.h src/makeint.h src/mock.h src/os.h \
+				src/output.h src/print.h src/profile.h src/read.h \
+				src/rule.h src/trace.h src/types.h src/variable.h src/vpath.h \
+				$(DEBUGGER_H)
 
-
-# Extra stuff to include in the distribution.
-
-EXTRA_DIST =	ChangeLog README build.sh.in $(man_MANS) \
-		README.customs \
-		SCOPTIONS SMakefile \
-		make.lnk  NMakefile  \
-		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		gmk-default.scm gmk-default.h \
-	        debugger/Makefile \
-		NEWS.remake README.remake REMAKE.todo Rakefile
-
-# This is built during configure, but behind configure's back
-
-DISTCLEANFILES = build.sh
-
-MOSTLYCLEANFILES = callgrind.out.* *.orig *.rej @MAKE_NAME@
-
-# Forward targets
-
-html-local:
-	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
-
-#: Make (re)make
-make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
-	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
-	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
-	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
-
-.PHONY: html
-
-# --------------- Internationalization Section
+make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
+		@LIBINTL@
 
 localedir =	$(datadir)/locale
 
-# --------------- Local INSTALL Section
+AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
+		-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" \
+		-DLOCALEDIR=\"$(localedir)\"
 
-# If necessary, change the gid of the app and turn on the setgid flag.
-#
+AM_CFLAGS += $(GUILE_CFLAGS)
 
-# Whether or not make needs to be installed setgid.
-# The value should be either 'true' or 'false'.
-# On many systems, the getloadavg function (used to implement the '-l'
-# switch) will not work unless make is installed setgid kmem.
-#
-inst_setgid = @NEED_SETGID@
+make_SOURCES += src/posixos.c
 
-# Install make setgid to this group so it can get the load average.
-#
-inst_group = @KMEM_GROUP@
+if USE_CUSTOMS
+  # make_SOURCES += src/remote-cstms.c src/mock.c
+  make_SOURCES += src/remote-cstms.c
+else
+  # make_SOURCES += src/remote-stub.c src/mock.c
+  make_SOURCES += src/remote-stub.c
+endif
 
-#: install executables (e.g. remake)
-install-exec-local:
-	@if $(inst_setgid); then \
-	   app=$(DESTDIR)$(bindir)/`echo $(bin_PROGRAMS)|sed '$(transform)'`; \
-	   if chgrp $(inst_group) $$app && chmod g+s $$app; then \
-	     echo "chgrp $(inst_group) $$app && chmod g+s $$app"; \
-	   else \
-	     echo "$$app needs to be owned by group $(inst_group) and setgid;"; \
-	     echo "otherwise the '-l' option will probably not work."; \
-	     echo "You may need special privileges to complete the installation"; \
-	     echo "of $$app."; \
-	   fi; \
-	 else true; fi
+# Extra stuff to include in the distribution.
 
-# ---------------
-#: Generate the Guile default module content
+# We don't need this, since the standard automake output will do.
+#mk/Posix.mk.in
 
-guile.$(OBJEXT): gmk-default.h
-gmk-default.h: $(srcdir)/gmk-default.scm
+m4_FILES =	m4/gnulib-cache.m4
+
+test_FILES =	tests/run_make_tests \
+		tests/run_make_tests.pl tests/test_driver.pl \
+		tests/config-flags.pm.in  \
+		tests/mkshadow tests/thelp.pl tests/guile.supp tests/README
+# test/scripts are added via dist-hook below.
+
+EXTRA_DIST =	ChangeLog README $(man_MANS) \
+		README.customs \
+		src/gmk-default.scm src/gmk-default.h \
+		NEWS-remake.md README.remake REMAKE.todo Rakefile \
+		$(m4_FILES) $(test_FILES)
+
+# --------------- Generate the Guile default module content
+
+#: Generate the Guile module
+src/guile.$(OBJEXT): src/gmk-default.h
+src/gmk-default.h: $(top_srcdir)/src/gmk-default.scm
 	(echo 'static const char *const GUILE_module_defn = " '\\ \
 	  && sed -e 's/;.*//' -e '/^[ \t]*$$/d' -e 's/"/\\"/g' -e 's/$$/ \\/' \
-	         $(srcdir)/gmk-default.scm \
-          && echo '";') > $@
+		 $(top_srcdir)/src/gmk-default.scm \
+	  && echo '";') > src/gmk-default.h
 
 # --------------- Local DIST Section
 
-#: Install the w32 and tests subdirectories
-#
+#: Install the tests subdirectories
 dist-hook:
-	(cd $(srcdir); \
-	 sub=`find w32 tests -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name Makefile \) -prune -o -type f -print`; \
+	(cd $(top_srcdir); \
+	 sub=`find src tests/scripts -follow \( -name .git -o -name .deps -o -name work -o -name .gitignore -o -name \*.orig -o -name \*.rej -o -name \*~ -o -name \*.out -o -name Makefile \) -prune -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
 
 # --------------- Local CHECK Section
 
-check-local: check-regression check-loadavg
+#: run check-regression and show a banner
+check-local: check-regression
 	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
 	dashes=`echo "$$banner" | sed s/./=/g`; \
 	echo; \
@@ -231,26 +144,6 @@ check-local: check-regression check-loadavg
 	echo "$$banner"; \
 	echo "$$dashes"; \
 	echo
-
-.PHONY: check-loadavg check-regression
-
-#: Check internal load average routine against 'uptime'
-check-loadavg: loadavg$(EXEEXT)
-	@echo The system uptime program believes the load average to be:
-	-uptime
-	@echo The GNU load average checking code thinks:
-	-./loadavg$(EXEEXT)
-
-# FIXME: doesn't work.
-##: Run remake-specific tests using Ruby rspec
-#check-rspec:
-#	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
-
-# The loadavg function is invoked during "make check" to test getloadavg.
-check_PROGRAMS = loadavg
-nodist_loadavg_SOURCES = getloadavg.c
-loadavg_CPPFLAGS = -DTEST
-loadavg_LDADD = @GETLOADAVG_LIBS@
 
 # > check-regression
 #
@@ -260,30 +153,33 @@ loadavg_LDADD = @GETLOADAVG_LIBS@
 #
 MAKETESTFLAGS =
 
+.PHONY: check-regression
+
 #: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
-	@if test -f '$(srcdir)/tests/run_make_tests'; then \
+	@if test -f '$(top_srcdir)/tests/run_make_tests'; then \
 	  ulimit -n 128; \
 	  if $(PERL) -v >/dev/null 2>&1; then \
-	    case `cd '$(srcdir)'; pwd` in `pwd`) : ;; \
+	    case `cd '$(top_srcdir)'; pwd` in `pwd`) : ;; \
 	      *) test -d tests || mkdir tests; \
 		 rm -f srctests; \
-		 if ln -s '$(srcdir)/tests' srctests; then \
-		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
+		 if ln -s '$(top_srcdir)/tests' srctests; then \
+		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts jhelp.pl; do \
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && $(PERL) -I . ./run_make_tests.pl -srcdir $(abs_srcdir) -make ../make$(EXEEXT) $(MAKETESTFLAGS)"; \
-	    cd tests && $(PERL) -I . ./run_make_tests.pl -srcdir '$(abs_srcdir)' -make '../make$(EXEEXT)' $(MAKETESTFLAGS); \
+	    echo "cd tests && $(PERL) $(PERLFLAGS) ./run_make_tests.pl -srcdir $(abs_top_srcdir)/src -make ../make$(EXEEXT) $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) $(PERLFLAGS) ./run_make_tests.pl -srcdir '$(abs_top_srcdir)/src' -make '../make$(EXEEXT)' $(MAKETESTFLAGS); \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \
-	 else \
-	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
-	 fi
+	else \
+	  echo "Can't find the GNU Make test suite ($(top_srcdir)/tests)."; \
+	fi
 
-%.short:
-	$(MAKE) $(@:.short=) 2>&1 >/dev/null
+#: Generate the ReadTheDocs manual in HTML format
+readthedocs:
+	$(MAKE) -C docs html
 
 # --------------- Maintainer's Section
 
@@ -299,8 +195,9 @@ README:
 GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
-#: create ChangeLog for distirbution from 'git log'
+@MAINTAINER_MODE_TRUE@#: create ChangeLog for distribution from 'git log'
 ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
+#:
 
 endif

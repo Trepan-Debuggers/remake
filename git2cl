@@ -1,8 +1,8 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # Copyright (C) 2007, 2008 Simon Josefsson <simon@josefsson.org>
 # Copyright (C) 2007 Luis Mondesi <lemsx1@gmail.com>
-# * calls git directly. To use it just:
+# * calls git directly. To use it just: 
 #   cd ~/Project/my_git_repo; git2cl > ChangeLog
 # * implements strptime()
 # * fixes bugs in $comment parsing
@@ -350,7 +350,7 @@ while (my $_l = <$fh>) {
 	$state = 1 if ($_l =~ m,^$, and $author and (@date+0>0));
     } elsif ($state == 1) {
         # * modifying our input text is a bad choice
-        #   let's make a copy of it first, then we remove spaces
+        #   let's make a copy of it first, then we remove spaces 
         # * if we meet a "merge branch" statement, we need to start
         #   over and find a real entry
         # Luis Mondesi <lemsx1@gmail.com>

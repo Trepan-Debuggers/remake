@@ -11,19 +11,17 @@ find the makefile and the file to delete in the work directory.";
 $example = $workdir . $pathsep . "EXAMPLE";
 
 open(MAKEFILE,"> $makefile");
-print MAKEFILE <<EOF;
+print MAKEFILE qq!
 all: ; \@echo This makefile did not clean the dir ... good
-clean: ; $delete_command EXAMPLE\$(ext)
-EOF
+clean: ; $CMD_rmfile EXAMPLE\$(ext)
+!;
 close(MAKEFILE);
 
 # TEST #1
 # -------
-&touch($example);
+touch($example);
 
-&run_make_with_options("${testname}.mk",
-	               "-C $workdir clean",
-		       &get_logfile);
+run_make_with_options("${testname}.mk", "-C $workdir clean", &get_logfile);
 
 chdir $workdir;
 $wpath = &get_this_pwd;
@@ -35,10 +33,10 @@ if (-f $example) {
 
 # Create the answer to what should be produced by this Makefile
 $answer = "$make_name: Entering directory '$wpath'\n"
-        . "$delete_command EXAMPLE\n"
+        . "$CMD_rmfile EXAMPLE\n"
         . "$make_name: Leaving directory '$wpath'\n";
 
-&compare_output($answer,&get_logfile(1));
+compare_output($answer,&get_logfile(1));
 
 
 # TEST #2
@@ -47,11 +45,9 @@ $answer = "$make_name: Entering directory '$wpath'\n"
 
 $example .= "slash";
 
-&touch($example);
+touch($example);
 
-&run_make_with_options("${testname}.mk",
-	               "-C $workdir/ clean ext=slash",
-		       &get_logfile);
+run_make_with_options("${testname}.mk", "-C $workdir/ clean ext=slash", &get_logfile);
 
 chdir $workdir;
 $wpath = &get_this_pwd;
@@ -63,9 +59,10 @@ if (-f $example) {
 
 # Create the answer to what should be produced by this Makefile
 $answer = "$make_name: Entering directory '$wpath'\n"
-        . "$delete_command EXAMPLEslash\n"
+        . "$CMD_rmfile EXAMPLEslash\n"
         . "$make_name: Leaving directory '$wpath'\n";
 
 &compare_output($answer,&get_logfile(1));
 
+unlink($example);
 1;

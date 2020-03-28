@@ -54,7 +54,7 @@ $answer = "Some stuff\n$makefile:12: *** error is maybe.  Stop.\n";
 # Test #4
 
 &run_make_with_options($makefile, "ERROR4=definitely", &get_logfile, 512);
-$answer = "Some stuff\n$makefile:16: *** error is definitely.  Stop.\n";
+$answer = "Some stuff\n$makefile:17: *** error is definitely.  Stop.\n";
 &compare_output($answer,&get_logfile(1));
 
 # Test #5
@@ -66,8 +66,6 @@ $answer = "$makefile:22: *** Error found!.  Stop.\n";
 # This tells the test driver that the perl test script executed properly.
 1;
 
-
-
-
-
-
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

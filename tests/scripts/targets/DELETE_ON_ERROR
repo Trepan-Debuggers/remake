@@ -1,0 +1,34 @@
+#! -*-perl-*-
+
+$description = "Test the behaviour of the .DELETE_ON_ERROR target.";
+
+$details = "";
+
+run_make_test('
+.DELETE_ON_ERROR:
+all: ; exit 1 > $@
+',
+              '',
+"exit 1 > all
+work/targets/DELETE_ON_ERROR.mk:3: *** [all] error 1
+
+#0  all at $fullworkdir/DELETE_ON_ERROR.mk:3
+#MAKE#: *** Deleting file 'all'", 512);
+
+run_make_test('
+.DELETE_ON_ERROR:
+all: foo.x ;
+%.x : %.q ; echo > $@
+%.q : ; exit 1 > $@
+',
+              '',
+"exit 1 > foo.q
+work/targets/DELETE_ON_ERROR.mk.1:4: *** [foo.q] error 1
+
+#0  foo.q at $fullworkdir/DELETE_ON_ERROR.mk.1:4
+#1  foo.x at ??
+#2  all at $fullworkdir/DELETE_ON_ERROR.mk.1:3
+#MAKE#: *** Deleting file 'foo.q'", 512);
+
+# This tells the test driver that the perl test script executed properly.
+1;

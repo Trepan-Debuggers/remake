@@ -42,8 +42,7 @@ foo.x: bar.x
 bar.x: ; echo >> $@
 baz.x: bar.x ; @echo "touch $@"
 ',
-              '', '#MAKEFILE#:3: foo.x: No such file or directory
-echo >> bar.x
+              '', 'echo >> bar.x
 touch foo.x
 restarts=1
 touch baz.x');
@@ -86,3 +85,7 @@ unlink(qw(y x-dir/x));
 rmdir('x-dir');
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

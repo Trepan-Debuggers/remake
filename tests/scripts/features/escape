@@ -10,47 +10,58 @@ Make sure that backslash before non-special characters are kept.";
 
 # TEST 1
 
-run_make_test('
+run_make_test(q!
+ifdef NOESC
+path = pre:
+endif
+ifdef ONEESC
+path = pre\:
+endif
+ifdef TWOESC
+path = pre\\\\:
+endif
+
 $(path)foo : ; @echo "touch ($@)"
 
 foo\ bar: ; @echo "touch ($@)"
 
 sharp: foo\#bar.ext
-foo\#bar.ext: ; @echo "foo#bar.ext = ($@)"',
-	      '',
-	      'touch (foo)');
+foo\#bar.ext: ; @echo "foo#bar.ext = ($@)"
+!,
+              '',
+              'touch (foo)');
 
 # TEST 2: This one should fail, since the ":" is unquoted.
 
 run_make_test(undef,
-	      'path=pre:',
-	      "#MAKEFILE#:2: *** target pattern contains no '%'.  Stop.",
-	      512);
+              'NOESC=1',
+              "#MAKEFILE#:12: *** target pattern contains no '%'.  Stop.",
+              512);
 
 # TEST 3: This one should work, since we escape the ":".
 
 run_make_test(undef,
-	      "'path=pre\\:'",
-	      'touch (pre:foo)');
+              'ONEESC=1',
+              'touch (pre:foo)');
 
 # TEST 4: This one should fail, since the escape char is escaped.
 
 run_make_test(undef,
-	      "'path=pre\\\\:'",
-	      "#MAKEFILE#:2: *** target pattern contains no '%'.  Stop.",
-	      512);
+              'TWOESC=1',
+              "#MAKEFILE#:12: *** target pattern contains no '%'.  Stop.",
+              512);
 
 # TEST 5: This one should work
 
 run_make_test(undef,
-	      "'foo bar'",
-	      'touch (foo bar)');
+              ['foo bar'],
+              'touch (foo bar)');
 
 # TEST 6: Test escaped comments
 
 run_make_test(undef,
-	      'sharp',
-	      'foo#bar.ext = (foo#bar.ext)');
+              'sharp',
+              'foo#bar.ext = (foo#bar.ext)');
 
 # Test escaped colons in prerequisites
 # Quoting of backslashes in q!! is kind of messy.
@@ -69,6 +80,24 @@ all: ..\foo
 .DEFAULT: ; : '$@'
 !,
               '', ": '..\\foo'\n");
+
+# Test escaped comments in variable assignments
+run_make_test(q!
+self = $1
+foo := $(call self,#foo#)#foo
+bar := $(call self,\#bar\#)#bar
+all:;@echo '$(foo) $(bar)'
+!,
+               '',"#foo# \\#bar\\#");
+
+# Test escaped comments in variable assignments in a variable
+run_make_test(q!
+C = \#
+self = $1
+foo := $(call self,$Cfoo$C)#foo
+all:;@echo '$(foo)'
+!,
+               '',"#foo#");
 
 # This tells the test driver that the perl test script executed properly.
 1;

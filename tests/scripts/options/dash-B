@@ -45,7 +45,6 @@ include foo.x
 foo.x: ; @touch $@
 ',
               '-B', 'MAKE_RESTARTS=
-#MAKEFILE#:4: foo.x: No such file or directory
 MAKE_RESTARTS=1');
 
 rmfiles('foo.x');
@@ -63,7 +62,6 @@ foo.x: ; @touch $@
 blah.x: ; @echo $@
 ',
               '-B', 'MAKE_RESTARTS=
-#MAKEFILE#:4: foo.x: No such file or directory
 MAKE_RESTARTS=1
 blah.x
 all');
@@ -83,3 +81,7 @@ x.a: x.b ; @echo $?
 unlink(qw(x.a x.b));
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:
