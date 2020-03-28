@@ -18,6 +18,16 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file libdebugger/command/up.c
+ *
+ *  \brief Debugger "up" command
+ */
+
+
+#include "../../src/trace.h"
+#include "../fns.h"
+#include "../stack.h"
+
 debug_return_t
 dbg_cmd_up (char *psz_amount)
 {
@@ -31,14 +41,6 @@ dbg_cmd_up (char *psz_amount)
   }
   return dbg_adjust_frame(i_amount, false);
 }
-
-static void
-dbg_cmd_up_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_up;
-  short_command[c].use  = _("up [AMOUNT]");
-}
-
 
 
 /*

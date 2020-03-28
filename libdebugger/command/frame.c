@@ -1,4 +1,4 @@
-/** Move reported target frame postition down by psz_amount. */
+/** Move reported target frame position to absolute position psz_frame. */
 /*
 Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -18,26 +18,25 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-debug_return_t
-dbg_cmd_frame_down(char *psz_amount)
-{
-  int i_amount = 1;
+#include "../../src/trace.h"
+#include "../fns.h"
+#include "../stack.h"
 
-  if (!psz_amount || !*psz_amount) {
-    i_amount = 1;
-  } else if (!get_int(psz_amount, &i_amount, true)) {
+debug_return_t
+dbg_cmd_frame(char *psz_frame)
+{
+  int i_frame;
+
+  if (!psz_frame || !*psz_frame) {
+    return debug_readloop;
+  } else {
+    if (!get_int(psz_frame, &i_frame, true))
       return debug_readloop;
   }
-  return dbg_adjust_frame(-i_amount, false);
+  return dbg_adjust_frame(i_frame, true);
 }
 
-static void
-dbg_cmd_down_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_frame_down;
-  short_command[c].use  = _("down [AMOUNT]");
-}
-
+
 /*
  * Local variables:
  * eval: (c-set-style "gnu")

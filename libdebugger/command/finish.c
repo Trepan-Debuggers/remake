@@ -1,4 +1,3 @@
-/* Terminate execution. */
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2015, 2020 R. Bernstein
 <rocky@gnu.org>
@@ -18,7 +17,19 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t
+
+/** \file libdebugger/command/finish.c
+ *
+ *  \brief Debugger "step out" command
+ */
+
+#include "../../src/trace.h"
+#include "../../src/variable.h"
+#include "../stack.h"
+#include "../cmd.h"
+#include "../fns.h"
+
+extern debug_return_t
 dbg_cmd_finish(char *psz_amount)
 {
   target_stack_node_t *p=p_stack;
@@ -53,13 +64,6 @@ dbg_cmd_finish(char *psz_amount)
   }
 
   return debug_readloop;
-}
-
-static void
-dbg_cmd_finish_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_finish;
-  short_command[c].use  = _("finish [AMOUNT]");
 }
 
 

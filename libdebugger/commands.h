@@ -28,3 +28,8 @@ extern debug_return_t dbg_cmd_break (char *psz_args);
 extern debug_return_t dbg_cmd_chdir (char *psz_args);
 extern debug_return_t dbg_cmd_comment (char *psz_args);
 extern debug_return_t dbg_cmd_delete(char *psz_args);
+extern debug_return_t dbg_cmd_down(char *psz_args);
+extern debug_return_t dbg_cmd_finish(char *psz_args);
+extern debug_return_t dbg_cmd_frame(char *psz_args);
+extern debug_return_t dbg_cmd_list(char *psz_args);
+extern debug_return_t dbg_cmd_up(char *psz_args);

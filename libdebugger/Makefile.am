@@ -52,6 +52,11 @@ libdebugger_a_SOURCES =  \
 	command/chdir.c \
 	command/comment.c \
 	command/delete.c \
+	command/down.c \
+	command/finish.c \
+	command/frame.c \
+	command/list.c \
+	command/up.c \
 	break.c \
 	cmd.c 	\
 	fns.c 	\
