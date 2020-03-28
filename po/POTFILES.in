@@ -21,14 +21,11 @@ libdebugger/command/chdir.c
 libdebugger/command/delete.c
 libdebugger/command/info.c
 libdebugger/command/continue.h
-libdebugger/command/down.h
 libdebugger/command/edit.h
 libdebugger/command/eval.h
 libdebugger/command/expand.h
-libdebugger/command/finish.h
-libdebugger/command/frame.h
 libdebugger/command/help.h
-libdebugger/command/list.h
+libdebugger/command/list.c
 libdebugger/command/load.h
 libdebugger/command/next.h
 libdebugger/command/print.h
@@ -44,7 +41,6 @@ libdebugger/command/skip.h
 libdebugger/command/source.h
 libdebugger/command/step.h
 libdebugger/command/target.h
-libdebugger/command/up.h
 libdebugger/command/where.h
 libdebugger/command/write.h
 libdebugger/fns.c
