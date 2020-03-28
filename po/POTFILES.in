@@ -1,5 +1,5 @@
 # List of source files containing translatable strings.
-# Copyright (C) 2000-2014 Free Software Foundation, Inc.
+# Copyright (C) 2000-2020 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -15,32 +15,70 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ar.c
-arscan.c
-commands.c
-debug.c
-dir.c
-expand.c
-file.c
-function.c
-getopt.c
-guile.c
-hash.c
-implicit.c
-job.c
-job.h
-load.c
-main.c
-makeint.h
-misc.c
-output.c
-print.c
-read.c
-remake.c
-remote-cstms.c
-rule.c
-signame.c
-strcache.c
-variable.c
-variable.h
-vpath.c
+src/ar.c
+src/arscan.c
+src/commands.c
+src/debug.c
+src/debugger/break.c
+src/debugger/cmd.c
+src/debugger/command/break.h
+src/debugger/command/chdir.h
+src/debugger/command/comment.h
+src/debugger/command/continue.h
+src/debugger/command/delete.h
+src/debugger/command/down.h
+src/debugger/command/edit.h
+src/debugger/command/eval.h
+src/debugger/command/expand.h
+src/debugger/command/finish.h
+src/debugger/command/frame.h
+src/debugger/command/help.h
+src/debugger/command/info.h
+src/debugger/command/list.h
+src/debugger/command/load.h
+src/debugger/command/next.h
+src/debugger/command/print.h
+src/debugger/command/pwd.h
+src/debugger/command/quit.h
+src/debugger/command/run.h
+src/debugger/command/set.h
+src/debugger/command/setq.h
+src/debugger/command/setqx.h
+src/debugger/command/shell.h
+src/debugger/command/show.h
+src/debugger/command/skip.h
+src/debugger/command/source.h
+src/debugger/command/step.h
+src/debugger/command/target.h
+src/debugger/command/up.h
+src/debugger/command/where.h
+src/debugger/command/write.h
+src/debugger/fns.c
+src/debugger/stack.c
+src/dir.c
+src/expand.c
+src/file.c
+src/function.c
+src/getopt.c
+src/guile.c
+src/hash.c
+src/implicit.c
+src/job.c
+src/load.c
+src/main.c
+src/make.h
+src/misc.c
+src/output.c
+src/output.h
+src/posixos.c
+src/print.c
+src/read.c
+src/remake.c
+src/remote-cstms.c
+src/rule.c
+src/signame.c
+src/strcache.c
+src/variable.c
+src/variable.h
+src/vpath.c
+src/w32/w32os.c

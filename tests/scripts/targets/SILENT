@@ -1,42 +1,33 @@
 #                                                                    -*-perl-*-
 
-$description = "The following tests the special target .SILENT.  By simply\n"
-              ."mentioning this as a target, it tells make not to print\n"
-              ."commands before executing them.";
+$description = "Test the special target .SILENT.";
 
-$details = "This test is the same as the clean test except that it should\n"
-          ."not echo its command before deleting the specified file.\n";
+run_make_test(q!
+.PHONY: M a b
+M: a b
+.SILENT : b
+a b: ; echo $@
+!,
+              '', "echo a\na\nb");
 
-$example = "EXAMPLE_FILE";
+run_make_test(q!
+.PHONY: M a b
+M: a b
+.SILENT:
+a b: ; echo $@
+!,
+              '', "a\nb");
 
-open(MAKEFILE,"> $makefile");
+# SV 54740 : don't inherit .SILENT settings in sub-makes
+run_make_test(q!
+.PHONY: M r a b
+r: a b ; @$(MAKE) -f #MAKEFILE# M V=x
+a b: ; echo $@
 
-# The Contents of the MAKEFILE ...
-
-print MAKEFILE ".SILENT : clean\n";
-print MAKEFILE "clean: \n";
-print MAKEFILE "\t$delete_command EXAMPLE_FILE\n";
-
-# END of Contents of MAKEFILE
-
-close(MAKEFILE);
-
-&touch($example);
-
-$answer = "";
-&run_make_with_options($makefile,"clean",&get_logfile,0);
-if (-f $example) {
-  $test_passed = 0;
-}
-&compare_output($answer,&get_logfile(1));
+V =
+$V.SILENT:
+M: a b
+!,
+              '--no-print-directory', "a\nb\necho a\na\necho b\nb");
 
 1;
-
-
-
-
-
-
-
-
-

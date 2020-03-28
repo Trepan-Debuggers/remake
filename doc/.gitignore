@@ -1,3 +1,5 @@
+/*.html
+/*.pdf
 /*~
 /Makefile
 /Makefile.in
@@ -6,6 +8,7 @@
 /make.info
 /make.info-1
 /make.info-2
+/make.t2p
 /make_abt.html
 /mdb.info
 /remake.aux
@@ -20,6 +23,7 @@
 /remake.log
 /remake.pdf
 /remake.pg
+/remake.t2p
 /remake.toc
 /remake.tp
 /remake.vr

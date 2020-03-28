@@ -48,22 +48,11 @@ x:;@cat 4touch
 unlink('4touch');
 
 # Test > to a read-only file
-touch('file.out');
-chmod(0444, 'file.out');
+if (defined $ERR_read_only_file) {
+    touch('file.out');
+    chmod(0444, 'file.out');
 
-# Find the error that will be printed
-# This seems complicated, but we need the message from the C locale
-my $loc = undef;
-if ($has_POSIX) {
-    $loc = POSIX::setlocale(POSIX::LC_MESSAGES);
-    POSIX::setlocale(POSIX::LC_MESSAGES, 'C');
-}
-my $e;
-open(my $F, '>', 'file.out') and die "Opened read-only file!\n";
-$e = "$!";
-$loc and POSIX::setlocale(POSIX::LC_MESSAGES, $loc);
-
-run_make_test(q!
+    run_make_test(q!
 define A
 a
 b
@@ -71,10 +60,11 @@ endef
 $(file     >     file.out,$(A))
 x:;@cat file.out
 !,
-              '', "#MAKEFILE#:6: *** open: file.out: $e.  Stop.",
-              512);
+                  '', "#MAKEFILE#:6: *** open: file.out: $ERR_read_only_file.  Stop.",
+                  512);
 
-unlink('file.out');
+    unlink('file.out');
+}
 
 # Use variables for operator and filename
 run_make_test(q!
@@ -114,5 +104,48 @@ x:;@cat file.out
               '', "\n\n");
 
 unlink('file.out');
+
+# Reading files
+run_make_test(q!
+$(file >file.out,A = foo)
+X1 := $(file <file.out)
+$(file >>file.out,B = bar)
+$(eval $(file <file.out))
+
+x:;@echo '$(X1)'; echo '$(A)'; echo '$(B)'
+!,
+              '', "A = foo\nfoo\nbar\n");
+
+unlink('file.out');
+
+# Reading from non-existent file
+run_make_test(q!
+X1 := $(file <file.out)
+x:;@echo '$(X1)';
+!,
+              '', "\n");
+
+# Extra arguments in read mode
+run_make_test(q!
+X1 := $(file <file.out,foo)
+x:;@echo '$(X1)';
+!,
+              '', "#MAKEFILE#:2: *** file: too many arguments.  Stop.\n", 512);
+
+
+# Missing filename
+run_make_test('$(file >)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+run_make_test('$(file >>)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+run_make_test('$(file <)', '',
+              "#MAKEFILE#:1: *** file: missing filename.  Stop.\n", 512);
+
+# Bad call
+
+run_make_test('$(file foo)', '',
+              "#MAKEFILE#:1: *** file: invalid file operation: foo.  Stop.\n", 512);
 
 1;

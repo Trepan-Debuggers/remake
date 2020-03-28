@@ -11,7 +11,7 @@
 #                         [-make <make prog>]
 #                        (and others)
 
-# Copyright (C) 1992-2014 Free Software Foundation, Inc.
+# Copyright (C) 1992-2020 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -26,6 +26,23 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Add the working directory to @INC and load the test driver
+use FindBin;
+use lib "$FindBin::Bin";
+
+our $testsroot = $FindBin::Bin;
+
+require "test_driver.pl";
+
+use File::Spec;
+
+use Cwd;
+$cwdpath = cwd();
+($cwdvol, $cwddir, $_) = File::Spec->splitpath($cwdpath, 1);
+
+# Some target systems might not have the POSIX module...
+$has_POSIX = eval { require "POSIX.pm" };
 
 %FEATURES = ();
 
@@ -42,21 +59,81 @@ $command_string = '';
 
 $all_tests = 0;
 
-# rmdir broken in some Perls on VMS.
-if ($^O eq 'VMS')
+# Shell commands
+
+$sh_name = '/bin/sh';
+$is_posix_sh = 1;
+
+$CMD_rmfile = 'rm -f';
+
+%CONFIG_FLAGS = ();
+
+# Find the strings that will be generated for various error codes.
+# We want them from the C locale regardless of our current locale.
+
+$ERR_no_such_file = undef;
+$ERR_read_only_file = undef;
+$ERR_unreadable_file = undef;
+$ERR_nonexe_file = undef;
+$ERR_exe_dir = undef;
+
 {
-  require VMS::Filespec;
-  VMS::Filespec->import();
+  use locale;
 
-  sub vms_rmdir {
-    my $vms_file = vmspath($_[0]);
-    $vms_file = fileify($vms_file);
-    my $ret = unlink(vmsify($vms_file));
-    return $ret
-  };
+  my $loc = undef;
+  if ($has_POSIX) {
+      POSIX->import(qw(locale_h));
+      # Windows has POSIX locale, but only LC_ALL not LC_MESSAGES
+      $loc = POSIX::setlocale(&POSIX::LC_ALL);
+      POSIX::setlocale(&POSIX::LC_ALL, 'C');
+  }
 
-  *CORE::GLOBAL::rmdir = \&vms_rmdir;
+  if (open(my $F, '<', 'file.none')) {
+      print "Opened non-existent file! Skipping related tests.\n";
+  } else {
+      $ERR_no_such_file = "$!";
+  }
+
+  unlink('file.out');
+  touch('file.out');
+
+  chmod(0444, 'file.out');
+  if (open(my $F, '>', 'file.out')) {
+      print "Opened read-only file! Skipping related tests.\n";
+      close($F);
+  } else {
+      $ERR_read_only_file = "$!";
+  }
+
+  $_ = `./file.out 2>/dev/null`;
+  if ($? == 0) {
+      print "Executed non-executable file!  Skipping related tests.\n";
+  } else {
+      $ERR_nonexe_file = "$!";
+  }
+
+  $_ = `./. 2>/dev/null`;
+  if ($? == 0) {
+      print "Executed directory!  Skipping related tests.\n";
+  } else {
+      $ERR_exe_dir = "$!";
+  }
+
+  chmod(0000, 'file.out');
+  if (open(my $F, '<', 'file.out')) {
+      print "Opened unreadable file!  Skipping related tests.\n";
+      close($F);
+  } else {
+      $ERR_unreadable_file = "$!";
+  }
+
+  unlink('file.out') or die "Failed to delete file.out: $!\n";
+
+  $loc and POSIX::setlocale(&POSIX::LC_ALL, $loc);
 }
+
+use FindBin;
+use lib "$FindBin::Bin";
 
 require "test_driver.pl";
 require "config-flags.pm";
@@ -81,7 +158,7 @@ sub valid_option
 
    if ($option =~ /^-srcdir$/i) {
        $srcdir = shift @argv;
-       if (! -f "$srcdir/gnumake.h") {
+       if (! -f "$srcdir/gnuremake.h") {
            print "$option $srcdir: Not a valid GNU make source directory.\n";
            exit 0;
        }
@@ -140,6 +217,7 @@ sub subst_make_string
 sub run_make_test
 {
   local ($makestring, $options, $answer, $err_code, $timeout) = @_;
+  my @call = caller;
 
   # If the user specified a makefile string, create a new makefile to contain
   # it.  If the first value is not defined, use the last one (if there is
@@ -171,18 +249,42 @@ sub run_make_test
   }
 
   run_make_with_options($makefile, $options, &get_logfile(0),
-                        $err_code, $timeout);
+                        $err_code, $timeout, @call);
   &compare_output($answer, &get_logfile(1));
 
   $old_makefile = $makefile;
   $makefile = undef;
 }
 
+sub add_options {
+  my $cmd = shift;
+
+  foreach (@_) {
+    if (ref($cmd)) {
+      push(@$cmd, ref($_) ? @$_ : $_);
+    } else {
+      $cmd .= ' '.(ref($_) ? "@$_" : $_);
+    }
+  }
+
+  return $cmd;
+}
+
+sub create_command {
+  return !$_[0] || ref($_[0]) ? [$make_path] : $make_path;
+}
+
 # The old-fashioned way...
+# $options can be a scalar (string) or a ref to an array of options
+# If it's a scalar the entire argument is passed to system/exec etc. as
+# a single string.  If it's a ref then the array is passed to system/exec.
+# Using a ref should be preferred as it's more portable but all the older
+# invocations use strings.
 sub run_make_with_options {
-  local ($filename,$options,$logname,$expected_code,$timeout) = @_;
-  local($code);
-  local($command) = $make_path;
+  my ($filename,$options,$logname,$expected_code,$timeout,@call) = @_;
+  @call = caller unless @call;
+  my $code;
+  my $command = create_command($options);
 
   $expected_code = 0 unless defined($expected_code);
 
@@ -190,13 +292,14 @@ sub run_make_with_options {
   $test_passed = 1;
 
   if ($filename) {
-    $command .= " -f $filename";
+    $command = add_options($command, '-f', $filename);
   }
 
   if ($options) {
-    if ($^O eq 'VMS') {
+    if (!ref($options) && $^O eq 'VMS') {
       # Try to make sure arguments are properly quoted.
       # This does not handle all cases.
+      # We should convert the tests to use array refs not strings
 
       # VMS uses double quotes instead of single quotes.
       $options =~ s/\'/\"/g;
@@ -228,15 +331,21 @@ sub run_make_with_options {
 
       print ("Options fixup = -$options-\n") if $debug;
     }
-    $command .= " $options";
+
+    $command = add_options($command, $options);
   }
 
-  $command_string = "$command\n";
+  my $cmdstr = ref($command) ? "'".join("' '", @$command)."'" : $command;
+
+  if (@call) {
+    $command_string = "#$call[1]:$call[2]\n$cmdstr\n";
+  } else {
+    $command_string = $cmdstr;
+  }
 
   if ($valgrind) {
-    print VALGRIND "\n\nExecuting: $command\n";
+    print VALGRIND "\n\nExecuting: $cmdstr\n";
   }
-
 
   {
       my $old_timeout = $test_timeout;
@@ -245,7 +354,11 @@ sub run_make_with_options {
       # If valgrind is enabled, turn off the timeout check
       $valgrind and $test_timeout = 0;
 
-      $code = &run_command_with_output($logname,$command);
+      if (ref($command)) {
+          $code = run_command_with_output($logname, @$command);
+      } else {
+          $code = run_command_with_output($logname, $command);
+      }
       $test_timeout = $old_timeout;
   }
 
@@ -268,7 +381,7 @@ sub run_make_with_options {
   }
 
   if ($code != $expected_code) {
-    print "Error running $make_path (expected $expected_code; got $code): $command\n";
+    print "Error running $make_path (expected $expected_code; got $code): $cmdstr\n";
     $test_passed = 0;
     $runf = &get_runfile;
     &create_file (&get_runfile, $command_string);
@@ -311,11 +424,9 @@ sub print_help
 }
 
 sub get_this_pwd {
-  $delete_command = 'rm -f';
   if ($has_POSIX) {
     $__pwd = POSIX::getcwd();
   } elsif ($vos) {
-    $delete_command = "delete_file -no_ask";
     $__pwd = `++(current_dir)`;
   } else {
     # No idea... just try using pwd as a last resort.
@@ -339,65 +450,48 @@ sub set_more_defaults
    local($string);
    local($index);
 
-   # find the type of the port.  We do this up front to have a single
-   # point of change if it needs to be tweaked.
-   #
-   # This is probably not specific enough.
-   #
-   if ($osname =~ /Windows/i || $osname =~ /MINGW32/i || $osname =~ /CYGWIN_NT/i) {
-     $port_type = 'W32';
-   }
-   # Bleah, the osname is so variable on DOS.  This kind of bites.
-   # Well, as far as I can tell if we check for some text at the
-   # beginning of the line with either no spaces or a single space, then
-   # a D, then either "OS", "os", or "ev" and a space.  That should
-   # match and be pretty specific.
-   elsif ($osname =~ /^([^ ]*|[^ ]* [^ ]*)D(OS|os|ev) /) {
-     $port_type = 'DOS';
-   }
-   # Check for OS/2
-   elsif ($osname =~ m%OS/2%) {
-     $port_type = 'OS/2';
-   }
-   # Everything else, right now, is UNIX.  Note that we should integrate
-   # the VOS support into this as well and get rid of $vos; we'll do
-   # that next time.
-   else {
-     $port_type = 'UNIX';
-   }
-
    # On DOS/Windows system the filesystem apparently can't track
    # timestamps with second granularity (!!).  Change the sleep time
    # needed to force a file to be considered "old".
    $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
 
-   print "Port type: $port_type\n" if $debug;
-   print "Make path: $make_path\n" if $debug;
-
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
    if ($osname eq 'VMS') {
+     $port_type = 'VMS-DCL' unless defined $ENV{"SHELL"};
      # On VMS pre-setup make to be found with simply 'make'.
      $make_path = 'make';
    } else {
-     my $mk = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+     create_file('make.mk', 'all:;$(info $(MAKE))');
+     my $mk = `$make_path -sf make.mk`;
+     unlink('make.mk');
      chop $mk;
-     $mk or die "FATAL ERROR: Cannot determine the value of \$(MAKE):\n
-'echo \"all:;\@echo \\\$(MAKE)\" | $make_path -f-' failed!\n";
+     $mk or die "FATAL ERROR: Cannot determine the value of \$(MAKE)\n";
      $make_path = $mk;
    }
-   print "Make\t= '$make_path'\n" if $debug;
 
-   my $redir2 = '2> /dev/null';
-   $redir2 = '' if os_name eq 'VMS';
-   $string = `$make_path -v -f /dev/null $redir2`;
+   # Ask make what shell to use
+   create_file('shell.mk', 'all:;$(info $(SHELL))');
+   $sh_name = `$make_path -sf shell.mk`;
+   unlink('shell.mk');
+   chop $sh_name;
+   if (! $sh_name) {
+       print "Cannot determine shell\n";
+       $is_posix_sh = 0;
+   } else {
+       my $o = `$sh_name -c ': do nothing' 2>&1`;
+       $is_posix_sh = $? == 0 && $o == '';
+   }
 
-   $string =~ /^(GNU Make [^,\n]*)/;
+   $string = `$make_path -v`;
+   $string =~ /^(GNU Make [^,\n]*)/ or die "$make_path is not GNU make.  Version:\n$string";
    $testee_version = "$1\n";
+
+   create_file('null.mk', '');
 
    my $redir = '2>&1';
    $redir = '' if os_name eq 'VMS';
-   $string = `sh -c "$make_path -f /dev/null $redir"`;
+   $string = `sh -c "$make_path -f null.mk $redir"`;
    if ($string =~ /(.*): \*\*\* No targets\.  Stop\./) {
      $make_name = $1;
    }
@@ -446,7 +540,7 @@ sub set_more_defaults
      $purify_errors = 0;
    }
 
-   $string = `sh -c "$make_path -j 2 -f /dev/null $redir"`;
+   $string = `sh -c "$make_path -j 2 -f null.mk $redir"`;
    if ($string =~ /not supported/) {
      $parallel_jobs = 0;
    }
@@ -454,9 +548,15 @@ sub set_more_defaults
      $parallel_jobs = 1;
    }
 
-   %FEATURES = map { $_ => 1 } split /\s+/, `sh -c "echo '\\\$(info \\\$(.FEATURES))' | $make_path -f- 2>/dev/null"`;
+   unlink('null.mk');
+
+   create_file('features.mk', 'all:;$(info $(.FEATURES))');
+   %FEATURES = map { $_ => 1 } split /\s+/, `$make_path -sf features.mk`;
+   unlink('features.mk');
 
    # Set up for valgrind, if requested.
+
+   $make_command = $make_path;
 
    if ($valgrind) {
      my $args = $valgrind_args;
@@ -469,6 +569,16 @@ sub set_more_defaults
      fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
      system("echo Starting on `date` 1>&".fileno(VALGRIND));
      print "Enabled valgrind support.\n";
+   }
+
+   if ($debug) {
+     print "Port type:  $port_type\n";
+     print "Make path:  $make_path\n";
+     print "Shell path: $sh_name".($is_posix_sh ? ' (POSIX)' : '')."\n";
+     print "#PWD#:      $pwd\n";
+     print "#PERL#:     $perl_name\n";
+     print "#MAKEPATH#: $mkpath\n";
+     print "#MAKE#:     $make_name\n";
    }
 }
 

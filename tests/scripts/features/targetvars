@@ -7,7 +7,6 @@ values, override and non-override, and using various variable expansion
 rules, semicolon interference, etc.";
 
 run_make_test('
-SHELL = /bin/sh
 export FOO = foo
 export BAR = bar
 one: override FOO = one
@@ -271,3 +270,7 @@ a: ; @echo $(A)
 #               '', "local\n");
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

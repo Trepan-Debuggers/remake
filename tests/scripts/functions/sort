@@ -42,6 +42,10 @@ A boy captured_by days end, has jazz_and_a midnight moon_light rise
 
 run_make_test("FOO = a b\tc\rd\fe \f \f \f \f \ff
 all: ; \@echo \$(words \$(sort \$(FOO)))\n",
-              '', "5\n");
+              '', "6\n");
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

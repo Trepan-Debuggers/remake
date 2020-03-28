@@ -21,6 +21,9 @@ $details = 'This only works on systems that support it.';
 # If we don't have Guile support, never mind.
 exists $FEATURES{guile} or return -1;
 
+# Guile and Valgrind don't play together at all.
+$valgrind and return -1;
+
 # Verify simple data type conversions
 # Currently we don't support vectors:
 #    echo '$(guile (vector 1 2 3))'; \
@@ -35,6 +38,20 @@ x:;@echo '$(guile #f)'; \
     echo '$(guile '(a b (c . d) 1 (2) 3))'
 !,
               '', "\n#t\nc\n1234\nfoo\nbar\na b\na b c d 1 2 3");
+
+# Verify guile functions in variables -- SV 43378
+run_make_test(q!
+res := $(guile #f) \
+       $(guile #t) \
+       $(guile #\c) \
+       $(guile 1234) \
+       $(guile 'foo) \
+       $(guile "bar") \
+       $(guile (cons 'a 'b)) \
+       $(guile '(a b (c . d) 1 (2) 3))
+x:;@echo '$(res)'
+!,
+              '', " #t c 1234 foo bar a b a b c d 1 2 3");
 
 # Verify the gmk-expand function
 run_make_test(q!

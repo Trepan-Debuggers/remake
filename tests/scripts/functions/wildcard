@@ -25,7 +25,7 @@ print2:
 \t\@echo \$(sort \$(wildcard example.[a-z0-9]))
 \t\@echo \$(sort \$(wildcard example.[!A-Za-z_\\!]))
 clean:
-\t$delete_command \$(sort \$(wildcard example.*))
+\t$CMD_rmfile \$(sort \$(wildcard example.*))
 EOM
 
 # END of Contents of MAKEFILE
@@ -63,7 +63,7 @@ $answer = "example.1 example.3 example._\n"
 # TEST #3
 # -------
 
-$answer = "$delete_command example.1 example.3 example._ example.for example.two";
+$answer = "$CMD_rmfile example.1 example.3 example._ example.for example.two";
 if ($vos)
 {
    $answer .= " \n";

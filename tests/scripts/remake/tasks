@@ -12,7 +12,7 @@ run_make_test('
 #: A simple comment
 all:
 	echo "Simple comment"
-', '-r -R --tasks', 'all	# A simple comment
+', '-r -R --tasks', 'all                  A simple comment
 ');
 
 # TEST #0 --targets

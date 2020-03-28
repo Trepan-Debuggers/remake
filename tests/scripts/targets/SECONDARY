@@ -93,8 +93,7 @@ print MAKEFILE <<'EOF';
 final: intermediate
 intermediate: source
 
-final intermediate source:
-	echo $< > $@
+final intermediate source: ; echo $< > $@
 EOF
 
 close(MAKEFILE);
@@ -135,7 +134,7 @@ all : 1.c 2.c
 cp 1.b 1.c
 cp 2.a 2.b
 cp 2.b 2.c
-rm 1.b 2.b');
+rm 2.b 1.b');
 
 unlink(qw(1.a 2.a 1.c 2.c));
 

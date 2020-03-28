@@ -42,7 +42,7 @@ close(MAKEFILE);
                "$workdir${pathsep}command.h",
                "$workdir${pathsep}commands.c","$workdir${pathsep}display.c",
                "$workdir${pathsep}buffer.h",
-	       "$workdir${pathsep}command.c");
+               "$workdir${pathsep}command.c");
 
 &touch(@files_to_touch);
 
@@ -90,8 +90,7 @@ EOF
 close(MAKEFILE);
 
 my $answer = "exit 1
-$makefile2:9: recipe for target 'foo.o' failed
-$makefile2:9: *** [foo.o] Error 1
+$makefile2:9: *** [foo.o] error 1
 
 #0  foo.o at work/options/dash-k.mk.1:9
 #1  lib at work/options/dash-k.mk.1:7
@@ -109,15 +108,17 @@ $slurp =~ s{at .*work/options/}{at work/options/}gm;
 # TEST -- make sure we keep the error code if we can't create an included
 # makefile.
 
-run_make_test('all: ; @echo hi
+if (defined $ERR_no_such_file) {
+    run_make_test('all: ; @echo hi
 include ifile
 ifile: no-such-file; @false
 ',
-              '-k',
-              "#MAKEFILE#:2: ifile: No such file or directory
+                  '-k',
+                  "#MAKEFILE#:2: ifile: $ERR_no_such_file
 #MAKE#: *** No rule to make target 'no-such-file', needed by 'ifile'.
 #MAKE#: Failed to remake makefile 'ifile'.
 hi\n",
-              512);
+                  512);
+}
 
 1;

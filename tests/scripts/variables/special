@@ -14,14 +14,22 @@ X2 := $(sort $(filter FOO BAR,$(.VARIABLES)))
 
 BAR := bar
 
-all:
-	@echo X1 = $(X1)
-	@echo X2 = $(X2)
-	@echo LAST = $(sort $(filter FOO BAR,$(.VARIABLES)))
+all: ; @echo X1 = $(X1); echo X2 = $(X2); echo LAST = $(sort $(filter FOO BAR,$(.VARIABLES)))
 ',
                '', "X1 =\nX2 = FOO\nLAST = BAR FOO\n");
 
+# SV 45728: Test that undefining a variable is reflected properly
 
+&run_make_test('
+FOO := foo
+BAR := bar
+$(info one: $(sort $(filter FOO BAR BAZ,$(.VARIABLES))))
+undefine BAR
+BAZ := baz
+$(info two: $(sort $(filter FOO BAR BAZ,$(.VARIABLES))))
+all:;@:
+',
+               '', "one: BAR FOO\ntwo: BAZ FOO\n");
 
 # $makefile2 = &get_tmpfile;
 # open(MAKEFILE, "> $makefile2");
@@ -31,9 +39,9 @@ all:
 # X1 := $(sort $(.TARGETS))
 
 # all: foo
-# 	@echo X1 = $(X1)
-# 	@echo X2 = $(X2)
-# 	@echo LAST = $(sort $(.TARGETS))
+#	@echo X1 = $(X1)
+#	@echo X2 = $(X2)
+#	@echo LAST = $(sort $(.TARGETS))
 
 # X2 := $(sort $(.TARGETS))
 

@@ -67,12 +67,14 @@ Other contributors:
   David A. Wheeler <dwheeler@dwheeler.com>
   David Boyce <dsb@boyski.com>
   Frank Heckenbach <f.heckenbach@fh-soft.de>
+  Kaz Kylheku <kaz@kylheku.com>
+  Christof Warlich <cwarlich@gmx.de>
 
 With suggestions/comments/bug reports from a cast of ... well ...
 hundreds, anyway :)
 
 -------------------------------------------------------------------------------
-Copyright (C) 1997-2014 Free Software Foundation, Inc.
+Copyright (C) 1997-2020 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the

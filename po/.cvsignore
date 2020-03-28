@@ -1,6 +1,0 @@
-*.gmo *.mo *.pot *.po
-
-Makefile Makefile.in Makefile.in.in Makevars.template
-Rules-quot stamp-po
-*.sed *.sin *.header
-POTFILES

@@ -1,15 +1,36 @@
-language: C
+language: c
 
-sudo: false
+compiler:
+  - gcc
 
 addons:
+  homebrew:
+    update: yes
+    packages:
+      - autoconf automake gettext gcc guile lzip pkg-config readline texinfo
   apt:
     packages:
-      - autopoint
-      - libreadline-dev
-      - wget
-      - texinfo
+      - autopoint gettext libreadline-dev texinfo wget
+
+jobs:
+  include:
+    - os: linux
+      name: Ubuntu
+      dist: bionic
+    - os: osx
+      name: macOS
+      env:
+        - GETTEXT_EVAL="PATH=/usr/local/opt/gettext/bin:$PATH"
+      osx_image: xcode9.4
+
+before_install:
+  # if macOS then add autopoint/gettext path to the PATH variable
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then eval "${GETTEXT_EVAL}" ; fi
+
+before_script:
+  # if macOS then LDFLAGS & CPPFLAGS for readline
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export CPPFLAGS="-I/usr/local/opt/readline/include";
+        export LDFLAGS="-L/usr/local/opt/readline/lib"; fi
 
 # run the tests
-#script: autoreconf -i && ./configure --enable-maintainer-mode && make update && (cd doc && make stamp-vti) && make && TRAVIS=1 make check
-script: autoreconf -i && ./configure && make update && make && TRAVIS=1 make check
+script: autoreconf -i && ./configure && make po-update && (cd doc && make stamp-1 stamp-vti) && make && make check

@@ -15,7 +15,8 @@ run_make_test(q!
 all: ; @echo $(MAKEFLAGS)
 !,
               '--no-print-directory -e -r -R --trace', "Reading makefiles...
-Updating goal targets....
+Updating makefiles...
+Updating goal targets...
  File 'all' does not exist.
 Must remake target 'all'.
 #MAKEFILE#:2: target 'all' does not exist
@@ -47,3 +48,7 @@ jump Works: MAKEFLAGS=e --no-print-directory
 print Works: MAKEFLAGS=e --no-print-directory');
 
 1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:
