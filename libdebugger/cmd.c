@@ -181,20 +181,11 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/break.h"
-#include "command/chdir.h"
-#include "command/comment.h"
 #include "command/continue.h"
-#include "command/delete.h"
-#include "command/down.h"
 #include "command/edit.h"
 #include "command/expand.h"
-#include "command/finish.h"
-#include "command/frame.h"
-#include "command/info.h"
 #include "command/load.h"
 #include "command/next.h"
-#include "command/list.h"
 #include "command/print.h"
 #include "command/pwd.h"
 #include "command/quit.h"
@@ -208,7 +199,6 @@ find_command (const char *psz_name)
 #include "command/source.h"
 #include "command/step.h"
 #include "command/target.h"
-#include "command/up.h"
 #include "command/where.h"
 #include "command/write.h"
 
@@ -228,8 +218,8 @@ find_command (const char *psz_name)
 #include "command/help/help.h"
 #include "command/help/info.h"
 #include "command/help/load.h"
-#include "command/help/next.h"
 #include "command/help/list.h"
+#include "command/help/next.h"
 #include "command/help/print.h"
 #include "command/help/pwd.h"
 #include "command/help/quit.h"
@@ -245,6 +235,77 @@ find_command (const char *psz_name)
 #include "command/help/up.h"
 #include "command/help/where.h"
 #include "command/help/write.h"
+
+/* FIXME: folded "init" routines into the macro them. */
+static void
+dbg_cmd_break_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_break;
+  short_command[c].use  = _("break [*target*|*linenum*] [all|run|prereq|end]*");
+}
+
+static void
+dbg_cmd_chdir_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_chdir;
+  short_command[c].use  = _("cd DIR");
+}
+
+static void
+dbg_cmd_comment_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_comment;
+  short_command[c].use  = _("comment *text*");
+}
+
+static void
+dbg_cmd_delete_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_delete;
+  short_command[c].use  = _("delete *breakpoint-numbers*...");
+}
+
+static void
+dbg_cmd_down_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_down;
+  short_command[c].use  = _("down [*amount]");
+}
+
+static void
+dbg_cmd_finish_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_finish;
+  short_command[c].use  = _("finish [*amount*]");
+}
+
+static void
+dbg_cmd_frame_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_frame;
+  short_command[c].use  = _("frame *n*");
+}
+
+static void
+dbg_cmd_list_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_list;
+  short_command[c].use = _("list [*target*|*line-number*]");
+}
+
+static void
+dbg_cmd_info_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_info;
+  short_command[c].use = _("info [*subcommand*]");
+}
+
+static void
+dbg_cmd_up_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_up;
+  short_command[c].use  = _("up [*amount*]");
+}
 
 
 #define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \

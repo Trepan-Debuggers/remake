@@ -28,6 +28,14 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/buildargv.h"
 #include "../src/trace.h"
 
+/*!
+   Command-line args after the command-name part. For example in:
+   break foo
+   the below will be "foo".
+ **/
+extern char *psz_debugger_args;
+
+
 extern debug_return_t enter_debugger (target_stack_node_t *p,
 				      file_t *p_target, int errcode,
 				      debug_enter_reason_t reason);

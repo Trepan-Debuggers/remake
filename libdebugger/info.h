@@ -31,4 +31,7 @@ Boston, MA 02111-1307, USA.  */
 extern debug_enter_reason_t last_stop_reason;
 extern const char *WARRANTY;
 
+#include "subcmd.h"
+extern subcommand_var_info_t info_subcommands[];
+
 #endif /* DBG_INFO_H*/

@@ -1,3 +1,4 @@
+/** Move reported target frame position to absolute position psz_frame. */
 /*
 Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -16,45 +17,26 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/*
-   Delete some breakpoints. Arguments are breakpoint numbers with spaces
-   in between."To delete all breakpoints, give no argument.
-*/
 
-static debug_return_t
-dbg_cmd_delete(char *psz_args)
+#include "../../src/trace.h"
+#include "../fns.h"
+#include "../stack.h"
+
+debug_return_t
+dbg_cmd_frame(char *psz_frame)
 {
-  int i_brkpt;
-  char *psz_word;
+  int i_frame;
 
-  if (!psz_args || !*psz_args) {
-    unsigned int breakpoints_removed = 0;
-    for (unsigned int i=1; i<=i_breakpoints; i++) {
-      if (remove_breakpoint(i, true)) breakpoints_removed++;
-    }
-    dbg_msg(_("%u breakpoint(s) removed."), breakpoints_removed);
-
+  if (!psz_frame || !*psz_frame) {
     return debug_readloop;
+  } else {
+    if (!get_int(psz_frame, &i_frame, true))
+      return debug_readloop;
   }
-
-  psz_word = get_word(&psz_args);
-  while ( psz_word && *psz_word ) {
-    if (get_int(psz_word, &i_brkpt, true)) {
-      remove_breakpoint(i_brkpt, false);
-    }
-    psz_word = get_word(&psz_args);
-  }
-
-  return debug_readloop;
+  return dbg_adjust_frame(i_frame, true);
 }
 
-static void
-dbg_cmd_delete_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_delete;
-  short_command[c].use  = _("delete BREAKPOINT_NUMBERS...");
-}
-
+
 /*
  * Local variables:
  * eval: (c-set-style "gnu")

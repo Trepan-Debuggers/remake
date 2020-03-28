@@ -19,7 +19,9 @@ Boston, MA 02111-1307, USA.  */
 
 /** \file libdebugger/command/set.h
  *
- *  \brief Debugger command to change various debugger and Makefile settings and values.
+ *  \brief debugger `set` command.
+ *
+ *  Debugger command to change various debugger and Makefile settings and values.
  */
 
 /* Documentation for help set, and help set xxx. Note the format has
@@ -29,6 +31,8 @@ Boston, MA 02111-1307, USA.  */
    (or "is on").
 */
 
+#include "../../src/commands.h"
+#include "../../src/main.h"
 #include "../subcmd.h"
 
 subcommand_var_info_t set_subcommands[] = {

@@ -6,6 +6,8 @@ Step out (`finish`)
 
 **finish** [ *count* ]
 
+Run to the completion of the target, which is also known as "step out".
+
 With no arguments, `remake` runs to the end of the target. Any prerequisite
 checking and building that needs to occur is done and any shell commands
 that occur get run.

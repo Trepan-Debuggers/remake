@@ -23,8 +23,16 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Debugger command to list Makefile target information
  */
 
+#include "../../src/trace.h"
+#include "../../src/print.h"
+#include "../file2line.h"
+#include "../cmd.h"
+#include "../fns.h"
+#include "../msg.h"
+#include "../stack.h"
+
 #define DEPENDS_COMMANDS " depends commands"
-static debug_return_t
+extern debug_return_t
 dbg_cmd_list(char *psz_arg)
 {
   const char *psz_target = NULL;
@@ -84,13 +92,6 @@ dbg_cmd_list(char *psz_arg)
   target_cmd = CALLOC(char, strlen(psz_target) + 1 + strlen(DEPENDS_COMMANDS));
   sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
   return dbg_cmd_target(target_cmd);
-}
-
-static void
-dbg_cmd_list_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_list;
-  short_command[c].use = _("list [TARGET|LINE-NUMBER]");
 }
 
 
