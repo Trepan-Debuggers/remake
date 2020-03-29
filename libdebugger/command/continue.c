@@ -17,7 +17,19 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Continue running program. */
-static debug_return_t
+
+/** \file libdebugger/command/continue.c
+ *
+ *  \brief Debugger `continue` command.
+ */
+
+#include "../../src/trace.h"
+#include "../../src/expand.h"
+#include "../break.h"
+#include "../fns.h"
+#include "../stack.h"
+
+extern debug_return_t
 dbg_cmd_continue (char *psz_args)
 {
   if (psz_args && *psz_args) {
@@ -65,13 +77,6 @@ dbg_cmd_continue (char *psz_args)
                          "", o_debugger, 0, NULL, NULL);
   return continue_execution;
 };
-
-static void
-dbg_cmd_continue_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_continue;
-  short_command[c].use  = _("continue [TARGET [all|run|prereq|end]*]");
-}
 
 /*
  * Local variables:

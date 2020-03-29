@@ -18,7 +18,20 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t
+
+/** \file libdebugger/command/edit.c
+ *
+ *  \brief Debugger `edit` command.
+ */
+
+
+#include "../../src/makeint.h"
+#include "../../src/function.h"
+#include "../../src/trace.h"
+#include "../fns.h"
+
+
+extern debug_return_t
 dbg_cmd_edit(char *psz_args)
 {
   const char *editor;
@@ -46,13 +59,6 @@ dbg_cmd_edit(char *psz_args)
     printf(_("The \"edit\" command does not take an argument: %s\n"), psz_args);
   }
   return debug_readloop;
-}
-
-static void
-dbg_cmd_edit_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_edit;
-  short_command[c].use = _("edit");
 }
 
 /*

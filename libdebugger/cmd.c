@@ -181,9 +181,6 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/continue.h"
-#include "command/edit.h"
-#include "command/expand.h"
 #include "command/load.h"
 #include "command/next.h"
 #include "command/print.h"
@@ -259,17 +256,39 @@ dbg_cmd_comment_init(unsigned int c)
 }
 
 static void
+dbg_cmd_continue_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_continue;
+  short_command[c].use  = _("continue [TARGET [all|run|prereq|end]*]");
+}
+
+static void
 dbg_cmd_delete_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_delete;
   short_command[c].use  = _("delete *breakpoint-numbers*...");
 }
 
+
+static void
+dbg_cmd_edit_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_edit;
+  short_command[c].use = _("edit");
+}
+
+static void
+dbg_cmd_expand_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_expand;
+  short_command[c].use  = _("expand *string*");
+}
+
 static void
 dbg_cmd_down_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_down;
-  short_command[c].use  = _("down [*amount]");
+  short_command[c].use  = _("down [*amount*]");
 }
 
 static void

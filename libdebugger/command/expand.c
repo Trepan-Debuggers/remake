@@ -1,5 +1,3 @@
-/* Parse and evaluate buffer and return the results.
-*/
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
@@ -19,43 +17,44 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-static debug_return_t
-dbg_cmd_eval(char *psz_evalstring)
+
+/** \file libdebugger/command/expand.h
+ *
+ *  \brief Debugger `expand` command.
+ *
+*/
+
+#include "../../src/trace.h"
+#include "../fns.h"
+
+/** \file libdebugger/command/expand.c
+ *
+ *  \brief Debugger `expand` command.
+ */
+
+extern debug_return_t
+dbg_cmd_expand (char *psz_string)
 {
-#if 0
-  if ('\0' == *psz_evalstring) {
-    file_t *p_target;
-    if (p_stack && p_stack->p_target) {
-      p_target = p_stack->p_target;
-    } else {
-      printf(_("Default target not found here. You must supply one\n"));
+  static char *psz_last_string = NULL;
+
+  if (!psz_string || !*psz_string) {
+    /* Use last target value */
+    if (psz_last_string)
+      psz_string = psz_last_string;
+    else {
+      printf("No current expand string - must supply something to print\n");
+      return debug_readloop;
     }
-
-    if (p_target->name)
-      printf(_("Running commands for target %s\n"), p_target->name);
-    else
-      printf(_("Running commands\n"), p_target->name);
-    target_environment (p_target);
-    new_job(p_target, p_stack);
-  } else
-#else
-  {
-    func_eval(NULL, &psz_evalstring, NULL);
-    reading_file = 0;
-
   }
-#endif
+
+  if (dbg_cmd_show_exp(psz_string, true)) {
+    if (psz_last_string) free(psz_last_string);
+    psz_last_string = strdup(psz_string);
+  }
   return debug_readloop;
 }
 
-static void
-dbg_cmd_eval_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_eval;
-  short_command[c].use  = _("eval STRING");
-  short_command[c].doc  = _("parse and evaluate a string.");
-}
-
+
 /*
  * Local variables:
  * eval: (c-set-style "gnu")
