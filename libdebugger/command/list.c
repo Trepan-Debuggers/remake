@@ -18,7 +18,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/list.h
+/** \file libdebugger/command/list.c
  *
  *  \brief Debugger command to list Makefile target information
  */

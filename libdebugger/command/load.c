@@ -18,16 +18,21 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/load.h
+/** \file libdebugger/command/load.c
  *
- *  \brief Debugger command to read and evaluate a Makefile.
+ *  \brief Debugger `load` command.
+ *
+ *  Debugger command to read and evaluate a Makefile.
  */
+
+#include "../../src/trace.h"
+#include "../msg.h"
 
 #include <glob.h>
 #include "read.h"
 #include "filedef.h"
 
-static debug_return_t
+extern debug_return_t
 dbg_cmd_load(char *psz_filename)
 {
   if (psz_filename && *psz_filename) {
@@ -72,13 +77,6 @@ dbg_cmd_load(char *psz_filename)
     dbg_errmsg("load command expects a filename");
   }
   return debug_readloop;
-}
-
-static void
-dbg_cmd_load_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_load;
-  short_command[c].use = _("load *file-glob*");
 }
 
 

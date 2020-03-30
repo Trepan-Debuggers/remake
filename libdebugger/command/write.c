@@ -1,4 +1,3 @@
-/* Write commands associated with a given target. */
 /*
 Copyright (C) 2011, 2017, 2020 R. Bernstein  <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -18,9 +17,23 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "../../src/trace.h"
+#include "../../src/commands.h"
 #include "../../src/dep.h"
+#include "../../src/variable.h"
 
-static debug_return_t
+#include "../cmd.h"
+#include "../fns.h"
+
+/**
+ *  \brief Debugger `write` command.
+ *
+ * Write commands associated with a given target.
+ **/
+
+#include "../../src/trace.h"
+
+extern debug_return_t
 dbg_cmd_write(char *psz_args)
 {
   file_t *p_target = NULL;
@@ -187,13 +200,6 @@ dbg_cmd_write(char *psz_args)
     }
   }
   return debug_readloop;
-}
-
-static void
-dbg_cmd_write_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_write;
-  short_command[c].use =  _("write [TARGET [FILENAME]]");
 }
 
 

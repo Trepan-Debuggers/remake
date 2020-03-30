@@ -1,7 +1,5 @@
-/* Run a shell command. */
 /*
-Copyright (C) 2004-2005, 2007-2009, 2011 2020 R. Bernstein
-<rocky@gnu.org>
+Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -18,28 +16,23 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-#include <errno.h>
-static debug_return_t
-dbg_cmd_shell(char *psz_varname)
-{
-  int rc=system(psz_varname);
-  shell_rc_status(rc);
-  return debug_readloop;
-}
 
-static void
-dbg_cmd_shell_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_shell;
-  short_command[c].use =  _("shell STRING");
-  short_command[c].doc  =
-    _("Execute the rest of the line as a shell.");
-}
+/*
+ *  \brief Debugger `step` command.
+ */
 
+#include "../../src/trace.h"
+
+extern debug_return_t
+dbg_cmd_skip (char *psz_arg)
+{
+  UNUSED_ARGUMENT(psz_arg);
+  return skip_execution;
+}
 
 /*
  * Local variables:
- * eval: (c-set-style "gnu")
- * indent-tabs-mode: nil
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
  * End:
  */

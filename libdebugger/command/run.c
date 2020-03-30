@@ -18,12 +18,17 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/run.h
+/** \file libdebugger/command/run.c
  *
- *  \brief Debugger command to restart remake
+ *  \brief Debugger `run` command.
+ *
+ *  Debugger command to restart `remake`.
  */
 
-static debug_return_t
+#include "../../src/trace.h"
+#include "../../src/buildargv.h"
+
+extern debug_return_t
 dbg_cmd_run(char *psz_arg)
 {
   char * const *ppsz_argv = (char * const *)global_argv;
@@ -45,17 +50,6 @@ dbg_cmd_run(char *psz_arg)
   execvp (psz_make_cmd, ppsz_argv);
   /* NOT USED: */
   return debug_readloop;
-}
-
-static void
-dbg_cmd_run_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_run;
-  short_command[c].use = _("run [ARGS]");
-  short_command[c].doc =
-    _("Run Makefile from the beginning.\n"
-      "You may specify arguments to give it.\n"
-      "With no arguments, uses arguments last specified (with \"run\")");
 }
 
 /*

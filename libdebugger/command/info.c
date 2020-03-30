@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
  *
  *  \brief Debugger `info` command
  *
- *  command to get various pieces of information about program being debugged.
+ *  Debugger command to get various pieces of information about program being debugged.
 */
 
 #include "../../src/commands.h"

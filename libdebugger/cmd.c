@@ -19,24 +19,42 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* debugger command interface. */
+/** \file libdebugger/cmd.c
+ *
+ *  \brief Top-level command REPL.
+ *
+ */
 
 #include "makeint.h"
+#include "main.h"
 #include "msg.h"
 #include "debug.h"
-#include "debugger.h"
 #include "file.h"
 #include "print.h"
-#include "break.h"
 #include "cmd.h"
 #include "fns.h"
-#include "function.h"
 #include "info.h"
 #include "stack.h"
 #include "commands.h"
-#include "expand.h"
 #include "debug.h"
 #include "file2line.h"
+#include "cmd.h"
+
+#ifdef HAVE_LIBREADLINE
+#include <stdio.h>
+#include <stdlib.h>
+/* The following line makes Solaris' gcc/cpp not puke. */
+#undef HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+
+/* From readline. ?? Should this be in configure?  */
+#ifndef whitespace
+#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
+#endif
+#endif /* HAVE_LIBREADLINE */
+
+#include "cmd_initialize.h"
+
 
 #ifdef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -53,15 +71,6 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 /**
-   Think of the below not as an enumeration but as #defines done in a
-   way that we'll be able to use the value in a gdb.
- **/
-enum {
-  MAX_FILE_LENGTH   = 1000,
-} debugger_enum1;
-
-
-/**
    Command-line args after the command-name part. For example in:
    break foo
    the below will be "foo".
@@ -71,77 +80,6 @@ char *psz_debugger_args;
 debug_enter_reason_t last_stop_reason;
 
 #ifdef HAVE_LIBREADLINE
-#include <stdio.h>
-#include <stdlib.h>
-/* The following line makes Solaris' gcc/cpp not puke. */
-#undef HAVE_READLINE_READLINE_H
-#include <readline/readline.h>
-
-/* From readline. ?? Should this be in configure?  */
-#ifndef whitespace
-#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#endif /* HAVE_LIBREADLINE */
-
-/* A structure which contains information on the commands this program
-   can understand. */
-
-static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
-
-/* Should be in alphabetic order by command name. */
-long_cmd_t commands[] = {
-  { "break",    'b' },
-  { "cd",       'C' },
-  { "comment",  '#' },
-  { "continue", 'c' },
-  { "delete",   'd' },
-  { "down",     'D' },
-  { "edit" ,    'e' },
-  { "expand" ,  'x' },
-  { "finish"  , 'F' },
-  { "frame"   , 'f' },
-  { "help"    , 'h' },
-  { "info"    , 'i' },
-  { "list"    , 'l' },
-  { "load"    , 'M' },
-  { "next"    , 'n' },
-  { "print"   , 'p' },
-  { "pwd"     , 'P' },
-  { "quit"    , 'q' },
-  { "run"     , 'R' },
-  { "set"     , '=' },
-  { "setq"    , '"' },
-  { "setqx"   , '`' },
-  { "shell"   , '!' },
-  { "show"    , 'S' },
-  { "skip"    , 'k' },
-  { "source"  , '<' },
-  { "step"    , 's' },
-  { "target"  , 't' },
-  { "up"      , 'u' },
-  { "where"   , 'T' },
-  { "write"   , 'w' },
-  { (char *)NULL, ' '}
-};
-
-typedef struct {
-  const char *command;	        /* real command name. */
-  const char *alias;	        /* alias for command. */
-} alias_cmd_t;
-
-/* Should be in alphabetic order by ALIAS name. */
-
-alias_cmd_t aliases[] = {
-  { "shell",    "!!" },
-  { "help",     "?" },
-  { "break",    "L" },
-  { "where",    "backtrace" },
-  { "where",    "bt" },
-  { "quit",     "exit" },
-  { "run",      "restart" },
-  { "quit",     "return" },
-  { (char *)NULL, (char *) NULL}
-};
-
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
@@ -150,9 +88,11 @@ short_cmd_t short_command[256] = { { NULL,
                                      false,
                                     }, };
 
-/* Look up NAME as the name of a command, and return a pointer to that
-   command.  Return a NULL pointer if NAME isn't a command name. */
-static short_cmd_t *
+/*!
+  Look up `psz_name` as the name of a command, and return a pointer to that
+  command.  Return a NULL pointer if `psz_name` isn't a command name.
+*/
+extern short_cmd_t *
 find_command (const char *psz_name)
 {
   unsigned int i;
@@ -168,10 +108,10 @@ find_command (const char *psz_name)
       if (cmp < 0) break;
   }
 
-  for (i = 0; commands[i].long_name; i++) {
-    const int cmp = strcmp (psz_name, commands[i].long_name);
+  for (i = 0; dbg_commands[i].long_name; i++) {
+    const int cmp = strcmp (psz_name, dbg_commands[i].long_name);
     if ( 0 == cmp ) {
-      return &(short_command[(uint8_t) commands[i].short_name]);
+      return &(short_command[(uint8_t) dbg_commands[i].short_name]);
     } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
@@ -181,177 +121,9 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/continue.h"
-#include "command/edit.h"
-#include "command/expand.h"
-#include "command/load.h"
-#include "command/next.h"
-#include "command/print.h"
-#include "command/pwd.h"
-#include "command/quit.h"
-#include "command/run.h"
-#include "command/set.h"
-#include "command/setq.h"
-#include "command/setqx.h"
-#include "command/shell.h"
-#include "command/show.h"
-#include "command/skip.h"
-#include "command/source.h"
-#include "command/step.h"
-#include "command/target.h"
-#include "command/where.h"
-#include "command/write.h"
-
-/* Needs to come after command/show.h */
-#include "command/help.h"
-
-#include "command/help/break.h"
-#include "command/help/chdir.h"
-#include "command/help/comment.h"
-#include "command/help/continue.h"
-#include "command/help/delete.h"
-#include "command/help/down.h"
-#include "command/help/edit.h"
-#include "command/help/expand.h"
-#include "command/help/finish.h"
-#include "command/help/frame.h"
-#include "command/help/help.h"
-#include "command/help/info.h"
-#include "command/help/load.h"
-#include "command/help/list.h"
-#include "command/help/next.h"
-#include "command/help/print.h"
-#include "command/help/pwd.h"
-#include "command/help/quit.h"
-#include "command/help/run.h"
-#include "command/help/set.h"
-#include "command/help/setq.h"
-#include "command/help/setqx.h"
-#include "command/help/shell.h"
-#include "command/help/show.h"
-#include "command/help/skip.h"
-#include "command/help/step.h"
-#include "command/help/target.h"
-#include "command/help/up.h"
-#include "command/help/where.h"
-#include "command/help/write.h"
-
-/* FIXME: folded "init" routines into the macro them. */
-static void
-dbg_cmd_break_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_break;
-  short_command[c].use  = _("break [*target*|*linenum*] [all|run|prereq|end]*");
-}
-
-static void
-dbg_cmd_chdir_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_chdir;
-  short_command[c].use  = _("cd DIR");
-}
-
-static void
-dbg_cmd_comment_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_comment;
-  short_command[c].use  = _("comment *text*");
-}
-
-static void
-dbg_cmd_delete_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_delete;
-  short_command[c].use  = _("delete *breakpoint-numbers*...");
-}
-
-static void
-dbg_cmd_down_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_down;
-  short_command[c].use  = _("down [*amount]");
-}
-
-static void
-dbg_cmd_finish_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_finish;
-  short_command[c].use  = _("finish [*amount*]");
-}
-
-static void
-dbg_cmd_frame_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_frame;
-  short_command[c].use  = _("frame *n*");
-}
-
-static void
-dbg_cmd_list_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_list;
-  short_command[c].use = _("list [*target*|*line-number*]");
-}
-
-static void
-dbg_cmd_info_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_info;
-  short_command[c].use = _("info [*subcommand*]");
-}
-
-static void
-dbg_cmd_up_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_up;
-  short_command[c].use  = _("up [*amount*]");
-}
-
-
-#define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \
-  dbg_cmd_ ## CMD ## _init(LETTER);                     \
-  short_command[LETTER].doc = _(CMD ## _HELP_TEXT);     \
-  short_command[LETTER].needs_running = NEEDS_RUNNING;  \
-  short_command[LETTER].id = id++
-
-static void
-cmd_initialize(void)
-{
-  int id=0;
-  DBG_CMD_INIT(break, 'b', false);
-  DBG_CMD_INIT(chdir, 'C', false);
-  DBG_CMD_INIT(comment, '#', false);
-  DBG_CMD_INIT(continue, 'c', true);
-  DBG_CMD_INIT(delete, 'd', false);
-  DBG_CMD_INIT(down, 'D', false);
-  DBG_CMD_INIT(edit, 'e', false);
-  DBG_CMD_INIT(expand, 'x', false);
-  DBG_CMD_INIT(finish, 'F', true);
-  DBG_CMD_INIT(frame, 'f', false);
-  DBG_CMD_INIT(help, 'h', false);
-  DBG_CMD_INIT(info, 'i', false);
-  DBG_CMD_INIT(list, 'l', false);
-  DBG_CMD_INIT(load, 'M', false);
-  DBG_CMD_INIT(next, 'n', true);
-  DBG_CMD_INIT(print, 'p', false);
-  DBG_CMD_INIT(pwd, 'P', false);
-  DBG_CMD_INIT(quit, 'q', false);
-  DBG_CMD_INIT(run, 'R', false);
-  DBG_CMD_INIT(set, '=', false);
-  DBG_CMD_INIT(setq, '"', false);
-  DBG_CMD_INIT(setqx, '`', false);
-  DBG_CMD_INIT(shell, '!', false);
-  DBG_CMD_INIT(show, 'S', false);
-  DBG_CMD_INIT(skip, 'k', true);
-  DBG_CMD_INIT(source, '<', false);
-  DBG_CMD_INIT(step, 's', true);
-  DBG_CMD_INIT(target, 't', false);
-  DBG_CMD_INIT(up, 'u', false);
-  DBG_CMD_INIT(where, 'T', false);
-  DBG_CMD_INIT(write, 'w', false);
-}
-
-/* Execute a command line. */
+/*!
+  Execute a command line: the "EP" part of "REPL".
+*/
 extern debug_return_t
 execute_line (char *psz_line)
 {
@@ -388,7 +160,9 @@ execute_line (char *psz_line)
   return ((*(command->func)) (psz_debugger_args));
 }
 
-/* Show history. */
+/*!
+  Show command history.
+*/
 debug_return_t
 dbg_cmd_show_command (const char
                       *psz_args ATTRIBUTE_UNUSED)
@@ -410,10 +184,12 @@ dbg_cmd_show_command (const char
   return debug_readloop;
 }
 
-/* Set a variable. Set "expand' to 1 if you want variable
-   definitions inside the value getting passed in to be expanded
-   before assigment. */
-static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
+/*!
+  Set a variable. Set "expand' to 1 if you want variable
+  definitions inside the value getting passed in to be expanded
+  before assigment.
+*/
+extern debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_msg(_("You need to supply a variable name."));

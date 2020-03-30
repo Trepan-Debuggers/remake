@@ -1,4 +1,3 @@
-/* Write commands associated with a given target. */
 /*
 Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
@@ -17,7 +16,16 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Debugger help command. */
+
+/** \file libdebugger/command/help.c
+ *
+ *  \brief Debugger ``help` command.
+ */
+
+#include "../../src/trace.h"
+#include "../cmd.h"
+#include "../fns.h"
+#include "../msg.h"
 
 void
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
@@ -79,14 +87,14 @@ dbg_cmd_help(char *psz_args)
   if (!psz_args || !*psz_args) {
     printf ("  Command                  Short Name  Aliases\n");
     printf ("  ----------------------   ----------  ---------\n");
-    for (i = 0; commands[i].long_name; i++) {
+    for (i = 0; dbg_commands[i].long_name; i++) {
       unsigned int j;
       bool b_alias = false;
-      uint8_t s=commands[i].short_name;
+      uint8_t s=dbg_commands[i].short_name;
       printf("  %-31s (%c)",
-	     short_command[s].use, commands[i].short_name);
+	     short_command[s].use, dbg_commands[i].short_name);
       for (j = 0; aliases[j].alias; j++) {
-	if (is_alias(commands[i].long_name, &aliases[j])) {
+	if (is_alias(dbg_commands[i].long_name, &aliases[j])) {
 	  if (!b_alias) {
 	    printf("  %s", aliases[j].alias);
 	    b_alias = true;
@@ -99,7 +107,7 @@ dbg_cmd_help(char *psz_args)
     }
 
     dbg_msg("\nReadline command line editing (emacs/vi mode) is available.\n"
-"For more detailed help, type 'help COMAMND-NAME' or consult\n"
+"For more detailed help, type 'help *command-name*' or consult\n"
 "the online-documentation.\n");
 
   } else {
@@ -123,7 +131,7 @@ dbg_cmd_help(char *psz_args)
 	  } else if ( p_command->func == &dbg_cmd_set ) {
 	      return dbg_help_subcmd("set", p_command, psz_args, set_subcommands);
 	  } else {
-            const long_cmd_t *p_long_command = &commands[p_command->id];
+            const long_cmd_t *p_long_command = &dbg_commands[p_command->id];
             printf("%s\n\n", p_command->use);
             printf("%s\n", p_command->doc);
             printf("\nShort name and aliases: %c", p_long_command->short_name);
@@ -142,13 +150,6 @@ dbg_cmd_help(char *psz_args)
   }
 
   return debug_readloop;
-}
-
-static void
-dbg_cmd_help_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_help;
-  short_command[c].use  = _("help [COMMAND]");
 }
 
 

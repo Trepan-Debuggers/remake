@@ -27,6 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/job.h"
 #include "../src/buildargv.h"
 #include "../src/trace.h"
+#include "debugger.h"
+#include "subcmd.h"
 
 /*!
    Command-line args after the command-name part. For example in:
@@ -34,6 +36,28 @@ Boston, MA 02111-1307, USA.  */
    the below will be "foo".
  **/
 extern char *psz_debugger_args;
+
+/**
+   Think of the below not as an enumeration but as C-preprocessor
+   defines done in a way that we'll be able to use the value in a gdb.
+ **/
+enum {
+  MAX_FILE_LENGTH   = 1000,
+} debugger_enum1;
+
+
+typedef struct {
+  const char *command;	        /* real command name. */
+  const char *alias;	        /* alias for command. */
+} alias_cmd_t;
+
+extern alias_cmd_t aliases[];
+extern long_cmd_t dbg_commands[];
+extern short_cmd_t short_command[256];
+
+extern subcommand_var_info_t info_subcommands[];
+extern subcommand_var_info_t set_subcommands[];
+extern subcommand_var_info_t show_subcommands[];
 
 
 extern debug_return_t enter_debugger (target_stack_node_t *p,
@@ -46,11 +70,20 @@ extern debug_return_t dbg_cmd_info(char *psz_args);
 extern debug_return_t dbg_cmd_target(char *psz_args);
 extern debug_return_t dbg_cmd_show(char *psz_args);
 extern debug_return_t dbg_cmd_where(char *psz_args);
+extern debug_return_t dbg_cmd_set(char *psz_args);
+extern debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 extern debug_return_t dbg_cmd_show_command(const char *psz_args);
 /*! Show just a list of targets */
 extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
 /*! Show just a list of tasks */
 extern void dbg_cmd_info_tasks();
+
+
+/*! Look up NAME as the name of a command, and return a pointer to that
+  command.  Return a NULL pointer if NAME isn't a command name. */
+short_cmd_t * find_command (const char *psz_name);
+
+
 
 #endif /* DBG_CMD_H*/
 /*

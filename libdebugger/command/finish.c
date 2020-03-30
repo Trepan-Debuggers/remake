@@ -20,7 +20,11 @@ Boston, MA 02111-1307, USA.  */
 
 /** \file libdebugger/command/finish.c
  *
- *  \brief Debugger "step out" command
+ *  \brief Debugger `finish` command.
+ *
+ *  Debugger command to run until the current target is finished
+ *  dependency update and running any commands associated with the
+ *  target. This is also known as "step out".
  */
 
 #include "../../src/trace.h"

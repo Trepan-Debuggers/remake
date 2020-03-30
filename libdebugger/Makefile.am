@@ -1,6 +1,7 @@
 noinst_HEADERS = \
 	break.h \
 	cmd.h \
+	cmd_initialize.h \
 	commands.h \
 	debugger.h \
 	command/help/break.h \
@@ -51,12 +52,33 @@ libdebugger_a_SOURCES =  \
 	$(DEBUGGER_COMMANDS_C) \
 	command/chdir.c \
 	command/comment.c \
+	command/continue.c \
 	command/delete.c \
 	command/down.c \
+	command/edit.c \
+	command/expand.c \
 	command/finish.c \
 	command/frame.c \
+	command/help.c \
 	command/list.c \
+	command/next.c \
+	command/load.c \
+	command/print.c \
+	command/pwd.c \
+	command/quit.c \
+	command/run.c \
+	command/set.c \
+	command/setq.c \
+	command/setqx.c \
+	command/shell.c \
+	command/show.c \
+	command/skip.c \
+	command/source.c \
+	command/step.c \
+	command/target.c \
 	command/up.c \
+	command/where.c \
+	command/write.c \
 	break.c \
 	cmd.c 	\
 	fns.c 	\
