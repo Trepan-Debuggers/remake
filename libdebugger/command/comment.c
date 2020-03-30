@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /** \file libdebugger/command/comment.c
  *
  *  \brief Debugger comment line.
+ *
  */
 
 #include "../../src/trace.h"

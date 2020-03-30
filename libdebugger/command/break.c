@@ -35,7 +35,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../break.h"
 #include "../cmd.h"
-#include "../debugger.h"
 #include "../file2line.h"
 #include "../fns.h"
 #include "../msg.h"

@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 /** \file libdebugger/command/continue.c
  *
  *  \brief Debugger `continue` command.
+ *
+ *  Debugger command to continue running.
  */
 
 #include "../../src/trace.h"

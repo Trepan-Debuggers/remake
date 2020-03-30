@@ -1,5 +1,4 @@
-/*
-Copyright (C) 2004-2005, 2007-2009, 2011, 2015, 2020 R. Bernstein
+/* Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -18,35 +17,30 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-
-/** \file libdebugger/command/next.h
+/** \file libdebugger/command/pwd.c
  *
- *  \brief Debugger command to step over the next command or target to be executed.
+ *  \brief Debugger `pwd` command.
+ *
+ *  Debugger command to the show the current working directory.
  */
 
-static debug_return_t
-dbg_cmd_next(char *psz_arg)
+#include "../../src/trace.h"
+
+extern debug_return_t
+dbg_cmd_pwd(char *psz_args)
 {
-  if (!psz_arg || !*psz_arg) {
-    i_debugger_nexting  = 1;
-    i_debugger_stepping = 0;
-    define_variable_in_set("MAKEFLAGS", sizeof("MAKEFLAGS")-1,
-                         "", o_debugger, 0, NULL, NULL);
-    return continue_execution;
+  if (!psz_args || 0==strlen(psz_args)) {
+    char wd[300];
+    if (NULL == getcwd (wd, sizeof(wd))) {
+      printf (_("cannot get current directory %s\n"), strerror(errno));
+    } else {
+      printf (_("Working directory %s.\n"), wd);
+    }
+  } else {
+    printf(_("The \"pwd\" command does not take an argument: %s\n"), psz_args);
   }
-  if (get_uint(psz_arg, &i_debugger_nexting, true))
-    return continue_execution;
-  else
-    return continue_execution;
+
   return debug_readloop;
-}
-
-static void
-dbg_cmd_next_init(unsigned int c)
-{
-
-  short_command[c].func = &dbg_cmd_next;
-  short_command[c].use = _("next [AMOUNT]");
 }
 
 /*

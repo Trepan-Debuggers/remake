@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include "makeint.h"
 #include "msg.h"
 #include "debug.h"
-#include "debugger.h"
 #include "file.h"
 #include "print.h"
 #include "break.h"
@@ -53,8 +52,8 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 /**
-   Think of the below not as an enumeration but as #defines done in a
-   way that we'll be able to use the value in a gdb.
+   Think of the below not as an enumeration but as C-preprocessor
+   defines done in a way that we'll be able to use the value in a gdb.
  **/
 enum {
   MAX_FILE_LENGTH   = 1000,
@@ -88,7 +87,7 @@ debug_enter_reason_t last_stop_reason;
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
 /* Should be in alphabetic order by command name. */
-long_cmd_t commands[] = {
+long_cmd_t dbg_commands[] = {
   { "break",    'b' },
   { "cd",       'C' },
   { "comment",  '#' },
@@ -123,11 +122,6 @@ long_cmd_t commands[] = {
   { (char *)NULL, ' '}
 };
 
-typedef struct {
-  const char *command;	        /* real command name. */
-  const char *alias;	        /* alias for command. */
-} alias_cmd_t;
-
 /* Should be in alphabetic order by ALIAS name. */
 
 alias_cmd_t aliases[] = {
@@ -152,7 +146,7 @@ short_cmd_t short_command[256] = { { NULL,
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
-static short_cmd_t *
+extern short_cmd_t *
 find_command (const char *psz_name)
 {
   unsigned int i;
@@ -168,10 +162,10 @@ find_command (const char *psz_name)
       if (cmp < 0) break;
   }
 
-  for (i = 0; commands[i].long_name; i++) {
-    const int cmp = strcmp (psz_name, commands[i].long_name);
+  for (i = 0; dbg_commands[i].long_name; i++) {
+    const int cmp = strcmp (psz_name, dbg_commands[i].long_name);
     if ( 0 == cmp ) {
-      return &(short_command[(uint8_t) commands[i].short_name]);
+      return &(short_command[(uint8_t) dbg_commands[i].short_name]);
     } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
@@ -181,11 +175,6 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/load.h"
-#include "command/next.h"
-#include "command/print.h"
-#include "command/pwd.h"
-#include "command/quit.h"
 #include "command/run.h"
 #include "command/set.h"
 #include "command/setq.h"
@@ -198,9 +187,6 @@ find_command (const char *psz_name)
 #include "command/target.h"
 #include "command/where.h"
 #include "command/write.h"
-
-/* Needs to come after command/show.h */
-#include "command/help.h"
 
 #include "command/help/break.h"
 #include "command/help/chdir.h"
@@ -306,6 +292,13 @@ dbg_cmd_frame_init(unsigned int c)
 }
 
 static void
+dbg_cmd_help_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_help;
+  short_command[c].use  = _("help [*command*]");
+}
+
+static void
 dbg_cmd_list_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_list;
@@ -313,10 +306,46 @@ dbg_cmd_list_init(unsigned int c)
 }
 
 static void
+dbg_cmd_next_init(unsigned int c)
+{
+
+  short_command[c].func = &dbg_cmd_next;
+  short_command[c].use = _("next [*amount*]");
+}
+
+static void
 dbg_cmd_info_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_info;
   short_command[c].use = _("info [*subcommand*]");
+}
+
+static void
+dbg_cmd_load_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_load;
+  short_command[c].use = _("load *file-glob*");
+}
+
+static void
+dbg_cmd_pwd_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_pwd;
+  short_command[c].use = _("pwd");
+}
+
+static void
+dbg_cmd_print_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_print;
+  short_command[c].use = _("print {*variable* [*attrs*...]}");
+}
+
+static void
+dbg_cmd_quit_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_quit;
+  short_command[c].use = _("quit [*exit-status*]");
 }
 
 static void

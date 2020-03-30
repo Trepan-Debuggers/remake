@@ -89,7 +89,7 @@ dbg_cmd_set_bool(const char *psz_varname, const char *psz_flag_name,
 }
 
 
-static debug_return_t
+extern debug_return_t
 dbg_cmd_set(char *psz_args)
 {
   if (!psz_args || 0==strlen(psz_args)) {

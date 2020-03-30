@@ -21,13 +21,8 @@ libdebugger/command/chdir.c
 libdebugger/command/delete.c
 libdebugger/command/edit.c
 libdebugger/command/info.c
-libdebugger/command/help.h
 libdebugger/command/list.c
-libdebugger/command/load.h
-libdebugger/command/next.h
-libdebugger/command/print.h
-libdebugger/command/pwd.h
-libdebugger/command/quit.h
+libdebugger/command/pwd.c
 libdebugger/command/run.h
 libdebugger/command/set.h
 libdebugger/command/setq.h

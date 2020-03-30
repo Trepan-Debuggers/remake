@@ -58,7 +58,13 @@ libdebugger_a_SOURCES =  \
 	command/expand.c \
 	command/finish.c \
 	command/frame.c \
+	command/help.c \
 	command/list.c \
+	command/next.c \
+	command/load.c \
+	command/print.c \
+	command/pwd.c \
+	command/quit.c \
 	command/up.c \
 	break.c \
 	cmd.c 	\

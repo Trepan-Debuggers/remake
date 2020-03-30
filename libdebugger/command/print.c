@@ -18,33 +18,40 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/quit.h
+/** \file libdebugger/command/print.c
  *
- *  \brief Debugger command to terminate remake.
+ *  \brief Debugger `print` command.
+ *
+ *  Debugger command to show a variable definition.
  */
 
-static debug_return_t
-dbg_cmd_quit(char *psz_arg)
-{
-  if (!psz_arg || !*psz_arg) {
-    in_debugger = DEBUGGER_QUIT_RC;
-    dbg_msg("remake: That's all, folks...\n");
-    die(DEBUGGER_QUIT_RC);
-  } else {
-    int rc=0;
-    if (get_int(psz_arg, &rc, true)) {
-      dbg_msg("remake: That's all, folks...\n");
-      die(rc);
-    }
-  }
-  return debug_readloop;
-}
+#include "../../src/trace.h"
+#include "../fns.h"
 
-static void
-dbg_cmd_quit_init(unsigned int c)
+extern debug_return_t
+dbg_cmd_print(char *psz_args)
 {
-  short_command[c].func = &dbg_cmd_quit;
-  short_command[c].use = _("quit [exit-status]");
+  char *psz_name;
+  static char *psz_last_name = NULL;
+
+  if (!psz_args || 0==strlen(psz_args)) {
+    /* Use last value */
+    if (psz_last_name)
+      psz_name = psz_last_name;
+    else {
+      printf("No current variable - must supply something to print\n");
+      return debug_readloop;
+    }
+  } else {
+    psz_name = get_word(&psz_args);
+  }
+
+  if (dbg_cmd_show_exp(psz_name, false)) {
+    if (psz_last_name) free(psz_last_name);
+    psz_last_name = strdup(psz_name);
+  }
+
+  return debug_readloop;
 }
 
 /*
