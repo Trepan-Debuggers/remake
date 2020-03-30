@@ -24,12 +24,7 @@ libdebugger/command/edit.c
 libdebugger/command/info.c
 libdebugger/command/list.c
 libdebugger/command/pwd.c
-libdebugger/command/set.h
-libdebugger/command/show.h
-libdebugger/command/source.h
-libdebugger/command/target.h
-libdebugger/command/where.h
-libdebugger/command/write.h
+libdebugger/command/write.c
 libdebugger/fns.c
 libdebugger/stack.c
 src/ar.c

@@ -26,20 +26,35 @@ Boston, MA 02111-1307, USA.  */
  */
 
 #include "makeint.h"
+#include "main.h"
 #include "msg.h"
 #include "debug.h"
 #include "file.h"
 #include "print.h"
-#include "break.h"
 #include "cmd.h"
 #include "fns.h"
-#include "function.h"
 #include "info.h"
 #include "stack.h"
 #include "commands.h"
-#include "expand.h"
 #include "debug.h"
 #include "file2line.h"
+#include "cmd.h"
+
+#ifdef HAVE_LIBREADLINE
+#include <stdio.h>
+#include <stdlib.h>
+/* The following line makes Solaris' gcc/cpp not puke. */
+#undef HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+
+/* From readline. ?? Should this be in configure?  */
+#ifndef whitespace
+#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
+#endif
+#endif /* HAVE_LIBREADLINE */
+
+#include "cmd_initialize.h"
+
 
 #ifdef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -56,15 +71,6 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 /**
-   Think of the below not as an enumeration but as C-preprocessor
-   defines done in a way that we'll be able to use the value in a gdb.
- **/
-enum {
-  MAX_FILE_LENGTH   = 1000,
-} debugger_enum1;
-
-
-/**
    Command-line args after the command-name part. For example in:
    break foo
    the below will be "foo".
@@ -74,20 +80,6 @@ char *psz_debugger_args;
 debug_enter_reason_t last_stop_reason;
 
 #ifdef HAVE_LIBREADLINE
-#include <stdio.h>
-#include <stdlib.h>
-/* The following line makes Solaris' gcc/cpp not puke. */
-#undef HAVE_READLINE_READLINE_H
-#include <readline/readline.h>
-
-/* From readline. ?? Should this be in configure?  */
-#ifndef whitespace
-#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
-#endif /* HAVE_LIBREADLINE */
-
-/* Include needs to come after whitespace */
-
-#include "cmd_initialize.h"
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',

@@ -24,14 +24,6 @@ Boston, MA 02111-1307, USA.  */
  *
  */
 
-
-#include "command/set.h"
-#include "command/show.h"
-#include "command/source.h"
-#include "command/target.h"
-#include "command/where.h"
-#include "command/write.h"
-
 #include "command/help/break.h"
 #include "command/help/chdir.h"
 #include "command/help/comment.h"
@@ -56,6 +48,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command/help/setqx.h"
 #include "command/help/shell.h"
 #include "command/help/show.h"
+#include "command/help/source.h"
 #include "command/help/skip.h"
 #include "command/help/step.h"
 #include "command/help/target.h"
@@ -258,6 +251,15 @@ dbg_cmd_run_init(unsigned int c)
 }
 
 static void
+dbg_cmd_set_init(unsigned int c)
+{
+
+  short_command[c].func = &dbg_cmd_set;
+  short_command[c].use =
+    _("set *option* {on|off|toggle}");
+}
+
+static void
 dbg_cmd_setq_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_setq;
@@ -279,10 +281,24 @@ dbg_cmd_shell_init(unsigned int c)
 }
 
 static void
+dbg_cmd_show_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_show;
+  short_command[c].use = _("show [*subcommand]");
+}
+
+static void
 dbg_cmd_skip_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_skip;
   short_command[c].use = _("skip");
+}
+
+static void
+dbg_cmd_source_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_source;
+  short_command[c].use = _("source *file-glob*");
 }
 
 static void
@@ -293,12 +309,32 @@ dbg_cmd_step_init(unsigned int c)
 }
 
 static void
+dbg_cmd_target_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_target;
+  short_command[c].use =  _("target [*target-name] [info1 [info2...]]");
+}
+
+static void
 dbg_cmd_up_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_up;
   short_command[c].use  = _("up [*amount*]");
 }
 
+static void
+dbg_cmd_where_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_where;
+  short_command[c].use =  _("where");
+}
+
+static void
+dbg_cmd_write_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_write;
+  short_command[c].use =  _("write [*target* [*filename*]]");
+}
 
 #define DBG_CMD_INIT(CMD, LETTER, NEEDS_RUNNING)        \
   dbg_cmd_ ## CMD ## _init(LETTER);                     \

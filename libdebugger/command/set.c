@@ -31,9 +31,27 @@ Boston, MA 02111-1307, USA.  */
    (or "is on").
 */
 
+#include "../../src/trace.h"
 #include "../../src/commands.h"
+#include "../../src/debug.h"
 #include "../../src/main.h"
+#include "../cmd.h"
+#include "../fns.h"
+#include "../msg.h"
 #include "../subcmd.h"
+
+#ifdef HAVE_LIBREADLINE
+#include <stdio.h>
+#include <stdlib.h>
+/* The following line makes Solaris' gcc/cpp not puke. */
+#undef HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+
+/* From readline. ?? Should this be in configure?  */
+#ifndef whitespace
+#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
+#endif
+#endif /* HAVE_LIBREADLINE */
 
 subcommand_var_info_t set_subcommands[] = {
   { "basename",
@@ -133,15 +151,6 @@ dbg_cmd_set(char *psz_args)
                psz_varname);
     return debug_cmd_error;
   }
-}
-
-static void
-dbg_cmd_set_init(unsigned int c)
-{
-
-  short_command[c].func = &dbg_cmd_set;
-  short_command[c].use =
-    _("set OPTION {on|off|toggle}");
 }
 
 /*

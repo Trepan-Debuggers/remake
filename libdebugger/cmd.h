@@ -37,6 +37,14 @@ Boston, MA 02111-1307, USA.  */
  **/
 extern char *psz_debugger_args;
 
+/**
+   Think of the below not as an enumeration but as C-preprocessor
+   defines done in a way that we'll be able to use the value in a gdb.
+ **/
+enum {
+  MAX_FILE_LENGTH   = 1000,
+} debugger_enum1;
+
 
 typedef struct {
   const char *command;	        /* real command name. */

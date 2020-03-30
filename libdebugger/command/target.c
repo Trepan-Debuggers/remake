@@ -18,9 +18,14 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "../../src/trace.h"
 #include "../../src/commands.h"
+#include "../../src/file.h"
+#include "../../src/variable.h"
+#include "../cmd.h"
+#include "../fns.h"
 
-debug_return_t
+extern debug_return_t
 dbg_cmd_target(char *psz_args)
 {
   const char *psz_target;
@@ -73,14 +78,6 @@ dbg_cmd_target(char *psz_args)
   }
   return debug_readloop;
 }
-
-static void
-dbg_cmd_target_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_target;
-  short_command[c].use =  _("target [TARGET-NAME] [info1 [info2...]]");
-}
-
 
 /*
  * Local variables:

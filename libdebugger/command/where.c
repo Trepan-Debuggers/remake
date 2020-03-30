@@ -1,6 +1,5 @@
-/* Write commands associated with a given target. */
 /*
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,9 +16,19 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Show target call stack info. */
 
-debug_return_t
+/**
+ *  \brief Debugger `where` command.
+ *
+ * Show dependency target call stack information.
+ **/
+
+#include "../../src/trace.h"
+#include "../../src/print.h"
+#include "../fns.h"
+#include "../stack.h"
+
+extern debug_return_t
 dbg_cmd_where (char *psz_amount)
 {
   int i_amount;
@@ -43,13 +52,6 @@ dbg_cmd_where (char *psz_amount)
       dbg_print_invocation();
     }
   return debug_readloop;
-}
-
-static void
-dbg_cmd_where_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_where;
-  short_command[c].use =  _("where");
 }
 
 

@@ -1,4 +1,3 @@
-/* Show debugger settings. */
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
@@ -19,7 +18,21 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/**
+ *  \brief Debugger `show` command.
+ *
+ *   Show debugger settings.
+ **/
+
+#include "../../src/trace.h"
+#include "../../src/debug.h"
 #include "../../src/main.h"
+#include "../../src/print.h"
+
+#include "../cmd.h"
+#include "../fns.h"
+#include "../info.h"
+#include "../msg.h"
 #include "../subcmd.h"
 
 subcommand_var_info_t show_subcommands[] = {
@@ -78,7 +91,7 @@ subcommand_var_info_t show_subcommands[] = {
     false, 0}
 };
 
-debug_return_t
+extern debug_return_t
 dbg_cmd_show(char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
@@ -117,16 +130,6 @@ dbg_cmd_show(char *psz_arg)
   }
 
   return debug_readloop;
-}
-
-static void
-dbg_cmd_show_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_show;
-  short_command[c].use = _("show [SUBCOMMAND]");
-  short_command[c].doc =
-    _("Show debugger information regarding SUBCOMMAND.\n"
-      "If no SUBCOMMAND is specified, give a list of \"show\" subcommands.");
 }
 
 
