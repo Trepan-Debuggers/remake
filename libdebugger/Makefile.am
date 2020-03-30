@@ -65,6 +65,12 @@ libdebugger_a_SOURCES =  \
 	command/print.c \
 	command/pwd.c \
 	command/quit.c \
+	command/run.c \
+	command/setq.c \
+	command/setqx.c \
+	command/shell.c \
+	command/skip.c \
+	command/step.c \
 	command/up.c \
 	break.c \
 	cmd.c 	\

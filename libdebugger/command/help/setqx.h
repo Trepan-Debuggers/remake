@@ -4,9 +4,9 @@
  *
  */
 #define setqx_HELP_TEXT							\
-  "Set GNU Make variable VARIABLE to VALUE.\n"				\
+  "Set GNU Make variable *variable* to *value*.\n"			\
   "\n"									\
-  "In contrast to `setq`, variable definitions inside VALUE are\n"	\
+  "In contrast to `setq`, variable definitions inside *value* are\n"	\
   "expanded before assignment occurs.\n"				\
   "\n"									\
   "See also:\n"								\

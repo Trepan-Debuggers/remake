@@ -63,6 +63,7 @@ extern debug_return_t dbg_cmd_target(char *psz_args);
 extern debug_return_t dbg_cmd_show(char *psz_args);
 extern debug_return_t dbg_cmd_where(char *psz_args);
 extern debug_return_t dbg_cmd_set(char *psz_args);
+extern debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 extern debug_return_t dbg_cmd_show_command(const char *psz_args);
 /*! Show just a list of targets */
 extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);

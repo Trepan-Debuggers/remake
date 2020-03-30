@@ -84,7 +84,7 @@ debug_enter_reason_t last_stop_reason;
 /* A structure which contains information on the commands this program
    can understand. */
 
-static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
+debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
 /* Should be in alphabetic order by command name. */
 long_cmd_t dbg_commands[] = {
@@ -175,15 +175,9 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-#include "command/run.h"
 #include "command/set.h"
-#include "command/setq.h"
-#include "command/setqx.h"
-#include "command/shell.h"
 #include "command/show.h"
-#include "command/skip.h"
 #include "command/source.h"
-#include "command/step.h"
 #include "command/target.h"
 #include "command/where.h"
 #include "command/write.h"
@@ -349,6 +343,52 @@ dbg_cmd_quit_init(unsigned int c)
 }
 
 static void
+dbg_cmd_run_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_run;
+  short_command[c].use = _("run [*args*]");
+  short_command[c].doc =
+    _("Run Makefile from the beginning.\n"
+      "You may specify arguments to give it.\n"
+      "With no arguments, uses arguments last specified (with \"run\")");
+}
+
+static void
+dbg_cmd_setq_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_setq;
+  short_command[c].use  = _("setq *variable* *value*");
+}
+
+static void
+dbg_cmd_setqx_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_setqx;
+  short_command[c].use  = _("setqx *variable* *value");
+}
+
+static void
+dbg_cmd_shell_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_shell;
+  short_command[c].use =  _("shell *string*");
+}
+
+static void
+dbg_cmd_skip_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_skip;
+  short_command[c].use = _("skip");
+}
+
+static void
+dbg_cmd_step_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_step;
+  short_command[c].use = _("step [*amount*]");
+}
+
+static void
 dbg_cmd_up_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_up;
@@ -461,7 +501,7 @@ dbg_cmd_show_command (const char
 /* Set a variable. Set "expand' to 1 if you want variable
    definitions inside the value getting passed in to be expanded
    before assigment. */
-static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
+extern debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_msg(_("You need to supply a variable name."));

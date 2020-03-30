@@ -17,10 +17,21 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Step execution until another stopping point is reached Argument N
-   means do this N times (or until there's another reason to stop. */
 
-static debug_return_t
+
+/**
+ * \brief Debugger `step` command.
+ *
+ * Step execution until another stopping point is reached Argument N
+ *  means do this N times (or until there's another reason to stop.
+*/
+
+#include "../../src/trace.h"
+#include "../../src/debug.h"
+#include "../../src/variable.h"
+#include "../fns.h"
+
+extern debug_return_t
 dbg_cmd_step (char *psz_arg)
 {
   if (!psz_arg || !*psz_arg) {
@@ -37,13 +48,6 @@ dbg_cmd_step (char *psz_arg)
     return continue_execution;
   } else
     return debug_readloop;
-}
-
-static void
-dbg_cmd_step_init(unsigned int c)
-{
-  short_command[c].func = &dbg_cmd_step;
-  short_command[c].use = _("step [AMOUNT]");
 }
 
 
