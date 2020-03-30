@@ -19,7 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/cmd.c
+/** \file libdebugger/cmd.c
  *
  *  \brief Top-level command REPL.
  *
@@ -96,8 +96,10 @@ short_cmd_t short_command[256] = { { NULL,
                                      false,
                                     }, };
 
-/* Look up NAME as the name of a command, and return a pointer to that
-   command.  Return a NULL pointer if NAME isn't a command name. */
+/*!
+  Look up `psz_name` as the name of a command, and return a pointer to that
+  command.  Return a NULL pointer if `psz_name` isn't a command name.
+*/
 extern short_cmd_t *
 find_command (const char *psz_name)
 {
@@ -127,7 +129,9 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-/* Execute a command line. */
+/*!
+  Execute a command line: the "EP" part of "REPL".
+*/
 extern debug_return_t
 execute_line (char *psz_line)
 {
@@ -164,7 +168,9 @@ execute_line (char *psz_line)
   return ((*(command->func)) (psz_debugger_args));
 }
 
-/* Show history. */
+/*!
+  Show command history.
+*/
 debug_return_t
 dbg_cmd_show_command (const char
                       *psz_args ATTRIBUTE_UNUSED)
@@ -186,9 +192,11 @@ dbg_cmd_show_command (const char
   return debug_readloop;
 }
 
-/* Set a variable. Set "expand' to 1 if you want variable
-   definitions inside the value getting passed in to be expanded
-   before assigment. */
+/*!
+  Set a variable. Set "expand' to 1 if you want variable
+  definitions inside the value getting passed in to be expanded
+  before assigment.
+*/
 extern debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 {
   if (!psz_args || 0==strlen(psz_args)) {

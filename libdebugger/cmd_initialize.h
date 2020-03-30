@@ -1,7 +1,6 @@
 /*
-Copyright (C) 2004-2005, 2007-2009, 2011,
-              2014-2015, 2020 R. Bernstein
-<rocky@gnu.org>
+Copyright (C) 2020 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -19,7 +18,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/cmd_initialize.c
+/** \file libdebugger/command/cmd_initialize.h
  *
  *  \brief Debugger command initialization.
  *
@@ -66,8 +65,6 @@ Boston, MA 02111-1307, USA.  */
 
 /* A structure which contains information on the commands this program
    can understand. */
-
-debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
 /* Should be in alphabetic order by command name. */
 long_cmd_t dbg_commands[] = {
