@@ -1,6 +1,7 @@
 noinst_HEADERS = \
 	break.h \
 	cmd.h \
+	cmd_initialize.h \
 	commands.h \
 	debugger.h \
 	command/help/break.h \
