@@ -18,7 +18,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file libdebugger/command/cmd_initialize.h
+/** \file libdebugger/cmd_initialize.h
  *
  *  \brief Debugger command initialization.
  *
@@ -122,7 +122,7 @@ static void
 dbg_cmd_chdir_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_chdir;
-  short_command[c].use  = _("cd DIR");
+  short_command[c].use  = _("cd *dir*");
 }
 
 static void
@@ -136,7 +136,7 @@ static void
 dbg_cmd_continue_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_continue;
-  short_command[c].use  = _("continue [TARGET [all|run|prereq|end]*]");
+  short_command[c].use  = _("continue [*target* [all|run|prereq|end]*]");
 }
 
 static void

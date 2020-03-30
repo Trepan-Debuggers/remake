@@ -107,7 +107,7 @@ dbg_cmd_help(char *psz_args)
     }
 
     dbg_msg("\nReadline command line editing (emacs/vi mode) is available.\n"
-"For more detailed help, type 'help COMAMND-NAME' or consult\n"
+"For more detailed help, type 'help *command-name*' or consult\n"
 "the online-documentation.\n");
 
   } else {
