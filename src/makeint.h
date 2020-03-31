@@ -652,7 +652,7 @@ extern unsigned short stopchar_map[];
 extern int just_print_flag, run_silent, ignore_errors_flag, keep_going_flag;
 extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
-extern int print_version_flag, print_directory_flag, check_symlink_flag;
+extern int print_version_flag, print_directory, check_symlink_flag;
 extern int warn_undefined_variables_flag, trace_flag, posix_pedantic;
 extern int not_parallel, second_expansion, clock_skew_detected;
 extern int rebuilding_makefiles, one_shell, output_sync, verify_flag;

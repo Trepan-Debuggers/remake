@@ -27,7 +27,7 @@ int no_builtin_variables_flag = 0;
 int check_symlink_flag = 0;
 
 /* Nonzero means print directory before starting and when done (-w).  */
-int print_directory_flag = 0;
+int print_directory = 0;
 
 /* Nonzero means print version information.  */
 int print_version_flag = 0;

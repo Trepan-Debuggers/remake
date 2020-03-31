@@ -166,10 +166,10 @@ static const int default_keep_going_flag = 0;
 
 int show_task_comments_flag = 0;
 
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
+/* Nonzero means ignore print_directory and never print the directory.
+   This is necessary because print_directory is set implicitly.  */
 
-int inhibit_print_directory_flag = 0;
+int inhibit_print_directory = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -401,7 +401,7 @@ static const struct command_switch switches[] =
       "no-keep-going" },
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
+    { 'w', flag, &print_directory, 1, 1, 0, 0, 0, "print-directory" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, "debugger" },
     { '!', flag, &post_mortem_flag, 1, 1, 0, 0, 0, "post-mortem" },
 
@@ -424,7 +424,7 @@ static const struct command_switch switches[] =
     { CHAR_MAX+1, strlist, &db_flags, 1, 1, 0, "basic", 0, "debug" },
     { CHAR_MAX+2, string, &jobserver_auth, 1, 1, 0, 0, 0, "jobserver-auth" },
     { CHAR_MAX+3,  flag, &show_tasks_flag, 0, 0, 0, 0, 0, "tasks" },
-    { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+4, flag, &inhibit_print_directory, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
@@ -1558,41 +1558,18 @@ main (int argc, const char **argv, char **envp)
       for (i = 0; directories->list[i] != 0; ++i)
         {
           const char *dir = directories->list[i];
-#ifdef WINDOWS32
-          /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
-             But allow -C/ just in case someone wants that.  */
-          {
-            char *p = (char *)dir + strlen (dir) - 1;
-            while (p > dir && (p[0] == '/' || p[0] == '\\'))
-              --p;
-            p[1] = '\0';
-          }
-#endif
           if (chdir (dir) < 0)
             pfatal_with_name (dir);
         }
     }
 
-#ifdef WINDOWS32
-  /*
-   * THIS BLOCK OF CODE MUST COME AFTER chdir() CALL ABOVE IN ORDER
-   * TO NOT CONFUSE THE DEPENDENCY CHECKING CODE IN implicit.c.
-   *
-   * The functions in dir.c can incorrectly cache information for "."
-   * before we have changed directory and this can cause file
-   * lookups to fail because the current directory (.) was pointing
-   * at the wrong place when it was first evaluated.
-   */
-   no_default_sh_exe = !find_and_set_default_shell (NULL);
-#endif /* WINDOWS32 */
-
   /* Except under -s, always do -w in sub-makes and under -C.  */
   if (!silent_flag && (directories != 0 || makelevel > 0))
-    print_directory_flag = 1;
+    print_directory = 1;
 
   /* Let the user disable that with --no-print-directory.  */
-  if (inhibit_print_directory_flag)
-    print_directory_flag = 0;
+  if (inhibit_print_directory)
+    print_directory = 0;
 
   /* If -R was given, set -r too (doesn't make sense otherwise!)  */
   if (no_builtin_variables_flag)
