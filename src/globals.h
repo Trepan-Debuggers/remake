@@ -32,7 +32,7 @@ extern int no_builtin_variables_flag;
 extern int check_symlink_flag;
 
 /* Nonzero means print directory before starting and when done (-w).  */
-extern int print_directory_flag;
+extern int print_directory;
 
 /* Nonzero means print version information.  */
 extern int print_version_flag;
