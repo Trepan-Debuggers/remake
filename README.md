@@ -22,6 +22,6 @@ Example showing `--show-parent` (short option `-c`) feature:
 
 ![--show-parent](screenshots/remake-search-parent.gif)
 
-Example showing `--profiling` output (displayed via [KCachegrind](https://kcachegrind.github.io/html/Home.htmlkcachegrind)):
+Example showing `--profiling` output (displayed via [KCachegrind](https://kcachegrind.github.io/html/Home.html)):
 
 ![--profile](screenshots/remake-profiled2.png)
