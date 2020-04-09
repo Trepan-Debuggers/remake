@@ -36,6 +36,10 @@ The latest version may not yet be included in the archives. If you are running
 a stable version of Debian or a derivative, you may need to install `remake` from
 the backports repository for your version to get a recent version installed.
 
+Starting with remake-4.3+dbg-1.5 some debian package files are stored on github in
+https://github.com/rocky/remake/releases.
+
+
 MacOSX
 +++++++
 
@@ -192,6 +196,18 @@ So the full sequence is:
    $ (cd doc && make stamp-1 stamp-vti)
    $ make && make check
    $ make install # may need sudo
+
+Debian Package Building
+.......................
+
+Have Debian git-buildpackage (`gdp`) installed `sudo apt install gdp`.
+
+```
+  $ git checkout upstream/4.3+dbg
+  $ gbp buildpackage --git-ignore-branch
+```
+
+If all goes well, Debian packaging files like `remake_4.3+dbg-1.5_amd64.deb` will appear in the parent directory.
 
 Unbuilding
 ..........

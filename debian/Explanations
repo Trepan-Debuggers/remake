@@ -1,0 +1,204 @@
+ This file is a presentation of explanations of make's behaviour that
+ users have found puzzling over time, along with explanations of the
+ behaviour by make's author.
+
+######################################################################
+######################################################################
+######################################################################
+
+ Case 1:
+
+> I have always thought that a normal (non-pattern) rule with multiple
+> targets gets run multiple times, once per each target that is out of
+> date.  At least, that's what the manual says.  Sometimes one would
+> like a different behavior, namely to update all the targets at once
+> with one run, but as long as it's documented and established I am
+> willing to live with it.  But there seems to be more to it.             
+
+==============================================================================
+ MODULES := \                                                                   
+         Blah \                                                                 
+         Bleh \                                                                 
+                                                                                
+ SOURCES := $(addsuffix .sml,$(MODULES))                                        
+                                                                                
+ TEX := $(addsuffix .tex,$(MODULES))                                            
+                                                                                
+ modules.tex : $(TEX)                                                           
+         cat $(TEX) > modules.tex                                               
+                                                                                
+ $(TEX) : $(SOURCES)                                                            
+         ./bin/plit $(SOURCES)                                                  
+==============================================================================
+                                                                            
+> I have files Blah.sml and Bleh.sml.                                            
+> Surprise #1: make modules.tex runs the last rule _once_ (which
+> happens to be which happens in this case).
+                                                                
+That's because of the way make processes the makefile.  First, it builds
+Blah.tex, but that command also updates Bleh.tex.  So, when make comes
+around looking to decide if Bleh.tex needs to be updated, it doesn't
+have to be because it's already up to date, so make doesn't run the rule
+again.
+
+The best way to see this problem is to try a parallel build: in that
+case often make will try to invoke the script once for each target, in
+parallel.
+
+> Surprise #2: add a flag to the command, so now the last rule is                
+> $(TEX) : $(SOURCES)                                                            
+>         ./bin/plit -n $(SOURCES)                                               
+> touch one of the .sml files, make modules.tex again.  Now plit runs twice!     
+
+I don't know what the -n flag does so I can't say: I can't find any docs
+for "plit" via Google or on my system.  Maybe it doesn't actually update
+the files with -n?
+
+Needless to say I can't reproduce this behavior with a simplified
+makefile that doesn't invoke plit but rather just uses touch, etc. to
+try to mimic its behavior.
+
+>                                                                                
+> Surprise #3: refactor like this                                                
+> $(TEX) : junk                                                                  
+> junk: $(SOURCES)                                                               
+>         ./bin/plit -n $(SOURCES)                                               
+> touch Blah.sml.  Now make modules.tex runs the last rule (once), but
+> not the first rule (for modules.tex itself), even though it clearly
+> is out of date!
+
+I can only assume that you created a file "junk" by hand in this
+directory during your testing: no other explanation fits the facts as
+you describe them.
+
+This makefile is broken, because you never have any command that updates
+the file "junk".
+
+If that file "junk" doesn't exist already then make will always run the
+plit script every time, regardless of the relative timestamps of the
+.sml files, and then it will always update modules.tex.
+
+If that file "junk" does exist, then it will re-run "plit" if any of the
+.sml files is newer than the file "junk".  But since the script doesn't
+update "junk" itself, make doesn't consider the two .tex files out of
+date (they are still newer than their prerequisite, "junk") so it
+doesn't rebuild modules.tex.
+
+If you change your rule so that it updates "junk", all will work as you
+expect:
+
+    $(TEX): junk
+
+    junk: $(SOURCES)
+        ./bin/plit -n $(SOURCES)
+        @touch $@
+
+######################################################################
+######################################################################
+######################################################################
+
+ Case 2
+
+> In some cases, GNU make ignores some double-colon rules when dry-run.
+======================================================================
+  all: foo.1 foo.2                                                              
+  foo.1:                                                                        
+          touch foo.1                                                           
+  foo.2:                                                                        
+          touch foo.2                                                           
+                                                                                
+  install.man:: foo.1                                                           
+          @echo install foo.1                                                   
+                                                                                
+  install.man:: foo.2                                                           
+          @echo install foo.2                                                   
+                                                                                
+  install.man::                                                                 
+          @echo install done                    
+======================================================================
+> I've got the following results
+
+>  % make                                                                        
+>  touch foo.1                                                                   
+>  touch foo.2                                                                   
+>  % make -n install.man                                                         
+>  echo install foo.1                                                            
+>  echo install done                                                             
+ 
+> I expect "echo install foo.2", but make dry-run shows not to
+> run "install foo.2". However, if I run make actually
+
+>  % make install.man
+>  install foo.1
+>  install foo.2
+>  install done
+
+> "install foo.2" is executed.  Is this an intentional behavior or a
+> bug of GNU make?
+
+It is intentional behavior.  When GNU make runs with -n it must assume
+that your command script does what you say it will do: since it doesn't
+run the script itself it can't know what the script _really_ does.
+
+For a rule like this:
+
+    install.man:: foo.1
+            <some script>
+
+GNU make _must_ assume that <some script> updates the target
+"install.man"... how can it know that it really doesn't?
+
+So, when you run with -n it assumes that the target is now updated,
+which automatically makes it newer than "foo.2", so the rule depending
+on "foo.2" does not get run.
+
+The last install.man rule is run because there is a special condition
+for double-colon rules, that if they have no prerequisites the command
+is run even if the target exists (see the section "Double-Colon Rules"
+in the GNU make manual).
+
+However, double-colon rules that _DO_ have prerequisites are only
+invoked if the prerequisites are newer than the target, just as with
+normal rules.
+
+You can see the behavior "make -n" is emulating without using -n if you
+have your scripts actually create the target your makefile says it will:
+
+  install.man:: foo.1
+        @echo install foo.1
+        touch $@
+  install.man:: foo.2
+         @echo install foo.2
+        touch $@
+  install.man::
+         @echo install done
+        touch $@
+
+
+  $ make -n
+  install foo.1
+  install done
+
+  $ make
+  install foo.1
+  install done
+
+  ms> Note that pmake run as I expected
+
+  ms>  % pmake -n install.man
+  ms>  echo install foo.1
+  ms>  echo install foo.2
+  ms>  echo install done
+
+Most likely pmake behaves differently; it may always run all
+double-colon scripts, even if there's a satisfied prerequisite
+relationship.
+
+Try the above makefile with the touch lines in it: does it run all three
+rules even though the touch lines exist?
+
+######################################################################
+######################################################################
+######################################################################
+
+arch-tag: b9738368-cd5f-43ad-aed0-6853f020811f

@@ -1,0 +1,34 @@
+Source: remake-dfsg
+Section: devel
+Priority: optional
+Maintainer: Rocky Bernstein <rocky@gnu.org>
+Standards-Version: 4.1.3
+Homepage: http://www.gnu.org/software/make/
+Build-Depends: gettext, po-debconf, debhelper (>= 9.0.0), dh-autoreconf,
+               autoconf, automake | automaken, autopoint, file, pkg-config,
+               guile-2.2-dev, procps, libbsd-resource-perl <!nocheck>
+
+Package: remake
+Suggests: make-doc
+Conflicts: remake-guile
+Architecture: any
+Priority: optional
+Replaces: remake-guile
+Multi-Arch: allowed
+Description: utility for directing compilation
+ GNU make utility with enhanced tracing, error reporting, profiling, a debugger
+ and more.
+Depends: ${shlibs:Depends}, ${misc:Depends}
+
+Package: remake-guile
+Suggests: make-doc
+Priority: extra
+Conflicts: remake
+Provides: remake
+Replaces: remake
+Architecture: any
+Multi-Arch: allowed
+Description: utility for directing compilation with guile support
+ GNU make utility with enhanced tracing, error reporting, profiling, a debugger
+ and more.
+Depends: ${shlibs:Depends}, ${misc:Depends}

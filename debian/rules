@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+package:=make
+SRCTOP:= $(shell if [ "$$PWD" != "" ]; then echo $$PWD; else pwd; fi)
+INSTALL = install
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+    INSTALL_PROGRAM += -s
+endif
+install_file	= $(INSTALL) -p	   -o root -g root  -m	644
+install_program = $(INSTALL) -p	   -o root -g root  -m	755
+install_script	= $(INSTALL) -p	   -o root -g root  -m	755
+make_directory	= $(INSTALL) -p -d -o root -g root  -m	755
+PREFIX=/usr
+BUILDDIR_NORMAL = $(SRCTOP)/debian/build-make
+BUILDDIR_GUILE  = $(SRCTOP)/debian/build-make-guile
+
+DPKG_ARCH := dpkg-architecture
+export DEB_HOST_MULTIARCH  := $(shell $(DPKG_ARCH) $(ha) -qDEB_HOST_MULTIARCH)
+
+%:
+	dh $@ --parallel  --with autoreconf
+
+override_dh_auto_configure:
+ifneq (,$(filter make-guile, $(shell dh_listpackages)))
+	mkdir -p $(BUILDDIR_GUILE)
+	ac_cv_lib_util_getloadavg=no dh_auto_configure --parallel \
+           -B$(BUILDDIR_GUILE) -- --prefix=$(PREFIX) $(confflags) \
+              --with-guile
+endif
+ifneq (,$(filter make, $(shell dh_listpackages)))
+	mkdir -p $(BUILDDIR_NORMAL)
+	ac_cv_lib_util_getloadavg=no dh_auto_configure --parallel  \
+           -B$(BUILDDIR_NORMAL) -- --prefix=$(PREFIX) $(confflags) \
+              --with-guile=no
+endif
+
+override_dh_auto_build:
+ifneq (,$(filter make-guile, $(shell dh_listpackages)))
+	dh_auto_build --parallel -B$(BUILDDIR_GUILE)
+endif
+ifneq (,$(filter make, $(shell dh_listpackages)))
+	dh_auto_build --parallel -B$(BUILDDIR_NORMAL)
+endif
+
+override_dh_auto_test:
+ifneq (,$(filter make-guile, $(shell dh_listpackages)))
+	dh_auto_test --parallel -B$(BUILDDIR_GUILE)
+endif
+ifneq (,$(filter make, $(shell dh_listpackages)))
+	dh_auto_test --parallel -B$(BUILDDIR_NORMAL)
+endif
+
+override_dh_auto_install:
+ifneq (,$(filter make-guile, $(shell dh_listpackages)))
+	dh_auto_install -B$(BUILDDIR_GUILE)  --destdir=debian/make-guile
+endif
+ifneq (,$(filter make, $(shell dh_listpackages)))
+	dh_auto_install -B$(BUILDDIR_NORMAL) --destdir=debian/make
+endif
+
+#Local variables:
+#mode: makefile
+#End:

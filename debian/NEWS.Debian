@@ -1,0 +1,6 @@
+remake-dfsg (4.3-1.5) unstable; urgency=low
+
+  Revision based on GNU Make Debian package
+
+
+ -- Rocky Bernstein <rocky@gnu.org>  Thu,  9 Apr 2020 00:00:00 -0400
