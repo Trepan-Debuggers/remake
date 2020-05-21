@@ -36,7 +36,7 @@ Here we show how in contrast to GNU `make`, `remake` will look in parent directo
 
 # How these were made:
 
-The "cast" screenshots were made with `asciienea`. For example:
+The "cast" screenshots were made with `asciinema`. For example:
 
 ```
 $ asciinema rec remake-tasks.cast
