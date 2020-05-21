@@ -16,7 +16,8 @@ test-make:
 	@case $(MAKE) in \
 	*/remake|remake) echo "Enlightended!";; \
 	*/make|make) echo "This is what most folks use.";; \
-	esac \
+	esac
+
 : 	@bogus-command
 ```
 
