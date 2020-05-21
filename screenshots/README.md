@@ -1,6 +1,6 @@
 # `remake --tasks`
 
-Here we show how you can document your targets using lines that start with `#
+Here we show how you can document your targets using lines that start with `#:`
 
 This is the `Makefile` used in this demo:
 
