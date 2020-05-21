@@ -11,9 +11,9 @@ The [wiki](https://github.com/rocky/remake/wiki) also has information, including
 
 Example showing `--tasks` feature:
 
-![--tasks](screenshots/remake-session0.gif)
+![--tasks](screenshots/remake-tasks.gif)
 
-Example showing `--trace` (short option `-x`) feature:
+Example showing `--trace` (short option `-x`) feature.
 
 ![--trace](screenshots/remake-trace.gif)
 
