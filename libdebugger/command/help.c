@@ -27,6 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../fns.h"
 #include "../msg.h"
 
+extern short_cmd_t short_command[256];
+
 void
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
 		      subcommand_var_info_t *p_subcmd, bool full_info)

@@ -41,7 +41,7 @@ extern char *psz_debugger_args;
    Think of the below not as an enumeration but as C-preprocessor
    defines done in a way that we'll be able to use the value in a gdb.
  **/
-enum {
+extern enum {
   MAX_FILE_LENGTH   = 1000,
 } debugger_enum1;
 
@@ -81,9 +81,7 @@ extern void dbg_cmd_info_tasks();
 
 /*! Look up NAME as the name of a command, and return a pointer to that
   command.  Return a NULL pointer if NAME isn't a command name. */
-short_cmd_t * find_command (const char *psz_name);
-
-
+extern short_cmd_t * find_command (const char *psz_name);
 
 #endif /* DBG_CMD_H*/
 /*

@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -19,15 +19,15 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 #ifndef REMAKE_FILE2LINE
 #define REMAKE_FILE2LINE
-struct hash_table file2lines;
+extern struct hash_table file2lines;
 
 typedef enum {
   F2L_TARGET,
   F2L_PATTERN
 } f2l_entry_t;
 
-  
-typedef struct lineo_array_s 
+
+typedef struct lineo_array_s
 {
   const char *hname;   /**< Name stored in hash table */
   unsigned int size;   /**< Number of entries in array */
@@ -40,13 +40,13 @@ typedef struct lineo_array_s
   only. So we do this on demand.
 */
 extern bool file2lines_init(void);
-extern file_t *target_for_file_and_line (const char *psz_filename, 
+extern file_t *target_for_file_and_line (const char *psz_filename,
 					 unsigned int lineno,
 					 /*out*/ f2l_entry_t *entry_type);
 extern void file2lines_dump(void);
 #endif
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

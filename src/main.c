@@ -45,6 +45,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # include <fcntl.h>
 #endif
 
+struct goaldep *read_makefiles;
+
 extern void initialize_stopchar_map ();
 
 #if defined HAVE_WAITPID || defined HAVE_WAIT3

@@ -92,7 +92,7 @@ short_cmd_t short_command[256] = { { NULL,
   Look up `psz_name` as the name of a command, and return a pointer to that
   command.  Return a NULL pointer if `psz_name` isn't a command name.
 */
-extern short_cmd_t *
+short_cmd_t *
 find_command (const char *psz_name)
 {
   unsigned int i;

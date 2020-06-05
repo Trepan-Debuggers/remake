@@ -39,7 +39,7 @@ void fatal_err (target_stack_node_t *p_call, const char *fmt, ...);
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
-enum debug_print_enums_e {
+extern enum debug_print_enums_e {
   MAX_STACK_SHOW = 1000,
 } debug_print_enums1;
 

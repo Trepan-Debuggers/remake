@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein
+Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011, 2020 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -25,6 +25,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/read.h"
 #include "../src/rule.h"
 #include "./file2line.h"
+
+struct hash_table file2lines;
 
 unsigned long
 file2lines_hash_1 (const void *key)
