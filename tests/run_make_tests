@@ -1,3 +1,0 @@
-#!/bin/sh
-# No exec perl so we allow Environment variables to be passed through
-perl $0.pl ${1+"$@"}

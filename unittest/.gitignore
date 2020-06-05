@@ -1,7 +1,0 @@
-/Makefile
-/Makefile.in
-/*.Po
-/test-suite.log
-/test_*.log
-/test_*.trs
-/test_profile
