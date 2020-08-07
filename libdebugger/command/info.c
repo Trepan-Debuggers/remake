@@ -126,8 +126,10 @@ subcommand_var_info_t info_subcommands[] = {
      NULL, false,
     7},
   { "tasks",
-    "Show a list of tasks and their descriptions",
-    "\n",
+    "Show task or a list of tasks and their descriptions",
+    " [*targets*]\n\n"
+"If a target name is given, just show that along with any description it has.\n"
+"",
     NULL, false,
     3},
   { "variables",
@@ -201,17 +203,21 @@ dbg_cmd_info_targets(info_target_output_mask_t output_mask)
 }
 
 void
-dbg_cmd_info_tasks()
+dbg_cmd_info_tasks(const char *target_name)
 {
   struct file **file_slot_0 = (struct file **) hash_dump (&files, 0,
                                                           dbg_target_compare);
   struct file **file_end = file_slot_0 + files.ht_fill;
   struct file **pp_file_slot;
   struct file *p_target;
+  bool have_target = (target_name != NULL) && (strlen(target_name) != 0);
 
   for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
     if ((p_target = *pp_file_slot) != NULL && p_target->description) {
-      printf("%-20s %s\n", p_target->name, p_target->description);
+      if (!have_target || strncmp(target_name, p_target->name, strlen(p_target->name)) == 0) {
+        printf("%-20s %s\n", p_target->name, p_target->description);
+        if (have_target) return;
+      }
     }
   }
 }
@@ -377,7 +383,8 @@ dbg_cmd_info(char *psz_args)
       dbg_cmd_info_targets(output_type);
 
     } else if (0 == strcmp(psz_subcmd, "tasks")) {
-      dbg_cmd_info_tasks();
+      const char *target_name = get_word(&psz_args);
+      dbg_cmd_info_tasks(target_name);
 
     } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
       if (0 == strlen(psz_args)) {
