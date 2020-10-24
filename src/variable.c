@@ -1709,6 +1709,9 @@ print_variable (const void *item, void *arg)
     case o_override:
       origin = _("'override' directive");
       break;
+    case o_debugger:
+      origin = _("debugger");
+      break;
     case o_invalid:
     default:
       abort ();
