@@ -1383,6 +1383,13 @@ static char *
 func_this_file (char *o, char **argv, const char *funcname UNUSED)
 {
   fprintf(stderr, "@func_this_file (%s:%d)\n", __FILE__, __LINE__);
+  if (reading_file)
+    {
+      const char*curfil = reading_file->filenm;
+      if (curfil && curfil[0]) {
+#warning should func_this_file return curfil or strdup(curfil) here?
+      }
+    }
   return o;
 }
 
@@ -1396,6 +1403,16 @@ func_this_file (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_this_line (char *o, char **argv, const char *funcname UNUSED)
 {
+  if (reading_file)
+    {
+      unsigned long curlineno = reading_file->lineno;
+      if (curlineno) {
+	char linenobuf[32];
+	memset(linenobuf, 0, sizeof(linenobuf));
+	snprintf(linenobuf, sizeof(linenobuf), "%lu", curlineno);
+#warning should func_this_line return strdup(linenobuf) here?
+      }
+    }
   return o;
 }
 
@@ -1409,6 +1426,12 @@ func_this_line (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_this_counter (char *o, char **argv, const char *funcname UNUSED)
 {
+  static unsigned long curcounter;
+  curcounter++;
+  char curcountbuf[32];
+  memset (curcountbuf, 0, sizeof(curcountbuf));
+  snprintf (curcountbuf, sizeof(curcountbuf), "%lu", curcounter);
+#warning should func_this_counter return strdup(curcountbuf) here?
   return o;
 }
 ///// end of functions added by  <basile@starynkevitch.net>
