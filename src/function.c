@@ -1380,10 +1380,13 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
 **/
 
 static char *
-func_this_file (char *o, char **argv, const char *funcname UNUSED)
+func_this_file (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
-  fprintf(stderr, "@func_this_file (%s:%d)\n", __FILE__, __LINE__);
-  return o;
+  if (reading_file) {
+    return xstrdup(reading_file->filenm);
+  }
+  else
+    return xstrdup("?");
 }
 
 
@@ -1394,9 +1397,16 @@ func_this_file (char *o, char **argv, const char *funcname UNUSED)
 **/
 
 static char *
-func_this_line (char *o, char **argv, const char *funcname UNUSED)
+func_this_line (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
-  return o;
+  if (reading_file) {
+    char linumbuf[32];
+    memset (linumbuf, 0, sizeof(linumbuf));
+    snprintf(linumbuf, sizeof(linumbuf),  "%lu", reading_file->lineno);
+    return xstrdup(linumbuf);
+  }
+  else
+    return xstrdup("0");
 }
 
 
