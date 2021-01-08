@@ -1376,20 +1376,13 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
 /**
   $(this_file)
 
-  Always expands to the current Makefile path.  Inspired by the __FILE__macro of C.
+  Always expands to the current Makefile path.  Inspired by the __FILE__ macro of C.
 **/
 
 static char *
-func_this_file (char *o, char **argv UNUSED, const char *funcname UNUSED)
+func_this_file (char *o, char **argv, const char *funcname UNUSED)
 {
   fprintf(stderr, "@func_this_file (%s:%d)\n", __FILE__, __LINE__);
-  if (reading_file)
-    {
-      const char*curfil = reading_file->filenm;
-      if (curfil && curfil[0]) {
-	return strdup(curfil);
-      }
-    }
   return o;
 }
 
@@ -1397,23 +1390,12 @@ func_this_file (char *o, char **argv UNUSED, const char *funcname UNUSED)
 /**
   $(this_line)
 
-  Always expands to the current line number.   Inspired by the __LINE__macro of C.
+  Always expands to the current line number.   Inspired by the __LINE__ macro of C.
 **/
 
 static char *
-func_this_line (char *o, char **argv UNUSED, const char *funcname UNUSED)
+func_this_line (char *o, char **argv, const char *funcname UNUSED)
 {
-  fprintf(stderr, "@func_this_line (%s:%d)\n", __FILE__, __LINE__);
-  if (reading_file)
-    {
-      unsigned long curlineno = reading_file->lineno;
-      if (curlineno) {
-	char linenobuf[32];
-	memset(linenobuf, 0, sizeof(linenobuf));
-	snprintf(linenobuf, sizeof(linenobuf), "%lu", curlineno);
-	return strdup(linenobuf);
-      }
-    }
   return o;
 }
 
@@ -1421,19 +1403,18 @@ func_this_line (char *o, char **argv UNUSED, const char *funcname UNUSED)
 /**
   $(this_counter)
 
-  Always expands to a unique, incremented, counter.   Inspired by the __COUNT__macro of GCC.
+  Always expands to a unique, incremented, counter.   Inspired by the __COUNTER__ macro of GCC.
 **/
 
 static char *
 func_this_counter (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
-  static unsigned long curcounter;
-  char curcountbuf[32];
-  fprintf(stderr, "@func_this_counter (%s:%d)\n", __FILE__, __LINE__);
-  memset (curcountbuf, 0, sizeof(curcountbuf));
-  curcounter++;
-  snprintf (curcountbuf, sizeof(curcountbuf), "%lu", curcounter);
-  return strdup(curcountbuf);
+  static long counter;
+  char cntbuf[32];
+  memset (cntbuf, 0, sizeof(cntbuf));
+  counter++;
+  snprintf (cntbuf, sizeof(cntbuf), "%ld", counter);
+  return xstrdup(cntbuf);
 }
 ///// end of functions added by  <basile@starynkevitch.net>
 
