@@ -228,7 +228,7 @@ read_all_makefiles (const char **makefiles)
     {
       PATH_VAR (current_directory);
       static const char *default_makefiles[] =
-        { "GNUmakefile", "makefile", "Makefile", 0 };
+        { "GNUremakefile", "GNUmakefile", "makefile", "Makefile", 0 };
       const char **p;
 
       while (1) {
