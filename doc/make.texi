@@ -7652,7 +7652,7 @@ macro of the C programming language understood by GCC.
 
 @end table
 
-
+@node Conditional Functions, Foreach Function, File Name Functions, Functions
 @section Functions for Conditionals
 @findex if
 @cindex conditional expansion
