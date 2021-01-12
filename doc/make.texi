@@ -5,7 +5,7 @@
 @include version.texi
 @set EDITION 0.75
 
-@settitle GNU @code{make}
+@settitle GNU @code{[re]make}
 @setchapternewpage odd
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -17,7 +17,7 @@
 @c %**end of header
 
 @copying
-This file documents the GNU @code{make} utility, which determines
+This file documents the GNU @code{[re]make} utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
