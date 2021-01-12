@@ -1154,9 +1154,10 @@ var := oneword
 
 @c following paragraph rewritten to avoid overfull hbox
 By default, when @code{make} looks for the makefile, it tries the
-following names, in order: @file{GNUmakefile}, @file{makefile}
+following names, in order: @file{GNUremakefile}, @file{GNUmakefile}, @file{makefile}
 and @file{Makefile}.@refill
 @findex Makefile
+@findex GNUremakefile
 @findex GNUmakefile
 @findex makefile
 
