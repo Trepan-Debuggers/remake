@@ -27,6 +27,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #include "debug.h"
 #include "hash.h"
+#include "profile.h"
+#include "globals.h"
 
 
 /* Remember whether snap_deps has been invoked: we need this to be sure we
@@ -685,9 +687,15 @@ set_command_state (struct file *file, enum cmd_state state)
 
   file->command_state = state;
 
-  for (d = file->also_make; d != 0; d = d->next)
-    if (state > d->file->command_state)
+  for (d = file->also_make; d != 0; d = d->next) {
+    if (state > d->file->command_state) {
       d->file->command_state = state;
+    }
+  }
+
+  if (profile_flag) {
+    profile_add_timestamp(file);
+  }
 }
 
 /* Convert an external file timestamp to internal form.  */

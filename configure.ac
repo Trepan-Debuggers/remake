@@ -423,6 +423,22 @@ AC_ARG_ENABLE([load],
   [make_cv_load="$enableval" user_load="$enableval"],
   [make_cv_load="yes"])
 
+AC_ARG_WITH([profiler_resolution],
+  AC_HELP_STRING([--with-profiler-resolution],
+                 [require minimum profiler resolution in nanoseconds, defaults to 1000]),
+  [AS_IF([test "$withval" = no],
+         [prof_res="no"],
+         [AS_IF([test "$withval" = yes],
+                [prof_res="1000"],
+                [prof_res="$withval"])])],
+  [prof_res="1000"])
+
+AS_IF([test "x$prof_res" = "xno"],
+      [],_
+      [AC_DEFINE_UNQUOTED([PROFILER_MIN_RES],
+                          [$prof_res],
+                          [Minimum profiler resolution in nanoseconds])])
+
 AS_CASE([/$ac_cv_have_decl_dlopen/$ac_cv_have_decl_dlsym/$ac_cv_have_decl_dlerror/],
   [*/no/*], [make_cv_load=no])
 

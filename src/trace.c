@@ -19,6 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <sys/time.h>
 /* Header for routines related to tracing and debugging support */
 
 /* AIX likes this: */
@@ -26,11 +27,13 @@ Boston, MA 02111-1307, USA.  */
 #include "config.h"
 #endif
 
+#include "globals.h"
 #include "trace.h"
 #include "print.h"
 #include "debug.h"
 // debugger include(s)
 #include "cmd.h"
+#include "profile.h"
 
 /** Pointer to top of current target call stack */
 target_stack_node_t *p_stack_top;
@@ -63,6 +66,16 @@ trace_push_target (target_stack_node_t *p, file_t *p_target)
     }
   }
 
+  if (profile_flag) {
+    file_t *prev = NULL;
+
+    if (NULL != new_node->p_parent) {
+        prev = new_node->p_parent->p_target;
+    }
+
+    profile_add_dependency(new_node->p_target, prev);
+  }
+
   return new_node;
 };
 
@@ -70,7 +83,13 @@ trace_push_target (target_stack_node_t *p, file_t *p_target)
 extern void
 trace_pop_target (target_stack_node_t *p)
 {
+
   if (NULL == p) return;
+
+  if (profile_flag) {
+    profile_update_target(p->p_target);
+  }
+
   free(p->p_target);
   free(p);
 }

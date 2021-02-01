@@ -871,6 +871,14 @@ define_automatic_variables (void)
   sprintf (buf, "%u", makelevel);
   define_variable_cname (MAKELEVEL_NAME, buf, o_env, 0);
 
+  sprintf (buf, "%d", (int32_t)makeparent_pid);
+  define_variable_cname (MAKEPARENT_PID_NAME, buf, o_env, 0);
+
+  if (makeparent_target) {
+    sprintf (buf, "%s", makeparent_target);
+    define_variable_cname (MAKEPARENT_TARGET_NAME, buf, o_env, 0);
+  }
+
   sprintf (buf, "%s%s%s",
            version_string,
            (remote_description == 0 || remote_description[0] == '\0')
@@ -1029,6 +1037,7 @@ target_environment (struct file *file)
   struct variable **v_slot;
   struct variable **v_end;
   struct variable makelevel_key;
+  struct variable makeparent_key;
   char **result_0;
   char **result;
 
@@ -1115,7 +1124,16 @@ target_environment (struct file *file)
   makelevel_key.length = MAKELEVEL_LENGTH;
   hash_delete (&table, &makelevel_key);
 
-  result = result_0 = xmalloc ((table.ht_fill + 2) * sizeof (char *));
+  makeparent_key.name = (char *)MAKEPARENT_PID_NAME;
+  makeparent_key.length = MAKEPARENT_PID_LENGTH;
+  hash_delete (&table, &makeparent_key);
+
+  makeparent_key.name = (char *)MAKEPARENT_TARGET_NAME;
+  makeparent_key.length = MAKEPARENT_TARGET_LENGTH;
+  hash_delete (&table, &makeparent_key);
+
+  /* Include 3 extra for MAKELEVEL and MAKEPARENT PID and TARGET and 1 more for the NULL terminator */
+  result = result_0 = xmalloc ((table.ht_fill + 4) * sizeof (char *));
 
   v_slot = (struct variable **) table.ht_vec;
   v_end = v_slot + table.ht_size;
@@ -1152,8 +1170,13 @@ target_environment (struct file *file)
 
   *result = xmalloc (100);
   sprintf (*result, "%s=%u", MAKELEVEL_NAME, makelevel + 1);
-  *++result = 0;
 
+  *++result = xmalloc (100);
+  sprintf (*result, "%s=%d", MAKEPARENT_PID_NAME, getpid());
+
+  *++result = xmalloc (MAKEPARENT_TARGET_LENGTH + 2 + strlen(file->name));
+  sprintf(*result, "%s=%s", MAKEPARENT_TARGET_NAME, file->name);
+  *++result = 0;
   hash_free (&table, 0);
 
   return result_0;

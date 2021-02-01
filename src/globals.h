@@ -43,6 +43,12 @@ extern int shell_trace;
 /*! Nonzero means profile calls (option --profile).  */
 extern int profile_flag;
 
+/* Nonzero means output json for profiling (option --profile-json) */
+extern int profile_json_flag;
+
+/* Nonzero means output json for profiling (option --profile-callgrind) */
+extern int profile_callgrind_flag;
+
 /*! Nonzero means look in parent directories for a Makefile if one isn't found
    in the current directory (option --search-parent).  */
 extern int search_parent_flag;
@@ -68,6 +74,12 @@ extern int db_level;
 
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
+
+/*! Value of the MAKEPARENT_PID variable at startup (or 0). */
+extern pid_t makeparent_pid;
+
+/*! Value of the MAKEPARENT_TARGET variable at startup (or 0). */
+extern char *makeparent_target;
 
 /*! Nonzero gives a list of explicit target names and exits. Set by option
   --targets

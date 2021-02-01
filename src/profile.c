@@ -17,12 +17,6 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Compile with:
-   gcc -g3 -I . -c -DSTANDALONE profile.c -o test-profile.o
-   make mock.o
-   gcc mock.o version.o alloc.o globals.o misc.o output.o file_basic.o hash.o strcache.o test-profile.o -o test-profile
-*/
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <config.h>
@@ -37,24 +31,15 @@ So we'll disable it, independent of what config.h says.
 #include <unistd.h>
 #include <errno.h>
 
+#include "globals.h"
 #include "profile.h"
 #include "hash.h"
+#include "dep.h"
+
+#include "callgrind_format.h"
+#include "json_format.h"
 
 /* #define DEBUG_PROFILE */
-
-/*! \brief Node for an item in the target call stack */
-typedef struct profile_call   {
-  const file_t   *p_target;
-  struct profile_call *p_next;
-} profile_call_t;
-
-struct profile_entry   {
-  uint64_t elapsed_time;   /* runtime in milliseconds */
-  const char *name;
-  gmk_floc floc;           /* location in Makefile - for tracing */
-  profile_call_t *calls;   /* List of targets this target calls.  */
-};
-typedef struct profile_entry profile_entry_t;
 
 static struct hash_table profile_table;
 
@@ -100,210 +85,152 @@ add_profile_entry (const file_t *target)
      profile hash table.  */
   new->calls = NULL;
   memcpy(&(new->floc), &(target->floc), sizeof(gmk_floc));
+
   hash_insert_at (&profile_table, new, slot);
   return new;
 }
 
-#define CALLGRIND_FILE_PREFIX "callgrind.out."
-#define CALLGRIND_FILE_TEMPLATE CALLGRIND_FILE_PREFIX "%d"
+static profile_context_t ctx;
 
-/* + 10 is more than enough since 2**64 ~= 10**9 */
-#define CALLGRIND_FILENAME_LEN sizeof(CALLGRIND_FILE_PREFIX) + 20
+extern bool
+profile_init(const char *creator, const char *const *argv, int jobs) {
 
-char callgrind_fname[CALLGRIND_FILENAME_LEN];
-static FILE *callgrind_fd;
+  ctx.jobs = jobs;
+  ctx.pid = getpid();
 
-#define CALLGRIND_PREAMBLE_TEMPLATE1 "version: 1\n\
-creator: %s\n"
+  ctx.resolution = 0;
+  ctx.start = file_timestamp_now(&ctx.resolution);
 
-#define CALLGRIND_PREAMBLE_TEMPLATE2 "pid: %d\n\
-\n\
-desc: Trigger: %s\n\
-desc: Node: Targets\n\
-\n\
-positions: line\n\
-events: 100usec\n"
-
-#ifndef HAVE_GETTIMEOFDAY
-# error Somebody has to work out how to handle if getimeofday is not around
+#ifdef PROFILER_MIN_RES
+  /* Require at least microsecond resolution */
+  if (ctx.resolution > PROFILER_MIN_RES) {
+    printf("Resolution is only %d ns. Profiling not supported\n", ctx.resolution);
+    return false;
+  }
 #endif
-extern bool
-get_time(struct timeval *t) {
-  return (0 != gettimeofday(t, NULL));
-}
 
-static inline uint64_t
-time_in_100micro(struct timeval *time) {
-  return ((time->tv_sec * (uint64_t)10000) +
-	  (uint64_t) (time->tv_usec / 100));
-}
-
-extern uint64_t
-time_diff(struct timeval *start_time, struct timeval *finish_time) {
-  struct timeval diff_time;
-  diff_time.tv_sec = finish_time->tv_sec - start_time->tv_sec;
-  diff_time.tv_usec = finish_time->tv_usec;
-  if (diff_time.tv_usec < start_time->tv_usec) {
-    diff_time.tv_usec += 1000000;
-    diff_time.tv_sec--;
-  }
-  diff_time.tv_usec -= start_time->tv_usec;
-  return time_in_100micro(&diff_time);
-}
-
-static struct timeval program_start_time;
-static struct timeval program_finish_time;
-static bool time_error;
-static pid_t callgrind_pid;
-
-extern bool
-init_callgrind(const char *creator, const char *const *argv) {
-  size_t len;
-  unsigned int i;
-
-  callgrind_pid = getpid();
-  len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, callgrind_pid);
-  time_error = get_time(&program_start_time);
-
-  if (len >= CALLGRIND_FILENAME_LEN) {
-    printf("Error in generating name\n");
-    return false;
-  }
-  callgrind_fd = fopen(callgrind_fname, "w");
-  if (NULL == callgrind_fd) {
-    printf("Error in opening callgrind file %s\n", callgrind_fname);
-    return false;
-  }
-  hash_init (&profile_table, 1000, profile_table_entry_hash_1,
-	     profile_table_entry_hash_2, profile_hash_cmp);
-  fprintf(callgrind_fd, CALLGRIND_PREAMBLE_TEMPLATE1,
-	  creator);
-  fprintf(callgrind_fd, "cmd:");
-  for (i = 0; argv[i]; i++) {
-      fprintf(callgrind_fd, " %s", argv[i]);
+  /* If neither is set, then consider both set */
+  if (profile_callgrind_flag || !profile_json_flag) {
+    if (!callgrind_init(&ctx, creator, argv)) {
+      return false;
     }
-  fprintf(callgrind_fd, "\n");
+  }
+
+  if (profile_json_flag || !profile_callgrind_flag) {
+    if (!json_init(&ctx, creator, argv)) {
+      return false;
+    }
+  }
+
+  hash_init(&profile_table, 1000, profile_table_entry_hash_1,
+      profile_table_entry_hash_2, profile_hash_cmp);
+
   return true;
 }
 
-#if 0
-/* Could use this for name compression */
-static unsigned int next_file_num = 0;
-static unsigned int next_fn_num   = 1;
-#endif
+static void add_timestamp(profile_entry_t *t, bool updated, enum cmd_state state)
+{
+  FILE_TIMESTAMP *ts = NULL;
+  int resolution = 0;
+  if (state == cs_not_started && t->start == 0) {
+    /* This is the first time this target is checked */
+    ts = &t->start;
+  } else if (state == cs_deps_running && t->deps == 0) {
+    ts = &t->deps;
+  } else if (state == cs_running && t->recipe == 0) {
+    ts = &t->recipe;
+  } else if ((state == cs_finished || updated) && t->end == 0) {
+    ts = &t->end;
+  } else {
+    /* No updates */
+    return;
+  }
+  *ts = file_timestamp_now(&resolution);
 
-extern void
-add_target(file_t *target, file_t *prev) {
-  profile_entry_t *p = add_profile_entry(target);
-  p->elapsed_time = target->elapsed_time;
-  if (prev) {
-    profile_entry_t *q = add_profile_entry(prev);
-    if (q) {
-      profile_call_t *new = CALLOC(profile_call_t, 1);
-      new->p_target = target;
-      new->p_next = q->calls;
-      q->calls = new;
-    }
+  if (t->start > 0 && t->end > 0) {
+    t->elapsed_total = (t->end - t->start)/1000;
+  }
+
+  if (t->recipe > 0 && t->end > 0) {
+    t->elapsed_recipe = (t->end - t->recipe)/1000;
   }
 }
 
+static void
+add_dependency(profile_entry_t *target, profile_entry_t *parent)
+{
+  profile_call_t *c = CALLOC(profile_call_t, 1);
+  c->target = target;
+  c->next = parent->calls;
+  parent->calls = c;
+}
+
+extern void
+profile_add_dependency(file_t *target, file_t *parent)
+{
+  profile_entry_t *p = NULL;
+  profile_entry_t *t = add_profile_entry(target);
+
+  add_timestamp(t, (target->updated == 1), target->command_state);
+  if (parent) {
+    p = add_profile_entry(parent);
+    add_dependency(t, p);
+  }
+}
+
+extern void
+profile_update_target(file_t *target)
+{
+  profile_entry_t *t = add_profile_entry(target);
+  add_timestamp(t, (target->updated == 1), target->command_state);
+  memcpy(&(t->floc), &(target->floc), sizeof(gmk_floc));
+}
+
+extern void
+profile_add_timestamp(file_t *target)
+{
+  profile_entry_t *t = add_profile_entry(target);
+  add_timestamp(t, (target->updated == 1), target->command_state);
+}
+
 #ifdef DEBUG_PROFILE
+/* Print profile entry */
 static void
 print_profile_entry (const void *item)
 {
   const profile_entry_t *p = item;
   profile_call_t *c;
   printf("name: %s, file: %s, line: %" PRIu64 ", time: %" PRIu64 "\n",
-	 p->name, p->floc.filenm, p->floc.lineno, p->elapsed_time);
+         p->name, p->floc.filenm, p->floc.lineno, p->elapsed_total);
   for (c = p->calls; c; c = c->p_next) {
     printf("calls: %s\n", c->p_target->name);
   }
 }
-
-/* Print all profile entries */
-static void
-print_profile(struct hash_table *hash_table)
-{
-  hash_map (hash_table, print_profile_entry);
-}
 #endif
 
-static void
-callgrind_profile_entry (const void *item)
-{
-  const profile_entry_t *p = item;
-  profile_call_t *c;
-  if (p->floc.filenm) fprintf(callgrind_fd, "fl=%s\n\n", p->floc.filenm);
-  fprintf(callgrind_fd, "fn=%s\n", p->name);
-  fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
-	  (uint64_t) p->floc.lineno,
-	  p->elapsed_time == 0 ? 1 : p->elapsed_time);
-  for (c = p->calls; c; c = c->p_next) {
-    if (c->p_target->floc.filenm)
-      fprintf(callgrind_fd, "cfi=%s\n", c->p_target->floc.filenm);
-    fprintf(callgrind_fd, "cfn=%s\n", c->p_target->name);
-    fprintf(callgrind_fd, "calls=1 %" PRIu64 "\n",
-	    (uint64_t) p->floc.lineno);
-    fprintf(callgrind_fd, "%" PRIu64 " %" PRIu64 "\n",
-	    (uint64_t) p->floc.lineno,
-	    c->p_target->elapsed_time == 0 ? 1 : c->p_target->elapsed_time);
-  }
-  fprintf(callgrind_fd, "\n");
-}
-
-/* Print all profile entries */
-void
-callgrind_profile_data(struct hash_table *hash_table)
-{
-  hash_map (hash_table, callgrind_profile_entry);
+extern void
+profile_dump_entries(profile_dump_entry_fn fn) {
+  hash_map(&profile_table, fn);
 }
 
 extern void
-close_callgrind(const char *program_status) {
-  fprintf(callgrind_fd, CALLGRIND_PREAMBLE_TEMPLATE2, callgrind_pid,
-	  program_status);
-  if (!time_error) {
-    time_error = time_error || get_time(&program_finish_time);
-  }
+profile_close(const char *program_status, const struct goaldep *goal, bool jobserver) {
+  int resolution = 0;
+  ctx.end = file_timestamp_now(&resolution);
 
-  if (!time_error) {
-    fprintf(callgrind_fd, "summary: %" PRIu64 "\n\n",
-	    time_diff(&program_start_time, &program_finish_time));
-  }
+  ctx.elapsed = (ctx.end - ctx.start)/1000;
+  ctx.entry = goal;
+  ctx.jobserver = jobserver;
+
 #ifdef DEBUG_PROFILE
-  print_profile(&profile_table);
+  profile_dump_entries(print_profile_entry);
 #endif
-  callgrind_profile_data(&profile_table);
-  printf("Created callgrind profiling data file: %s\n", callgrind_fname);
-  fclose(callgrind_fd);
-}
 
-#ifdef STANDALONE
-#include "config.h"
-#include "types.h"
-int main(int argc, const char * const* argv) {
-  bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
-  init_hash_files();
-  if (rc) {
-    file_t *target = enter_file("Makefile");
-    file_t *target2, *target3;
-    target->floc.filenm = "Makefile";
-
-
-    target2 = enter_file("all");
-    target2->floc.filenm = "Makefile";
-    target2->floc.lineno = 5;
-    target2->elapsed_time = 500;
-    add_target(target2, NULL);
-
-    target3 = enter_file("all-recursive");
-    target3->floc.filenm = "Makefile";
-    target3->floc.lineno = 5;
-    target3->elapsed_time = 1000;
-    add_target(target3, target2);
-
-    close_callgrind("Program termination");
+  if (profile_callgrind_flag || !profile_json_flag) {
+    callgrind_close(&ctx, program_status);
   }
-  return rc;
+
+  if (profile_json_flag || !profile_callgrind_flag) {
+    json_close(&ctx, program_status);
+  }
 }
-#endif

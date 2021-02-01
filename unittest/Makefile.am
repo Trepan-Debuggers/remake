@@ -13,6 +13,8 @@ test_profile_LDADD = \
 	../src/profile.o \
 	../src/strcache.o \
 	../src/posixos.o \
+	../src/json_format.o \
+	../src/callgrind_format.o \
 	../lib/libgnu.a \
 	@LIBINTL@
 
@@ -20,4 +22,4 @@ check_PROGRAMS = test_profile
 
 TESTS = $(check_PROGRAMS)
 
-MOSTLYCLEANFILES = callgrind.out.*
+MOSTLYCLEANFILES = callgrind.out.* build.*.json

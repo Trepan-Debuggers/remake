@@ -48,3 +48,4 @@
 /tmp
 /w32
 callgrind.out.*
+build.*.json

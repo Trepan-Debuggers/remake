@@ -119,10 +119,22 @@ Same as options: \-\-debugger \-\-debugger\-stop=error
 
 .TP 0.5i
 \fB\-P\fR, \fB\-\-profile\fR
+Creates profile output in both json and callgrind format.
+Callgrind output can be used with kcachegrind, callgrind_annotate,
+or gprof2dot to analyze data. You can get not only timings, but
+a graph of the target dependencies checked
+
+.TP 0.5i
+\fB\-P\fR, \fB\-\-profile\-callgrind\fR
 Creates callgrind profile output.
 Callgrind output can be used with kcachegrind, callgrind_annotate,
 or gprof2dot to analyze data. You can get not only timings, but
 a graph of the target dependencies checked
+
+.TP 0.5i
+\fB\-P\fR, \fB\-\-profile\-json\fR
+Creates json profile output.
+Json output can be used with custom tools to analyze data.
 
 .TP 0.5i
 .BR "\-\-targets"

@@ -318,6 +318,10 @@ static const char *const usage[] =
     N_("\
   -P, --profile               Print profiling information for each target.\n"),
     N_("\
+  --profile-json              Output profiling information in json format.\n"),
+    N_("\
+  --profile-callgrind         Output profiling information in callgrind format.\n"),
+    N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
@@ -443,6 +447,8 @@ static const struct command_switch switches[] =
       "targets" },
     { CHAR_MAX+14, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
       "debugger-stop" },
+    { CHAR_MAX+15, flag, &profile_json_flag, 1, 1, 0, 0, 0, "profile-json" },
+    { CHAR_MAX+16, flag, &profile_callgrind_flag, 1, 1, 0, 0, 0, "profile-callgrind" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -1372,6 +1378,19 @@ main (int argc, const char **argv, char **envp)
       makelevel = (unsigned int) atoi (v->value);
     else
       makelevel = 0;
+
+    v = lookup_variable (STRING_SIZE_TUPLE (MAKEPARENT_PID_NAME));
+    if (v && v->value[0] != '\0' && v->value[0] != '-')
+      makeparent_pid = (pid_t) atoi (v->value);
+    else
+      makeparent_pid = (pid_t)0;
+
+    v = lookup_variable (STRING_SIZE_TUPLE (MAKEPARENT_TARGET_NAME));
+    if (v && v->value[0] != '\0' && v->value[0] != '-') {
+      makeparent_target = v->value;
+    } else {
+      makeparent_target = NULL;
+    }
   }
 
   decode_trace_flags (tracing_opts);
@@ -1462,7 +1481,7 @@ main (int argc, const char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
-  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
+  if (profile_flag) profile_init(PACKAGE_TARNAME " " PACKAGE_VERSION, argv, arg_job_slots);
 
   /* Validate the arg_job_slots configuration before we define MAKEFLAGS so
      users get an accurate value in their makefiles.
@@ -2773,6 +2792,9 @@ decode_switches (int argc, const char **argv, int env)
 
   /* Perform any special switch handling.  */
   run_silent = silent_flag;
+
+  /* Either profile flag, implies profiling */
+  profile_flag |= profile_json_flag || profile_callgrind_flag;
 }
 
 /* Decode switches from environment variable ENVAR (which is LEN chars long).
@@ -3290,7 +3312,7 @@ die (int status)
 	status_str = "";
       }
 
-    close_callgrind(status_str);
+    profile_close(status_str, goals, (jobserver_auth != NULL));
   }
   exit (status);
 }
