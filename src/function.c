@@ -1088,6 +1088,43 @@ func_error (char *o, char **argv, const char *funcname)
   return o;
 }
 
+/*
+   Print its argument and return it.
+*/
+static char *
+func_trace (char *o, char **argv, const char *funcname)
+{
+  char **argvp;
+  char *msg, *p;
+  size_t len;
+
+  /* The arguments will be broken on commas.  Rather than create yet
+     another special case where function arguments aren't broken up,
+     just create a format string that puts them back together.  */
+  for (len=0, argvp=argv; *argvp != 0; ++argvp)
+    len += strlen (*argvp) + 2;
+
+  p = msg = alloca (len + 1);
+  msg[0] = '\0';
+
+  for (argvp=argv; argvp[1] != 0; ++argvp)
+    {
+      strcpy (p, *argvp);
+      p += strlen (*argvp);
+      *(p++) = ',';
+      *(p++) = ' ';
+    }
+  strcpy (p, *argvp);
+
+  outputs (0, msg);
+  outputs (0, "\n");
+
+  o = variable_buffer_output (o, msg, len); // Not sure if len is correct
+
+  /* The warning function expands to the empty string.  */
+  return o;
+}
+
 
 /*
   chop argv[0] into words, and sort them.
@@ -2203,6 +2240,7 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("info",          0,  1,  1,  func_error),
   FT_ENTRY ("error",         0,  1,  1,  func_error),
   FT_ENTRY ("warning",       0,  1,  1,  func_error),
+  FT_ENTRY ("trace",         0,  1,  1,  func_trace),
   FT_ENTRY ("if",            2,  3,  0,  func_if),
   FT_ENTRY ("or",            1,  0,  0,  func_or),
   FT_ENTRY ("and",           1,  0,  0,  func_and),
