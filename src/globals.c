@@ -35,14 +35,8 @@ int print_version_flag = 0;
 /*! Nonzero means --trace and shell trace with input.  */
 int shell_trace = 0;
 
-/* Nonzero means profile calls (option --profile).  */
+/* Nonzero means profiling is enabled with specific output requested. (option --profile=callgrind|json  */
 int profile_flag = 0;
-
-/* Nonzero means output json for profiling (option --profile-json) */
-int profile_json_flag = 0;
-
-/* Nonzero means output json for profiling (option --profile-callgrind) */
-int profile_callgrind_flag = 0;
 
 /* Nonzero means look in parent directories for a Makefile if one isn't found
    in the current directory (option --search-parent).  */

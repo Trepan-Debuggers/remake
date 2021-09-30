@@ -160,7 +160,7 @@ static void
 dump_jobserver(FILE *fd, profile_context_t *ctx)
 {
   fprintf(fd, LVL1 "\"jobs\":%d,\n", ctx->jobs);
-  fprintf(fd, LVL1 "\"server\":%d,\n", ctx->jobserver);
+  fprintf(fd, LVL1 "\"server\":%s,\n", ctx->jobserver ? "true" : "false");
 
 }
 

@@ -109,17 +109,19 @@ profile_init(const char *creator, const char *const *argv, int jobs) {
   }
 #endif
 
-  /* If neither is set, then consider both set */
-  if (profile_callgrind_flag || !profile_json_flag) {
-    if (!callgrind_init(&ctx, creator, argv)) {
-      return false;
-    }
-  }
-
-  if (profile_json_flag || !profile_callgrind_flag) {
-    if (!json_init(&ctx, creator, argv)) {
-      return false;
-    }
+  switch (profile_flag) {
+    case PROFILE_CALLGRIND:
+      if (!callgrind_init(&ctx, creator, argv)) {
+        return false;
+      }
+      break;
+    case PROFILE_JSON:
+      if (!json_init(&ctx, creator, argv)) {
+        return false;
+      }
+      break;
+    default:
+      break;
   }
 
   hash_init(&profile_table, 1000, profile_table_entry_hash_1,
@@ -226,11 +228,14 @@ profile_close(const char *program_status, const struct goaldep *goal, bool jobse
   profile_dump_entries(print_profile_entry);
 #endif
 
-  if (profile_callgrind_flag || !profile_json_flag) {
-    callgrind_close(&ctx, program_status);
-  }
-
-  if (profile_json_flag || !profile_callgrind_flag) {
-    json_close(&ctx, program_status);
+  switch (profile_flag) {
+    case PROFILE_CALLGRIND:
+      callgrind_close(&ctx, program_status);
+      break;
+    case PROFILE_JSON:
+      json_close(&ctx, program_status);
+      break;
+    default:
+      break;
   }
 }

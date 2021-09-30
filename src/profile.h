@@ -29,6 +29,10 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/time.h>
 #include "filedef.h"
 
+#define PROFILE_DISABLED    0
+#define PROFILE_CALLGRIND   1
+#define PROFILE_JSON        2
+
 struct profile_entry;
 
 /*! \brief Node for an item in the target call stack */
