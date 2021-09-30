@@ -1090,6 +1090,13 @@ format. Each recursive call to @value{REMAKE} generates its own
 output in the starting directory named @code{callgrind.out.<pid>}
 where @code{pid} is the PID of the @value{REMAKE} process.
 
+By default, profiling data is written in the same directory where
+@value{REMAKE} is executed. This includes recursive calls. The
+@code{--profile-directory} argument can be used to specify a
+single directory for all profiling data. This is taken to
+be relative to the initial invocation of @value{REMAKE} unless
+the path begins with ~ or /.
+
 @subsection JSON-formatted profiling data
 @cindex json
 

@@ -38,6 +38,9 @@ int shell_trace = 0;
 /* Nonzero means profiling is enabled with specific output requested. (option --profile=callgrind|json  */
 int profile_flag = 0;
 
+/* Path to directory to dump profiling data */
+const char *profile_directory;
+
 /* Nonzero means look in parent directories for a Makefile if one isn't found
    in the current directory (option --search-parent).  */
 int search_parent_flag = 0;

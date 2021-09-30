@@ -97,6 +97,7 @@ profile_init(const char *creator, const char *const *argv, int jobs) {
 
   ctx.jobs = jobs;
   ctx.pid = getpid();
+  ctx.output_dir = profile_directory;
 
   ctx.resolution = 0;
   ctx.start = file_timestamp_now(&ctx.resolution);

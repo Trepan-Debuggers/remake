@@ -139,6 +139,18 @@ have the format specified in the
 manual.
 
 .TP 0.5i
+.B \-\-profile\-directory=[PATH]
+Specifies the
+.I PATH
+that profiling files should be written to. Must exist
+before running
+.IR make .
+It is assumed to be a relative path to the initial directory
+where
+.I make
+is called, unless it begins with a ~ or /.
+
+.TP 0.5i
 .BR "\-\-targets"
 Print a list of explicitly-named targets found in read-in makefiles.
 

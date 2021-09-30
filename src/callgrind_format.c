@@ -24,10 +24,10 @@ Boston, MA 02111-1307, USA.  */
 #include "callgrind_format.h"
 
 #define CALLGRIND_FILE_PREFIX "callgrind.out."
-#define CALLGRIND_FILE_TEMPLATE CALLGRIND_FILE_PREFIX "%d"
+#define CALLGRIND_FILE_TEMPLATE "%s/" CALLGRIND_FILE_PREFIX "%d"
 
 /* + 10 is more than enough since 2**64 ~= 10**9 */
-#define CALLGRIND_FILENAME_LEN sizeof(CALLGRIND_FILE_PREFIX) + 20
+#define CALLGRIND_FILENAME_LEN (GET_PATH_MAX)
 
 #define CALLGRIND_PREAMBLE_TEMPLATE1 "version: 1\n\
 creator: %s\n"
@@ -50,7 +50,7 @@ callgrind_init(profile_context_t *ctx, const char *creator, const char *const *a
   size_t len;
   unsigned int i;
 
-  len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, ctx->pid);
+  len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, ctx->output_dir, ctx->pid);
 
   if (len >= CALLGRIND_FILENAME_LEN) {
     printf("Error in generating callgrind name\n");

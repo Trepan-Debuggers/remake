@@ -155,6 +155,10 @@ char *output_sync_option = 0;
 
 char *profile_option = 0;
 
+/* Specify the output directory for profiling information */
+
+static struct stringlist *profile_dir_opt = 0;
+
 /* Output level (--verbosity).  */
 
 static struct stringlist *verbosity_opts;
@@ -323,6 +327,8 @@ static const char *const usage[] =
   -P, --profile[=FORMAT]      Print profiling information for each target using FORMAT.\n\
                               If FORMAT isn't specified, default to \"callgrind\"\n"),
     N_("\
+  --profile-directory=DIR     Output profiling data to the DIR directory.\n"),
+    N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
@@ -448,6 +454,7 @@ static const struct command_switch switches[] =
       "targets" },
     { CHAR_MAX+14, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
       "debugger-stop" },
+    { CHAR_MAX+15, filename, &profile_dir_opt, 1, 1, 0, 0, 0, "profile-directory" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -759,7 +766,7 @@ decode_output_sync_flags (void)
 }
 
 void
-decode_profile_option(void)
+decode_profile_options(void)
 {
   if (profile_option)
   {
@@ -774,8 +781,22 @@ decode_profile_option(void)
   {
     profile_flag = PROFILE_DISABLED;
   }
-}
 
+  if (profile_dir_opt == NULL)
+  {
+    profile_directory = starting_directory;
+  }
+  else
+  {
+    const char *dir = profile_dir_opt->list[profile_dir_opt->idx - 1];
+    if (dir[0] != '/') {
+      char directory[GET_PATH_MAX];
+      sprintf(directory, "%s/%s", starting_directory, dir);
+      profile_dir_opt->list[profile_dir_opt->idx - 1] = strcache_add(directory);
+    }
+    profile_directory = profile_dir_opt->list[profile_dir_opt->idx - 1];
+  }
+}
 
 #ifdef WINDOWS32
 
@@ -1499,6 +1520,9 @@ main (int argc, const char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
+
+  /* Update profile global options from cli options */
+  decode_profile_options();
   if (profile_flag) profile_init(PACKAGE_TARNAME " " PACKAGE_VERSION, argv, arg_job_slots);
 
   /* Validate the arg_job_slots configuration before we define MAKEFLAGS so
@@ -2807,7 +2831,6 @@ decode_switches (int argc, const char **argv, int env)
   /* If there are any options that need to be decoded do it now.  */
   decode_debug_flags ();
   decode_output_sync_flags ();
-  decode_profile_option();
 
   /* Perform any special switch handling.  */
   run_silent = silent_flag;

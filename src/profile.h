@@ -65,6 +65,7 @@ typedef struct profile_context {
 
   FILE_TIMESTAMP elapsed;       /*!< Total time running remake */
   const struct goaldep *entry;  /*!< Pointer to chain of entries to remake */
+  const char *output_dir;       /*!< Directory for output of profiling information */
 } profile_context_t;
 
 /*! \brief Function for processing a profile entry for output */
