@@ -1068,28 +1068,148 @@ are a number of handy extensions to @value{MAKE} that we list here.
 @end menu
 
 @node Profiling and Visualization
-@section Getting data on where build time is spent
-
-If you want to know where most of the time goes in building your system with Makefiles,
-there is a @code{--profile} option which times the targets.
+@section Profiling build execution timing and dependencies
 @cindex @code{--profile}
-
+@cindex profiling
 
 @smallexample
-  $ remake --profile # target...
+  $ remake --profile[=callgrind|json] # target...
 @end smallexample
 
-@value{REMAKE} outputs callgrind profile format data
+The @code{--profile} option enables dependency and timing output
+from build execution. The data can be used to determine where your
+build system spends it's time. By default, the @code{--profile}
+option outputs profiling data in the callgrind format
 @footnote{@url{http://valgrind.org/docs/manual/cl-format.html}} which
 can be used with
 @code{kcachegrind}@footnote{http://kcachegrind.sourceforge.net/html/Home.html}
 or other
 tools@footnote{@url{https://github.com/icefox/callgrind_tools},
 @url{https://github.com/zenkj/callgrind2dot}} that work with this
-format. that work with this format.
+format. Each recursive call to @value{REMAKE} generates its own
+output in the starting directory named @code{callgrind.out.<pid>}
+where @code{pid} is the PID of the @value{REMAKE} process.
 
-You can get not only timings, but a graph of the target dependencies
-checked.
+By default, profiling data is written in the same directory where
+@value{REMAKE} is executed. This includes recursive calls. The
+@code{--profile-directory} argument can be used to specify a
+single directory for all profiling data. This is taken to
+be relative to the initial invocation of @value{REMAKE} unless
+the path begins with ~ or /.
+
+@subsection JSON-formatted profiling data
+@cindex json
+
+The @code{--profile} option also accepts a @code{json} flag that
+will output profiling data in json-formatted files. With the following
+formatting:
+
+@example
+ @{
+     "version":"1.0.0",
+     "pid":1234,
+     "parent":@{
+         "pid":1230,
+         "target":"target-name"
+     @},
+     "jobs": 8,
+     "server": true,
+     "creator":"remake"
+     "argv":[
+         "arg0",
+         "arg1",
+         "arg2"
+     ],
+     "directory":"path/to/working/dir",
+     "status":"Normal program termination",
+     "start":1235.6789,
+     "end":1240.0123,
+     "resolution":1000,
+     "entry":[
+         "all",
+         "other"
+     ],
+     "targets":[
+         @{
+             "name":"all",
+             "file":"path/to/file/with/target",
+             "line":100,
+             "start":123.123,
+             "deps":null,
+             "recipe":124.0,
+             "end":124.124,
+             "depends":[
+                 "dependent",
+                 "target0",
+                 "target1",
+                 "target2"
+             ]
+         @}
+     ]
+ @}
+@end example
+
+@subsubsection Top-level field definitions
+@table @code
+@item version
+The @code{version} field specifies the version of build.json file.
+@item pid
+The PID of the @value{REMAKE} execution that created this file
+@item parent.pid
+If present, this PID of the @value{REMAKE} process that recursively called the
+current @value{REMAKE} process
+@item parent.target
+If present, the name of the target the parent @value{REMAKE} process that
+recusively called the current @value{REMAKE} process.
+@item jobs
+If present, either @code{unlimited} when parallel jobs were not restricted. Or
+an integer value reprenting the maximum number of available jobs.
+@item server
+True if connected to a jobserver
+@item creator
+A string representing the version of @value{REMAKE} that generated this file
+@item argv
+An array of strings that represent the command used to start @value{REMAKE}
+@item directory
+Path to the starting directory, generally the path current directory or the value
+passed to @value{REMAKE} with @code{-C path/to/subdir}
+@item status
+String representing what caused @value{REMAKE} to exit
+@item start
+Timestamp in seconds representing when @value{REMAKE} started
+@item end
+Timestamp in seconds representing when @value{REMAKE} ended
+@item resolution
+Number of nanoseconds specifying the minimum resolution of timestamps
+in the output
+@item entry
+An array of targets that were requested to be built.
+@item targets
+An array of target specifications
+@end table
+
+@subsubsection Target field definitions
+@table @code
+@item name
+Name of the target
+@item file
+Path to the file that contains the target definition relative to the top-level
+@code{directory} field
+@item line
+Line number of the @code{name} target in the @code{file} field
+@item start
+Timestamp when the target was first considered by @value{REMAKE}
+@item deps
+Timestamp when @value{REMAKE} marked the target as waiting on dependencies.
+Or @code{null} if it was not marked as waiting.
+@item recipe
+Timestamp when the recipe for the target began execution. Or @code{null} if
+the recipe did not need to execute.
+@item end
+Timestamp when the target was considered complete
+@item depends
+Array of target names that this target depended on.
+@end table
 
 @node Comments
 @section Listing and Documenting Makefile Targets

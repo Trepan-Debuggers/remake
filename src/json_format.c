@@ -38,9 +38,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define JSON_FILE_PREFIX "build."
 #define JSON_FILE_EXT    ".json"
-#define JSON_FILE_TEMPLATE JSON_FILE_PREFIX "%d" JSON_FILE_EXT
+#define JSON_FILE_TEMPLATE "%s/" JSON_FILE_PREFIX "%d" JSON_FILE_EXT
 
-#define JSON_FILENAME_LEN (sizeof(JSON_FILE_PREFIX) + 20 + sizeof(JSON_FILE_EXT))
+#define JSON_FILENAME_LEN (GET_PATH_MAX)
 
 #define JSON_FILE_VER   "1.0.0"
 
@@ -65,7 +65,7 @@ static void dump_target(const void *item);
 static void dump_target_timestamps(FILE *fd, const profile_entry_t *p);
 static void dump_depends(FILE *fd, const profile_call_t *c);
 
-static char json_fname[JSON_FILENAME_LEN];
+static char json_fname[GET_PATH_MAX];
 static FILE *json_fd;
 static bool first_entry;
 
@@ -160,7 +160,7 @@ static void
 dump_jobserver(FILE *fd, profile_context_t *ctx)
 {
   fprintf(fd, LVL1 "\"jobs\":%d,\n", ctx->jobs);
-  fprintf(fd, LVL1 "\"server\":%d,\n", ctx->jobserver);
+  fprintf(fd, LVL1 "\"server\":%s,\n", ctx->jobserver ? "true" : "false");
 
 }
 
@@ -265,7 +265,7 @@ json_init(profile_context_t *ctx, const char *creator, const char *const *argv)
 {
   size_t len;
 
-  len = sprintf(json_fname, JSON_FILE_TEMPLATE, ctx->pid);
+  len = sprintf(json_fname, JSON_FILE_TEMPLATE, ctx->output_dir, ctx->pid);
 
   if (len >= JSON_FILENAME_LEN) {
     printf("Error in generating json name\n");

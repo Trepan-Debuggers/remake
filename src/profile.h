@@ -29,6 +29,10 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/time.h>
 #include "filedef.h"
 
+#define PROFILE_DISABLED    0
+#define PROFILE_CALLGRIND   1
+#define PROFILE_JSON        2
+
 struct profile_entry;
 
 /*! \brief Node for an item in the target call stack */
@@ -61,6 +65,7 @@ typedef struct profile_context {
 
   FILE_TIMESTAMP elapsed;       /*!< Total time running remake */
   const struct goaldep *entry;  /*!< Pointer to chain of entries to remake */
+  const char *output_dir;       /*!< Directory for output of profiling information */
 } profile_context_t;
 
 /*! \brief Function for processing a profile entry for output */

@@ -118,23 +118,37 @@ Go into the debugger on an error. This is the
 Same as options: \-\-debugger \-\-debugger\-stop=error
 
 .TP 0.5i
-\fB\-P\fR, \fB\-\-profile\fR
-Creates profile output in both json and callgrind format.
-Callgrind output can be used with kcachegrind, callgrind_annotate,
-or gprof2dot to analyze data. You can get not only timings, but
-a graph of the target dependencies checked
+.B \-P, " \-\-profile [=TYPE]
+Enables timing and dependency profiling output using the specified
+.I TYPE
+for formatting.
+.I TYPE
+can be either 
+.I callgrind
+or
+.IR json .
+If omitted, it defaults to
+.IR callgrind .
+Files generated using
+.I callgrind
+can be analyzed with kcachegrind, callgrind_annotate, or
+gprof2dot. Files generated with
+.I json
+have the format specified in the
+.I info
+manual.
 
 .TP 0.5i
-\fB\-P\fR, \fB\-\-profile\-callgrind\fR
-Creates callgrind profile output.
-Callgrind output can be used with kcachegrind, callgrind_annotate,
-or gprof2dot to analyze data. You can get not only timings, but
-a graph of the target dependencies checked
-
-.TP 0.5i
-\fB\-P\fR, \fB\-\-profile\-json\fR
-Creates json profile output.
-Json output can be used with custom tools to analyze data.
+.B \-\-profile\-directory=[PATH]
+Specifies the
+.I PATH
+that profiling files should be written to. Must exist
+before running
+.IR make .
+It is assumed to be a relative path to the initial directory
+where
+.I make
+is called, unless it begins with a ~ or /.
 
 .TP 0.5i
 .BR "\-\-targets"
