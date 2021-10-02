@@ -17,7 +17,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define(_MAKE_VERSION_, 4.3)
-AC_INIT([remake],[_MAKE_VERSION_+dbg-1.5],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[_MAKE_VERSION_+dbg-1.6.dev0],[https://github.com/rocky/remake/issues])
 
 # These are used in maintMakefile
 MAKE_VERSION=_MAKE_VERSION_
