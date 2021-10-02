@@ -151,6 +151,14 @@ int basename_filenames = 0;
 
 char *output_sync_option = 0;
 
+/* Specify profile output formatting (--profile) */
+
+char *profile_option = 0;
+
+/* Specify the output directory for profiling information */
+
+static struct stringlist *profile_dir_opt = 0;
+
 /* Output level (--verbosity).  */
 
 static struct stringlist *verbosity_opts;
@@ -316,7 +324,10 @@ static const char *const usage[] =
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
     N_("\
-  -P, --profile               Print profiling information for each target.\n"),
+  -P, --profile[=FORMAT]      Print profiling information for each target using FORMAT.\n\
+                              If FORMAT isn't specified, default to \"callgrind\"\n"),
+    N_("\
+  --profile-directory=DIR     Output profiling data to the DIR directory.\n"),
     N_("\
   -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
@@ -393,7 +404,7 @@ static const struct command_switch switches[] =
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
-    { 'P', flag, &profile_flag, 1, 1, 0, 0, 0, "profile" },
+    { 'P', string, &profile_option, 1, 1, 0, "callgrind", 0, "profile" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
     { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
@@ -443,6 +454,7 @@ static const struct command_switch switches[] =
       "targets" },
     { CHAR_MAX+14, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
       "debugger-stop" },
+    { CHAR_MAX+15, filename, &profile_dir_opt, 1, 1, 0, 0, 0, "profile-directory" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -751,6 +763,39 @@ decode_output_sync_flags (void)
   if (sync_mutex)
     RECORD_SYNC_MUTEX (sync_mutex);
 #endif
+}
+
+void
+decode_profile_options(void)
+{
+  if (profile_option)
+  {
+    if (streq (profile_option, "callgrind"))
+      profile_flag = PROFILE_CALLGRIND;
+    else if (streq (profile_option, "json"))
+      profile_flag = PROFILE_JSON;
+    else
+      profile_flag = PROFILE_DISABLED;
+  }
+  else
+  {
+    profile_flag = PROFILE_DISABLED;
+  }
+
+  if (profile_dir_opt == NULL)
+  {
+    profile_directory = starting_directory;
+  }
+  else
+  {
+    const char *dir = profile_dir_opt->list[profile_dir_opt->idx - 1];
+    if (dir[0] != '/') {
+      char directory[GET_PATH_MAX];
+      sprintf(directory, "%s/%s", starting_directory, dir);
+      profile_dir_opt->list[profile_dir_opt->idx - 1] = strcache_add(directory);
+    }
+    profile_directory = profile_dir_opt->list[profile_dir_opt->idx - 1];
+  }
 }
 
 #ifdef WINDOWS32
@@ -1372,6 +1417,19 @@ main (int argc, const char **argv, char **envp)
       makelevel = (unsigned int) atoi (v->value);
     else
       makelevel = 0;
+
+    v = lookup_variable (STRING_SIZE_TUPLE (MAKEPARENT_PID_NAME));
+    if (v && v->value[0] != '\0' && v->value[0] != '-')
+      makeparent_pid = (pid_t) atoi (v->value);
+    else
+      makeparent_pid = (pid_t)0;
+
+    v = lookup_variable (STRING_SIZE_TUPLE (MAKEPARENT_TARGET_NAME));
+    if (v && v->value[0] != '\0' && v->value[0] != '-') {
+      makeparent_target = v->value;
+    } else {
+      makeparent_target = NULL;
+    }
   }
 
   decode_trace_flags (tracing_opts);
@@ -1462,7 +1520,10 @@ main (int argc, const char **argv, char **envp)
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
-  if (profile_flag) init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
+
+  /* Update profile global options from cli options */
+  decode_profile_options();
+  if (profile_flag) profile_init(PACKAGE_TARNAME " " PACKAGE_VERSION, argv, arg_job_slots);
 
   /* Validate the arg_job_slots configuration before we define MAKEFLAGS so
      users get an accurate value in their makefiles.
@@ -2773,6 +2834,7 @@ decode_switches (int argc, const char **argv, int env)
 
   /* Perform any special switch handling.  */
   run_silent = silent_flag;
+
 }
 
 /* Decode switches from environment variable ENVAR (which is LEN chars long).
@@ -3290,7 +3352,7 @@ die (int status)
 	status_str = "";
       }
 
-    close_callgrind(status_str);
+    profile_close(status_str, goals, (jobserver_auth != NULL));
   }
   exit (status);
 }
