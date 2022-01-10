@@ -183,8 +183,8 @@ dump_entry(FILE *fd, const struct goaldep *entry)
     } else {
       fprintf(fd, "\"\n");
     }
-    fprintf(fd, LVL1 "],\n");
   }
+  fprintf(fd, LVL1 "],\n");
 }
 
 static void
