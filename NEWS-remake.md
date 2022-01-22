@@ -1,4 +1,16 @@
-Here we have note remake changes. For changes to GNU Make see its NEWS file.
+Here we have note remake changes. For changes to GNU Make, see its NEWS file.
+
+Version 4.3.1+dbg-1.6 (2022-01-22)
+==================================
+
+* Allow `--profile` to take an argument to specify callgrind for json PR #132 (Jayson Messenger)
+* Fix bug in `info var` PR #113
+* Typos in make.1 Issue #110
+* Support gcc-10  Issue #109
+* Document debugger commands
+* Debugger commands are in separate `.c` files (not inlined, `.h` included)
+
+I'd like thank Marten Cassel for his sponsorship.
 
 Version 4.3.1+dbg-1.5 (2020-03-15) Ron Frankel
 ==============================================

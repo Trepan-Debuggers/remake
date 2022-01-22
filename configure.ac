@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 1993-2020 Free Software Foundation, Inc.
+# Copyright (C) 1993-2020, 2022 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -17,7 +17,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define(_MAKE_VERSION_, 4.3)
-AC_INIT([remake],[_MAKE_VERSION_+dbg-1.6.dev0],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[_MAKE_VERSION_+dbg-1.6],[https://github.com/rocky/remake/issues])
 
 # These are used in maintMakefile
 MAKE_VERSION=_MAKE_VERSION_
