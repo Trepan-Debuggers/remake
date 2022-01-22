@@ -3,6 +3,7 @@
 *~
 .deps
 /.dep_segment
+/.pc
 /ABOUT-NLS
 /Basic.mk
 /ChangeLog
@@ -47,5 +48,5 @@
 /stamp-h1
 /tmp
 /w32
-callgrind.out.*
 build.*.json
+callgrind.out.*
