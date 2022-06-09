@@ -945,6 +945,7 @@ pattern_search (struct file *file, int archive,
 
   file->cmds = rule->cmds;
   file->is_target = 1;
+  file->floc = rule->floc;
 
   /* Set precious flag. */
   {
