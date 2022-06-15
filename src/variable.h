@@ -290,6 +290,9 @@ struct pattern_var *create_pattern_var (const char *target,
 
 extern int export_all_variables;
 
+struct variable *
+define_makeflags (int all, int makefile);
+
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (CSTRLEN (MAKELEVEL_NAME))
 

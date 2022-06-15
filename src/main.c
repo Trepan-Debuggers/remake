@@ -69,7 +69,6 @@ void print_rule_data_base (bool b_verbose);
 static void print_version (void);
 static void decode_switches (int argc, const char **argv, int env);
 static void decode_env_switches (const char *envar, size_t len);
-static struct variable *define_makeflags (int all, int makefile);
 static char *quote_for_env (char *out, const char *in);
 static void initialize_global_hash_tables (void);
 
@@ -2932,7 +2931,7 @@ quote_for_env (char *out, const char *in)
    command switches.  Include options with args if ALL is nonzero.
    Don't include options with the 'no_makefile' flag set if MAKEFILE.  */
 
-static struct variable *
+struct variable *
 define_makeflags (int all, int makefile)
 {
   const char ref[] = "MAKEOVERRIDES";
@@ -2990,7 +2989,7 @@ define_makeflags (int all, int makefile)
           if ((!*(int *) cs->value_ptr) == (cs->type == flag_off)
               && (cs->default_value == 0
                   || *(int *) cs->value_ptr != *(int *) cs->default_value))
-	    if (cs->c != 'X') ADD_FLAG (0, 0);
+	    ADD_FLAG (0, 0);
           break;
 
         case positive_int:
@@ -3077,10 +3076,8 @@ define_makeflags (int all, int makefile)
   /* Add simple options as a group.  */
   while (flags != 0 && !flags->arg && short_option (flags->cs->c))
     {
-      if (flags->cs->c != 'X') {
-        *p++ = (char) flags->cs->c;
-        flags = flags->next;
-      }
+      *p++ = (char) flags->cs->c;
+      flags = flags->next;
     }
 
   /* Now add more complex flags: ones with options and/or long names.  */

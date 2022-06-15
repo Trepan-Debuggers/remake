@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../../src/trace.h"
 #include "../../src/debug.h"
 #include "../../src/variable.h"
+#include "../../src/globals.h"
 #include "../fns.h"
 
 extern debug_return_t
@@ -37,13 +38,13 @@ dbg_cmd_step (char *psz_arg)
   if (!psz_arg || !*psz_arg) {
     i_debugger_stepping = 1;
     i_debugger_nexting  = 0;
-    define_variable_in_set("MAKEFLAGS", sizeof("MAKEFLAGS")-1,
-                           "X", o_debugger, 0, NULL, NULL);
+    debugger_flag = 1;
+    define_makeflags (1, 0);
     return continue_execution;
   }
   if (get_uint(psz_arg, &i_debugger_stepping, true)) {
-    define_variable_in_set("MAKEFLAGS", sizeof("MAKEFLAGS")-1,
-                           "X", o_debugger, 0, NULL, NULL);
+    debugger_flag = 1;
+    define_makeflags (1, 0);
     i_debugger_nexting  = 0;
     return continue_execution;
   } else
