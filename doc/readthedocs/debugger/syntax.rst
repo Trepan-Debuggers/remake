@@ -8,7 +8,7 @@ Command names and arguments are separated with spaces like POSIX shell
 syntax. Parenthesis around the arguments and commas between them are
 not used. If the character of a line starts with ``#``,
 the command is ignored. (Actually, what is going on here is that it is
-a "comment" commant.)
+a "comment" command.)
 
 Within a single command, tokens are then white-space split. Again,
 this process disregards quotes or symbols that have meaning in GNU Make.
