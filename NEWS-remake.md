@@ -10,7 +10,7 @@ Version 4.3.1+dbg-1.6 (2022-01-22)
 * Document debugger commands
 * Debugger commands are in separate `.c` files (not inlined, `.h` included)
 
-I'd like thank Marten Cassel for his sponsorship.
+I'd like to thank Marten Cassel for his sponsorship.
 
 Version 4.3.1+dbg-1.5 (2020-03-15) Ron Frankel
 ==============================================

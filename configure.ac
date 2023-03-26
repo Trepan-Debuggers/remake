@@ -434,7 +434,7 @@ AC_ARG_WITH([profiler_resolution],
   [prof_res="1000"])
 
 AS_IF([test "x$prof_res" = "xno"],
-      [],_
+      [],
       [AC_DEFINE_UNQUOTED([PROFILER_MIN_RES],
                           [$prof_res],
                           [Minimum profiler resolution in nanoseconds])])
