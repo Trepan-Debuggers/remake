@@ -6,12 +6,7 @@
 MAKE=${MAKE:-make}
 
 echo "Rebuilding ./configure with autoreconf..."
-autoreconf -f -i
-
-if [ $? -ne 0 ]; then
-  echo "autoreconf failed"
-  exit $?
-fi
+autoreconf -f -i || { rc=$?; echo "autoreconf failed"; exit $rc; }
 
 # Add our target descriptions to po/Makefile.in.in
 patch -p0 < po/Makefile.in.in.patch
