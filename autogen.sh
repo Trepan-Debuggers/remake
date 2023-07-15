@@ -5,6 +5,9 @@
 # honor MAKE variable if set otherwise set it to `make'
 MAKE=${MAKE:-make}
 
+# Guard against being run more than once
+(cd build-aux && rm -f mdate-sh texinfo.tex)
+
 echo "Rebuilding ./configure with autoreconf..."
 autoreconf -f -i || { rc=$?; echo "autoreconf failed"; exit $rc; }
 
