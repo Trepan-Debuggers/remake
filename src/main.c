@@ -1465,7 +1465,7 @@ main (int argc, const char **argv, char **envp)
             db_level           |= DB_UPDATE_GOAL;
           }
 
-          if ( 0 == strcmp(*p, "full") || b_debugger_preread
+          if ( 0 == strcmp(*p, "full") || b_debugger_preread || b_debugger_goal
                || 0 == strcmp(*p, "preaction") ) {
             job_slots            =  1;
             i_debugger_stepping  =  1;
@@ -1474,10 +1474,11 @@ main (int argc, const char **argv, char **envp)
             /* For now we'll do basic debugging. Later, "stepping'
                will stop here while next won't - either way no printing.
              */
-            db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+            db_level          |=  DB_BASIC | DB_CALL | DB_UPDATE_GOAL
+                              |   b_debugger_goal ? 0 : DB_SHELL
                               |   DB_MAKEFILES;
           }
-          if ( 0 == strcmp(*p, "full")
+          if ( 0 == strcmp(*p, "full") || b_debugger_goal
                || 0 == strcmp(*p, "error") ) {
             debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
           } else if ( 0 == strcmp(*p, "fatal") ) {
