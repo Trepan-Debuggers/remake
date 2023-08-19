@@ -309,7 +309,10 @@ print_target_stack_entry (const file_t *p_target, int i, int i_pos)
        before the first command? Or should we list the line
        that the command starts on - so we know we've faked the location?
     */
-    floc.lineno--;
+    /* Not OK to subtract 1 if b_debugger_goal sent us here */
+    if (!b_debugger_goal) {
+      floc.lineno--;
+    }
   } else {
     floc.filenm = NULL;
   }
