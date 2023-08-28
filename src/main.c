@@ -370,14 +370,16 @@ static const char *const usage[] =
   --debugger-stop[=TYPE]      Which point to enter debugger. TYPE may be\n\
                               \"goal\", \"preread\", \"preaction\",\n\
                               \"full\", \"error\", or \"fatal\".\n\
-                              Only makes sense with -X set.\n"),
+                              Default is \"preaction\".\n\
+                              May be repeated (to get TYPE|TYPE|...).\n"),
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
-  -X, --debugger              Enter debugger.\n"),
+  -X, --debugger              Enter debugger.\n\
+                              Same as --debugger-stop=full\n"),
     N_("\
   -!, --post-mortem           Go into debugger on error.\n\
-                              Same as --debugger --debugger-stop=error\n"),
+                              Same as --debugger-stop=error\n"),
     N_("\
   --no-readline               Do not use GNU ReadLine in debugger.\n"),
     NULL
