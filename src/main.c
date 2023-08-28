@@ -1450,50 +1450,49 @@ main (int argc, const char **argv, char **envp)
     */
     db_level            |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
         | DB_MAKEFILES;
-  } else {
-    /* debugging sets some things */
-    if (debugger_opts) {
-      const char **p;
-      b_show_version = true;
-      for (p = debugger_opts->list; *p != 0; ++p)
-        {
-          if (0 == strcmp(*p, "preread")) {
-            b_debugger_preread  = true;
-            db_level           |= DB_READ_MAKEFILES;
-          }
-
-          if (0 == strcmp(*p, "goal")) {
-            b_debugger_goal  = true;
-            db_level           |= DB_UPDATE_GOAL;
-          }
-
-          if ( 0 == strcmp(*p, "full") || b_debugger_preread || b_debugger_goal
-               || 0 == strcmp(*p, "preaction") ) {
-            job_slots            =  1;
-            i_debugger_stepping  =  1;
-            i_debugger_nexting   =  0;
-            debugger_enabled     =  1;
-            /* For now we'll do basic debugging. Later, "stepping'
-               will stop here while next won't - either way no printing.
-             */
-            db_level          |=  DB_BASIC | DB_CALL | DB_UPDATE_GOAL
-                              |   b_debugger_goal ? 0 : DB_SHELL
-                              |   DB_MAKEFILES;
-          }
-          if ( 0 == strcmp(*p, "full") || b_debugger_goal
-               || 0 == strcmp(*p, "error") ) {
-            debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
-          } else if ( 0 == strcmp(*p, "fatal") ) {
-            debugger_on_error  |=  DEBUGGER_ON_FATAL;
-          }
+  }
+  /* debugging sets some things */
+  if (debugger_opts) {
+    const char **p;
+    b_show_version = true;
+    for (p = debugger_opts->list; *p != 0; ++p)
+      {
+        if (0 == strcmp(*p, "preread")) {
+          b_debugger_preread  = true;
+          db_level           |= DB_READ_MAKEFILES;
         }
+
+        if (0 == strcmp(*p, "goal")) {
+          b_debugger_goal  = true;
+          db_level           |= DB_UPDATE_GOAL;
+        }
+
+        if ( 0 == strcmp(*p, "full") || b_debugger_preread || b_debugger_goal
+             || 0 == strcmp(*p, "preaction") ) {
+          job_slots            =  1;
+          i_debugger_stepping  =  1;
+          i_debugger_nexting   =  0;
+          debugger_enabled     =  1;
+          /* For now we'll do basic debugging. Later, "stepping'
+             will stop here while next won't - either way no printing.
+           */
+          db_level          |=  DB_BASIC | DB_CALL | DB_UPDATE_GOAL
+                            |   b_debugger_goal ? 0 : DB_SHELL
+                            |   DB_MAKEFILES;
+        }
+        if ( 0 == strcmp(*p, "full") || b_debugger_goal
+             || 0 == strcmp(*p, "error") ) {
+          debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+        } else if ( 0 == strcmp(*p, "fatal") ) {
+          debugger_on_error  |=  DEBUGGER_ON_FATAL;
+        }
+      }
 #ifndef HAVE_LIBREADLINE
-      O (error, NILF,
-             "warning: you specified a debugger option, but you don't have readline support");
-      O (error, NILF,
-             "debugger support compiled in. Debugger options will be ignored.");
+    O (error, NILF,
+           "warning: you specified a debugger option, but you don't have readline support");
+    O (error, NILF,
+           "debugger support compiled in. Debugger options will be ignored.");
 #endif
-    }
   }
 
   /* Set always_make_flag if -B was given and we've not restarted already.  */
