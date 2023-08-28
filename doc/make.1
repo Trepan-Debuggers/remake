@@ -1,4 +1,4 @@
-.TH REMAKE 1 "5 June 2020" "GNU" "User Commands"
+.TH REMAKE 1 "28 August 2023" "GNU" "User Commands"
 .SH NAME
 remake \- GNU make utility to maintain groups of programs
 .SH SYNOPSIS
@@ -118,7 +118,7 @@ Go into the debugger on an error. This is the
 Same as options: \-\-debugger \-\-debugger\-stop=error
 
 .TP 0.5i
-.B \-P, " \-\-profile [=TYPE]
+.B \-P, " \-\-profile[=TYPE]
 Enables timing and dependency profiling output using the specified
 .I TYPE
 for formatting.
@@ -139,7 +139,7 @@ have the format specified in the
 manual.
 
 .TP 0.5i
-.B \-\-profile\-directory=[PATH]
+.B \-\-profile\-directory[=PATH]
 Specifies the
 .I PATH
 that profiling files should be written to. Must exist
@@ -161,7 +161,7 @@ have description comments. A description comment is added by putting
 a single comment before the target that starts with '#:'.
 
 .TP 0.5i
-.B \-x, " \-\-trace [=FLAGS]"
+.B \-x, " \-\-trace[=FLAGS]"
 Set trace flags
 If the
 .I FLAGS
@@ -179,33 +179,29 @@ is disabled, or
 for maximum tracing.
 
 .TP 0.5i
-.B \-X, "\-\-debugger [=TYPE]"
-Enter debugger with
-If the
+.B \-X, "\-\-debugger"
+Same as \fB--debugger-stop=full\fR
+.TP 0.5i
+.B "\-\-debugger-stop[=TYPE]"
+If
 .I TYPE
-are omitted, then the behavior is the same as if
-.B \-\-debugger=normal
+is omitted, then the behavior is the same as if
+.B \-\-debugger=preaction
 was specified.
 .I TYPE
 may be
-.I goal
-for all tracing Makefiles read
 .I preread
-which stop before any Makefiles are read
+which stops before any Makefiles are read,
 .I goal
-which stops after the goal target is built
-.I normal
-which is the same as given no option
+which stops before any target is built,
 .I preaction
-which is like \fInormal\fR but shell tracing
-is disabled
+which stops after all Makefiles are read but before make does anything else,
 .I full
-for maximum tracing. It is the same as giving all of the
-options except "normal" .
+which combines \fIpreaction\fR, \fIerror\fR and \fIfatal\fR,
 .I fatal
-for entering the debugger on a fatal error,
+to enter the debugger on a fatal error or
 .I error
-for entering the debugger on an error
+to enter the debugger on an error.
 
 .SH "SEE ALSO"
 The full documentation for
