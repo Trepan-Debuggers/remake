@@ -319,8 +319,8 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 	   before the first command? Or should we list the line
 	   that the command starts on - so we know we've faked the location?
 	*/
-	/* Not OK to subtract 1 if b_debugger_goal sent us here */
-	if (!b_debugger_goal) {
+	/* Not OK to subtract 1 if already zero */
+	if (floc.lineno) {
 	  floc.lineno--;
 	}
 	p_target_loc->filenm = floc.filenm;
