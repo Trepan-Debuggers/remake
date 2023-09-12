@@ -3,6 +3,13 @@
 $description = "This script tests to make sure that Make looks for
 default makefiles in the correct order (GNUmakefile,makefile,Makefile)";
 
+# Create a makefile called "GNUremakefile"
+$remakefile = "GNUremakefile";
+
+open(MAKEFILE,"> $remakefile");
+print MAKEFILE "FIRST: ; \@echo It chose GNUremakefile\n";
+close(MAKEFILE);
+
 # Create a makefile called "GNUmakefile"
 $makefile = "GNUmakefile";
 
@@ -26,6 +33,10 @@ if (! -f 'Makefile') {
     print MAKEFILE "THIRD: ; \@echo It chose Makefile\n";
     close(MAKEFILE);
 }
+
+run_make_with_options("","",&get_logfile);
+compare_output("It chose GNUremakefile\n",&get_logfile(1));
+unlink($remakefile);
 
 run_make_with_options("","",&get_logfile);
 compare_output("It chose GNUmakefile\n",&get_logfile(1));
