@@ -5,7 +5,7 @@
 @include version.texi
 @set EDITION 0.75
 
-@settitle GNU @code{make}
+@settitle GNU @code{[re]make}
 @setchapternewpage odd
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -17,7 +17,7 @@
 @c %**end of header
 
 @copying
-This file documents the GNU @code{make} utility, which determines
+This file documents the GNU @code{[re]make} utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
@@ -1154,9 +1154,10 @@ var := oneword
 
 @c following paragraph rewritten to avoid overfull hbox
 By default, when @code{make} looks for the makefile, it tries the
-following names, in order: @file{GNUmakefile}, @file{makefile}
+following names, in order: @file{GNUremakefile}, @file{GNUmakefile}, @file{makefile}
 and @file{Makefile}.@refill
 @findex Makefile
+@findex GNUremakefile
 @findex GNUmakefile
 @findex makefile
 
@@ -7626,9 +7627,33 @@ separators (@code{/}).  Note that, in contrast to @code{realpath}
 function, @code{abspath} does not resolve symlinks and does not require
 the file names to refer to an existing file or directory.  Use the
 @code{wildcard} function to test for existence.
+
+@item $(this_line)
+@findex this_line
+@cindex this_line, function
+The invocation @code{$(this_line)} expands to the current line
+number.  It is inspired by the @code{__LINE__} magical macro of the C
+programming language.
+
+
+@item $(this_file)
+@findex this_file
+@cindex this_file, function
+The invocation @code{$(this_file)} expands to the current filename,
+e.g. to @code{Makefile}.  It is inspired by the @code{__FILE__}
+magical macro of the C programming language.
+
+
+@item $(this_counter)
+@findex this_counter
+@cindex this_counter, function
+The invocation @code{$(this_counter)} expands to a unique, incremented,
+counter (in decimal). It is inspired by the @code{__COUNTER__} magical
+macro of the C programming language understood by GCC.
+
 @end table
 
-@node Conditional Functions, Foreach Function, File Name Functions, Functions
+
 @section Functions for Conditionals
 @findex if
 @cindex conditional expansion

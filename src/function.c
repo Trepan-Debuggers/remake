@@ -1370,6 +1370,65 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+///// added by <basile@starynkevitch.net>
+
+
+/**
+  $(this_file)
+
+  Always expands to the current Makefile path.  Inspired by the __FILE__ macro of C.
+**/
+
+static char *
+func_this_file (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
+{
+  if (reading_file) {
+    return xstrdup(reading_file->filenm);
+  }
+  else
+    return xstrdup("?");
+}
+
+
+/**
+  $(this_line)
+
+  Always expands to the current line number.   Inspired by the __LINE__ macro of C.
+**/
+
+static char *
+func_this_line (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
+{
+  if (reading_file) {
+    char linumbuf[32];
+    memset (linumbuf, 0, sizeof(linumbuf));
+    snprintf(linumbuf, sizeof(linumbuf),  "%lu", reading_file->lineno);
+    return xstrdup(linumbuf);
+  }
+  else
+    return xstrdup("0");
+}
+
+
+/**
+  $(this_counter)
+
+  Always expands to a unique, incremented, counter.   Inspired by the __COUNTER__ macro of GCC.
+**/
+
+static char *
+func_this_counter (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
+{
+  static long counter;
+  char cntbuf[32];
+  memset (cntbuf, 0, sizeof(cntbuf));
+  counter++;
+  snprintf (cntbuf, sizeof(cntbuf), "%ld", counter);
+  return xstrdup(cntbuf);
+}
+///// end of functions added by  <basile@starynkevitch.net>
+
+
 /*
   \r is replaced on UNIX as well. Is this desirable?
  */
@@ -2210,6 +2269,10 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
   FT_ENTRY ("debugger",      0,  1,  1,  func_debugger),
+  /// three functions added by <basile@starynkevitch.net>
+  FT_ENTRY ("this_file",     0,  0,  0,  func_this_file),
+  FT_ENTRY ("this_line",     0,  0,  0,  func_this_line),
+  FT_ENTRY ("this_counter",  0,  0,  0,  func_this_counter),
 #ifdef EXPERIMENTAL
   FT_ENTRY ("eq",            2,  2,  1,  func_eq),
   FT_ENTRY ("not",           0,  1,  1,  func_not),
@@ -2236,7 +2299,10 @@ expand_builtin_function (char *o, int argc, char **argv,
      but so far no internal ones do, so just test it for all functions here
      rather than in each one.  We can change it later if necessary.  */
 
-  if (!argc && !entry_p->alloc_fn)
+  if (!argc
+      /// the functions named this_* by <basile@starynkevitch.net> take no arguments...
+      && strncmp(entry_p->name, "this", sizeof("this")-1)
+      && !entry_p->alloc_fn)
     return o;
 
   if (!entry_p->fptr.func_ptr)
