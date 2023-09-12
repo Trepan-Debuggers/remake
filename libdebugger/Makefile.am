@@ -33,6 +33,7 @@ noinst_HEADERS = \
 	command/help/step.h \
 	command/help/target.h \
 	command/help/up.h \
+	command/help/watch.h \
 	command/help/where.h \
 	command/help/write.h \
 	file2line.h \
@@ -77,6 +78,7 @@ libdebugger_a_SOURCES =  \
 	command/step.c \
 	command/target.c \
 	command/up.c \
+	command/watch.c \
 	command/where.c \
 	command/write.c \
 	break.c \

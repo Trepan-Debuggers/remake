@@ -37,4 +37,4 @@ Examples:
 
 .. seealso::
 
-   :ref:`delete <delete>`.
+   :ref:`delete <delete>`, :ref:`watch <watch>`.

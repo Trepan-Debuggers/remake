@@ -69,6 +69,7 @@ extern debug_return_t dbg_cmd_help(char *psz_args);
 extern debug_return_t dbg_cmd_info(char *psz_args);
 extern debug_return_t dbg_cmd_target(char *psz_args);
 extern debug_return_t dbg_cmd_show(char *psz_args);
+extern debug_return_t dbg_cmd_watch(char *psz_regex);
 extern debug_return_t dbg_cmd_where(char *psz_args);
 extern debug_return_t dbg_cmd_set(char *psz_args);
 extern debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);

@@ -264,8 +264,10 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     if (!p_target->tracing) return continue_execution;
   } else if ( !debugger_on_error
 	      && !(i_debugger_stepping || i_debugger_nexting)
-	      && p_target && !p_target->tracing && -2 != errcode )
+	      && p_target && !p_target->tracing && -2 != errcode
+	      && reason != DEBUG_WATCHPOINT ) {
     return continue_execution;
+  }
 
   /* Clear temporary breakpoints. */
   if (p_target && p_target->tracing & BRK_TEMP)

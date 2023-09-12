@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 #include <string.h>
 
+#include "break.h"
 #include "job.h"
 #include "print.h"
 #include "debug.h"
@@ -1213,6 +1214,8 @@ start_job_command (child_t *child,
 
   /* We're sure we're going to invoke a command: set up the output.  */
   output_start ();
+
+  check_command_watchpoint(p_call_stack, child->file, child->command_lines[child->command_line - 1]);
 
     p_stack_top = p_call_stack;
     if (i_debugger_stepping)

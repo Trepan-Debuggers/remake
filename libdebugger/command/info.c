@@ -279,6 +279,10 @@ dbg_cmd_info_program()
       printf(_("Program stopped from explicit debugger function call.\n"));
       printf("\n");
       break;
+    case DEBUG_WATCHPOINT:
+      printf(_("Program stopped at a command watchpoint.\n"));
+      printf("\n");
+      break;
     case DEBUG_NOT_GIVEN:
       printf(_("Reason not given.\n"));
       break;
