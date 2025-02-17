@@ -4,7 +4,6 @@ test_profile_SOURCES = test_profile.c
 
 test_profile_LDADD = \
 	../src/version.o \
-	../src/alloc.o \
 	../src/globals.o \
 	../src/misc.o \
 	../src/output.o \

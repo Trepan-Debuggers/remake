@@ -430,7 +430,7 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
       file_t *p_target = lookup_file (psz_target);
       if (p_target) {
 	initialize_file_variables (p_target, 0);
-	set_file_variables (p_target);
+	set_file_variables (p_target, p_target->stem);
 	p_file_vars = p_target->variables;
 	p_set = p_file_vars->set;
       }

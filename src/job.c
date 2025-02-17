@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "types.h"
 #include "makeint.h"
@@ -1833,17 +1833,7 @@ load_too_high (void)
 #else
   static double last_sec;
   static time_t last_now;
-
-  /* This is disabled by default for now, because it will behave badly if the
-     user gives a value > the number of cores; in that situation the load will
-     never be exceeded, this function always returns false, and we'll start
-     all the jobs.  Also, it's not quite right to limit jobs to the number of
-     cores not busy since a job takes some time to start etc.  Maybe that's
-     OK, I'm not sure exactly how to handle that, but for sure we need to
-     clamp this value at the number of cores before this can be enabled.
-   */
-#define PROC_FD_INIT -1
-  static int proc_fd = PROC_FD_INIT;
+  static int proc_fd = -2;
 
   double load, guess;
   time_t now;
@@ -1901,8 +1891,8 @@ load_too_high (void)
 
               if (p && ISDIGIT(p[1]))
                 {
-                  int cnt = atoi (p+1);
-                  DB (DB_JOBS, ("Running: system = %d / make = %u (max requested = %f)\n",
+                  unsigned int cnt = make_toui (p+1, NULL);
+                  DB (DB_JOBS, ("Running: system = %u / make = %u (max requested = %f)\n",
                                 cnt, job_slots_used, max_load_average));
                   return (double)cnt > max_load_average;
                 }
@@ -1920,7 +1910,7 @@ load_too_high (void)
     }
 
   /* Find the real system load average.  */
-  make_access ();
+  errno = 0;
   if (getloadavg (&load, 1) != 1)
     {
       static int lossage = -1;
@@ -1937,7 +1927,6 @@ load_too_high (void)
       lossage = errno;
       load = 0;
     }
-  user_access ();
 
   /* If we're in a new second zero the counter and correct the backlog
      value.  Only keep the backlog for one extra second; after that it's 0.  */
@@ -2176,7 +2165,7 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
 
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
-void
+pid_t
 exec_command (char **argv, char **envp)
 {
 #ifdef WINDOWS32
@@ -2233,17 +2222,31 @@ exec_command (char **argv, char **envp)
         }
     }
 
-  /* return child's exit code as our exit code */
+  /* Use the child's exit code as our exit code */
   exit (exit_code);
 
 #else  /* !WINDOWS32 */
 
-  /* Be the user, permanently.  */
-  child_access ();
+  pid_t pid = -1;
 
+# ifdef __EMX__
   /* Run the program.  */
+  pid = spawnvpe (P_NOWAIT, argv[0], argv, envp);
+  if (pid >= 0)
+    return pid;
+
+  /* the file might have a strange shell extension */
+  if (errno == ENOENT)
+    errno = ENOEXEC;
+
+# else
+
+  /* Run the program.  Don't use execvpe() as we want the search for argv[0]
+     to use the new PATH, but execvpe() searches before resetting PATH.  */
   environ = envp;
   execvp (argv[0], argv);
+
+# endif /* !__EMX__ */
 
   switch (errno)
     {
@@ -2258,7 +2261,16 @@ exec_command (char **argv, char **envp)
         int argc;
         int i=1;
 
+# ifdef __EMX__
+        /* Do not use $SHELL from the environment */
+        struct variable *p = lookup_variable ("SHELL", 5);
+        if (p)
+          shell = p->value;
+        else
+          shell = 0;
+# else
         shell = getenv ("SHELL");
+# endif
         if (shell == 0)
           shell = default_shell;
 
@@ -2266,8 +2278,22 @@ exec_command (char **argv, char **envp)
         while (argv[argc] != 0)
           ++argc;
 
+# ifdef __EMX__
+        if (!unixy_shell)
+          ++argc;
+# endif
+
         new_argv = alloca ((1 + argc + 1) * sizeof (char *));
         new_argv[0] = (char *)shell;
+
+# ifdef __EMX__
+        if (!unixy_shell)
+          {
+            new_argv[1] = "/c";
+            ++i;
+            --argc;
+          }
+# endif
 
         new_argv[i] = argv[0];
         while (argc > 0)
@@ -2276,17 +2302,30 @@ exec_command (char **argv, char **envp)
             --argc;
           }
 
+# ifdef __EMX__
+        pid = spawnvpe (P_NOWAIT, shell, new_argv, envp);
+        if (pid >= 0)
+          break;
+# else
         execvp (shell, new_argv);
+# endif
         OSS (error, NILF, "%s: %s", new_argv[0], strerror (errno));
         break;
       }
+
+# ifdef __EMX__
+    case EINVAL:
+      /* this nasty error was driving me nuts :-( */
+      O (error, NILF, _("spawnvpe: environment space might be exhausted"));
+      /* FALLTHROUGH */
+# endif
 
     default:
       OSS (error, NILF, "%s: %s", argv[0], strerror (errno));
       break;
     }
 
-  _exit (127);
+  return pid;
 #endif /* !WINDOWS32 */
 }
 

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-define(_MAKE_VERSION_, 4.3)
+define(_MAKE_VERSION_, 4.4)
 AC_INIT([remake],[_MAKE_VERSION_+dbg-1.6],[https://github.com/rocky/remake/issues])
 
 # These are used in maintMakefile
@@ -175,8 +175,8 @@ AS_IF([test "$ac_cv_func_gettimeofday" = yes],
             [Define to 1 if you have a standard gettimeofday function])
 ])
 
-AC_CHECK_FUNCS([strdup strndup memrchr umask mkstemp mktemp fdopen \
-                dup dup2 getcwd realpath sigsetmask sigaction \
+AC_CHECK_FUNCS([strtoll strdup strndup strcpy memrchr memcpy umask mkstemp \
+                mktemp fdopen dup dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 getrlimit setrlimit setvbuf pipe strsignal \
                 lstat readlink atexit isatty ttyname pselect posix_spawn \

@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 Copyright (C) 2015, 2017 Rocky Bernstein
 This file is part of GNU Make.
 
@@ -13,7 +13,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "globals.h"
@@ -35,7 +35,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # include <windows.h>
 # include <io.h>
 #ifdef HAVE_STRINGS_H
-# include <strings.h>	/* for strcasecmp */
+# include <strings.h> /* for strcasecmp */
 #endif
 # include "pathstuff.h"
 # include "sub_proc.h"
@@ -208,7 +208,10 @@ static const int inf_jobs = 0;
 
 /* Authorization for the jobserver.  */
 
-static char *jobserver_auth = NULL;
+char *jobserver_auth = NULL;
+
+/* Style for the jobserver.  */
+static char *jobserver_style = NULL;
 
 /* Handle for the mutex used on Windows to synchronize output of our
    children under -O.  */
@@ -265,6 +268,15 @@ int always_make_flag = 0;
 
 int rebuilding_makefiles = 0;
 
+/* Count the number of commands we've invoked, that might change something in
+   the filesystem.  Start with 1 so calloc'd memory never matches.  */
+
+unsigned long command_count = 1;
+
+/* Remember the location of the name of the batch file from stdin.  */
+
+static int stdin_offset = -1;
+
 
 /* The usage output.  We write it this way to make life easier for the
    translators, especially those trying to translate to right-to-left
@@ -303,6 +315,8 @@ static const char *const usage[] =
                               Search DIRECTORY for included makefiles.\n"),
     N_("\
   -j [N], --jobs[=N]          Allow N jobs at once; infinite jobs with no arg.\n"),
+    N_("\
+  --jobserver-style=STYLE     Select the style of jobserver to use.\n"),
     N_("\
   -k, --keep-going            Keep going when some targets can't be made.\n"),
     N_("\
@@ -455,6 +469,7 @@ static const struct command_switch switches[] =
     { CHAR_MAX+14, strlist, &debugger_opts, 1, 1, 0, "preaction", 0,
       "debugger-stop" },
     { CHAR_MAX+15, filename, &profile_dir_opt, 1, 1, 0, 0, 0, "profile-directory" },
+    { CHAR_MAX+16, string, &jobserver_style, 1, 0, 0, 0, 0, "jobserver-style" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -532,6 +547,12 @@ int not_parallel;
    warning at the end of the run. */
 
 int clock_skew_detected;
+
+/* Map of possible stop characters for searching strings.  */
+#ifndef UCHAR_MAX
+# define UCHAR_MAX 255
+#endif
+unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
 
 /* If output-sync is enabled we'll collect all the output generated due to
    options, while reading makefiles, etc.  */
@@ -623,6 +644,76 @@ initialize_global_hash_tables (void)
   hash_init_directories ();
   hash_init_function_table ();
 }
+
+void
+initialize_stopchar_map (void)
+{
+  int i;
+
+  stopchar_map[(int)'\0'] = MAP_NUL;
+  stopchar_map[(int)'#'] = MAP_COMMENT;
+  stopchar_map[(int)';'] = MAP_SEMI;
+  stopchar_map[(int)'='] = MAP_EQUALS;
+  stopchar_map[(int)':'] = MAP_COLON;
+  stopchar_map[(int)'|'] = MAP_PIPE;
+  stopchar_map[(int)'.'] = MAP_DOT | MAP_USERFUNC;
+  stopchar_map[(int)','] = MAP_COMMA;
+  stopchar_map[(int)'('] = MAP_VARSEP;
+  stopchar_map[(int)'{'] = MAP_VARSEP;
+  stopchar_map[(int)'}'] = MAP_VARSEP;
+  stopchar_map[(int)')'] = MAP_VARSEP;
+  stopchar_map[(int)'$'] = MAP_VARIABLE;
+
+  stopchar_map[(int)'-'] = MAP_USERFUNC;
+  stopchar_map[(int)'_'] = MAP_USERFUNC;
+
+  stopchar_map[(int)' '] = MAP_BLANK;
+  stopchar_map[(int)'\t'] = MAP_BLANK;
+
+  stopchar_map[(int)'/'] = MAP_DIRSEP;
+#if defined(HAVE_DOS_PATHS)
+  stopchar_map[(int)'\\'] |= MAP_DIRSEP;
+#endif
+
+  for (i = 1; i <= UCHAR_MAX; ++i)
+    {
+      if (isspace (i) && NONE_SET (stopchar_map[i], MAP_BLANK))
+        /* Don't mark blank characters as newline characters.  */
+        stopchar_map[i] |= MAP_NEWLINE;
+      else if (isalnum (i))
+        stopchar_map[i] |= MAP_USERFUNC;
+    }
+}
+
+/* This code is stolen from gnulib.
+   If/when we abandon the requirement to work with K&R compilers, we can
+   remove this (and perhaps other parts of GNU make!) and migrate to using
+   gnulib directly.
+
+   This is called only through atexit(), which means die() has already been
+   invoked.  So, call exit() here directly.  Apparently that works...?
+*/
+
+/* Close standard output, exiting with status 'exit_failure' on failure.
+   If a program writes *anything* to stdout, that program should close
+   stdout and make sure that it succeeds before exiting.  Otherwise,
+   suppose that you go to the extreme of checking the return status
+   of every function that does an explicit write to stdout.  The last
+   printf can succeed in writing to the internal stream buffer, and yet
+   the fclose(stdout) could still fail (due e.g., to a disk full error)
+   when it tries to write out that buffered data.  Thus, you would be
+   left with an incomplete output file and the offending program would
+   exit successfully.  Even calling fflush is not always sufficient,
+   since some file systems (NFS and CODA) buffer written/flushed data
+   until an actual close call.
+
+   Besides, it's wasteful to check the return value from every call
+   that writes to stdout -- just let the internal stream state record
+   the failure.  That's what the ferror test is checking below.
+
+   It's important to detect such failures and exit nonzero because many
+   tools (most notably 'make' and other build-management systems) depend
+   on being able to detect failure in other tools via their exit status.  */
 
 /* This character map locate stop chars when parsing GNU makefiles.
    Each element is true if we should stop parsing on that character.  */
@@ -1045,6 +1136,23 @@ reset_jobserver (void)
   jobserver_auth = NULL;
 }
 
+void
+temp_stdin_unlink ()
+{
+  /* This function is called from a signal handler.  Keep async-signal-safe.
+     If there is a temp file from reading from stdin, get rid of it.  */
+  if (stdin_offset >= 0)
+    {
+      const char *nm = makefiles->list[stdin_offset];
+      int r = 0;
+
+      stdin_offset = -1;
+      EINTRLOOP(r, unlink (nm));
+      if (r < 0 && errno != ENOENT && !handling_fatal_signal)
+        perror_with_name (_("unlink (temporary file): "), nm);
+    }
+}
+
 int
 main (int argc, const char **argv, char **envp)
 {
@@ -1222,10 +1330,11 @@ main (int argc, const char **argv, char **envp)
 #endif
     }
 
-  /* Set up to access user data (files).  */
-  user_access ();
-
   initialize_global_hash_tables ();
+
+  /* Ensure the temp directory is set up: we don't want the first time we use
+     it to be in a forked process.  */
+  get_tmpdir ();
 
   /* Figure out where we are.  */
 
@@ -1702,14 +1811,11 @@ main (int argc, const char **argv, char **envp)
             if (strchr ("/\\", template[strlen (template) - 1]) == NULL)
               strcat (template, "/");
 #else
-# ifndef VMS
             if (template[strlen (template) - 1] != '/')
               strcat (template, "/");
-# endif /* !VMS */
 #endif /* !HAVE_DOS_PATHS */
 
-            strcat (template, DEFAULT_TMPFILE);
-            outfile = get_tmpfile (&stdin_nm, template);
+            outfile = get_tmpfile (&stdin_nm);
             if (outfile == 0)
               pfatal_with_name (_("fopen (temporary file)"));
             while (!feof (stdin) && ! ferror (stdin))
@@ -1959,7 +2065,7 @@ main (int argc, const char **argv, char **envp)
      submakes it's the token they were given by their parent.  For the top
      make, we just subtract one from the number the user wants.  */
 
-  if (job_slots > 1 && jobserver_setup (job_slots - 1))
+  if (job_slots > 1 && jobserver_setup (job_slots - 1, jobserver_style))
     {
       /* Fill in the jobserver_auth for our children.  */
       jobserver_auth = jobserver_get_auth ();
@@ -3196,8 +3302,8 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright"), so it hardly seems worth it.  */
 
-  printf ("%sCopyright (C) 1988-2020 Free Software Foundation, Inc.\n"
-	        "Copyright (C) 2015, 2017 Rocky Bernstein.\n",
+  printf ("%sCopyright (C) 1988-2022 Free Software Foundation, Inc.\n"
+	        "Copyright (C) 2015, 2017, 2025 Rocky Bernstein.\n",
           precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\

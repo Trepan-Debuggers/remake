@@ -314,7 +314,7 @@ dbg_cmd_info(char *psz_args)
       if (p_target) {
 	if (!p_target->variables) {
 	  initialize_file_variables (p_target, 0);
-	  set_file_variables (p_target);
+	  set_file_variables (p_target, p_target->stem);
 	  if (!p_target->variables) {
 	    printf("Can't get variable information for target %s\n",
 		   psz_target);

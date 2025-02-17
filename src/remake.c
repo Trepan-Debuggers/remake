@@ -1363,7 +1363,7 @@ f_mtime (struct file *file, int search)
         /* The archive doesn't exist, so its members don't exist either.  */
         return NONEXISTENT_MTIME;
 
-      found = ar_member_date (file->hname, &member_date);
+      found = ar_member_date (file->hname);
       if (found && member_date == (time_t) 0)
         {
               OSS (error, NILF,

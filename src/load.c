@@ -1,5 +1,5 @@
 /* Loading dynamic objects for GNU Make.
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
+Copyright (C) 2012-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 
@@ -84,11 +84,13 @@ load_object (const gmk_floc *flocp, int noerror, const char *ldname,
         {
           const char *err = dlerror ();
           if (noerror)
-            DB (DB_BASIC, ("%s", err));
+            DB (DB_BASIC, ("%s\n", err));
           else
             OS (error, flocp, "%s", err);
           return NULL;
         }
+
+      DB (DB_VERBOSE, (_("Loaded shared object %s\n"), ldname));
 
       /* Assert that the GPL license symbol is defined.  */
       symp = (load_func_t) dlsym (dlp, "plugin_is_GPL_compatible");
@@ -231,19 +233,25 @@ load_file (const gmk_floc *flocp, const char **ldname, int noerror)
   return r;
 }
 
-void
+int
 unload_file (const char *name)
 {
+  int rc = 0;
   struct load_list *d;
 
   for (d = loaded_syms; d != NULL; d = d->next)
     if (streq (d->name, name) && d->dlp)
       {
-        if (dlclose (d->dlp))
+        DB (DB_VERBOSE, (_("Unloading shared object %s\n"), name));
+        rc = dlclose (d->dlp);
+        if (rc)
           perror_with_name ("dlclose: ", d->name);
-        d->dlp = NULL;
+        else
+          d->dlp = NULL;
         break;
       }
+
+  return rc;
 }
 
 #else
@@ -258,10 +266,10 @@ load_file (const floc *flocp, const char **ldname UNUSED, int noerror)
   return 0;
 }
 
-void
+int
 unload_file (const char *name UNUSED)
 {
-  O (fatal, NILF, "INTERNAL: Cannot unload when load is not supported!");
+  O (fatal, NILF, "INTERNAL: Cannot unload when load is not supported");
 }
 
 #endif  /* MAKE_LOAD */

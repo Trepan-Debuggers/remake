@@ -30,7 +30,7 @@ include_HEADERS = src/gnuremake.h
 man_MANS =	doc/make.1
 
 make_SRCS =	\
-		src/alloc.c src/ar.c src/arscan.c src/buildargv.c \
+		src/ar.c src/arscan.c src/buildargv.c \
 		src/commands.c src/debug.c src/default.c src/dir.c src/expand.c \
 		src/file.c src/file_basic.c src/function.c src/getopt.c \
 		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \

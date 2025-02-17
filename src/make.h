@@ -359,7 +359,7 @@ FILE *open_tmpfile (char **, const char *);
 int ar_name (const char *);
 void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
-int ar_member_date (const char *, time_t *);
+time_t ar_member_date (const char *);
 
 
 #endif
@@ -387,9 +387,7 @@ int gpath_search (const char *file, size_t len);
 */
 extern void construct_include_path (const char **arg_dirs);
 
-void user_access (void);
 void make_access (void);
-void child_access (void);
 
 char *strip_whitespace (const char **begpp, const char **endpp);
 
@@ -465,8 +463,6 @@ extern int batch_mode_shell;
 extern char cmd_prefix;
 
 extern unsigned int job_slots;
-extern int job_fds[2];
-extern int job_rfd;
 #ifndef NO_FLOAT
 extern double max_load_average;
 #else
@@ -498,7 +494,7 @@ extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
 
-extern int handling_fatal_signal;
+extern volatile sig_atomic_t handling_fatal_signal;
 
 
 #ifndef MIN

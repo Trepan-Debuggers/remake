@@ -68,7 +68,7 @@ dbg_cmd_target(char *psz_args)
 
     if (i_mask & PRINT_TARGET_VARS) {
       initialize_file_variables (p_target, 0);
-      set_file_variables (p_target);
+      set_file_variables (p_target, p_target->stem);
     }
 
     if (p_target->description) {

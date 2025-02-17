@@ -1,5 +1,5 @@
 /* Interface to 'ar' archives for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
 This file is part of GNU Make.
 
@@ -13,7 +13,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 
@@ -22,6 +22,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "filedef.h"
 #include "dep.h"
 #include <fnmatch.h>
+#include <intprops.h>
 
 /* Return nonzero if NAME is an archive-member reference, zero if not.  An
    archive-member reference is a name like 'lib(member)' where member is a
@@ -35,7 +36,7 @@ ar_name (const char *name)
   const char *p = strchr (name, '(');
   const char *end;
 
-  if (p == 0 || p == name)
+  if (p == NULL || p == name)
     return 0;
 
   end = p + strlen (p) - 1;
@@ -60,6 +61,9 @@ ar_parse_name (const char *name, char **arname_p, char **memname_p)
 
   *arname_p = xstrdup (name);
   p = strchr (*arname_p, '(');
+  /* This is never called unless ar_name() is true so p cannot be NULL.  */
+  if (!p)
+    OS (fatal, NILF, "Internal: ar_parse_name: bad name '%s'", *arname_p);
   *(p++) = '\0';
   p[strlen (p) - 1] = '\0';
   *memname_p = p;
@@ -68,38 +72,25 @@ ar_parse_name (const char *name, char **arname_p, char **memname_p)
 
 /* This function is called by 'ar_scan' to find which member to look at.  */
 
-struct member_date_lookup
-{
-  const char *name;
-  time_t *member_date;
-};
-
 /* ARGSUSED */
-static long int
+static intmax_t
 ar_member_date_1 (int desc UNUSED, const char *mem, int truncated,
                   long int hdrpos UNUSED, long int datapos UNUSED,
-                  long int size UNUSED, long int date,
+                  long int size UNUSED, intmax_t date,
                   int uid UNUSED, int gid UNUSED, unsigned int mode UNUSED,
-                  const void *data)
+                  const void *name)
 {
-  const struct member_date_lookup *lookup_data = data;
-  if (ar_name_equal (lookup_data->name, mem, truncated))
-    {
-      *lookup_data->member_date = date;
-      return 1;
-    }
-  return 0;
+  return ar_name_equal (name, mem, truncated) ? date : 0;
 }
 
-/* Read the modtime of NAME in MEMBER_DATE.
-   Returns 1 if NAME exists, 0 otherwise.  */
-int
-ar_member_date (const char *name, time_t *member_date)
+/* Return the modtime of NAME.  */
+
+time_t
+ar_member_date (const char *name)
 {
   char *arname;
   char *memname;
-  int found;
-  struct member_date_lookup lookup_data;
+  intmax_t val;
 
   ar_parse_name (name, &arname, &memname);
 
@@ -120,14 +111,11 @@ ar_member_date (const char *name, time_t *member_date)
       (void) f_mtime (arfile, 0);
   }
 
-  lookup_data.name = memname;
-  lookup_data.member_date = member_date;
-  found = ar_scan (arname, ar_member_date_1, &lookup_data);
+  val = ar_scan (arname, ar_member_date_1, memname);
 
   free (arname);
 
-  /* return 0 (not found) if the archive does not exist or has invalid format. */
-  return (found == 1) ? 1 : 0;
+  return 0 < val && val <= TYPE_MAXIMUM (time_t) ? val : -1;
 }
 
 /* Set the archive-member NAME's modtime to now.  */
@@ -191,10 +179,10 @@ struct ar_glob_state
 /* This function is called by 'ar_scan' to match one archive
    element against the pattern in STATE.  */
 
-static long int
+static intmax_t
 ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
                long int hdrpos UNUSED, long int datapos UNUSED,
-               long int size UNUSED, long int date UNUSED, int uid UNUSED,
+               long int size UNUSED, intmax_t date UNUSED, int uid UNUSED,
                int gid UNUSED, unsigned int mode UNUSED, const void *arg)
 {
   struct ar_glob_state *state = (struct ar_glob_state *)arg;
@@ -215,7 +203,7 @@ ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
       ++state->n;
     }
 
-  return 0L;
+  return 0;
 }
 
 /* Return nonzero if PATTERN contains any metacharacters.

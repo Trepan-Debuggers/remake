@@ -69,7 +69,7 @@ dbg_cmd_write(char *psz_args)
 	psz_target_basename = (char *) psz_target;
       else
 	psz_target_basename++; /* Skip delimiter */
-      psz_filename = CALLOC(char, strlen(psz_target_basename) + 10);
+      psz_filename = xcalloc(strlen(psz_target_basename) + 10);
       snprintf(psz_filename, MAX_FILE_LENGTH, "/tmp/%s.sh",
 	       psz_target_basename);
     }
@@ -157,7 +157,7 @@ dbg_cmd_write(char *psz_args)
       }
 
       initialize_file_variables (p_target, 0);
-      set_file_variables (p_target);
+      set_file_variables (p_target, p_target->stem);
 
       {
 #if 0

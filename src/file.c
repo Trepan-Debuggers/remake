@@ -440,7 +440,7 @@ expand_deps (struct file *f)
       if (d->stem != 0)
         f->stem = d->stem;
 
-      set_file_variables (f);
+      set_file_variables (f, f->stem);
 
       p = variable_expand_for_file (d->name, f);
 

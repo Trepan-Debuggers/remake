@@ -610,9 +610,8 @@ file_exists_p (const char *name)
 
 #ifndef NO_ARCHIVES
   {
-    time_t member_date;
     if (ar_name (name))
-      return ar_member_date (name, &member_date);
+      return ar_member_date (name) != (time_t) -1;
   }
 #endif
 
