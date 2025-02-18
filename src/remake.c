@@ -1316,7 +1316,7 @@ f_mtime (struct file *file, int search)
       char *arname, *memname;
       struct file *arfile;
       int found;
-      time_t member_date;
+      time_t member_date = 0;
 
       /* Find the archive's name.  */
       ar_parse_name (file->name, &arname, &memname);

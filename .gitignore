@@ -4,6 +4,7 @@
 .deps
 /.dep_segment
 /.pc
+/.python-version
 /ABOUT-NLS
 /Basic.mk
 /ChangeLog
