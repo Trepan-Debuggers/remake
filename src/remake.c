@@ -456,6 +456,7 @@ update_file_1 (struct file *file, unsigned int depth,
         }
 
       DBF (DB_VERBOSE, _("File '%s' was considered already.\n"));
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -467,10 +468,12 @@ update_file_1 (struct file *file, unsigned int depth,
       break;
     case cs_running:
       DBF (DB_VERBOSE, _("Still updating file '%s'.\n"));
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return file->update_status;
     default:
@@ -707,6 +710,7 @@ update_file_1 (struct file *file, unsigned int depth,
       set_command_state (file, cs_deps_running);
       --depth;
       DBF (DB_VERBOSE, _("The prerequisites of '%s' are being made.\n"));
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -728,6 +732,7 @@ update_file_1 (struct file *file, unsigned int depth,
         OS (error, NILF,
             _("Target '%s' not remade because of errors."), file->name);
 
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return dep_status;
     }
@@ -838,6 +843,7 @@ update_file_1 (struct file *file, unsigned int depth,
         }
 
       notice_finished_file (file);
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
 
       /* Since we don't need to remake the file, convert it to use the
@@ -871,6 +877,7 @@ update_file_1 (struct file *file, unsigned int depth,
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
       if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
 	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+      p_stack_top = p_stack_top->p_parent;
       trace_pop_target(p_call_stack);
       return 0;
     }
@@ -894,6 +901,7 @@ update_file_1 (struct file *file, unsigned int depth,
   if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
 
+  p_stack_top = p_stack_top->p_parent;
   trace_pop_target(p_call_stack);
   return file->update_status;
 }
