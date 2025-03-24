@@ -46,12 +46,12 @@ Boston, MA 02111-1307, USA.  */
 /* The following line makes Solaris' gcc/cpp not puke. */
 #undef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
+#endif /* HAVE_LIBREADLINE */
 
 /* From readline. ?? Should this be in configure?  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
-#endif /* HAVE_LIBREADLINE */
 
 subcommand_var_info_t set_subcommands[] = {
   { "basename",
