@@ -91,6 +91,7 @@ trace_pop_target (target_stack_node_t *p)
   }
 
   free(p->p_target);
+  p->p_target = NULL;
   free(p);
 }
 
