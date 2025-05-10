@@ -26,25 +26,25 @@ Basic Information when stopped inside Debugger
     Makefile: Makefile.in config.status
     remake<0>
 
-The line immediately before the prompt ``remake<0>``, we show the the
+The line immediately before the prompt ``remake<0>``, shows the
 target name, ``Makefile`` and its dependencies: ``Makefile.in`` and
 ``config.status``.
 
 The line before that has position information
 ``(/tmp/libcdio-paranoia/Makefile:428)``. But at the beginning of the
-line is and arrow made up of two characters, ``->``. This indicates that
-we have not done prerequisite checking for this target yet.  Later we
+line is an arrow made up of two characters, ``->``. This indicates that
+we have not done the prerequisite checking for this target yet.  Later we
 will come across other two-character icons like ``++``.
 See :ref:`icons <icons>` for a complete list.
 
 The zero in the prompt ``remake<0>`` is the command history number.  If GNU
-Readline history support has it increments as we enter commands,
+Readline history is supported then it increments the number as we enter commands,
 otherwise it stays zero.
 
 For each recursive call to ``remake``, we'll add another pair of angle
 brackets ``<>`` around the number.
 
-Some of the information is given in more verbose format using :ref:`info program <info_program>`:
+More verbose information can be obtained using :ref:`info program <info_program>`:
 
 .. code:: console
 
@@ -57,7 +57,7 @@ Some of the information is given in more verbose format using :ref:`info program
     Program stopped before rule-prequisite checking.
     remake<1>
 
-Notice that the prompt has incremented to 1 after entering the a command.
+Notice that the prompt has incremented to 1 after entering the command.
 
 Stepping
 ++++++++
@@ -78,8 +78,8 @@ in the interpretation or execution of the makefile:
 I have elided the list of dependencies listed above and substituted ellipses (``...``).
 
 There is a slight difference between what you will find in the
-Makefile and the target output seen above. Below I'll list the what is
-in the Makefile versus what is line as shown above.
+Makefile and the target output seen above. Below I'll compare what is
+in the Makefile (1st line displayed) with what is in the remake output (2nd line displayed).
 
 For line 415:
 
@@ -110,12 +110,12 @@ canonicalized. Therefore you see:
 
 Let's recap where ``remake`` is in the process of running the Makefile.
 The first thing that seems to be done is that the ``Makefile``
-dependencies need to checked. A dependency of ``Makefile`` is
+dependencies need to be checked. A dependency of ``Makefile`` is
 ``Makefile.in`` and that in turn depends on target ``aclocal.m4``. We have
-now stepped into and stopped at that target. At the ``remake<3>`` prompt then
-before checking for the dependencies of ``aclocal.m4``.
+now stepped into and stopped at that target. So, at the ``remake<3>`` prompt
+we have not yet checked the dependencies of ``aclocal.m4``.
 
-You can see this dependency nesting that got us to this state using
+You can see the dependency nesting that got us to this state using
 the :ref:`backtrace <backtrace>` command:
 
 .. code:: console
@@ -132,7 +132,7 @@ as is the case here. This Makefile was created via ``autotools``.
 
 I had assumed that when I run ``make`` it looks for a default target and
 runs that. But as we see here, the first thing that goes on is to
-check to see if the Makefile is being used is itself out of date. If
+check to see if the Makefile being used is itself out of date. If
 that is the situation, then the Makefile will get recreated and you
 start again.
 
@@ -141,7 +141,7 @@ tedious.
 
 In the next section, we talk about :ref:`breakpoints <breakpoints>`
 which can get you to where you want to debug faster. To finish this
-session though use the :ref:`quit <quit>` command.
+session use the :ref:`quit <quit>` command.
 
 .. code:: console
 
@@ -191,9 +191,9 @@ Now when I issue a ``step``, I will step into the commands associated with the `
    remake<2>
 
 Notice that the event icon above is ``++`` which means I am stepping shell commands, here those associated with the Make target ``dist``.
-Above the line with the event icon in between the two chevrons is the command that is *about* to be run.
+Above the line with the event icon in between the two lines of chevrons is the command that is *about* to be run.
 
-To see the entire build commands, there is the :ref:`list <list>` command. Here is that:
+To see the build commands for the current target you can use the :ref:`list <list>` command:
 
 .. code:: console
 
@@ -204,9 +204,9 @@ To see the entire build commands, there is the :ref:`list <list>` command. Here 
     	$(MAKE) $(AM_MAKEFLAGS) $(DIST_TARGETS) am__post_remove_distdir='@:'
     	$(am__post_remove_distdir)
 
-A form of the :ref:`target <target>` command, `target @ command` does
-about the same thing. Note that in both cases variables are not
-expanded as the are in the trace output shown above between chevrons.
+Alternatively you can use a form of the :ref:`target <target>` command: `target @ command`. 
+Note that in both cases variables are not expanded as they are in the trace output shown 
+above between chevrons.
 
 Debugging Make Variables
 -------------------------
@@ -216,7 +216,7 @@ while in the ``list`` and ``target`` commands variables were not
 expanded.
 
 You can query any GNU Make variable that has been set in the program
-*without* variables inside expanded using the :ref:`print <print>`
+*without* performing expansion on its value by using the :ref:`print <print>`
 command.
 
 .. code:: console
@@ -226,7 +226,7 @@ command.
 
 The ``(origin default)`` means this is a built-in definition. Many
 variables that you will be interested in though, are set somewhere,
-and the variable is not a default it's location is also shown:
+and if the variable is not a default it's location is also shown:
 
 
 .. code:: console
@@ -234,7 +234,7 @@ and the variable is not a default it's location is also shown:
     remake<3> print DATA
     Makefile:168 (origin: makefile) DATA := libcdio_paranoia.pc libcdio_cdda.pc
 
-The other kind of print which does full expansion of the variables is
+The other kind of print which does full expansion of the variables value is
 called ``expand`` or ``x``. Here is an example
 
 .. code:: console
@@ -242,7 +242,7 @@ called ``expand`` or ``x``. Here is an example
     remake<4> expand MAKE
     (origin default) MAKE := remake
 
-Note that in printing expanded values we use ``:=`` while non-expanded
+Note that when printing expanded values we use ``:=`` while for non-expanded
 values we use ``=`` This output matches the semantics of these
 assignment operators.
 
@@ -262,34 +262,31 @@ about the variable you can leave that off.
 However for ``print`` you *never* add the dollar sign; printing only
 prints *variables* not strings.
 
-You can change values too using either the :ref:`set <set>`, :ref:`set <setq>` or
-:ref:`setqx <setqx>` commands. Let's see the difference between ``set``
-and ``setq``:
+You can change values too using either the :ref:`setq <setq>` or
+:ref:`setqx <setqx>` commands. Let's see the difference between ``setq``
+and ``setqx``:
 
 .. code:: console
 
-    remake<6> set MAKE $(MAKE_COMMAND)
-    Variable MAKE now has value 'remake'
-    remake<7>  setq MAKE $(MAKE_COMMAND)
+    remake<6> setq MAKE $(MAKE_COMMAND)
     Variable MAKE now has value '$(MAKE_COMMAND)'
+    remake<7>  setqx MAKE $(MAKE_COMMAND)
+    Variable MAKE now has value 'remake'
 
-So with ``set``, the value in the expression ``$(MAKE_COMMAND)`` is
+So with ``setqx``, the value in the expression ``$(MAKE_COMMAND)`` is
 expanded before the variable definition is assigned. With ``setq`` the
 internal variables are kept unexpanded. Which you use or want is up to
 you.
 
-Note the irregular syntax of ``set`` and ``setq``. Don't put an equal sign
-between the variable and the expression. That is, ``set MAKE = $(MAKE_COMMAND)`` gives:
+Note the irregular syntax of ``setq`` and ``setqx``. Don't put an equal sign
+between the variable and the expression. That is, ``setq MAKE = $(MAKE_COMMAND)`` gives:
 
 .. code:: console
 
-    remake<8> set MAKE = $(MAKE_COMMAND)
+    remake<8> setq MAKE = $(MAKE_COMMAND)
     Variable MAKE now has value '= remake'
 
-which is probably not what you want.  You can optionally put in the
-word "variable" when using ``set`` and "variable" is ignored. But
-it won't be if you use ``setq``.
-
+which is probably not what you want. 
 
 Debugging POSIX Shell Commands
 ------------------------------
@@ -305,7 +302,7 @@ Now consider the following sample Makefile ``test2.mk``:
     $(PACKAGE).txt: ../doc/remake.texi
   	makeinfo --no-headers $< > $@
 
-Running this entering the debugger initially:
+Running this with the debugger:
 
 .. code:: console
 
@@ -320,9 +317,9 @@ Running this entering the debugger initially:
     make.txt: ../doc/remake.texi
 
 We could use the :ref:`target <target>` command to show information about
-the current target, but that returns lots if information. So let us instead
-narrow the information to just the automatic variables that get set. The
-following commands do this are all mean the same thing: `target make.txt variables`,
+the current target, but that returns lots of information. So let us instead
+narrow the information down to just the automatic variables that get set. The
+following commands will all do this: `target make.txt variables`,
 `target @ variables`, and `info locals`.
 
 .. code::
@@ -370,7 +367,7 @@ command:
     remake<6> write
     File "/tmp/make.txt.sh" written.
 
-We can issue a shell command ``cat -n /tmp/make.txt.sh`` to see what
+We can issue the shell command ``cat -n /tmp/make.txt.sh`` to see what
 was written. See :ref:`shell <shell>`.
 
 .. code:: console
@@ -384,7 +381,7 @@ was written. See :ref:`shell <shell>`.
 
 If you issue step commands, the debugger runs the each command and
 stops. In this way, you can inspect the result of running that
-particular shell command and decide to continue or not.
+particular shell command and decide whether to continue or not.
 
 .. code:: console
 
@@ -399,10 +396,10 @@ particular shell command and decide to continue or not.
     ++ (/tmp/test2.mk:5)
 
 Notice that we've shown the expansion automatically. One subtle
-difference in the above output, is that we only show the *single*
+difference in the above output, is that it only shows the *single*
 shell command that is about to be run when there are several
 commands. In our example though, there is only one command; so there is
-no a difference.
+no difference.
 
 The ``++`` icon means that we are about to run that code.
 
@@ -416,8 +413,8 @@ The ``++`` icon means that we are about to run that code.
     make.txt
     remake<10>
 
-We ran the code, and are still at target ``make.txt``. The ``<-``
-icon means that have finished with this target and are about to return.
+We ran the code, and are still at the target ``make.txt``. The ``<-``
+icon means that we have finished with this target and are about to return.
 
 If you are at a target and want to continue to the end of the target you
 can use the command ``finish`` which is the same as ``finish 0``.
