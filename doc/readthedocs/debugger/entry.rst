@@ -38,7 +38,7 @@ Although the debugger tries to set things up to make it look like your
 program is called, sometimes the differences matter. Also the debugger
 adds overhead and slows down your program.
 
-Another possibility then is to a function call into your Makefile to call
+Another possibility then is to add a function call into your Makefile to call
 the debugger at the spot you want to stop at.
 
 Here is an Example:
@@ -87,5 +87,5 @@ Entering the debugger when ``remake`` encounters an error
 
 This is done by supplying the ``--post-mortem`` or ``-!`` option on invocation.
 
-Note that in contrast to the situations above. although you can examine state and evaluating expressions, execution
+Note that in contrast to the situations above. although you can examine state and evaluate expressions, execution
 has terminated. Therefore, some of the execution-specific commands are no longer applicable.
