@@ -11,9 +11,9 @@ Expand `remake` variables.
 Variable names should *not* be preceded with a dollar sign.
 
 Note however that a more versatile print command is `examine` which
-can print arbitrary string expands which of course includes variable.
+can print arbitrary string expands which of course includes variables.
 
-If you omit *variable*, the last expression again is displayed again..
+If you omit *variable*, the last expression is displayed again..
 
 Examples:
 +++++++++
