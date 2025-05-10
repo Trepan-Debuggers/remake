@@ -8,7 +8,7 @@ Set the Current Working Directory (`cd`)
 
 Set the working directory to *dir*.
 
-Changing this changes will the working directory in any subsequent
+Changing this changes the working directory for any subsequent
 build commands that are invoked.
 
 .. seealso::
