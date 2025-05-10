@@ -6,9 +6,9 @@ Print POSIX Working Directory (`pwd`)
 
 **pwd**
 
-Print working directory.
+Print the working directory.
 
-By default, this is the working directory for in any commands that run from the build.
+By default, this is the working directory for any commands that run from the build.
 
 .. seealso::
 
