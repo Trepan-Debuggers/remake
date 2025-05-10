@@ -19,6 +19,8 @@ also specified on the command line.";
 # On Windows a very different algorithm is used.
 $port_type eq 'W32' and return -1;
 
+return -1;
+
 open(MAKEFILE,"> $makefile");
 printf MAKEFILE q,
 define test

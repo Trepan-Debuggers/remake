@@ -18,6 +18,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "../src/config.h"
+#include "../src/config.h"
 #include "../src/types.h"
 #include "../src/file_basic.h"
 #include "../src/profile.h"
@@ -26,6 +27,13 @@ Boston, MA 02111-1307, USA.  */
 #define TS_RES       (1000)
 #define TS_INC       (5 * TS_RES)
 static FILE_TIMESTAMP fake_clock = 0;
+
+/* Map of possible stop characters for searching strings.  */
+#ifndef UCHAR_MAX
+# define UCHAR_MAX 255
+#endif
+unsigned short stopchar_map[UCHAR_MAX + 1] = {0};
+volatile sig_atomic_t handling_fatal_signal = 0;
 
 void
 die (int status)

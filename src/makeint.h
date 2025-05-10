@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2023 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -454,8 +454,6 @@ extern int unixy_shell;
 
 #define STOP_SET(_v,_m) ANY_SET(stopchar_map[(unsigned char)(_v)],(_m))
 
-/* True if C is a directory separator on the current system.  */
-#define ISDIRSEP(c)     STOP_SET((c),MAP_DIRSEP)
 /* True if C is whitespace but not newline.  */
 #define ISBLANK(c)      STOP_SET((c),MAP_BLANK)
 /* True if C is whitespace including newlines.  */
@@ -464,6 +462,18 @@ extern int unixy_shell;
 #define END_OF_TOKEN(c) STOP_SET((c),MAP_SPACE|MAP_NUL)
 /* Move S past all whitespace (including newlines).  */
 #define NEXT_TOKEN(s)   while (ISSPACE (*(s))) ++(s)
+
+/* True if C is a directory separator on the current system.  */
+#define ISDIRSEP(c)     STOP_SET((c),MAP_DIRSEP)
+
+/* True if S starts with a drive specifier.  */
+#if defined(HAVE_DOS_PATHS)
+# define HAS_DRIVESPEC(_s) ((((_s)[0] >= 'a' && (_s)[0] <= 'z')          \
+                             || ((_s)[0] >= 'A' && (_s)[0] <= 'Z'))      \
+                            && (_s)[1] == ':')
+#else
+# define HAS_DRIVESPEC(_s) 0
+#endif
 
 /* We can't run setrlimit when using posix_spawn.  */
 #if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) && !defined(USE_POSIX_SPAWN)

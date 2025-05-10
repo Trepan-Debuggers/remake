@@ -46,12 +46,12 @@ Boston, MA 02111-1307, USA.  */
 /* The following line makes Solaris' gcc/cpp not puke. */
 #undef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
+#endif /* HAVE_LIBREADLINE */
 
 /* From readline. ?? Should this be in configure?  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
-#endif /* HAVE_LIBREADLINE */
 
 #include "cmd_initialize.h"
 
@@ -78,8 +78,6 @@ Boston, MA 02111-1307, USA.  */
 char *psz_debugger_args;
 
 debug_enter_reason_t last_stop_reason;
-
-#ifdef HAVE_LIBREADLINE
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
@@ -225,8 +223,6 @@ extern debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
   }
   return debug_readloop;
 }
-
-#endif /* HAVE_LIBREADLINE */
 
 #define PROMPT_LENGTH 300
 
@@ -381,10 +377,14 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
       if ( line ) {
         if ( *(s=stripwhite(line)) ) {
+#ifdef HAVE_LIBREADLINE
           add_history (s);
+#endif /* HAVE_LIBREADLINE */
           debug_return=execute_line(s);
         } else {
+#ifdef HAVE_LIBREADLINE
           add_history ("step");
+#endif /* HAVE_LIBREADLINE */
           debug_return=dbg_cmd_step((char *) "");
         }
         free (line);

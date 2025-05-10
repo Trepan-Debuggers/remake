@@ -1,5 +1,5 @@
 /* Miscellaneous generic support functions for GNU Make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2023 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,8 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "os.h"
 #include "debug.h"
 
-/* GNU make no longer supports pre-ANSI89 environments.  */
-
+#include <assert.h>
 #include <stdarg.h>
 
 #ifdef WINDOWS32
@@ -141,7 +140,7 @@ collapse_continuations (char *line)
       if (i & 1)
         {
           /* Backslash/newline handling:
-             In traditional GNU make all trailing whitespace, consecutive
+             In traditional GNU Make all trailing whitespace, consecutive
              backslash/newlines, and any leading non-newline whitespace on the
              next line is reduced to a single space.
              In POSIX, each backslash/newline and is replaced by a space.  */
@@ -665,6 +664,8 @@ get_tmpfd (char **name)
   EINTRLOOP (fd, mkstemp (tmpnm));
 #else
   tmpnm = get_tmppath ();
+  if (!tmpnm)
+    return -1;
 
   /* Can't use mkstemp(), but try to guard against a race condition.  */
   EINTRLOOP (fd, open (tmpnm, O_CREAT|O_EXCL|O_RDWR, 0600));
@@ -691,8 +692,8 @@ get_tmpfd (char **name)
 }
 
 /* Return a FILE* for a temporary file, opened in the safest way possible.
-   Set name to point to an allocated buffer containing the name of the file.
-   Note, this cannot be NULL!  */
+   Set name to point to an allocated buffer containing the name of the file,
+   or NULL on failure.  Note, name cannot be NULL!  */
 FILE *
 get_tmpfile (char **name)
 {
@@ -701,18 +702,26 @@ get_tmpfile (char **name)
   FILE *file;
 
 #if defined(HAVE_FDOPEN)
-  int fd = get_tmpfd (name);
+  int fd;
+  assert (name);
+  fd = get_tmpfd (name);
+  if (fd < 0)
+    return NULL;
+  assert (*name);
 
   ENULLLOOP (file, fdopen (fd, tmpfile_mode));
   if (file == NULL)
-    OSS (fatal, NILF,
+    OSS (error, NILF,
          _("fdopen: temporary file %s: %s"), *name, strerror (errno));
 #else
   /* Preserve the current umask, and set a restrictive one for temp files.  */
   mode_t mask = umask (0077);
   int err;
 
+  assert (name);
   *name = get_tmppath ();
+  if (!*name)
+    return NULL;
 
   /* Although this fopen is insecure, it is executed only on non-fdopen
      platforms, which should be a rarity nowadays.  */
