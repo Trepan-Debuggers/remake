@@ -10,7 +10,7 @@ not used. If the character of a line starts with ``#``,
 the command is ignored. (Actually, what is going on here is that it is
 a "comment" command.)
 
-Within a single command, tokens are then white-space split. Again,
+Within a single command, tokens are white-space split. Again,
 this process disregards quotes or symbols that have meaning in GNU Make.
 Some commands like :ref:`expand <expand>`, have access to the untokenized
 string entered after the command name.
@@ -18,10 +18,10 @@ string entered after the command name.
 Resolving a command name involves possibly 2 steps. Some steps may be
 omitted depending on early success or some debugger settings:
 
-1. The leading token is next looked up in the debugger alias table and
+1. The leading token is looked up in the debugger alias table and
 the name may be substituted there.
 
-2. After the above, The leading token is looked up a table of debugger
+2. After the above, the leading token is looked up in a table of debugger
 commands. If an exact match is found, the command name and arguments
 are dispatched to that command.
 
@@ -33,7 +33,7 @@ Event Icons
 
 In the debugger, before showing position information there is a two-character event icon.
 
-For example, in his line:
+For example, in this line:
 
 .. code:: console
 
