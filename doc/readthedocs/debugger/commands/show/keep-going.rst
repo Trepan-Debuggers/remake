@@ -6,7 +6,7 @@ Show the value of the GNU Make `-k` flag (`show keep-going`)
 
 **show keep-going**
 
-Set value of GNU Make `--keep-going` (or `-k`) flag.
+Show the value of the GNU Make `--keep-going` (or `-k`) flag.
 
 .. seealso::
 

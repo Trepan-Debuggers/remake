@@ -10,10 +10,10 @@ Get help for a debugger command or subcommand.
 
 Without an argument, print the list of available debugger commands.
 
-When an argument is given, it is first checked to see if it is command
+When an argument is given, it is first checked to see if it is a command
 name.
 
 Some commands like `info`, `set`, and `show` can accept an
-additional subcommand to give help just about that particular
-subcommand. For example `help set basename` give help about the
+additional subcommand to give help about just that particular
+subcommand. For example `help set basename` gives help about the
 `basename` subcommand of `set`.

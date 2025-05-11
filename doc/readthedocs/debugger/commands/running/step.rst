@@ -12,7 +12,7 @@ Stepping is like `next` but it is more fine-grained. However we
 still don't stop at targets for which there is no rule.
 
 Argument *count* means do this *count* times (or until there's another
-reason to stop.
+reason to stop).
 
 Examples:
 +++++++++
