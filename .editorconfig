@@ -1,0 +1,11 @@
+# This is an EditorConfig file
+# https://EditorConfig.org
+
+# indicate this is the root of the project
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+tab_width = 8
+trim_trailing_whitespace = true
