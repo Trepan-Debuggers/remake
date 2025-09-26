@@ -413,11 +413,7 @@ long int lseek ();
 
 #endif  /* Not GNU C library or POSIX.  */
 
-#ifdef  HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-# endif
-#else
+#ifndef HAVE_GETCWD
 char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
 #endif

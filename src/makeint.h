@@ -656,7 +656,7 @@ long int lseek ();
 
 #endif  /* Not GNU C library or POSIX.  */
 
-#ifdef  HAVE_GETCWD
+#ifdef HAVE_GETCWD
 # if !defined(VMS) && !defined(__DECC)
 char *getcwd ();
 # endif
