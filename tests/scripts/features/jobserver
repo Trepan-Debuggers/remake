@@ -97,8 +97,7 @@ if ($port_type ne 'W32') {
 default: ; @ #MAKEPATH# -f Makefile2
 !,
               "-j2 $np",
-"#MAKE#[1]: warning: jobserver unavailable: using -j1.  Add '+' to parent make rule.
-#MAKE#[1]: Nothing to be done for 'foo'.");
+"#MAKE#[1]: Nothing to be done for 'foo'.");
 
     rmfiles('Makefile2');
 }
