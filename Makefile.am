@@ -1,13 +1,14 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997-2020 Free Software Foundation, Inc.
-# This file is part of GNU Make.
+# Copyright (C) 1997-2020, 2026 Free Software Foundation, Inc.
+# This file is part of GNU ReMake.
 #
-# GNU Make is free software; you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software # Foundation; either version 3 of the License, or (at your option) any later
-# version.
+# GNU Make is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software # Foundation; either version 3 of the License, or
+# (at your option) any later version.
 #
-# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# GNU ReMake is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
@@ -186,13 +187,23 @@ README:
 
 @MAINT_MAKEFILE@
 
-# FIXME fix up to use the git2cl in MAINT_MAKEFILE
-GIT2CL = ./git2cl
 if MAINTAINER_MODE
 
 @MAINTAINER_MODE_TRUE@#: create ChangeLog for distribution from 'git log'
-ChangeLog:
-	git log --pretty --numstat --summary | $(GIT2CL) > $@
-#:
+
+# FIXME fix up to use the git2cl in MAINT_MAKEFILE
+GIT2CL_PROG = ./git2cl
+
+#: Remove ChangeLog
+rmChangeLog:
+	rm ChangeLog || true
+
+#: Create ChangeLog from version control without corrections
+ChangeLog-without-corrections:
+	git log --pretty --numstat --summary | $(GIT2CL_PROG) >ChangeLog
+
+#: Create ChangeLog from version control with additonal corrections
+ChangeLog: ChangeLog-without-corrections
+	patch ChangeLog < ChangeLog-spell-corrected.diff
 
 endif

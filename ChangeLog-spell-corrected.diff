@@ -1,0 +1,1099 @@
+--- ChangeLog	2026-01-22 10:56:25.804174518 -0500
++++ ChangeLog-spell-corrected	2026-01-22 10:55:18.550092331 -0500
+@@ -29,7 +29,7 @@
+ 2025-05-10  rocky <rocky@gnu.org>
+ 
+ 	* libdebugger/cmd.c, libdebugger/command/set.c, src/makeint.h,
+-	src/misc.c, tests/scripts/options/dash-l, unittest/test_profile.c: 
++	src/misc.c, tests/scripts/options/dash-l, unittest/test_profile.c:
+ 	Sync with 4.3 and make 4.4.1 Remove test for make -l for now
+ 
+ 2025-03-24  Philipp Hahn <p.hahn@avm.de>
+@@ -167,7 +167,7 @@
+ 	src/globals.c, src/globals.h, src/json_format.c, src/json_format.h,
+ 	src/main.c, src/make.h, src/makeint.h, src/profile.c,
+ 	src/profile.h, src/remake.c, src/trace.c, src/variable.c,
+-	src/variable.h, unittest/Makefile.am, unittest/test_profile.c: 
++	src/variable.h, unittest/Makefile.am, unittest/test_profile.c:
+ 	Support outputting profiling information as json * Extract output formatting from profile.c into callgrind_format.c * Capture timestamps based on target state with
+ 	profile_add_timestamp * Capture dependencies explicitly with profile_add_dependency * Add MAKEPARENT_PID to pass PID to recursive make * Add MAKEPARENT_TARGET to pass target name to recursive make * Add --profile-callgrind to output just callgrind files * Add --profile-json to output just json files * Use file_timestamp_now to capture timestamp and resolution * Add --with-profiler-resolution to specify minimum timestamp
+ 	resolution required
+@@ -249,7 +249,7 @@
+ 
+ 2020-03-30  rocky <rocky@gnu.org>
+ 
+-	* libdebugger/cmd.c, libdebugger/cmd_initialize.h, po/POTFILES.in: 
++	* libdebugger/cmd.c, libdebugger/cmd_initialize.h, po/POTFILES.in:
+ 	Small tweaks
+ 
+ 2020-03-30  rocky <rocky@gnu.org>
+@@ -297,7 +297,7 @@
+ 
+ 2020-03-28  rocky <rocky@gnu.org>
+ 
+-	* po/POTFILES.in: Adjust po file names...  actualy leave them out. When we are done we need to contact the
++	* po/POTFILES.in: Adjust po file names...  actually leave them out. When we are done we need to contact the
+ 	translations project.
+ 
+ 2020-03-28  R. Bernstein <rocky@users.noreply.github.com>
+@@ -337,7 +337,7 @@
+ 
+ 	* doc/doxygen/Doxyfile.in, libdebugger/Makefile.am,
+ 	libdebugger/cmd.c, libdebugger/command/{break.h => break.c},
+-	libdebugger/command/info.h, libdebugger/commands.h, po/POTFILES.in: 
++	libdebugger/command/info.h, libdebugger/commands.h, po/POTFILES.in:
+ 	First debugger command, "break" in its own object
+ 
+ 2020-03-21  rocky <rocky@gnu.org>
+@@ -426,7 +426,7 @@
+ 
+ 2020-03-19  rocky <rocky@gnu.org>
+ 
+-	* libdebugger/fuzzy.h, libdebugger/hello.c, libdebugger/hello.h: 
++	* libdebugger/fuzzy.h, libdebugger/hello.c, libdebugger/hello.h:
+ 	Remove unused files.  Note: make distcheck *is* broken.
+ 
+ 2020-03-18  rocky <rocky@gnu.org>
+@@ -641,7 +641,7 @@
+ 2020-03-12  Thomas Kupper <thomas.kupper@gmail.com>
+ 
+ 	* src/main.c: Change `post-mortem`|`-!` flag variable type Change the flag type from `bool` to `int`. Using `bool` raised a
+-	problem on OpenBSD. Problably due to the used memory of `bool` vs
++	problem on OpenBSD. Probably due to the used memory of `bool` vs
+ 	`int`.
+ 
+ 2020-03-12  rocky <rocky@gnu.org>
+@@ -757,13 +757,13 @@
+ 
+ 2020-03-10  R. Bernstein <rocky@users.noreply.github.com>
+ 
+-	* : Merge pull request #87 from rocky/feature/improve-list-output "list" command improvments...
++	* : Merge pull request #87 from rocky/feature/improve-list-output "list" command improvements...
+ 
+ 2020-03-09  rocky <rocky@gnu.org>
+ 
+ 	* docs/debugger/commands/files/list.rst,
+-	src/debugger/command/help/list.h, src/debugger/command/list.h: 
+-	"list" command improvments...  list.h: when there was a description for a target, the description
++	src/debugger/command/help/list.h, src/debugger/command/list.h:
++	"list" command improvements...  list.h: when there was a description for a target, the description
+ 	was shown at the end of the file location instead of on a new line.  RsT docs: expand and regularize a little
+ 
+ 2020-03-09  R. Bernstein <rocky@users.noreply.github.com>
+@@ -821,7 +821,7 @@
+ 
+ 	* docs/debugger/commands/os.rst, docs/debugger/commands/os/cd.rst,
+ 	docs/debugger/commands/os/pwd.rst,
+-	src/debugger/command/help/chdir.h, src/debugger/command/help/pwd.h: 
++	src/debugger/command/help/chdir.h, src/debugger/command/help/pwd.h:
+ 	Document/update "cd" and "pwd".
+ 
+ 2020-03-08  rocky <rocky@gnu.org>
+@@ -858,7 +858,7 @@
+ 2020-03-08  rocky <rocky@gnu.org>
+ 
+ 	* src/debugger/command/info.h, src/debugger/command/target.h,
+-	src/main.c, src/read.c, src/trace.h, tests/scripts/remake/tasks: 
++	src/main.c, src/read.c, src/trace.h, tests/scripts/remake/tasks:
+ 	--tasks aligns better; add "info tasks"...  New debugger command "info tasks" which is the same as running
+ 	`remake --tasks` Show target descriptions when there is one on the debugger `target`
+ 	command `remake --tasks` now aligns with spaces rather than use tabs.
+@@ -908,7 +908,7 @@
+ 
+ 2020-03-08  Thomas Kupper <thomas.kupper@gmail.com>
+ 
+-	* tests/scripts/features/load, tests/scripts/features/loadapi: 
++	* tests/scripts/features/load, tests/scripts/features/loadapi:
+ 	Remove left-over files for two test cases If `features/load` or `features/loadapi` fail to compile the test
+ 	source file, the source and object files where not delete upon
+ 	`return.  This commit fixes that
+@@ -1146,7 +1146,7 @@
+ 	src/debugger/command/comment.h, src/debugger/command/delete.h,
+ 	src/debugger/command/edit.h, src/debugger/command/eval.h,
+ 	src/debugger/command/help/edit.h, src/debugger/command/help/eval.h,
+-	src/debugger/command/help/print.h, src/debugger/command/print.h: 
++	src/debugger/command/help/print.h, src/debugger/command/print.h:
+ 	Help refactor continued...
+ 
+ 2020-03-03  rocky <rocky@gnu.org>
+@@ -1187,7 +1187,7 @@
+ 	src/debugger/command/break.h, src/debugger/command/delete.h,
+ 	src/debugger/command/help/break.h,
+ 	src/debugger/command/help/delete.h,
+-	src/debugger/command/help/down.h, src/debugger/command/help/up.h: 
++	src/debugger/command/help/down.h, src/debugger/command/help/up.h:
+ 	More Newer-style help files
+ 
+ 2020-03-02  rocky <rocky@gnu.org>
+@@ -1231,7 +1231,7 @@
+ 2020-03-02  rocky <rocky@gnu.org>
+ 
+ 	* .gitignore, Makefile.am, NEWS, configure.ac, src/dir.c,
+-	unittest/test_profile.c: Towards getting "make distcheck" working.  configure.ac: guard against including more than once. Bumb version.
++	unittest/test_profile.c: Towards getting "make distcheck" working.  configure.ac: guard against including more than once. Bump version.
+ 	NEWS: obligatory change. FIXME: use NEW-readme.md instead src/dir.c:
+ 	some WINDOWS #ifdefs were causing warnings, remove WINDOWS32
+ 	unittest/test_profile.c: squelch a warning about argc not used in
+@@ -1244,7 +1244,7 @@
+ 	docs/debugger/commands/support/help.rst,
+ 	docs/debugger/commands/support/source.rst,
+ 	src/debugger/command/help.h, src/debugger/command/help/help.h,
+-	src/debugger/command/help/source.h, src/debugger/command/source.h: 
++	src/debugger/command/help/source.h, src/debugger/command/source.h:
+ 	Document "support" commands...  and improve how we handle help text.
+ 
+ 2020-03-02  rocky <rocky@gnu.org>
+@@ -1275,12 +1275,12 @@
+ 	docs/debugger/commands/running/quit.rst,
+ 	docs/debugger/commands/running/run.rst,
+ 	docs/debugger/commands/running/skip.rst,
+-	docs/debugger/commands/running/step.rst, src/debugger/cmd.c: Documen
++	docs/debugger/commands/running/step.rst, src/debugger/cmd.c: Document
+ 	"running" section...  and fix bug in not picking up "skip" command.
+ 
+ 2020-03-01  rocky <rocky@gnu.org>
+ 
+-	* src/dir.c, src/globals.c, src/globals.h, src/main.c, src/read.c: 
++	* src/dir.c, src/globals.c, src/globals.h, src/main.c, src/read.c:
+ 	Add option to look in parents for Makefile...  option -c | --search-parent See #69
+ 
+ 2020-03-01  rocky <rocky@gnu.org>
+@@ -1354,7 +1354,7 @@
+ 	docs/debugger/commands/data/expand.rst,
+ 	docs/debugger/commands/data/print.rst,
+ 	docs/debugger/commands/files.rst,
+-	docs/debugger/commands/files/load.rst, docs/debugger/syntax.rst: 
++	docs/debugger/commands/files/load.rst, docs/debugger/syntax.rst:
+ 	Start data and files sections. Describe syntax
+ 
+ 2020-02-28  rocky <rocky@gnu.org>
+@@ -1388,7 +1388,7 @@
+ 2020-02-28  rocky <rocky@gnu.org>
+ 
+ 	* INSTALL-from-source.md, doc/make.1, docs/manpage.rst: Incorporate
+-	boretoms corrections and suggestions...  Also go over make.1 ot make it more correct
++	boretoms corrections and suggestions...  Also go over make.1 to make it more correct
+ 
+ 2020-02-27  rocky <rocky@gnu.org>
+ 
+@@ -1646,11 +1646,11 @@
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/misc.c, w32/subproc/proc.h,
+ 	w32/subproc/sub_proc.c, w32/subproc/w32err.c, w32/w32os.c: Extended
+-	1st cut at patching make 4.3 to get remake 4.3 On Linux the following should work from git source: - 1. ./autogen.sh - 2. make - 3. make check On Linux the follwoing doesn't work right now (fix in work): - make dist - make distcheck Compiling on macOS and FreeBSD (*BSD?) fails: - On macOS due to clang not supporting all gcc options - On FreeBSD due to inclusion of <sys/timeb.h> warning and -Werror
++	1st cut at patching make 4.3 to get remake 4.3 On Linux the following should work from git source: - 1. ./autogen.sh - 2. make - 3. make check On Linux the following doesn't work right now (fix in work): - make dist - make distcheck Compiling on macOS and FreeBSD (*BSD?) fails: - On macOS due to clang not supporting all gcc options - On FreeBSD due to inclusion of <sys/timeb.h> warning and -Werror
+ 
+ 2020-02-14  rocky <rocky@gnu.org>
+ 
+-	* .gitignore, doc/.gitignore, tests/.gitignore, unittest/.gitignore: 
++	* .gitignore, doc/.gitignore, tests/.gitignore, unittest/.gitignore:
+ 	Add remake .gitignores
+ 
+ 2020-02-14  rocky <rocky@gnu.org>
+@@ -1996,7 +1996,7 @@
+ 	w32/include/dlfcn.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Files from GNU Make 4.1 release.
+ 
+ 2014-07-15  rocky <rocky@gnu.org>
+@@ -2005,7 +2005,7 @@
+ 
+ 2014-06-28  rocky <rocky@gnu.org>
+ 
+-	* .gitignore, debian/patches/series, debian/patches/up_texi_fixes: 
++	* .gitignore, debian/patches/series, debian/patches/up_texi_fixes:
+ 	In the main branch we don't need up_texi_fixes
+ 
+ 2014-06-27  rocky <rocky@gnu.org>
+@@ -2119,7 +2119,7 @@
+ 
+ 2012-10-04  Yaroslav Halchenko <debian@onerussian.com>
+ 
+-	* debian/README.Debian-source, debian/changelog, debian/control: 
++	* debian/README.Debian-source, debian/changelog, debian/control:
+ 	slight adjustments to Vcs and README.Debian-source
+ 
+ 2012-10-04  Yaroslav Halchenko <debian@onerussian.com>
+@@ -2129,7 +2129,7 @@
+ 
+ 2012-10-04  Yaroslav Halchenko <debian@onerussian.com>
+ 
+-	* : Merge tag 'release-0.9+dfsg' into debian Tagging .dfsg version of 0.9 (removed make.texi) * tag 'release-0.9+dfsg': (302 commits)   Get ready for release 0.9   Silence a gcc warning   Comment out failing test.    Administrivia - more files to ignore   Change addres of where to report bugs. Update ChangeLog   Add "debugger" built-in function. Revise remake documentationto
++	* : Merge tag 'release-0.9+dfsg' into debian Tagging .dfsg version of 0.9 (removed make.texi) * tag 'release-0.9+dfsg': (302 commits)   Get ready for release 0.9   Silence a gcc warning   Comment out failing test.    Administrivia - more files to ignore   Change address of where to report bugs. Update ChangeLog   Add "debugger" built-in function. Revise remake documentationto
+ 	  include "debugger" and a number of other updates.  Give a link and
+ 	  correct reference to GNU Readline.  Grammar typo   Typo   Note bugfix for options -x and -X.    NEW.remake cleanup   Pass in input parameters to decode routines. Better modularity
+ 	  that way.  Split out -X from --debugger. -X is boolean-only now.    main.c: Handle -x flag as a boolean. getops doesn't support
+@@ -2247,8 +2247,8 @@
+ 
+ 	* NEWS, NEWS.remake, debugger/command/info.h, main.h, read.c,
+ 	tests/spec/data/commented.right,
+-	tests/spec/example/commented.Makefile, tests/spec/test-commented.rb: 
+-	A little more agressive on showing target descriptions -- Show them
++	tests/spec/example/commented.Makefile, tests/spec/test-commented.rb:
++	A little more aggressive on showing target descriptions -- Show them
+ 	on --targets as well as --tasks
+ 
+ 2011-10-17  rocky <rocky@gnu.org>
+@@ -2320,7 +2320,7 @@
+ 
+ 2011-06-12  rocky <rocky@gnu.org>
+ 
+-	* NEWS, configure.in: Relase 3.82+dbg-0.7
++	* NEWS, configure.in: Release 3.82+dbg-0.7
+ 
+ 2011-06-09  rocky <rocky@gnu.org>
+ 
+@@ -2396,7 +2396,7 @@
+ 2011-04-17  rocky <rocky@gnu.org>
+ 
+ 	* debugger/command/frame.h, debugger/command/info.h,
+-	tests/spec/data/info-targets.right, tests/spec/test-info-targets.rb: 
++	tests/spec/data/info-targets.right, tests/spec/test-info-targets.rb:
+ 	Add subopions to "info targets {position, name, all}. Sometimes we
+ 	just want the target names. This is a poor-man's "rake --tasks".
+ 
+@@ -2537,12 +2537,12 @@
+ 2011-04-08  rocky <rocky@gnu.org>
+ 
+ 	* rule.c, tests/spec/data/info-rule.right,
+-	tests/spec/example/implicit.Makefile, tests/spec/test-info-rule.rb: 
++	tests/spec/example/implicit.Makefile, tests/spec/test-info-rule.rb:
+ 	Fix bug in print_rule_data_base which we see from "info rule".
+ 
+ 2011-04-08  rocky <rocky@gnu.org>
+ 
+-	* debugger/command/break.h, job.c, tests/scripts/features/vpathplus: 
++	* debugger/command/break.h, job.c, tests/scripts/features/vpathplus:
+ 	Improve location saving for implicit targets. break.h: suggests
+ 	"info lines"
+ 
+@@ -2588,7 +2588,7 @@
+ 	tests/spec/data/break-expand.right,
+ 	tests/spec/data/break-prereq.right,
+ 	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+-	tests/spec/data/norl.right, tests/spec/data/step3.right, trace.h: 
++	tests/spec/data/norl.right, tests/spec/data/step3.right, trace.h:
+ 	Toward getting a debugger function working. More derefrencing
+ 	guards.
+ 
+@@ -2636,7 +2636,7 @@
+ 
+ 	* ChangeLog, debugger/cmd.c, debugger/command/help.h,
+ 	debugger/command/info.h, doc/remake.texi, print.c: Revise info help.
+-	And make "info target" useable.
++	And make "info target" usable.
+ 
+ 2011-04-01  rocky <rocky@gnu.org>
+ 
+@@ -2721,7 +2721,7 @@
+ 2011-03-28  rocky <rocky@gnu.org>
+ 
+ 	* debugger/cmd.c, debugger/command/continue.h, doc/remake.texi,
+-	main.c, make.h, tests/spec/data/norl.right, tests/spec/test-norl.rb: 
++	main.c, make.h, tests/spec/data/norl.right, tests/spec/test-norl.rb:
+ 	Add --no-readline to avoid using GNU realine. remake.texi matches
+ 	fixed-up code  better which interestingly looks more like one of the
+ 	earlier versions.
+@@ -2876,7 +2876,7 @@
+ 	debugger/command/show.h, debugger/command/skip.h,
+ 	debugger/command/step.h, debugger/command/target.h,
+ 	debugger/command/up.h, debugger/command/where.h,
+-	debugger/command/write.h, types.h: Handle "unsused parameter"
++	debugger/command/write.h, types.h: Handle "unused parameter"
+ 	better. So we can reinstate passing args in commands.
+ 
+ 2011-03-24  rocky <rockyb@gnu.org>
+@@ -2899,7 +2899,7 @@
+ 2011-03-23  rocky <rocky@gnu.org>
+ 
+ 	* Makefile.am, debugger/cmd.c, debugger/command/edit.h,
+-	debugger/command/eval.h, debugger/fns.c, debugger/fns.h, trace.h: 
++	debugger/command/eval.h, debugger/fns.c, debugger/fns.h, trace.h:
+ 	Add edit command.
+ 
+ 2011-03-23  rocky <rocky@gnu.org>
+@@ -2934,7 +2934,7 @@
+ 	tests/scripts/functions/word, tests/scripts/options/dash-k,
+ 	tests/scripts/options/general, tests/scripts/options/symlinks,
+ 	tests/scripts/variables/DEFAULT_GOAL,
+-	tests/scripts/variables/define, tests/scripts/variables/negative: 
++	tests/scripts/variables/define, tests/scripts/variables/negative:
+ 	Most of the output changes for showing the command-line options have
+ 	been resolved. Need to look over "silent" option errors.
+ 
+@@ -2960,7 +2960,7 @@
+ 2011-03-22  rocky <rockyb@gnu.org>
+ 
+ 	* debugger/cmd.c, debugger/command/next.h, debugger/command/step.h,
+-	remake.c, tests/spec/data/step3.right, tests/spec/test-step3.rb: 
++	remake.c, tests/spec/data/step3.right, tests/spec/test-step3.rb:
+ 	Stepping now stops after target has been remade.
+ 
+ 2011-03-22  rocky <rockyb@gnu.org>
+@@ -3049,13 +3049,13 @@
+ 	* debugger/break.c, debugger/cmd.c, debugger/cmd.h,
+ 	debugger/command/continue.h, debugger/command/finish.h,
+ 	debugger/command/info.h, debugger/command/where.h, debugger/fns.c,
+-	file.c, filedef.h, print.c, remake.c, trace.c, trace.h, types.h: 
++	file.c, filedef.h, print.c, remake.c, trace.c, trace.h, types.h:
+ 	Redo semantics of finish command. It now means stop after
+ 	prerequisite checking. Need more work here.
+ 
+ 2011-03-21  rocky <rocky@gnu.org>
+ 
+-	* Makefile.am: Forgot to add new comand file
++	* Makefile.am: Forgot to add new command file
+ 
+ 2011-03-21  rocky <rocky@gnu.org>
+ 
+@@ -3105,7 +3105,7 @@
+ 
+ 2011-03-20  rocky <rocky@gnu.org>
+ 
+-	* .gitignore, debugger/command/Makefile, debugger/command/write.h: 
++	* .gitignore, debugger/command/Makefile, debugger/command/write.h:
+ 	Forgot to add new write file.  debugger/command/Makefile: does chdir
+ 	../.. and reissues .gitignore: ignore remake
+ 
+@@ -3299,7 +3299,7 @@
+ 	w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Update copyrights for 2010.
+ 
+ 2010-07-12  psmith <psmith>
+@@ -3517,7 +3517,7 @@
+ 	w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Update copyright years.
+ 
+ 2009-10-25  psmith <psmith>
+@@ -3613,7 +3613,7 @@
+ 	        no longer include it, so macros like __DJGPP_MINOR__ are no
+ 	        longer defined automatically.          * Makefile.DOS.template (INCLUDES): Use $(prefix) and the         corresponding variables to define LIBDIR, INCLUDEDIR and
+ 	        LOCALEDIR instead of using the hardcoded ones.          (SUBDIRS): doc subdir added.          (INFO_DEPS, DVIS): Values changed to 'make.info' and
+-	        'make.dvi'.  (TEXI2HTML, TEXI2HTML_FLAGS): Removed.  Use makeinfo --html to         create html formated docs.  texi2html may not be ported to
++	        'make.dvi'.  (TEXI2HTML, TEXI2HTML_FLAGS): Removed.  Use makeinfo --html to         create html formatted docs.  texi2html may not be ported to
+ 	        DOS.  (make.info, make.dvi, make.ps, make.html): Make targets depend on         'make.texi'.          (.texi.info, .texi, .texi.dvi): Now recursively invocate.
+ 	        Change -I switch to look in ./ instead of ./doc.          (html): Target depend on html-recursive instead of
+ 	        make_1.html.  (make_1.html): Removed.          (mostlyclean-aminfo): Use $(srcdir)/doc instead of ./ as
+@@ -4011,11 +4011,11 @@
+ 	po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po,
+ 	po/ja.po, po/ko.po, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po,
+ 	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po: Fix
+-	up documentaiton weirdnesses (spotted by Yarik the wise)
++	up documentation weirdnesses (spotted by Yarik the wise)
+ 
+ 2009-01-09  R. Bernstein <rocky@gnu.org>
+ 
+-	* doc/mdb.texi, make.1: Fix up documentaiton weirdnesses (spotted by
++	* doc/mdb.texi, make.1: Fix up documentation weirdnesses (spotted by
+ 	Yarik the wise)
+ 
+ 2009-01-08  Yaroslav Halchenko <debian@onerussian.com>
+@@ -4037,7 +4037,7 @@
+ 	* debian/TODO.Debian, debian/changelog, debian/control,
+ 	debian/copyright, debian/dh_wraporig.local, debian/docs,
+ 	debian/misc/fdl.txt, debian/remake.info, debian/rules: First touch
+-	to bring Debian packaging up to date   * Added VCS fields into the header.    * Extended list of copyright holders due to added pieces.    * Not using dpatch any longer.    * Redoing DFSG complience of a new remake:     - documents with GFDL with cover pages (info/html) are removed       and FDL license is no longer shipped     - remake-specific info file is no longer present/shipped     - vanilla make changelog is no longer shipped, please refer to       /usr/share/doc/make/changelog.gz if needed   * Updated complience to policy 3.8.0
++	to bring Debian packaging up to date   * Added VCS fields into the header.    * Extended list of copyright holders due to added pieces.    * Not using dpatch any longer.    * Redoing DFSG compliance of a new remake:     - documents with GFDL with cover pages (info/html) are removed       and FDL license is no longer shipped     - remake-specific info file is no longer present/shipped     - vanilla make changelog is no longer shipped, please refer to       /usr/share/doc/make/changelog.gz if needed   * Updated compliance to policy 3.8.0
+ 
+ 2009-01-08  Yaroslav Halchenko <debian@onerussian.com>
+ 
+@@ -4123,7 +4123,7 @@
+ 	dbg_cmd.h => debugger/cmd.h, dbg_fns.c => debugger/fns.c, dbg_fns.h
+ 	=> debugger/fns.h, dbg_info.c => debugger/info.c, dbg_info.h =>
+ 	debugger/info.h, dbg_stack.c => debugger/stack.c, dbg_stack.h =>
+-	debugger/stack.h, job.c, main.c, print.c, read.c, remake.c, trace.c: 
++	debugger/stack.h, job.c, main.c, print.c, read.c, remake.c, trace.c:
+ 	Move debugger files into its own directory.
+ 
+ 2008-10-24  R. Bernstein <rocky@gnu.org>
+@@ -4207,7 +4207,7 @@
+ 	po/fi.po, po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po,
+ 	po/id.po, po/ja.po, po/ko.po, po/make.pot, po/nl.po, po/pl.po,
+ 	po/pt_BR.po, po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po,
+-	po/vi.po, po/zh_CN.po: Add ommitted readline.h
++	po/vi.po, po/zh_CN.po: Add omitted readline.h
+ 
+ 2008-10-23  R. Bernstein <rocky@gnu.org>
+ 
+@@ -4219,7 +4219,7 @@
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+ 
+-	* Makefile.am, configure, configure.ac, emacs/mdb.el.in: 
++	* Makefile.am, configure, configure.ac, emacs/mdb.el.in:
+ 	Add/build/install emacs code
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+@@ -4248,8 +4248,8 @@
+ 	po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po, po/fr.po,
+ 	po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po, po/ja.po,
+ 	po/ko.po, po/make.pot, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po,
+-	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po: 
+-	Administrivia and things to make building a release feasable.
++	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po:
++	Administrivia and things to make building a release feasible.
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+ 
+@@ -4289,7 +4289,7 @@
+ 2008-10-21  R. Bernstein <rocky@gnu.org>
+ 
+ 	* ar.c, commands.c, default.c, file.c, filedef.h, implicit.c,
+-	main.c, make.h, read.c, remake.c: Conver enter_file() to save file
++	main.c, make.h, read.c, remake.c: Convert enter_file() to save file
+ 	location.
+ 
+ 2008-10-21  R. Bernstein <rocky@gnu.org>
+@@ -4345,7 +4345,7 @@
+ 2008-12-11  Yaroslav Halchenko <debian@onerussian.com>
+ 
+ 	* : Just binding all repositories (CVS of make, old CVS of remake,
+-	and git of remake) togehter Merge commit 'make-release-3.81'; commit 'remake-cvs/master' into
++	and git of remake) together. Merge commit 'make-release-3.81'; commit 'remake-cvs/master' into
+ 	remake-git-combined2
+ 
+ 2008-12-11  Yaroslav Halchenko <debian@onerussian.com>
+@@ -4392,7 +4392,7 @@
+ 
+ 2008-10-28  R. Bernstein <rocky@gnu.org>
+ 
+-	* tests/debugger/debugger1.mk, tests/debugger/debugger2.mk: 
++	* tests/debugger/debugger1.mk, tests/debugger/debugger2.mk:
+ 	function.c: Add a Make debugger function to call the debugger from
+ 	inside a makefile. trace*: manage p_stack_top inside push/pop.
+ 	cmd.c: Simplify using recently added enter reason.
+@@ -4455,7 +4455,7 @@
+ 	dbg_cmd.h => debugger/cmd.h, dbg_fns.c => debugger/fns.c, dbg_fns.h
+ 	=> debugger/fns.h, dbg_info.c => debugger/info.c, dbg_info.h =>
+ 	debugger/info.h, dbg_stack.c => debugger/stack.c, dbg_stack.h =>
+-	debugger/stack.h, job.c, main.c, print.c, read.c, remake.c, trace.c: 
++	debugger/stack.h, job.c, main.c, print.c, read.c, remake.c, trace.c:
+ 	Move debugger files into its own directory.
+ 
+ 2008-10-24  R. Bernstein <rocky@gnu.org>
+@@ -4539,7 +4539,7 @@
+ 	po/fi.po, po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po,
+ 	po/id.po, po/ja.po, po/ko.po, po/make.pot, po/nl.po, po/pl.po,
+ 	po/pt_BR.po, po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po,
+-	po/vi.po, po/zh_CN.po: Add ommitted readline.h
++	po/vi.po, po/zh_CN.po: Add omitted readline.h
+ 
+ 2008-10-23  R. Bernstein <rocky@gnu.org>
+ 
+@@ -4551,7 +4551,7 @@
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+ 
+-	* Makefile.am, configure, configure.ac, emacs/mdb.el.in: 
++	* Makefile.am, configure, configure.ac, emacs/mdb.el.in:
+ 	Add/build/install emacs code
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+@@ -4580,8 +4580,8 @@
+ 	po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po, po/fr.po,
+ 	po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po, po/ja.po,
+ 	po/ko.po, po/make.pot, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po,
+-	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po: 
+-	Administrivia and things to make building a release feasable.
++	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po:
++	Administrivia and things to make building a release feasible.
+ 
+ 2008-10-22  R. Bernstein <rocky@gnu.org>
+ 
+@@ -4621,7 +4621,7 @@
+ 2008-10-21  R. Bernstein <rocky@gnu.org>
+ 
+ 	* ar.c, commands.c, default.c, file.c, filedef.h, implicit.c,
+-	main.c, make.h, read.c, remake.c: Conver enter_file() to save file
++	main.c, make.h, read.c, remake.c: Convert enter_file() to save file
+ 	location.
+ 
+ 2008-10-21  R. Bernstein <rocky@gnu.org>
+@@ -4788,7 +4788,7 @@
+ 	w32/compat/dirent.c, w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Initial repository
+ 
+ 2008-09-30  eliz <eliz>
+@@ -4854,7 +4854,7 @@
+ 
+ 2007-12-22  eliz <eliz>
+ 
+-	* ChangeLog, configh.dos.template, job.c, variable.c: 
++	* ChangeLog, configh.dos.template, job.c, variable.c:
+ 	configh.dos.template [__DJGPP__]: Replace HAVE_SYS_SIGLIST with
+ 	HAVE_DECL_SYS_SIGLIST.  job.c (child_execute_job): Remove __MSDOS__ because MSDOS/DJGPP
+ 	build does not use child_execute_job.  variable.c (define_automatic_variables) [__MSDOS__]: Always export
+@@ -4883,7 +4883,7 @@
+ 	* ChangeLog, NEWS, commands.c, doc/make.texi, file.c, job.c,
+ 	main.c, make.h, read.c, remake.c, tests/ChangeLog,
+ 	tests/scripts/functions/eval, tests/scripts/misc/close_stdout,
+-	tests/scripts/variables/special, tests/test_driver.pl, variable.c: 
++	tests/scripts/variables/special, tests/test_driver.pl, variable.c:
+ 	New special variable: .RECIPEPREFIX Allows the user to reset the
+ 	prefix character for introducing recipe lines from the default (tab)
+ 	to any other single character, and back again.  Also, reworked the
+@@ -4989,7 +4989,7 @@
+ 
+ 2007-05-11  psmith <psmith>
+ 
+-	* ChangeLog, default.c, doc/make.texi, function.c, job.c, remake.c: 
++	* ChangeLog, default.c, doc/make.texi, function.c, job.c, remake.c:
+ 	Fix some documentation gitches.  Fix an uninitialized variable.  Add
+ 	builtin rules for Objective C.  Add a new debug line that shows
+ 	where the commands that are about to be run were defined.
+@@ -5051,7 +5051,7 @@
+ 
+ 2007-03-09  R. Bernstein <rocky@gnu.org>
+ 
+-	* src/Makefile.am, src/main.c: A help-string formating correction.
++	* src/Makefile.am, src/main.c: A help-string formatting correction.
+ 
+ 2007-03-09  R. Bernstein <rocky@gnu.org>
+ 
+@@ -5117,7 +5117,7 @@
+ 
+ 2007-02-28  R. Bernstein <rocky@gnu.org>
+ 
+-	* configure.ac, doc/mdb.texi, src/dbg_cmd.c, src/trace.h: 
++	* configure.ac, doc/mdb.texi, src/dbg_cmd.c, src/trace.h:
+ 	configure.ac: now in 0.63cvs - we can't really fake it any more.  src/dbg_cmd.c: Add a "list" command. Basically same as "target x
+ 	depends commands" for now.  "list -" shows the parent target.  Help commands now show short usage.  src/trace.h: Allow us to fathom debugger command errors that stay in
+ 	the read command loop Go over documentation to add new features and fix up some old
+@@ -5130,7 +5130,7 @@
+ 
+ 2007-02-28  yoh <yoh@82381867-18eb-0310-98a2-9474e637aba2>
+ 
+-	* debian/docs: removed windowz README git-svn-id: svn+ssh://washoe/home/yoh/.svn/debs/remake/trunk@940
++	* debian/docs: removed windows README git-svn-id: svn+ssh://washoe/home/yoh/.svn/debs/remake/trunk@940
+ 	82381867-18eb-0310-98a2-9474e637aba2
+ 
+ 2007-02-28  yoh <yoh@82381867-18eb-0310-98a2-9474e637aba2>
+@@ -5143,7 +5143,7 @@
+ 2007-02-28  yoh <yoh@82381867-18eb-0310-98a2-9474e637aba2>
+ 
+ 	* debian/README.Debian-source, debian/changelog,
+-	debian/patches/00-correct-info-title.dpatch, debian/patches/00list: 
++	debian/patches/00-correct-info-title.dpatch, debian/patches/00list:
+ 	fresh tarball from rocky fixing info issue git-svn-id: svn+ssh://washoe/home/yoh/.svn/debs/remake/trunk@938
+ 	82381867-18eb-0310-98a2-9474e637aba2
+ 
+@@ -5464,7 +5464,7 @@
+ 	debian/menu.ex, debian/postinst.ex, debian/postrm.ex,
+ 	debian/preinst.ex, debian/prerm.ex,
+ 	debian/remake-3.80+dbg-default.ex,
+-	debian/remake-3.80+dbg.doc-base.EX, debian/rules, debian/watch: 
++	debian/remake-3.80+dbg.doc-base.EX, debian/rules, debian/watch:
+ 	[svn-inject] Applying Debian modifications to trunk git-svn-id: svn+ssh://washoe/home/yoh/.svn/debs/remake/trunk@916
+ 	82381867-18eb-0310-98a2-9474e637aba2
+ 
+@@ -5513,7 +5513,7 @@
+ 	* ChangeLog, src/expand.c, src/expand.h, src/file.c,
+ 	src/function.c, src/function.h: Merge more of the Nov 18, '06
+ 	changes - up to about function.c.  The commit changes from make
+-	rever to Savannah bug #15182 Some changes had to be held back :-(
++	revert to Savannah bug #15182 Some changes had to be held back :-(
+ 
+ 2006-11-20  R. Bernstein <rocky@gnu.org>
+ 
+@@ -5525,7 +5525,7 @@
+ 	* po/da.po, po/de.po, po/es.po, po/fr.po, po/gl.po, po/he.po,
+ 	po/hr.po, po/ja.po, po/ko.po, po/nl.po, po/pl.po, po/pt_BR.po,
+ 	po/ru.po, po/sv.po, po/tr.po, po/zh_CN.po, src/ar_fns.c,
+-	src/ar_fns.h, src/arscan.c, src/arscan.h, src/default.c, src/dep.h: 
++	src/ar_fns.h, src/arscan.c, src/arscan.h, src/default.c, src/dep.h:
+ 	First part of const-ification done to track recent GNU Make changes
+ 	of Nov 18, '06
+ 
+@@ -5622,7 +5622,7 @@
+ 
+ 2006-03-30  R. Bernstein <rocky@gnu.org>
+ 
+-	* src/dep.c, src/dep.h, src/file.c, src/file.h, src/implicit.c: 
++	* src/dep.c, src/dep.h, src/file.c, src/file.h, src/implicit.c:
+ 	Merge in some 3.81 changes: add expand_deps, dep_free (free_dep),
+ 	parse_prereqs, and snap_deps variables
+ 
+@@ -5643,8 +5643,8 @@
+ 
+ 	* ChangeLog, doc/how-to-make-a-release.txt, src/dep.c, src/dep.h,
+ 	src/expand.c, src/expand.h, src/implicit.c, src/make.h,
+-	src/variable.c, src/variable.h: Merge in 3.81 implict.c changes
+-	which puls in expand.c, variable.h changes.
++	src/variable.c, src/variable.h: Merge in 3.81 implicit.c changes
++	which pulls in expand.c, variable.h changes.
+ 
+ 2006-03-25  R. Bernstein <rocky@gnu.org>
+ 
+@@ -5880,7 +5880,7 @@
+ 	w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Last of the copyright updates.
+ 
+ 2006-02-11  psmith <psmith>
+@@ -5915,7 +5915,7 @@
+ 	w32/compat/dirent.c, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Update copyright and license notices on all files.  Added new file
+ 	strcache.c to various non-UNIX makefiles and build scripts.
+ 
+@@ -5937,7 +5937,7 @@
+ 
+ 2006-02-09  R. Bernstein <rocky@gnu.org>
+ 
+-	* README.cvs, src/dir_fns.c, src/job.c, w32/subproc/sub_proc.c: 
++	* README.cvs, src/dir_fns.c, src/job.c, w32/subproc/sub_proc.c:
+ 	Track GNU Make 3.81 changes.  Savannah GNU make bug #15534.
+ 
+ 2006-02-09  R. Bernstein <rocky@gnu.org>
+@@ -6073,7 +6073,7 @@
+ 
+ 2006-01-09  R. Bernstein <rocky@gnu.org>
+ 
+-	* ABOUT-NLS, config/config.rpath, po/Makefile.in.in, po/Rules-quot: 
++	* ABOUT-NLS, config/config.rpath, po/Makefile.in.in, po/Rules-quot:
+ 	These should be taken from the autotoolset environment.
+ 
+ 2006-01-09  R. Bernstein <rocky@gnu.org>
+@@ -6104,7 +6104,7 @@
+ 
+ 	* ChangeLog, NEWS, configure.ac, doc/Makefile.am, doc/make.texi,
+ 	doc/mdb.texi, make.1, src/Makefile.am, src/arscan.c, src/arscan.h,
+-	src/dir_fns.c, src/function.c, src/job.c, src/main.c, src/remake.c: 
++	src/dir_fns.c, src/function.c, src/job.c, src/main.c, src/remake.c:
+ 	Mostly track changes to up-coming 3.81. Tabs in some source code
+ 	have been removed.  make.1: note debugger options.
+ 
+@@ -6143,7 +6143,7 @@
+ 
+ 	* configure.ac, src/Makefile.am, src/job.c, src/main.c,
+ 	src/os.h.in, tests/run_make_tests.pl: Add configure option
+-	--with-default-shell to specifiy the default shell. (Useful on
++	--with-default-shell to specify the default shell. (Useful on
+ 	Solaris) Add configure option --with-shell-trace to specify the option to
+ 	give the default shell to turn on tracing.  src/{Makefile.am,job.c,main.c,os.h.in: Don't need os.h, use getopt.h
+ 
+@@ -6162,7 +6162,7 @@
+ 
+ 	* ChangeLog, Makefile.am, Makefile.ami, README.makedb =>
+ 	README.mdb, configure.ac: configure.ac: in 0.61cvs now. Allow one to
+-	specifiy a default shell.  Makefile.am, README.mdb, README.maekdb: makedb->mdb
++	specify a default shell.  Makefile.am, README.mdb, README.maekdb: makedb->mdb
+ 
+ 2005-12-25  R. Bernstein <rocky@gnu.org>
+ 
+@@ -6247,7 +6247,7 @@
+ 
+ 2005-12-24  R. Bernstein <rocky@gnu.org>
+ 
+-	* tests/scripts/functions/abspath, tests/scripts/functions/realpath: 
++	* tests/scripts/functions/abspath, tests/scripts/functions/realpath:
+ 	Add realpath and abspath from make 3.81.
+ 
+ 2005-12-24  R. Bernstein <rocky@gnu.org>
+@@ -6351,7 +6351,7 @@
+ 
+ 2005-12-20  R. Bernstein <rocky@gnu.org>
+ 
+-	* src/debug.h, src/job.c, src/main.c, tests/scripts/debugger/trace: 
++	* src/debug.h, src/job.c, src/main.c, tests/scripts/debugger/trace:
+ 	Now shows shell tracing when --trace=normal or stepping debugging.
+ 	YEAH!
+ 
+@@ -6462,7 +6462,7 @@
+ 	src/implicit.c, src/main.c, src/make.h, src/read.c, src/remake.c,
+ 	src/rule.c, tests/scripts/options/dash-l, tests/test_driver.pl: Go
+ 	over memory allocation more. Reduce shared pointers. Free memory at
+-	the end explicitly so can use valgrind more agressively in the
++	the end explicitly so can use valgrind more aggressively in the
+ 	future.
+ 
+ 2005-12-18  R. Bernstein <rocky@gnu.org>
+@@ -6486,7 +6486,7 @@
+ 	tests/scripts/features/statipattrules,
+ 	tests/scripts/features/vpathplus, tests/scripts/functions/error,
+ 	tests/scripts/options/dash-k, tests/scripts/options/dash-q,
+-	tests/scripts/options/general, tests/scripts/variables/flavors: 
++	tests/scripts/options/general, tests/scripts/variables/flavors:
+ 	Debugger error output changed. Get test results to match up.  Note:
+ 	print.c needs to be changed to be able to deal with stderr as well
+ 	as or in addition to stdout.
+@@ -6616,7 +6616,7 @@
+ 2005-12-11  psmith <psmith>
+ 
+ 	* ChangeLog, implicit.c, read.c, tests/ChangeLog,
+-	tests/scripts/features/se_implicit, tests/scripts/misc/general4: 
++	tests/scripts/features/se_implicit, tests/scripts/misc/general4:
+ 	Extend .SECONDEXPANSION to implicit rules.  Final fix for bug
+ 	#13781.
+ 
+@@ -6671,7 +6671,7 @@
+ 
+ 	* ChangeLog, NEWS, po/da.po, po/de.po, po/es.po, po/fr.po,
+ 	po/gl.po, po/he.po, po/hr.po, po/ja.po, po/ko.po, po/nl.po,
+-	po/pl.po, po/pt_BR.po, po/ru.po, po/sv.po, po/tr.po, po/zh_CN.po: 
++	po/pl.po, po/pt_BR.po, po/ru.po, po/sv.po, po/tr.po, po/zh_CN.po:
+ 	0.5 release - this time, for sure!
+ 
+ 2005-12-10  R. Bernstein <rocky@gnu.org>
+@@ -6790,7 +6790,7 @@
+ 	src/dbg_cmd.c, src/debug.h, src/{dir.c => dir_fns.c},
+ 	src/dir_fns.h, src/function.c, src/function.h, src/hash.c,
+ 	src/implicit.c, src/job.c, src/main.c, src/make.h, src/print.c,
+-	src/read.c, src/remake.c, src/rule.c, src/trace.c, src/vpath.c: 
++	src/read.c, src/remake.c, src/rule.c, src/trace.c, src/vpath.c:
+ 	makdeb.texi: document next vs. step move directory definitions out
+ 	of main.h and into dir_fns.h Add more free routines and use them to
+ 	reduce unfreed memory in use at end of program.
+@@ -6862,7 +6862,7 @@
+ 2005-12-04  R. Bernstein <rocky@gnu.org>
+ 
+ 	* src/remake.c, tests/run_make_tests.pl,
+-	tests/scripts/features/default_names, tests/test_driver.pl: 
++	tests/scripts/features/default_names, tests/test_driver.pl:
+ 	remake.c: __CYGWIN__ is like WINDOWS32.  run_make_tests.pl: Note
+ 	CYGWIN is like W32. chop is deprecated.  default_names: more
+ 	complete description. Shorten code.
+@@ -6876,7 +6876,7 @@
+ 	* src/ar_fns.c, src/commands.h, src/debug.h, src/default.c,
+ 	src/default.h, src/dep.h, src/file.c, src/file.h, src/hash.c,
+ 	src/hash.h, src/implicit.c, src/main.c, src/make.h, src/read.c,
+-	src/remake.c, src/rule.c, src/rule.h, src/types.h, src/variable.h: 
++	src/remake.c, src/rule.c, src/rule.h, src/types.h, src/variable.h:
+ 	Add more free routines unreleased reduce memory by another 10K or
+ 	so.  More typedef use and rearrangement. More documentation in
+ 	headers.
+@@ -6904,7 +6904,7 @@
+ 2005-12-04  R. Bernstein <rocky@gnu.org>
+ 
+ 	* ChangeLog, Makefile.DOS, NMakefile, README.Amiga, build_w32.bat,
+-	config.ami, config.h-vms, config.h.W32, dosbuild.bat, make.lnk: 
++	config.ami, config.h-vms, config.h.W32, dosbuild.bat, make.lnk:
+ 	Remove some of the no longer maintained files
+ 
+ 2005-12-04  R. Bernstein <rocky@gnu.org>
+@@ -6945,7 +6945,7 @@
+ 
+ 	* NEWS, src/commands.c, src/dbg_cmd.c, src/default.c, src/dir.c,
+ 	src/function.c, src/hash.c, src/hash.h, src/job.c, src/main.c,
+-	src/make.h, src/read.c, src/trace.c, src/variable.c, src/variable.h: 
++	src/make.h, src/read.c, src/trace.c, src/variable.c, src/variable.h:
+ 	Reduce memory leaks via valgrind. More VMS/Amiga/EMX removal.
+ 
+ 2005-12-03  R. Bernstein <rocky@gnu.org>
+@@ -7078,7 +7078,7 @@
+ 
+ 	* ChangeLog, glob/glob.h, po/da.po, po/de.po, po/es.po, po/fr.po,
+ 	po/gl.po, po/he.po, po/hr.po, po/ja.po, po/ko.po, po/nl.po,
+-	po/pl.po, po/pt_BR.po, po/ru.po, po/sv.po, po/tr.po, po/zh_CN.po: 
++	po/pl.po, po/pt_BR.po, po/ru.po, po/sv.po, po/tr.po, po/zh_CN.po:
+ 	Ready for final 0.4 release.
+ 
+ 2005-11-27  R. Bernstein <rocky@gnu.org>
+@@ -7157,7 +7157,7 @@
+ 	* NEWS, configure.ac, doc/make.texi, doc/makedb.texi,
+ 	po/POTFILES.in, src/Makefile.am, src/ar.c, src/ar_fns.h,
+ 	src/make.h, src/read.c, src/remake.c: configure.ac: Get ready for
+-	0.4 rlease makedb.texi: we now get the right line number for
++	0.4 release makedb.texi: we now get the right line number for
+ 	commands - reflect that.  po/POSTFILES,in ar.c -> ar_fns.c Remove
+ 	definitions from make.h
+ 
+@@ -7233,7 +7233,7 @@
+ 2005-11-27  R. Bernstein <rocky@gnu.org>
+ 
+ 	* src/dbg_cmd.c, src/dbg_fns.c, src/dbg_fns.h, src/dbg_stack.c,
+-	src/dbg_stack.h, src/print.c, src/read.c, src/trace.c, src/trace.h: 
++	src/dbg_stack.h, src/print.c, src/read.c, src/trace.c, src/trace.h:
+ 	Add stack for reading Makefiles
+ 
+ 2005-11-24  R. Bernstein <rocky@gnu.org>
+@@ -7267,7 +7267,7 @@
+ 2005-11-23  R. Bernstein <rocky@gnu.org>
+ 
+ 	* src/Makefile.am, src/dbg_cmd.c, src/dbg_cmd.h, src/dbg_fns.c,
+-	src/dbg_fns.h, src/dbg_stack.c, src/dbg_stack.h, src/filedef.h: 
++	src/dbg_fns.h, src/dbg_stack.c, src/dbg_stack.h, src/filedef.h:
+ 	Break out some of the routines from dbg_cmd.c into
+ 	dbg_{fns,stack}.{c,h} No functional changes make.
+ 
+@@ -7299,7 +7299,7 @@
+ 2005-11-20  R. Bernstein <rocky@gnu.org>
+ 
+ 	* NEWS, src/dbg_cmd.c, src/expand.c, src/expand.h: Bug in setting
+-	automatic varaibles in expand now addressed. At long last! Write now
++	automatic variables in expand now addressed. At long last! Write now
+ 	uses takes basename of target and malloc/free's the filename
+ 	properly.
+ 
+@@ -7377,7 +7377,7 @@
+ 	--verbose option.  --debugger=preread now stops before reading each
+ 	Makefile.  emacs/makedeb.el.in, src/dbg_cmd.c: debug lines might not have a
+ 	target in them - e.g.  if we are reading a makefile.  main.c src/Makefile.am src/debug.c: Split off some debug variables
+-	and settings. Some things are now a little more gobal than before,
++	and settings. Some things are now a little more global than before,
+ 	but main.c really needs made smaller.
+ 
+ 2005-11-17  bosk <bosk>
+@@ -7609,7 +7609,7 @@
+ 
+ 2005-08-25  psmith <psmith>
+ 
+-	* ChangeLog, job.c, tests/ChangeLog, tests/scripts/variables/SHELL: 
++	* ChangeLog, job.c, tests/ChangeLog, tests/scripts/variables/SHELL:
+ 	If we're on a DOS/W32/OS2 system and we're not using a unixy shell,
+ 	don't follow POSIX backslash/newline conventions.  Use a different method for testing the SHELL variable, which
+ 	hopefully will work better on non-UNIX systems.
+@@ -7662,7 +7662,7 @@
+ 2005-06-27  psmith <psmith>
+ 
+ 	* tests/ChangeLog, tests/scripts/features/patternrules,
+-	tests/scripts/features/reinvoke, tests/scripts/options/dash-W: 
++	tests/scripts/features/reinvoke, tests/scripts/options/dash-W:
+ 	Cleaned up some problems found with the tests running on a powerful
+ 	Solaris system with an EMC NFS storage solution.  Still get some odd
+ 	errors here unfortunately related to sub-second timestamps that I
+@@ -7676,7 +7676,7 @@
+ 
+ 2005-06-27  psmith <psmith>
+ 
+-	* ChangeLog, NEWS, dir.c, maintMakefile, w32/subproc/sub_proc.c: 
++	* ChangeLog, NEWS, dir.c, maintMakefile, w32/subproc/sub_proc.c:
+ 	Fixes for some Windows/MSC compile issues.  wget command line option
+ 	seems to have changed?
+ 
+@@ -7715,7 +7715,7 @@
+ 
+ 2005-06-25  psmith <psmith>
+ 
+-	* ChangeLog, main.c, tests/ChangeLog, tests/scripts/options/dash-W: 
++	* ChangeLog, main.c, tests/ChangeLog, tests/scripts/options/dash-W:
+ 	Fix -W foo yielding infinite recursion in some cases of re-exec.
+ 	Added a -W test suite.
+ 
+@@ -7753,7 +7753,7 @@
+ 2005-05-31  bosk <bosk>
+ 
+ 	* ChangeLog, implicit.c, job.c, tests/ChangeLog,
+-	tests/scripts/features/include, tests/scripts/features/patternrules: 
++	tests/scripts/features/include, tests/scripts/features/patternrules:
+ 	Fixed Savannah bugs #13216 and #13218.
+ 
+ 2005-05-13  psmith <psmith>
+@@ -7819,7 +7819,7 @@
+ 2005-04-16  R. Bernstein <rocky@gnu.org>
+ 
+ 	* NEWS, config/readline.h, config/readline.m4, configure.ac,
+-	src/dbg_cmd.c, src/main.c: Revise readline allegedly to accomodate
++	src/dbg_cmd.c, src/main.c: Revise readline allegedly to accommodate
+ 	more readline variations.  Patches from Rich Paul.
+ 
+ 2005-04-13  psmith <psmith>
+@@ -7909,7 +7909,7 @@
+ 2005-02-27  bosk <bosk>
+ 
+ 	* ChangeLog, dep.h, file.c, filedef.h, main.c, misc.c, read.c,
+-	tests/ChangeLog, tests/scripts/variables/DEFAULT_TARGET: 
++	tests/ChangeLog, tests/scripts/variables/DEFAULT_TARGET:
+ 	Implementation of the .DEFAULT_TARGET special variable.
+ 
+ 2005-02-27  bosk <bosk>
+@@ -8078,7 +8078,7 @@
+ 
+ 	* tests/ChangeLog, tests/run_make_tests.pl,
+ 	tests/scripts/features/implicit_prereq_eval,
+-	tests/scripts/features/patternrules, tests/scripts/test_template: 
++	tests/scripts/features/patternrules, tests/scripts/test_template:
+ 	Update the test template.  A few fixes in run_make_test().  Rename
+ 	implicit_prereq_eval to patternrules, to be the start of a suite of
+ 	tests of pattern rules.
+@@ -8437,7 +8437,7 @@
+ 	* Makefile.am, configure.ac, glob/Makefile.in, po/da.po, po/de.po,
+ 	po/es.po, po/fr.po, po/gl.po, po/he.po, po/hr.po, po/ja.po,
+ 	po/ko.po, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po, po/sv.po,
+-	po/tr.po, po/zh_CN.po, src/vpath.h, tests/scripts/features/errors: 
++	po/tr.po, po/zh_CN.po, src/vpath.h, tests/scripts/features/errors:
+ 	Correct some errors from initial import.
+ 
+ 2004-06-11  R. Bernstein <rocky@gnu.org>
+@@ -8620,7 +8620,7 @@
+ 	w32/compat/dirent.c, w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Initial revision
+ 
+ 2004-03-22  psmith <psmith>
+@@ -8628,7 +8628,7 @@
+ 	* ChangeLog, NMakefile.template, README.OS2.template,
+ 	README.W32.template, build.template, configure.in, expand.c, job.c,
+ 	main.c, maintMakefile, read.c, rule.c, tests/ChangeLog,
+-	tests/scripts/variables/flavors, tests/test_driver.pl, variable.c: 
++	tests/scripts/variables/flavors, tests/test_driver.pl, variable.c:
+ 	Numerous updates and bug fixes.  A number of W32 cleanups from
+ 	J.Grant.  A number of OS/2 cleanups from Andreas Buening.  Various
+ 	random bug fixes.
+@@ -8732,7 +8732,7 @@
+ 2003-07-31  psmith <psmith>
+ 
+ 	* Makefile.am, NEWS, config/Makefile.am, configure.in,
+-	doc/Makefile.am, doc/make.texi, glob/Makefile.am, po/Makevars: 
++	doc/Makefile.am, doc/make.texi, glob/Makefile.am, po/Makevars:
+ 	Updated for autoconf 2.57, automake 1.7.6, and gettext 0.12.1.
+ 	Fixed problems with the dist target (adding missing files).
+ 	Workaround for a bug in gettext 0.12.1 po/Makefile.in.in where
+@@ -8901,7 +8901,7 @@
+ 2002-09-23  psmith <psmith>
+ 
+ 	* ChangeLog, read.c, tests/ChangeLog,
+-	tests/scripts/features/double_colon, tests/scripts/features/escape: 
++	tests/scripts/features/double_colon, tests/scripts/features/escape:
+ 	Fix a bug handling target/prerequisite names containing comment
+ 	characters.
+ 
+@@ -9186,7 +9186,7 @@
+ 
+ 2001-07-05  psmith <psmith>
+ 
+-	* ChangeLog, NEWS, configure.in, i18n/ko.po, make.texinfo: 
++	* ChangeLog, NEWS, configure.in, i18n/ko.po, make.texinfo:
+ 	New/updated translations; minor update to the index of the manual.
+ 
+ 2001-06-01  psmith <psmith>
+@@ -9211,7 +9211,7 @@
+ 2001-01-21  psmith <psmith>
+ 
+ 	* ChangeLog, build_w32.bat, expand.c, gettext.c, make.texinfo,
+-	remake.c, tests/scripts/features/targetvars, variable.c, variable.h: 
++	remake.c, tests/scripts/features/targetvars, variable.c, variable.h:
+ 	Some bug fixes and document updates.
+ 
+ 2000-11-17  psmith <psmith>
+@@ -10204,7 +10204,7 @@
+ 1998-05-02  karl <karl>
+ 
+ 	* texinfo.tex: (\putwordon, \putwordMethodon): New macros.          * texinfo/texinfo.tex (\putwordon, \putwordMethodon): New
+-	        macros.  Use in \def... commands.          (\indexdummies): make `\ ' be just ` ' for sorting.          (\deftypemethparsebody): New macro.          (\defmethod): Call it.          Various doc fixes.          Repored by: KHMarbaise@p69.ks.fido.de (Karl Heinz Marbaise)         Date: Wed, 07 Jan 1998 10:19:42 +0100
++	        macros.  Use in \def... commands.          (\indexdummies): make `\ ' be just ` ' for sorting.          (\deftypemethparsebody): New macro.          (\defmethod): Call it.          Various doc fixes.          Reported by: KHMarbaise@p69.ks.fido.de (Karl Heinz Marbaise)         Date: Wed, 07 Jan 1998 10:19:42 +0100
+ 
+ 1998-04-27  drepper <drepper>
+ 
+@@ -10483,9 +10483,9 @@
+ 
+ 1997-07-04  rms <rms>
+ 
+-	* texinfo.tex: (\kbdfont, \kbdexamplefont): New macros, parms that
++	* texinfo.tex: (\kbdfont, \kbdexamplefont): New macros, params that
+ 	tell @kbd what to do.  (\setkbdinputdistinct, \setkbdinputexample):
+-	New commands set them.  (\kbd): Use those parms.
++	New commands set them.  (\kbd): Use those params.
+ 
+ 1997-07-03  karl <karl>
+ 
+@@ -10929,7 +10929,7 @@
+ 
+ 	* dir.c: Thu Jul 25 19:53:31 1996  Roland McGrath
+ 	<roland@delasyd.gnu.ai.mit.edu>         From Robert Hoehne
+-	        <robert.hoehne@Mathematik.TU-Chemnitz.DE>: * dir.c [__MSDOS__] [DJGPP > 1]: Include <libc/dosio.h> and defin         `__opendir_flags' initialized to 0.          [__MSDOS__] (dosify) [DJGPP > 1]: Return name unchanged if
++	        <robert.hoehne@Mathematik.TU-Chemnitz.DE>: * dir.c [__MSDOS__] [DJGPP > 1]: Include <libc/dosio.h> and define         `__opendir_flags' initialized to 0.          [__MSDOS__] (dosify) [DJGPP > 1]: Return name unchanged if
+ 	        _USE_LFN.  (find_directory) [__MSDOS__ && DJGPP > 1]: If _USE_LGN, set         __opendir_flags to __OPENDIR_PRESERVE_CASE.
+ 
+ 1996-07-26  roland <roland>
+@@ -11157,7 +11157,7 @@
+ 	w32/include/dirent.h, w32/include/pathstuff.h,
+ 	w32/include/sub_proc.h, w32/include/w32err.h, w32/pathstuff.c,
+ 	w32/subproc/NMakefile, w32/subproc/build.bat, w32/subproc/misc.c,
+-	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c: 
++	w32/subproc/proc.h, w32/subproc/sub_proc.c, w32/subproc/w32err.c:
+ 	Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>         * dir.c: WIN32 does not support inode. For now, fully
+ 	        qualified pathname along with st_mtime will be keys for
+ 	        files.  Fixed problem where vpath can be confused when files         are added to a directory after the directory has already
+@@ -11296,7 +11296,7 @@
+ 	* read.c: Sun May 12 19:19:43 1996  Aaron Digulla
+ 	<digulla@fh-konstanz.de>         * read.c: "find_semicolon" is declared as static but never
+ 	        defined.  No difference between Makefile and makefile on
+-	        Amiga; added SMakefile to *default_makefiles[].          (read_makefile) SAS/C want's two_colon and pattern_percent
++	        Amiga; added SMakefile to *default_makefiles[].          (read_makefile) SAS/C wants two_colon and pattern_percent
+ 	        be set before use.          The current directory on Amiga is "" instead of "."         Strange #endif moved.
+ 
+ 1996-05-13  roland <roland>
+@@ -11326,7 +11326,7 @@
+ 	* SMakefile.template: Sun May 12 19:19:43 1996  Aaron Digulla
+ 	<digulla@fh-konstanz.de>         * read.c: "find_semicolon" is declared as static but never
+ 	        defined.  No difference between Makefile and makefile on
+-	        Amiga; added SMakefile to *default_makefiles[].          (read_makefile) SAS/C want's two_colon and pattern_percent
++	        Amiga; added SMakefile to *default_makefiles[].          (read_makefile) SAS/C wants two_colon and pattern_percent
+ 	        be set before use.          The current directory on Amiga is "" instead of "."         Strange #endif moved.          * SMakefile: Updated dependencies
+ 
+ 1996-05-09  roland <roland>
+@@ -11536,7 +11536,7 @@
+ 
+ 1996-03-01  roland <roland>
+ 
+-	* glob/COPYING.LIB.old, glob/ChangeLog, glob/configure, glob/glob.c: 
++	* glob/COPYING.LIB.old, glob/ChangeLog, glob/configure, glob/glob.c:
+ 	Updated from libc
+ 
+ 1996-03-01  roland <roland>
+@@ -11844,7 +11844,7 @@
+ 
+ 1995-10-10  roland <roland>
+ 
+-	* make.texinfo: (How Make Works): Clearify that default goal is only
++	* make.texinfo: (How Make Works): Clarify that default goal is only
+ 	first target.
+ 
+ 1995-10-10  roland <roland>
+@@ -12464,7 +12464,7 @@
+ 	* expand.c: (variable_expand): Rewrote computed variable name and substitution
+ 	reference handling to be simpler.  First expand the entire text
+ 	between the parens if it contains any $s, then examine the result of
+-	that for subtitution references and do no further expansion while
++	that for substitution references and do no further expansion while
+ 	parsing them.
+ 
+ 1995-01-15  roland <roland>
+@@ -16755,7 +16755,7 @@
+ 
+ 1988-06-28  mcgrath <mcgrath>
+ 
+-	* make.texinfo: * Fixed a minor grammaticaly error.  * Second release.
++	* make.texinfo: * Fixed a minor grammatic error.  * Second release.
+ 
+ 1988-06-19  mcgrath <mcgrath>
+ 
+@@ -16854,7 +16854,7 @@
+ 
+ 1988-04-23  roland <roland>
+ 
+-	* make.texinfo: * Bumped revision number to be the same as the source.  * Note that the `patsubst' expansion function and expansions   of the form `$(a:-b)', etc. (from Sun sh) were in revision   1.2 but were accidently omitted from the log entry.
++	* make.texinfo: * Bumped revision number to be the same as the source.  * Note that the `patsubst' expansion function and expansions   of the form `$(a:-b)', etc. (from Sun sh) were in revision   1.2 but were accidentally omitted from the log entry.
+ 
+ 1988-04-23  roland <roland>
+ 
+@@ -16872,4 +16872,3 @@
+ 
+ 	* Initial revision This version was distributed by RMS in
+ 	`binutils.tar'.
+-
