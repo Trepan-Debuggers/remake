@@ -1,10 +1,12 @@
-Here we have note remake changes. For changes to GNU Make, see its NEWS file.
+Here we note remake changes. For changes to GNU Make, see its NEWS file.
 
 Version 4.4.0+dbg-1.6 (2026-01-22)
 ==================================
 
+Rebase code on GNU Make 4.4
+
 * Support GCC 15, to improve building from source
-* SEGV after trace_pop_target(). Bug #158
+* Fix SEGV after trace_pop_target(). Bug #158
 * Fix build without GNU readline or libreadline #157
 
 
