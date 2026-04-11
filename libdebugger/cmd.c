@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2004-2005, 2007-2009, 2011,
-              2014-2015, 2020 R. Bernstein
+              2014-2015, 2020, 2026 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -242,9 +242,16 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   volatile debug_return_t debug_return = debug_readloop;
   static bool b_init = false;
   static bool b_readline_init = false;
+  static bool b_ps_init = false;
+  static char *custom_ps = NULL;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
+
+  if (!b_ps_init) {
+    custom_ps = getenv("REMAKE_PS");
+    b_ps_init = true;
+  }
 
   last_stop_reason = reason;
 
@@ -360,14 +367,14 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
 #ifdef HAVE_LIBREADLINE
       if (use_readline_flag) {
-        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ",
-                 open_depth, where_history(), close_depth);
+        snprintf(prompt, PROMPT_LENGTH, "%s%s%d%s ",
+                 custom_ps ? custom_ps : "remake", open_depth, where_history(), close_depth);
 
         line = readline (prompt);
       } else
 #endif /* HAVE_LIBREADLINE */
         {
-          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth,
+          snprintf(prompt, PROMPT_LENGTH, "%s%s0%s ", custom_ps ? custom_ps : "remake", open_depth,
                    close_depth);
           printf("%s", prompt);
           if (line == NULL) line = calloc(1, 2048);
