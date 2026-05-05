@@ -8,7 +8,7 @@ List Makefile target (`list`)
 
 **list** *line-number* | **-**
 
-List target dependencies and commands for *target* or *line-number*
+List the dependencies and commands for a *target* or *line-number*
 
 Without a target name or line number, use the current target.
 A target name of `-` will use the parent target on the target stack.

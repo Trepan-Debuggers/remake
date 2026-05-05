@@ -13,7 +13,7 @@ program execution. You can:
 * restart the program
 * continue its execution until it would normally terminate or until a
   breakpoint is hit
-* step exection which is runs for a limited amount of code before stopping
+* step exection which runs for a limited amount of code before stopping
 
 .. toctree::
    :maxdepth: 1

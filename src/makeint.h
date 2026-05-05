@@ -611,11 +611,7 @@ long int lseek ();
 
 #endif  /* Not GNU C library or POSIX.  */
 
-#ifdef  HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-# endif
-#else
+#ifndef HAVE_GETCWD
 char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
 #endif
@@ -685,6 +681,8 @@ void print_vpath_data_base (void);
 
 extern char *starting_directory;
 extern unsigned int makelevel;
+extern pid_t makeparent_pid;
+extern char *makeparent_target;
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;

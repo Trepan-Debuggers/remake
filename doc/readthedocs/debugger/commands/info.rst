@@ -8,7 +8,7 @@ Information from the Debugged Session (`break`, `files`, `line`, `program`, `rul
 
 Gets various pieces of information about the program being debugged.
 
-You can give unique prefix of the name of a subcommand to get
+You can give a unique prefix of the name of a subcommand to get
 information about just that subcommand.
 
 Type `info` for a list of info subcommands and what they do. Type ``help info`` for a summary list of info subcommands.

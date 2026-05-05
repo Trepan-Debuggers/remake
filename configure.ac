@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 1993-2020 Free Software Foundation, Inc.
+# Copyright (C) 1993-2020, 2022 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -17,7 +17,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define(_MAKE_VERSION_, 4.3)
-AC_INIT([remake],[_MAKE_VERSION_+dbg-1.5],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[_MAKE_VERSION_+dbg-1.6],[https://github.com/rocky/remake/issues])
 
 # These are used in maintMakefile
 MAKE_VERSION=_MAKE_VERSION_
@@ -422,6 +422,22 @@ AC_ARG_ENABLE([load],
                  [disable support for the 'load' operation]),
   [make_cv_load="$enableval" user_load="$enableval"],
   [make_cv_load="yes"])
+
+AC_ARG_WITH([profiler_resolution],
+  AC_HELP_STRING([--with-profiler-resolution],
+                 [require minimum profiler resolution in nanoseconds, defaults to 1000]),
+  [AS_IF([test "$withval" = no],
+         [prof_res="no"],
+         [AS_IF([test "$withval" = yes],
+                [prof_res="1000"],
+                [prof_res="$withval"])])],
+  [prof_res="1000"])
+
+AS_IF([test "x$prof_res" = "xno"],
+      [],
+      [AC_DEFINE_UNQUOTED([PROFILER_MIN_RES],
+                          [$prof_res],
+                          [Minimum profiler resolution in nanoseconds])])
 
 AS_CASE([/$ac_cv_have_decl_dlopen/$ac_cv_have_decl_dlsym/$ac_cv_have_decl_dlerror/],
   [*/no/*], [make_cv_load=no])

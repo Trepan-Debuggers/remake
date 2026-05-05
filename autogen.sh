@@ -5,13 +5,11 @@
 # honor MAKE variable if set otherwise set it to `make'
 MAKE=${MAKE:-make}
 
-echo "Rebuilding ./configure with autoreconf..."
-autoreconf -f -i
+# Guard against being run more than once
+(cd build-aux && rm -f mdate-sh texinfo.tex)
 
-if [ $? -ne 0 ]; then
-  echo "autoreconf failed"
-  exit $?
-fi
+echo "Rebuilding ./configure with autoreconf..."
+autoreconf -f -i || { rc=$?; echo "autoreconf failed"; exit $rc; }
 
 # Add our target descriptions to po/Makefile.in.in
 patch -p0 < po/Makefile.in.in.patch

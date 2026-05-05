@@ -46,12 +46,12 @@ Boston, MA 02111-1307, USA.  */
 /* The following line makes Solaris' gcc/cpp not puke. */
 #undef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
+#endif /* HAVE_LIBREADLINE */
 
 /* From readline. ?? Should this be in configure?  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
-#endif /* HAVE_LIBREADLINE */
 
 #include "cmd_initialize.h"
 
@@ -78,8 +78,6 @@ Boston, MA 02111-1307, USA.  */
 char *psz_debugger_args;
 
 debug_enter_reason_t last_stop_reason;
-
-#ifdef HAVE_LIBREADLINE
 
 short_cmd_t short_command[256] = { { NULL,
                                      (const char *) '\0',
@@ -226,8 +224,6 @@ extern debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
   return debug_readloop;
 }
 
-#endif /* HAVE_LIBREADLINE */
-
 #define PROMPT_LENGTH 300
 
 #include <setjmp.h>
@@ -246,9 +242,16 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   volatile debug_return_t debug_return = debug_readloop;
   static bool b_init = false;
   static bool b_readline_init = false;
+  static bool b_ps_init = false;
+  static char *custom_ps = NULL;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
+
+  if (!b_ps_init) {
+    custom_ps = getenv("REMAKE_PS");
+    b_ps_init = true;
+  }
 
   last_stop_reason = reason;
 
@@ -364,14 +367,14 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
 #ifdef HAVE_LIBREADLINE
       if (use_readline_flag) {
-        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ",
-                 open_depth, where_history(), close_depth);
+        snprintf(prompt, PROMPT_LENGTH, "%s%s%d%s ",
+                 custom_ps ? custom_ps : "remake", open_depth, where_history(), close_depth);
 
         line = readline (prompt);
       } else
 #endif /* HAVE_LIBREADLINE */
         {
-          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth,
+          snprintf(prompt, PROMPT_LENGTH, "%s%s0%s ", custom_ps ? custom_ps : "remake", open_depth,
                    close_depth);
           printf("%s", prompt);
           if (line == NULL) line = calloc(1, 2048);
@@ -381,10 +384,14 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
       if ( line ) {
         if ( *(s=stripwhite(line)) ) {
+#ifdef HAVE_LIBREADLINE
           add_history (s);
+#endif /* HAVE_LIBREADLINE */
           debug_return=execute_line(s);
         } else {
+#ifdef HAVE_LIBREADLINE
           add_history ("step");
+#endif /* HAVE_LIBREADLINE */
           debug_return=dbg_cmd_step((char *) "");
         }
         free (line);

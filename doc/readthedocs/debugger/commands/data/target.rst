@@ -8,7 +8,7 @@ Examining Targets (`target`)
 
 Show information about a *target-name*.
 
-*target-name* be the name of a target or it can be a variable like `@`
+*target-name* is the name of a target or it can be a variable like `@`
 (the current target) or `<` (first dependency). If *target-name* is
 omitted use the current target.
 
@@ -37,7 +37,7 @@ The following attributes names can be given after a target name:
    - invalid, an error of some sort occurred
 * time: last modification time and whether file has been updated. If
   the target is not up to date you will see the message "File is very
-  old." If a target is "phony", i.e. doesn't have file associated
+  old." If a target is "phony", i.e. doesn't have a file associated
   with it, the message "File does not exist."  will appear instead of
   the time. In some cases you may see "Modification time never
   checked."

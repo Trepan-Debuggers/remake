@@ -10,7 +10,7 @@ Continue executing debugged Makefile until another breakpoint or
 stopping point. If a target is given and valid we set a breakpoint at
 that target before continuing.
 
-As with the `break` command, the place in a target is in can be
+As with the `break` command, the precise stopping place within a target line can be
 specified. See :ref:`break <break>` for a list of the meanings of the
 target phases.
 

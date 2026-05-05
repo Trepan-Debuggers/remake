@@ -21,6 +21,11 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/types.h"
 #include "../src/file_basic.h"
 #include "../src/profile.h"
+#include "../src/dep.h"
+
+#define TS_RES       (1000)
+#define TS_INC       (5 * TS_RES)
+static FILE_TIMESTAMP fake_clock = 0;
 
 void
 die (int status)
@@ -28,31 +33,42 @@ die (int status)
   exit (status);
 }
 
+FILE_TIMESTAMP
+file_timestamp_now (int *resolution) {
+  *resolution = TS_RES;
+
+  fake_clock += TS_INC;
+  return fake_clock;
+}
 
 int main(int argc, const char * const* argv) {
-  bool rc = init_callgrind(PACKAGE_TARNAME " " PACKAGE_VERSION, argv);
+  bool rc = profile_init(PACKAGE_TARNAME " " PACKAGE_VERSION, argv, 0);
   (void)argc;
   init_hash_files();
+
   if (rc) {
     file_t *target = enter_file("Makefile");
     file_t *target2, *target3;
-    target->floc.filenm = "Makefile";
+    goaldep_t *goals = alloc_goaldep();
 
+    target->floc.filenm = "Makefile";
+    goals->file = target;
 
     target2 = enter_file("all");
     target2->floc.filenm = "Makefile";
     target2->floc.lineno = 5;
     target2->elapsed_time = 500;
-    add_target(target2, NULL);
+    profile_add_dependency(target2, NULL);
 
     target3 = enter_file("all-recursive");
     target3->floc.filenm = "Makefile";
     target3->floc.lineno = 5;
     target3->elapsed_time = 1000;
-    add_target(target3, target2);
+    profile_add_dependency(target3, target2);
 
-    close_callgrind("Program termination");
+    profile_close("Program termination", goals, 0);
   }
+
   if (rc == true) {
     return 0;
   } else {

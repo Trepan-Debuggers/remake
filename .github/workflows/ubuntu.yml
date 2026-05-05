@@ -1,0 +1,32 @@
+name: remake 4.3 (ubuntu)
+
+on:
+  push:
+    branches: [ remake-4-3 ]
+  pull_request:
+    branches: [ remake-4-3 ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -qq && sudo apt-get install -qq gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.2 lzip texinfo texlive
+    - name: Generate configure POSIX script
+      run: autoreconf -i
+    - name: Configure for GNU Make
+      run: ./configure --enable-maintainer-mode
+    - name: Pull localization files
+      run: make po-update
+    - name: Set up to rebuild doc
+      run: (cd doc && make stamp-1 stamp-vti)
+    - name: Run GNU make to build
+      run: make
+    - name: Test "remake" just built
+      run: make check
+    - name: Check distribution building
+      run: make distcheck

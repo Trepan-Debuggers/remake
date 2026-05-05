@@ -37,7 +37,8 @@ make_SRCS =	\
 		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
 		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
 		src/rule.c src/rule.h src/signame.c src/strcache.c \
-		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c
+		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
+		src/callgrind_format.c src/json_format.c
 
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 

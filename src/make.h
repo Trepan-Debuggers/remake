@@ -415,11 +415,7 @@ long int lseek ();
 
 #endif  /* Not GNU C library or POSIX.  */
 
-#ifdef  HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-# endif
-#else
+#ifndef HAVE_GETCWD
 char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
 #endif
@@ -487,6 +483,13 @@ extern char *directory_before_chdir;
 
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
+
+/*! Value of the MAKEPARENT variable at startup (or 0). */
+extern pid_t makeparent_pid;
+
+/*! Value of the MAKEPARENT_TARGET variable at startup (or NULL). */
+extern char *makeparent_target;
+
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
