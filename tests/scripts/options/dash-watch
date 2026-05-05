@@ -1,0 +1,169 @@
+#                                                                    -*-perl-*-
+
+$description = "Test make --watch (incremental rebuild on file-system changes).\n";
+
+$details = "Verify that --watch:
+1. is incompatible with -t (rejected at startup).
+2. only watches transitive prerequisites of command-line goals.
+3. does not self-trigger when a recipe writes its own output.
+4. re-execs the make process when a makefile changes.
+The watch loop tests background make, edit a source, sleep, then kill make,
+and check the captured log.";
+
+# Skip on platforms without inotify.  We probe by asking --watch to do
+# something tiny: a make built without HAVE_SYS_INOTIFY_H prints a fatal
+# error the moment --watch is requested.
+{
+    my $probe = `$make_path --watch -v 2>&1`;
+    if ($probe =~ /inotify is not available/) {
+        return -1;
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Test 15: --watch with -t is rejected at startup (no background needed).
+
+run_make_test('
+hello: ; @echo built
+',
+              '--watch -t hello',
+              "#MAKE#: *** --watch is incompatible with -t/--touch.  Stop.",
+              512);
+
+# ---------------------------------------------------------------------------
+# Helper: run "make --watch GOALS" in background, perform $editor (a shell
+# snippet) after $delay1 seconds, wait $delay2, then kill make.  Returns
+# captured stdout+stderr as a single string.
+
+sub run_watch {
+    my ($makestring, $goals, $editor, $delay1, $delay2) = @_;
+    my $mf = &get_tmpfile();
+    open(my $fh, '>', $mf) or die "open $mf: $!";
+    print $fh $makestring;
+    close($fh);
+
+    my $log = "$mf.watchlog";
+    my $script = qq{
+        ( $make_path -f $mf --watch $goals > $log 2>&1 ) &
+        WPID=\$!
+        sleep $delay1
+        $editor
+        sleep $delay2
+        kill \$WPID 2>/dev/null
+        wait 2>/dev/null
+        true
+    };
+    system('sh', '-c', $script);
+
+    my $out = '';
+    if (open($fh, '<', $log)) {
+        local $/;
+        $out = <$fh>;
+        close($fh);
+    }
+    unlink($log);
+    return $out;
+}
+
+sub count_str {
+    my ($hay, $needle) = @_;
+    my $n = 0;
+    $n++ while $hay =~ /\Q$needle\E/g;
+    return $n;
+}
+
+# Mark a test as run, with pass/fail derived from a boolean.
+sub watch_check {
+    my ($label, $ok, $out) = @_;
+    ++$tests_run;
+    if ($ok) {
+        ++$tests_passed;
+        print "ok: $label\n" if $debug;
+    } else {
+        $suite_passed = 0;
+        print "FAIL: $label\nCaptured output:\n$out\n";
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Test 4: rebuild does not self-trigger.  Recipe writes its own output;
+# after exactly one edit there must be exactly one rebuild, not a cascade.
+
+unlink('hello', 'hello.c');
+open(my $fh, '>', 'hello.c') or die;
+print $fh "int main(void){return 0;}\n";
+close($fh);
+
+my $out = run_watch(
+    "hello: hello.c\n\t\@cc -o \$\@ \$<\n",
+    'hello',
+    q{ printf 'int main(void){return 1;}\n' > hello.c },
+    1, 2);
+
+my $rebuilds = count_str($out, '--watch: change detected, rebuilding.');
+watch_check("self-trigger guard: 1 edit -> 1 rebuild (got $rebuilds)",
+            $rebuilds == 1, $out);
+
+unlink('hello', 'hello.c');
+
+# ---------------------------------------------------------------------------
+# Test 5: goals not on the command line are not watched.  Build "a" only;
+# edit "b.in"; expect no rebuild.
+
+unlink('a', 'b', 'a.in', 'b.in');
+open($fh, '>', 'a.in') or die; print $fh "a\n"; close($fh);
+open($fh, '>', 'b.in') or die; print $fh "b\n"; close($fh);
+
+$out = run_watch(
+    "a: a.in\n\t\@cp \$< \$\@\nb: b.in\n\t\@cp \$< \$\@\n",
+    'a',
+    q{ echo new > b.in },
+    1, 2);
+
+$rebuilds = count_str($out, '--watch: change detected, rebuilding.');
+watch_check("scoped watch set: edit to unwatched prerequisite -> 0 rebuilds (got $rebuilds)",
+            $rebuilds == 0, $out);
+
+unlink('a', 'b', 'a.in', 'b.in');
+
+# ---------------------------------------------------------------------------
+# Test 6: editing the makefile triggers re-exec.
+
+unlink('out', 'out.in');
+open($fh, '>', 'out.in') or die; print $fh "x\n"; close($fh);
+
+# Drive this one manually because the editor edits the makefile itself.
+my $mf = &get_tmpfile();
+open($fh, '>', $mf) or die;
+print $fh "out: out.in\n\t\@cp \$< \$\@\n";
+close($fh);
+
+my $log = "$mf.watchlog";
+my $script = qq{
+    ( $make_path -f $mf --watch out > $log 2>&1 ) &
+    WPID=\$!
+    sleep 1
+    printf 'out: out.in\\n\\t\@echo edited; cp \$< \$\@\\n' > $mf
+    sleep 2
+    kill \$WPID 2>/dev/null
+    wait 2>/dev/null
+    true
+};
+system('sh', '-c', $script);
+
+$out = '';
+if (open($fh, '<', $log)) { local $/; $out = <$fh>; close($fh); }
+unlink($log);
+
+my $matched_reexec = ($out =~ /--watch: makefile changed, re-executing remake\./) ? 1 : 0;
+watch_check("makefile edit triggers re-exec",
+            $matched_reexec,
+            $out);
+
+unlink('out', 'out.in');
+
+1;
+
+### Local Variables:
+### eval: (setq whitespace-action (delq 'auto-cleanup whitespace-action))
+### End:

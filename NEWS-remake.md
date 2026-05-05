@@ -10,6 +10,13 @@ Rebase code on GNU Make 4.4
 * Fix build without GNU readline or libreadline #157
 
 
+Unreleased
+==========
+
+* Add `--watch` option: stay running and rebuild on file-system changes
+  (Linux/inotify only).  Watches the transitive prerequisite set of the
+  named goals; re-execs on makefile changes for full re-parse.
+
 Version 4.3.1+dbg-1.6 (2022-01-22)
 ==================================
 

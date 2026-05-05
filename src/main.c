@@ -130,6 +130,9 @@ bool b_show_version = false;
 Sets --debugger --debugger-stop=error. */
 int post_mortem_flag = 0;
 
+/*! Nonzero means watch the goal subgraph and rebuild on changes. */
+int watch_flag = 0;
+
 /*! Nonzero means use GNU readline in the debugger. */
 int use_readline_flag =
 #ifdef HAVE_LIBREADLINE
@@ -375,6 +378,9 @@ static const char *const usage[] =
   -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n\
                               Consider FILE to be infinitely new.\n"),
     N_("\
+  --watch                     Stay running and rebuild affected targets on\n\
+                              file-system changes (requires inotify).\n"),
+    N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]          Trace command execution TYPE may be\n\
@@ -470,6 +476,7 @@ static const struct command_switch switches[] =
       "debugger-stop" },
     { CHAR_MAX+15, filename, &profile_dir_opt, 1, 1, 0, 0, 0, "profile-directory" },
     { CHAR_MAX+16, string, &jobserver_style, 1, 0, 0, 0, 0, "jobserver-style" },
+    { CHAR_MAX+17, flag, &watch_flag, 1, 1, 0, 0, 0, "watch" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -2538,6 +2545,21 @@ main (int argc, const char **argv, char **envp)
   /* Update the goals.  */
 
   DB (DB_BASIC, (_("Updating goal targets...\n")));
+
+  if (watch_flag)
+    {
+      if (touch_flag)
+        O (fatal, NILF,
+           _("--watch is incompatible with -t/--touch"));
+#ifdef HAVE_SYS_INOTIFY_H
+      watch_loop (goals, argc, (char **)argv);
+      /* watch_loop only returns on fatal error or signal. */
+      die (MAKE_FAILURE);
+#else
+      O (fatal, NILF,
+         _("--watch was requested but inotify is not available on this build"));
+#endif
+    }
 
   {
     switch (update_goal_chain (goals))
