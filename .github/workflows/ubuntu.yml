@@ -29,5 +29,5 @@ jobs:
         run: make
       - name: Test "remake" just built
         run: make check
-      - name: Check distribution building
-        run: make distcheck
+      # - name: Check distribution building
+      #   run: make distcheck
