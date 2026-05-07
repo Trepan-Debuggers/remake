@@ -1,5 +1,5 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -307,7 +307,7 @@ define_variable_in_set (const char *name, size_t length,
   /* Create a new variable definition and add it to the hash table.  */
 
   v = xcalloc (sizeof (struct variable));
-  v->name = xstrndup (name, length);
+  v->name = strndup (name, length);
   v->length = (unsigned int) length;
   hash_insert_at (&set->table, v, var_slot);
   if (set == &global_variable_set)

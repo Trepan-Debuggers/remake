@@ -1,5 +1,5 @@
 /* Reading and parsing of makefiles for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,6 +20,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cmd.h"
 
 #include <assert.h>
+#include <string.h>
 
 #include "read.h"
 #include "filedef.h"
@@ -879,7 +880,7 @@ eval (struct ebuffer *ebuf, int set_default)
           p = find_next_token (&cp, &l);
           if (p != 0)
             {
-              vpat = xstrndup (p, l);
+              vpat = strndup (p, l);
               p = find_next_token (&cp, &l);
               /* No searchpath means remove all previous
                  selective VPATH's with the same pattern.  */
@@ -1317,7 +1318,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
         /* Put all the prerequisites here; they'll be parsed later.  */
         if (beg <= end && *beg != '\0')
-          depstr = xstrndup (beg, end - beg + 1);
+          depstr = strndup (beg, end - beg + 1);
         else
           depstr = 0;
 
@@ -2005,7 +2006,7 @@ record_files (struct nameseq *filenames, int are_also_makes,
       cmds->fileinfo.filenm = flocp->filenm;
       cmds->fileinfo.lineno = cmds_started;
       cmds->fileinfo.offset = 0;
-      cmds->commands = xstrndup (commands, commands_idx);
+      cmds->commands = strndup (commands, commands_idx);
       cmds->command_lines = 0;
       cmds->recipe_prefix = prefix;
     }

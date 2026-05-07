@@ -213,7 +213,7 @@ variable_expand_string (char *line, const char *string, size_t length)
   /* We need a copy of STRING: due to eval, it's possible that it will get
      freed as we process it (it might be the value of a variable that's reset
      for example).  Also having a nil-terminated string is handy.  */
-  save = length == SIZE_MAX ? xstrdup (string) : xstrndup (string, length);
+  save = length == SIZE_MAX ? xstrdup (string) : strndup (string, length);
   p = save;
 
   while (1)

@@ -1065,11 +1065,6 @@ main (int argc, const char **argv, char **envp)
   no_default_sh_exe = 1;
 #endif
 
-  /* Useful for attaching debuggers, etc.  */
-#ifdef SPIN
-  SPIN ("main-entry");
-#endif
-
   argv0 = strdup(argv[0]);
   output_init (&make_sync);
 
@@ -1210,7 +1205,7 @@ main (int argc, const char **argv, char **envp)
           {
             size_t len = strlen (program);
             if (len > 4 && streq (&program[len - 4], ".exe"))
-              program = xstrndup (program, len - 4);
+              program = strndup (program, len - 4);
           }
         }
 #else
