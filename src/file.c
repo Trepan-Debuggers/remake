@@ -1,5 +1,5 @@
 /* Target file management for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "file_basic.h"
 
 #include <assert.h>
+#include <time.h>
 
 #include "filedef.h"
 #include "file.h"
@@ -29,7 +30,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hash.h"
 #include "profile.h"
 #include "globals.h"
-
 
 /* Remember whether snap_deps has been invoked: we need this to be sure we
    don't add new rules (via $(eval ...)) afterwards.  In the future it would

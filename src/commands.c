@@ -376,7 +376,7 @@ chop_commands (struct commands *cmds)
               nlines += 2;
               lines = xrealloc (lines, nlines * sizeof (char *));
             }
-          lines[idx++] = xstrndup (p, (size_t) (end - p));
+          lines[idx++] = strndup (p, (size_t) (end - p));
           p = end;
           if (*p != '\0')
             ++p;

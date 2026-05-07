@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2015 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2015, 2026 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -18,6 +18,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <config.h>
 
@@ -71,7 +72,7 @@ add_profile_entry (const file_t *target)
   profile_entry_t **slot;
   profile_entry_t *profile_entry;
 
-  new = xcalloc (sizeof (profile_entry_t));
+  new = calloc (1, sizeof (profile_entry_t));
   new->name = target->name;
 
   slot = (profile_entry_t **) hash_find_slot (&profile_table, new);

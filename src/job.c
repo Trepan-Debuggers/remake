@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -2933,7 +2933,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
               char *t;
               size_t len;
               while ((t = find_next_token (&s, &len)) != 0)
-                new_argv[n++] = xstrndup (t, len);
+                new_argv[n++] = strndup (t, len);
             }
 
           /* Set the command to invoke.  */
