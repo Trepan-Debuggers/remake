@@ -1065,6 +1065,7 @@ are a number of handy extensions to @value{MAKE} that we list here.
 * Comments::     Listing and Documenting Makefile Targets
 * Searching::    Searching for a Makefile in Parent Directories
 * Improved-Tracing::      Improved Execution Tracing
+* Watching::     Rebuild on file-system changes
 @end menu
 
 @node Profiling and Visualization
@@ -1285,6 +1286,43 @@ If different granularity of tracing is desired the @code{--trace} option
 has other settings. See the relevant parts of this manual for more information.
 
 And, if you the most flexibility in tracing there is a built-in debugger.
+
+@node Watching
+@section Rebuild on file-system changes
+
+@cindex @code{--watch}
+@cindex incremental rebuild
+
+@smallexample
+  $ remake --watch # target...
+@end smallexample
+
+When the @code{--watch} flag is given, @value{REMAKE} performs the
+requested build once and then stays running, watching the file system
+for changes to any file that is a transitive prerequisite of the named
+goals (or the default goal, if none was named).  When such a file
+changes, @value{REMAKE} re-runs @code{update_goal_chain} in-process,
+which means only targets whose dependencies have actually changed are
+remade --- exactly as a normal @code{remake} invocation would decide.
+
+If a @emph{makefile} that was read changes, @value{REMAKE} re-executes
+itself with the original argument list, so the makefiles are re-parsed
+from scratch.  This is the only behavior consistent with normal make
+semantics.
+
+@code{--watch} is incompatible with @code{-t}/@code{--touch}, since
+touching watched targets would cause the watcher to fire on its own
+output.  Other options (@code{-n}, @code{-q}, @code{-W}, @code{-p},
+etc.) work as documented; in particular, @code{-n} is a useful way
+to see, on each change, what @emph{would} be rebuilt.
+
+On Linux and Cygwin (when @code{<sys/inotify.h>} is available)
+@code{--watch} uses @code{inotify(7)} for instant wake-up.  Pass
+@code{--without-inotify} to @code{configure} to force the portable
+fallback.  On every other platform a @code{stat(2)}-based polling
+backend is used; its tick interval can be tuned with the
+@code{MAKE_WATCH_POLL_INTERVAL} environment variable (milliseconds;
+default 1000).  Press @kbd{Ctrl-C} to stop watching.
 
 @node Invocation
 @chapter Getting in and out and new @value{REMAKE} Command Options

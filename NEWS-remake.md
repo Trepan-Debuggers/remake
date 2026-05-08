@@ -10,6 +10,17 @@ Rebase code on GNU Make 4.4
 * Fix build without GNU readline or libreadline #157
 
 
+Unreleased
+==========
+
+* Add `--watch` option: stay running and rebuild on file-system changes.
+  Watches the transitive prerequisite set of the named goals; re-execs
+  on makefile changes for full re-parse.  Linux/Cygwin builds use
+  `inotify(7)` for instant wake-up; on every other platform (and with
+  `--without-inotify` on Linux for testing) a portable `stat()`-based
+  polling fallback is used (interval tunable via the
+  `MAKE_WATCH_POLL_INTERVAL` environment variable, default 1000 ms).
+
 Version 4.3.1+dbg-1.6 (2022-01-22)
 ==================================
 
