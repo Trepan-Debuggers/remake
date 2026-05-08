@@ -1,0 +1,34 @@
+#                                                                    -*-perl-*-
+$description = "Test the test_xxx functions.";
+
+$details = "Tests $(this_file ), $(this_line ), and $(this_counter ) nullary functions";
+
+
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE <<EOMAKE;
+string := \$(this_line ) \$(this_file ) \$(this_counter )
+one: ; \@echo \$(string)
+EOMAKE
+
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+
+&run_make_with_options($makefile, "", &get_logfile, 0);
+
+# Create the answer to what should be produced by this Makefile
+$answer = "1 work/functions/this.mk 1\n";
+
+# COMPARE RESULTS
+
+# In this call to compare output. call &get_logfile(1) is used
+# to send the name of the last logfile created.
+
+&compare_output($answer,&get_logfile(1));
+
+# This tells the test driver that the perl test script executed properly.
+1;
