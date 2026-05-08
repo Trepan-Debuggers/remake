@@ -1458,7 +1458,7 @@ func_this_counter (char *o UNUSED, char **argv UNUSED, const char *funcname UNUS
 
   o = variable_buffer_output(o, xstrdup(cntbuf), strlen(cntbuf));
 
-  return 0;
+  return o;
 }
 /* end of functions added by  <basile@starynkevitch.net> */
 
