@@ -1,5 +1,6 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, Free Software Foundation, Inc.
+Copyright (C) 2026 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -24,8 +25,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "debug.h"
 
-// debugger include(s)
-#include "cmd.h"
+/* enter_debugger() header is found in: */
+#include <libdebugger/cmd.h>
 
 struct function_table_entry
   {
@@ -1353,7 +1354,8 @@ func_debugger (char *o, char **argv, const char *funcname UNUSED)
 {
   printf("debugger() function called with parameter %s\n", argv[0]);
   (void) enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
-  o = variable_buffer_output (o, "", 0);
+  o = variable_buffer_output(o, "", 0);
+
   return o;
 }
 
@@ -1370,63 +1372,95 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-///// added by <basile@starynkevitch.net>
-
+/* The following 3 functions started by <basile@starynkevitch.net>,
+   but finished and corrected by Rocky Bernstein.
+*/
 
 /**
-  $(this_file)
+  $(this_file )
 
-  Always expands to the current Makefile path.  Inspired by the __FILE__ macro of C.
+  Always expands to the current Makefile path.  Inspired by the
+__FILE__ macro of C.
+
+
+  Note the space after "this_file". This is needed to distinguish this
+  from being a variable.
 **/
 
-static char *
-func_this_file (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
-{
+static char *func_this_file(char *o UNUSED, char **argv UNUSED,
+                            const char *funcname UNUSED) {
+  char *s;
   if (reading_file) {
-    return xstrdup(reading_file->filenm);
+    s = xstrdup(reading_file->filenm);
   }
   else
-    return xstrdup("?");
+    s = xstrdup("?");
+
+  o = variable_buffer_output(o, s, strlen(s));
+
+  return o;
+
 }
 
 
 /**
-  $(this_line)
+  $(this_line )
 
-  Always expands to the current line number.   Inspired by the __LINE__ macro of C.
+  Always expands to the current line number.   Inspired by the __LINE__ macro of
+C.
+
+  Note the space after "this_line". This is needed to distinguish this
+  from being a variable.
 **/
 
 static char *
 func_this_line (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
+  char *s;
+
   if (reading_file) {
     char linumbuf[32];
     memset (linumbuf, 0, sizeof(linumbuf));
     snprintf(linumbuf, sizeof(linumbuf),  "%lu", reading_file->lineno);
-    return xstrdup(linumbuf);
+    s =xstrdup(linumbuf);
   }
   else
-    return xstrdup("0");
+    s = xstrdup("0");
+
+  o = variable_buffer_output(o, s, strlen(s));
+
+  return o;
+
 }
 
 
 /**
-  $(this_counter)
+  $(this_counter )
 
-  Always expands to a unique, incremented, counter.   Inspired by the __COUNTER__ macro of GCC.
+  Always expands to a unique, incremented, counter.   Inspired by the
+__COUNTER__ macro of GCC.
+
+  Note the space after "this_counter". This is needed to distinguish
+  this from being a variable.
 **/
+
+
 
 static char *
 func_this_counter (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
   static long counter;
   char cntbuf[32];
+
   memset (cntbuf, 0, sizeof(cntbuf));
   counter++;
   snprintf (cntbuf, sizeof(cntbuf), "%ld", counter);
-  return xstrdup(cntbuf);
+
+  o = variable_buffer_output(o, xstrdup(cntbuf), strlen(cntbuf));
+
+  return o;
 }
-///// end of functions added by  <basile@starynkevitch.net>
+/* end of functions added by  <basile@starynkevitch.net> */
 
 
 /*
@@ -2269,7 +2303,7 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
   FT_ENTRY ("debugger",      0,  1,  1,  func_debugger),
-  /// three functions added by <basile@starynkevitch.net>
+  /* The following three functions added by <basile@starynkevitch.net>. */
   FT_ENTRY ("this_file",     0,  0,  0,  func_this_file),
   FT_ENTRY ("this_line",     0,  0,  0,  func_this_line),
   FT_ENTRY ("this_counter",  0,  0,  0,  func_this_counter),
@@ -2300,7 +2334,7 @@ expand_builtin_function (char *o, int argc, char **argv,
      rather than in each one.  We can change it later if necessary.  */
 
   if (!argc
-      /// the functions named this_* by <basile@starynkevitch.net> take no arguments...
+      /* the functions named this_* by <basile@starynkevitch.net> take no arguments... */
       && strncmp(entry_p->name, "this", sizeof("this")-1)
       && !entry_p->alloc_fn)
     return o;
