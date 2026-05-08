@@ -145,7 +145,7 @@ check-local: check-regression
 #
 MAKETESTFLAGS =
 
-.PHONY: check-regression readthedocs
+.PHONY: check-regression codespell readthedocs
 
 #: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
@@ -193,6 +193,10 @@ if MAINTAINER_MODE
 
 # FIXME fix up to use the git2cl in MAINT_MAKEFILE
 GIT2CL_PROG = ./git2cl
+
+#: Run codspell over ChangeLog
+codespell: codespell-ignore.txt ChangeLog
+	codespell --ignore-words=codespell-ignore.txt ChangeLog
 
 #: Remove ChangeLog
 rmChangeLog:

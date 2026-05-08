@@ -1,5 +1,6 @@
 /* Reading and parsing of makefiles for GNU Make.
 Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 2026 Rocky Bernstein
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -228,7 +229,7 @@ read_all_makefiles (const char **makefiles)
     {
       PATH_VAR (current_directory);
       static const char *default_makefiles[] =
-        { "GNUmakefile", "makefile", "Makefile", 0 };
+        { "GNUremakefile", "GNUmakefile", "makefile", "Makefile", 0 };
       const char **p;
 
       while (1) {
