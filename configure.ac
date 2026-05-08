@@ -127,7 +127,19 @@ AC_HEADER_STAT
 
 AC_CHECK_HEADERS([stdlib.h string.h strings.h locale.h unistd.h limits.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/select.h \
-                  sys/file.h fcntl.h spawn.h sys/inotify.h])
+                  sys/file.h fcntl.h spawn.h])
+
+# --watch backend selection: inotify when available, polling otherwise.
+# Pass --without-inotify to force the polling backend (useful for
+# testing the fallback on Linux).  No flag is needed on platforms
+# where <sys/inotify.h> is unavailable -- the probe just fails.
+AC_ARG_WITH([inotify],
+  [AS_HELP_STRING([--without-inotify],
+                  [do not use inotify(7) for --watch; use stat() polling instead])],
+  [],
+  [with_inotify=yes])
+AS_IF([test "x$with_inotify" != xno],
+  [AC_CHECK_HEADERS([sys/inotify.h])])
 
 AM_PROG_CC_C_O
 AC_C_CONST
@@ -157,14 +169,14 @@ AS_IF([test "$make_cv_file_timestamp_hi_res" = yes], [val=1], [val=0])
 AC_DEFINE_UNQUOTED([FILE_TIMESTAMP_HI_RES], [$val],
                    [Use high resolution file timestamps if nonzero.])
 
-AS_IF([test "$make_cv_file_timestamp_hi_res" = yes],
-[ # Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
-  # Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
-  AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-  AS_IF([test "$ac_cv_search_clock_gettime" != no],
-  [ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
-              [Define to 1 if you have the clock_gettime function.])
-  ])
+# Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
+# Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
+# The probe is unconditional so the --watch self-trigger guard can use
+# CLOCK_MONOTONIC regardless of file-timestamp resolution.
+AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+AS_IF([test "$ac_cv_search_clock_gettime" != no],
+[ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
+            [Define to 1 if you have the clock_gettime function.])
 ])
 
 # See if we have a standard version of gettimeofday().  Since actual
@@ -192,7 +204,7 @@ AC_CHECK_FUNCS([strtoll strdup strndup stpcpy memrchr mempcpy umask mkstemp \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 mkfifo getrlimit setrlimit setvbuf pipe strerror strsignal \
                 lstat readlink atexit isatty ttyname pselect posix_spawn \
-                posix_spawnattr_setsigmask])
+                posix_spawnattr_setsigmask nanosleep])
 
 # We need to check declarations, not just existence, because on Tru64 this
 # function is not declared without special flags, which themselves cause

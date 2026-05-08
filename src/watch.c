@@ -1,70 +1,93 @@
-/* --watch loop for remake: rebuild on file-system changes.
+/* --watch event loop for remake: rebuild on file-system changes.
+Copyright (C) 2026 Free Software Foundation, Inc.
+This file is part of GNU Make / remake.
 
-   Co-inductive by design: the outer event loop only progresses when the
-   user (or a build tool) modifies a watched file.  The only inductive
-   risk -- a rebuild that triggers itself -- is bounded by a counter
-   below (SELF_TRIGGER_HALT) which warns then aborts.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
+
+/* The outer event loop only progresses when the user (or a build tool)
+   modifies a watched file.  The one inductive risk -- a rebuild that
+   triggers itself -- is bounded by SELF_TRIGGER_HALT below, which warns
+   then aborts.
 
    For non-makefile sources we do an in-process rebuild
-   (update_goal_chain) for speed.  When a *makefile* changes we
-   re-exec ourselves with the original argv, which is the only
-   behavior consistent with normal make semantics (re-parse from
-   scratch).  This mirrors what main.c does at the bootstrap re_exec:
-   label; we deliberately use a simpler execvp here to keep the patch
-   minimal -- see main.c around the re_exec label for the fuller
-   ceremony (MAKE_RESTARTS bookkeeping, stdin temp file fixup) which
-   we do not need in the watch case.  */
+   (update_goal_chain) for speed.  When a makefile changes we re-exec
+   ourselves with the original argv, which is the only behavior
+   consistent with normal make semantics (re-parse from scratch).  This
+   is a simpler execvp than main.c's re_exec path -- we have no stdin
+   temp file to preserve and no in-flight makefile rebuild.
+
+   File-system-event detection is done by a backend selected at compile
+   time -- watch_inotify.c on Linux/Cygwin, watch_poll.c elsewhere --
+   behind the small interface in watchbackend.h.  */
 
 #include "makeint.h"
-
-#ifdef HAVE_SYS_INOTIFY_H
 
 #include "filedef.h"
 #include "dep.h"
 #include "debug.h"
 #include "os.h"
+#include "watchbackend.h"
 
-#include <sys/inotify.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
-#include <poll.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <libgen.h>
 #include <time.h>
 
-/* Tunables.  Kept conservative; expose later as env vars if needed.  */
-#define DEBOUNCE_MS            50
-#define DEBOUNCE_MAX_EVENTS    10000
-#define EVENT_BUF_BYTES        (64 * 1024)
-#define SELF_TRIGGER_WARN      3
-#define SELF_TRIGGER_HALT      10
-#define SELF_TRIGGER_WINDOW_NS 200000000L  /* 200ms */
+#define SELF_TRIGGER_WARN          3
+#define SELF_TRIGGER_HALT          10
+/* Floor for the self-trigger window.  The actual window used is
+   max(SELF_TRIGGER_WINDOW_MS_FLOOR, 2 * backend->min_latency_ms) so
+   the polling backend's tick (typically 1 s) does not silently
+   bypass the guard.  */
+#define SELF_TRIGGER_WINDOW_MS_FLOOR 200
 
-/* A directory we watch.  We watch the *directory* (not the file) so
-   atomic-replace saves (vim, most editors) don't detach the watch.
-   Each entry tracks the basenames in that directory we care about,
-   so changes to unrelated siblings can be filtered out.  */
-struct watched_dir
+/* mainline globals we need: directory the user was in before -C, so
+   we can restore it across the makefile-edit re-exec.  */
+extern char *directory_before_chdir;
+
+/* Monotonic time in milliseconds since some unspecified epoch, used
+   only for differences.  Falls back to gettimeofday() (POSIX.1-2001)
+   when clock_gettime() is unavailable; that fallback is wall-clock
+   and so a step backwards (NTP, manual date change) will produce a
+   negative diff -- callers must treat negative diffs as "long ago".  */
+static intmax_t
+monotonic_ms (void)
 {
-  int wd;                       /* inotify watch descriptor */
-  char *path;                   /* directory path (owned) */
-  char **basenames;             /* names of files we care about */
-  int n_basenames;
-  int cap_basenames;
-  unsigned int is_makefile_dir : 1;
-};
-
-static int notify_fd = -1;
-static struct watched_dir *src_dirs = NULL;
-static int n_src_dirs = 0, cap_src_dirs = 0;
-static struct watched_dir *mk_dirs = NULL;
-static int n_mk_dirs = 0, cap_mk_dirs = 0;
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+  struct timespec ts;
+  if (clock_gettime (CLOCK_MONOTONIC, &ts) == 0)
+    return (intmax_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#endif
+#ifdef HAVE_GETTIMEOFDAY
+  {
+    struct timeval tv;
+    if (gettimeofday (&tv, NULL) == 0)
+      return (intmax_t) tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  }
+#endif
+  /* Last resort: 1-second resolution from time().  Self-trigger
+     guard becomes coarse but the loop still works.  */
+  return (intmax_t) time (NULL) * 1000;
+}
 
 /* For self-trigger detection.  */
 static int self_trigger_count = 0;
-static struct timespec last_build_finished;
+static intmax_t last_build_finished_ms = 0;
 
 /* DFS visited set: pointer-identity, linear-probed open addressing.
    Tiny hash table, sized to power of two >= 2 * |goal subgraph|.  */
@@ -98,6 +121,7 @@ visited_add (struct visited_set *v, struct file *f)
 {
   size_t mask = v->cap - 1;
   size_t i = ((uintptr_t) f >> 4) & mask;
+  size_t k;
   while (v->slots[i])
     {
       if (v->slots[i] == f) return 0;       /* already present */
@@ -113,73 +137,18 @@ visited_add (struct visited_set *v, struct file *f)
       v->cap *= 2;
       v->slots = xcalloc (v->cap * sizeof (struct file *));
       v->n = 0;
-      for (size_t k = 0; k < old_cap; k++)
+      for (k = 0; k < old_cap; k++)
         if (old[k]) visited_add (v, old[k]);
       free (old);
     }
   return 1;
 }
 
-/* Add basename to dir entry if not present.  */
+/* Split NAME into (dirpath, basename), writing freshly-allocated copies
+   to *DIR_OUT and *BASE_OUT.  Caller frees both.  POSIX dirname()/
+   basename() may modify their input, so we use scratch copies.  */
 static void
-dir_add_basename (struct watched_dir *d, const char *base)
-{
-  for (int i = 0; i < d->n_basenames; i++)
-    if (strcmp (d->basenames[i], base) == 0) return;
-  if (d->n_basenames == d->cap_basenames)
-    {
-      d->cap_basenames = d->cap_basenames ? d->cap_basenames * 2 : 4;
-      d->basenames = xrealloc (d->basenames,
-                               d->cap_basenames * sizeof (char *));
-    }
-  d->basenames[d->n_basenames++] = xstrdup (base);
-}
-
-static struct watched_dir *
-find_or_add_dir (struct watched_dir **arr, int *n, int *cap,
-                 const char *path, int is_makefile_dir)
-{
-  /* CLOSE_WRITE coalesces in-progress writes; MOVED_TO catches editor
-     atomic-replace; CREATE/DELETE catch newly-added/removed prereqs.
-     IN_MODIFY and IN_ATTRIB are intentionally omitted -- they fire
-     mid-write and on metadata-only changes, producing spurious
-     wakeups.  */
-  const uint32_t mask = IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE | IN_DELETE;
-  struct watched_dir *d;
-  int i;
-
-  for (i = 0; i < *n; i++)
-    if (strcmp ((*arr)[i].path, path) == 0)
-      return &(*arr)[i];
-
-  if (*n == *cap)
-    {
-      *cap = *cap ? *cap * 2 : 8;
-      *arr = xrealloc (*arr, *cap * sizeof (struct watched_dir));
-    }
-  d = &(*arr)[*n];
-  memset (d, 0, sizeof *d);
-  d->path = xstrdup (path);
-  d->is_makefile_dir = is_makefile_dir ? 1 : 0;
-
-  d->wd = inotify_add_watch (notify_fd, path, mask);
-  if (d->wd < 0)
-    {
-      OSS (error, NILF, _("--watch: cannot watch directory '%s': %s"),
-           path, strerror (errno));
-      free (d->path);
-      d->path = NULL;
-      return NULL;
-    }
-  (*n)++;
-  return d;
-}
-
-/* Split f->name into (dirpath, basename) using a writable copy.
-   Returns 0 on success.  Caller frees *dir_out.  */
-static int
-split_path (const char *name, char **dir_out, char **base_out,
-            char **scratch_out)
+split_path (const char *name, char **dir_out, char **base_out)
 {
   char *scratch_dir = xstrdup (name);
   char *scratch_base = xstrdup (name);
@@ -187,8 +156,6 @@ split_path (const char *name, char **dir_out, char **base_out,
   *base_out = xstrdup (basename (scratch_base));
   free (scratch_dir);
   free (scratch_base);
-  *scratch_out = NULL;
-  return 0;
 }
 
 /* Add the file f to the source watch set if it is a leaf source --
@@ -196,68 +163,65 @@ split_path (const char *name, char **dir_out, char **base_out,
    product (no recipe attached).  Watching build outputs would make
    each successful build trigger the next one.  */
 static void
-watch_one_source (struct file *f)
+watch_one_source (struct watch_backend *wb, struct file *f)
 {
-  char *dir, *base, *scratch;
-  struct watched_dir *d;
-
+  char *dir, *base;
   if (!f || !f->name) return;
   if (f->phony) return;
   if (f->cmds) return;
   if (f->name[0] == '\0') return;
 
-  if (split_path (f->name, &dir, &base, &scratch) != 0) return;
-
-  d = find_or_add_dir (&src_dirs, &n_src_dirs, &cap_src_dirs, dir, 0);
-  if (d) dir_add_basename (d, base);
-
+  split_path (f->name, &dir, &base);
+  wb_add (wb, dir, base, 0 /* source */);
   free (dir);
   free (base);
 }
 
 /* DFS the goal subgraph collecting watch entries.  */
 static void
-collect_watched (struct file *f, struct visited_set *seen)
+collect_watched (struct watch_backend *wb, struct file *f,
+                 struct visited_set *seen)
 {
+  struct dep *d;
   if (!f) return;
   while (f->renamed) f = f->renamed;
   if (!visited_add (seen, f)) return;
 
-  watch_one_source (f);
+  watch_one_source (wb, f);
 
-  for (struct dep *d = f->deps; d; d = d->next)
-    if (d->file) collect_watched (d->file, seen);
-  for (struct dep *d = f->also_make; d; d = d->next)
-    if (d->file) collect_watched (d->file, seen);
+  for (d = f->deps; d; d = d->next)
+    if (d->file) collect_watched (wb, d->file, seen);
+  for (d = f->also_make; d; d = d->next)
+    if (d->file) collect_watched (wb, d->file, seen);
 }
 
 static void
-build_source_watch_set (struct goaldep *goals)
+build_source_watch_set (struct watch_backend *wb, struct goaldep *goals)
 {
   struct visited_set seen;
+  struct goaldep *g;
   visited_init (&seen, 64);
-  for (struct goaldep *g = goals; g; g = g->next)
-    if (g->file) collect_watched (g->file, &seen);
+  for (g = goals; g; g = g->next)
+    if (g->file) collect_watched (wb, g->file, &seen);
   visited_free (&seen);
 }
 
-/* read_makefiles is the chain remake parsed; watch each entry's
+/* read_files is the chain main() parsed; watch each entry's
    directory.  This set is computed once per process: any change here
    triggers re-exec, and the new process recomputes from scratch.  */
 static void
-build_makefile_watch_set (void)
+build_makefile_watch_set (struct watch_backend *wb,
+                          struct goaldep *read_files)
 {
   struct goaldep *g;
-  char *dir, *base, *scratch;
-  struct watched_dir *d;
-
-  for (g = read_makefiles; g; g = g->next)
+  for (g = read_files; g; g = g->next)
     {
+      char *dir, *base;
       if (!g->file || !g->file->name) continue;
-      if (split_path (g->file->name, &dir, &base, &scratch) != 0) continue;
-      d = find_or_add_dir (&mk_dirs, &n_mk_dirs, &cap_mk_dirs, dir, 1);
-      if (d) dir_add_basename (d, base);
-      free (dir); free (base);
+      split_path (g->file->name, &dir, &base);
+      wb_add (wb, dir, base, 1 /* makefile */);
+      free (dir);
+      free (base);
     }
 }
 
@@ -267,23 +231,26 @@ build_makefile_watch_set (void)
 static void
 reset_one (struct file *f, struct visited_set *seen)
 {
+  struct dep *d;
   if (!f) return;
   while (f->renamed) f = f->renamed;
   if (!visited_add (seen, f)) return;
 
+  /* update_goal_chain bumps a global 'considered' counter on entry and
+     compares f->considered to it, so leaving f->considered alone is
+     enough to force re-evaluation.  */
   f->last_mtime = UNKNOWN_MTIME;
   f->mtime_before_update = UNKNOWN_MTIME;
   f->updated = 0;
-  f->considered = 0;
   f->command_state = cs_not_started;
   f->update_status = us_none;
 
-  for (struct dep *d = f->deps; d; d = d->next)
+  for (d = f->deps; d; d = d->next)
     {
       d->changed = 0;
       if (d->file) reset_one (d->file, seen);
     }
-  for (struct dep *d = f->also_make; d; d = d->next)
+  for (d = f->also_make; d; d = d->next)
     if (d->file) reset_one (d->file, seen);
 }
 
@@ -291,152 +258,67 @@ static void
 reset_goal_subgraph (struct goaldep *goals)
 {
   struct visited_set seen;
+  struct goaldep *g;
   visited_init (&seen, 64);
-  for (struct goaldep *g = goals; g; g = g->next)
+  for (g = goals; g; g = g->next)
     if (g->file) reset_one (g->file, &seen);
   visited_free (&seen);
 }
 
-/* Returns 1 if (wd, basename) hits the source set, 2 if makefile set,
-   0 if neither.  Makefile takes precedence on a tie -- a re-exec is a
-   superset of a rebuild.  */
-static int
-classify (int wd, const char *base)
-{
-  for (int i = 0; i < n_mk_dirs; i++)
-    if (mk_dirs[i].wd == wd)
-      for (int j = 0; j < mk_dirs[i].n_basenames; j++)
-        if (strcmp (mk_dirs[i].basenames[j], base) == 0)
-          return 2;
-  for (int i = 0; i < n_src_dirs; i++)
-    if (src_dirs[i].wd == wd)
-      for (int j = 0; j < src_dirs[i].n_basenames; j++)
-        if (strcmp (src_dirs[i].basenames[j], base) == 0)
-          return 1;
-  return 0;
-}
-
-/* Drain inotify events with a debounce.  Returns 1 if a source change
-   (or queue overflow) was seen, 2 if a makefile change was seen
-   (highest wins), 0 if no watched basenames matched (caller should
-   keep waiting), -1 on fatal read error.  Bounded by both DEBOUNCE_MS
-   and DEBOUNCE_MAX_EVENTS.  */
-static int
-wait_and_drain (void)
-{
-  char buf[EVENT_BUF_BYTES] __attribute__((aligned(8)));
-  struct pollfd pfd;
-  int kind = 0;
-  int events_seen = 0;
-  int r;
-
-  pfd.fd = notify_fd;
-  pfd.events = POLLIN;
-  pfd.revents = 0;
-
-  /* Block until first event arrives.  */
-  for (;;)
-    {
-      r = poll (&pfd, 1, -1);
-      if (r < 0)
-        {
-          if (errno == EINTR) return -1;     /* signal: caller decides */
-          OS (error, NILF, _("--watch: poll: %s"), strerror (errno));
-          return -1;
-        }
-      if (pfd.revents & POLLIN) break;
-    }
-
-  /* Then drain with short timeout to coalesce bursts.  */
-  for (;;)
-    {
-      ssize_t len = read (notify_fd, buf, sizeof buf);
-      char *p;
-      if (len < 0)
-        {
-          if (errno == EAGAIN
-#if EAGAIN != EWOULDBLOCK
-              || errno == EWOULDBLOCK
-#endif
-              ) break;
-          if (errno == EINTR) continue;
-          OS (error, NILF, _("--watch: read: %s"), strerror (errno));
-          return -1;
-        }
-      for (p = buf; p < buf + len; )
-        {
-          struct inotify_event *e = (struct inotify_event *) p;
-          if (e->mask & IN_Q_OVERFLOW)
-            return 1;                        /* lost events: force source rebuild */
-          if (e->len > 0)
-            {
-              int k = classify (e->wd, e->name);
-              if (k > kind) kind = k;
-            }
-          p += sizeof (struct inotify_event) + e->len;
-          if (++events_seen >= DEBOUNCE_MAX_EVENTS)
-            return kind;                     /* hard cap */
-        }
-      if (kind == 2) return 2;               /* makefile wins, no need to drain more */
-
-      pfd.revents = 0;
-      r = poll (&pfd, 1, DEBOUNCE_MS);
-      if (r <= 0) break;
-    }
-
-  /* If we got events but none matched watched basenames (e.g. build
-     outputs in the same directory), report kind=0.  The caller's outer
-     loop will go back to poll() and block until the next event, so
-     this does not spin.  */
-  return kind;
-}
-
-static long
-ts_diff_ns (const struct timespec *a, const struct timespec *b)
-{
-  return (a->tv_sec - b->tv_sec) * 1000000000L + (a->tv_nsec - b->tv_nsec);
-}
-
 void
-watch_loop (struct goaldep *goals, int argc, char **argv)
+watch_loop (struct goaldep *goals, struct goaldep *read_files,
+            int argc, char **argv)
 {
-  /* Save argv for re-exec.  argv may live on the stack of main(); we
-     copy pointers, but the strings themselves are stable.  */
-  char **saved_argv = xmalloc ((argc + 1) * sizeof (char *));
+  char **saved_argv;
+  struct watch_backend *wb;
   enum update_status st;
+  intmax_t self_trigger_window_ms;
+  int min_lat;
   int i;
 
+  /* Save argv for re-exec.  argv may live on the stack of main(); we
+     copy pointers, but the strings themselves are stable.  */
+  saved_argv = xmalloc ((argc + 1) * sizeof (char *));
   for (i = 0; i < argc; i++) saved_argv[i] = argv[i];
   saved_argv[argc] = NULL;
 
-  notify_fd = inotify_init1 (IN_CLOEXEC | IN_NONBLOCK);
-  if (notify_fd < 0)
+  wb = wb_init ();
+  if (!wb)
     {
-      OS (fatal, NILF, _("--watch: inotify_init: %s"), strerror (errno));
-      return;
+      free (saved_argv);
+      return;                                /* wb_init already fataled */
     }
 
-  /* Initial build, in-process, exactly as the non-watch path would.  */
+  /* Self-trigger window must be at least one backend tick (otherwise
+     under polling the just-finished build's mtime updates land
+     outside the window and the guard never fires).  */
+  min_lat = wb_min_latency_ms (wb);
+  self_trigger_window_ms = SELF_TRIGGER_WINDOW_MS_FLOOR;
+  if ((intmax_t) min_lat * 2 > self_trigger_window_ms)
+    self_trigger_window_ms = (intmax_t) min_lat * 2;
+
+  /* Initial build, in-process, exactly as the non-watch path would.
+     -p (print_data_base_flag) and other end-of-run actions are
+     honored by die() on the rebuild path; they are *not* honored on
+     the makefile-edit re-exec path (execvp replaces the process
+     image), which mirrors the non-watch behavior of restart.  */
   st = update_goal_chain (goals);
   if (st == us_failed)
     O (error, NILF,
        _("--watch: initial build failed; will retry on next change."));
 
-  build_source_watch_set (goals);
-  build_makefile_watch_set ();
-  clock_gettime (CLOCK_MONOTONIC, &last_build_finished);
-
-  /* Note: -p (print_data_base_flag) is honored on exit via die(),
-     same as the non-watch path.  */
+  build_source_watch_set (wb, goals);
+  build_makefile_watch_set (wb, read_files);
+  last_build_finished_ms = monotonic_ms ();
 
   O (message, 0, _("--watch: waiting for changes (Ctrl-C to stop)..."));
 
   for (;;)
     {
       int kind;
-      struct timespec now;
+      intmax_t now_ms, since_ms;
 
-      kind = wait_and_drain ();
+      kind = wb_wait (wb);
       if (kind < 0)
         {
           /* Signal: let normal signal handling shut us down cleanly.  */
@@ -445,27 +327,34 @@ watch_loop (struct goaldep *goals, int argc, char **argv)
       if (kind == 0)
         continue;                            /* events were not for us */
 
-      clock_gettime (CLOCK_MONOTONIC, &now);
+      now_ms = monotonic_ms ();
 
       if (kind == 2)
         {
-          /* Makefile change: re-exec for full re-parse.  Simpler than
-             the bootstrap re_exec path in main.c -- we have no stdin
-             temp file to preserve and no in-flight makefile rebuild.  */
+          /* Makefile change: re-exec for full re-parse.  Restore the
+             working directory the user invoked us from so that any
+             relative paths in argv (e.g. -C subdir, -f path) and
+             argv[0] itself resolve identically in the new process.  */
           O (message, 0,
              _("--watch: makefile changed, re-executing remake."));
           fflush (stdout);
           fflush (stderr);
-          close (notify_fd);
+          wb_close (wb);
+          if (directory_before_chdir != 0
+              && chdir (directory_before_chdir) < 0)
+            OS (fatal, NILF, _("--watch: chdir before re-exec: %s"),
+                strerror (errno));
           execvp (saved_argv[0], saved_argv);
           OS (fatal, NILF, _("--watch: execvp failed: %s"), strerror (errno));
         }
 
-      /* Inductive-unboundedness guard: if the rebuild that just
-         finished is what triggered this wake (event came within
-         SELF_TRIGGER_WINDOW_NS of the build completing), assume the
-         rebuild touched its own watched outputs.  */
-      if (ts_diff_ns (&now, &last_build_finished) < SELF_TRIGGER_WINDOW_NS)
+      /* Inductive-unboundedness guard: if this event arrived within
+         the self-trigger window of the last build finishing, assume
+         the rebuild touched its own watched outputs.  Negative diffs
+         (clock skew under the gettimeofday fallback) are treated as
+         "long ago" so we do not falsely accuse.  */
+      since_ms = now_ms - last_build_finished_ms;
+      if (since_ms >= 0 && since_ms < self_trigger_window_ms)
         {
           self_trigger_count++;
           if (self_trigger_count == SELF_TRIGGER_WARN)
@@ -487,9 +376,7 @@ watch_loop (struct goaldep *goals, int argc, char **argv)
       st = update_goal_chain (goals);
       if (st == us_failed)
         O (error, NILF, _("--watch: build failed; will retry on next change."));
-      build_source_watch_set (goals);  /* pick up new generated prereqs */
-      clock_gettime (CLOCK_MONOTONIC, &last_build_finished);
+      build_source_watch_set (wb, goals);  /* pick up new generated prereqs */
+      last_build_finished_ms = monotonic_ms ();
     }
 }
-
-#endif /* HAVE_SYS_INOTIFY_H */

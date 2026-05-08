@@ -379,7 +379,7 @@ static const char *const usage[] =
                               Consider FILE to be infinitely new.\n"),
     N_("\
   --watch                     Stay running and rebuild affected targets on\n\
-                              file-system changes (requires inotify).\n"),
+                              file-system changes.\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
@@ -2551,14 +2551,9 @@ main (int argc, const char **argv, char **envp)
       if (touch_flag)
         O (fatal, NILF,
            _("--watch is incompatible with -t/--touch"));
-#ifdef HAVE_SYS_INOTIFY_H
-      watch_loop (goals, argc, (char **)argv);
+      watch_loop (goals, read_makefiles, argc, (char **)argv);
       /* watch_loop only returns on fatal error or signal. */
       die (MAKE_FAILURE);
-#else
-      O (fatal, NILF,
-         _("--watch was requested but inotify is not available on this build"));
-#endif
     }
 
   {

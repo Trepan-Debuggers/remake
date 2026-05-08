@@ -1316,9 +1316,13 @@ output.  Other options (@code{-n}, @code{-q}, @code{-W}, @code{-p},
 etc.) work as documented; in particular, @code{-n} is a useful way
 to see, on each change, what @emph{would} be rebuilt.
 
-This feature requires Linux @code{inotify} (build-time
-@code{<sys/inotify.h>}); on platforms without it, @code{--watch}
-fails with a clear error.  Press @kbd{Ctrl-C} to stop watching.
+On Linux and Cygwin (when @code{<sys/inotify.h>} is available)
+@code{--watch} uses @code{inotify(7)} for instant wake-up.  Pass
+@code{--without-inotify} to @code{configure} to force the portable
+fallback.  On every other platform a @code{stat(2)}-based polling
+backend is used; its tick interval can be tuned with the
+@code{MAKE_WATCH_POLL_INTERVAL} environment variable (milliseconds;
+default 1000).  Press @kbd{Ctrl-C} to stop watching.
 
 @node Invocation
 @chapter Getting in and out and new @value{REMAKE} Command Options

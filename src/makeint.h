@@ -703,7 +703,8 @@ extern int not_parallel, second_expansion, clock_skew_detected;
 extern int rebuilding_makefiles, one_shell, output_sync, verify_flag;
 extern int watch_flag;
 struct goaldep;
-void watch_loop (struct goaldep *goals, int argc, char **argv);
+void watch_loop (struct goaldep *goals, struct goaldep *read_files,
+                 int argc, char **argv);
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;

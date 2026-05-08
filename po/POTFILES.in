@@ -58,4 +58,6 @@ src/variable.c
 src/variable.h
 src/vpath.c
 src/watch.c
+src/watch_inotify.c
+src/watch_poll.c
 src/w32/w32os.c

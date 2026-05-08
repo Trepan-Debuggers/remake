@@ -39,7 +39,9 @@ make_SRCS =	\
 		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
 		src/rule.c src/rule.h src/signame.c src/strcache.c \
 		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
-		src/callgrind_format.c src/json_format.c src/watch.c
+		src/callgrind_format.c src/json_format.c \
+		src/watch.c src/watch_inotify.c src/watch_poll.c \
+		src/watchbackend.h
 
 glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
