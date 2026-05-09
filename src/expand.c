@@ -167,7 +167,7 @@ reference_variable (char *o, const char *name, size_t length)
   const struct function_table_entry *entry_p = lookup_function(variable_name);
   free((void *) variable_name);
 
-  if (entry_p) {
+  if (entry_p && entry_p->maximum_args==0) {
     char *p;
     if (!entry_p->alloc_fn)
       return entry_p->fptr.func_ptr (o, NULL, entry_p->name);

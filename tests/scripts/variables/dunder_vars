@@ -21,7 +21,7 @@ close(MAKEFILE);
 &run_make_with_options($makefile, "", &get_logfile, 0);
 
 # Create the answer to what should be produced by this Makefile
-$answer = "1 work/functions/this.mk 1\n";
+$answer = "1 work/variables/dunder_vars.mk 1\n";
 
 # COMPARE RESULTS
 
