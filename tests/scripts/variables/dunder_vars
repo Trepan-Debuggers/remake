@@ -1,7 +1,7 @@
 #                                                                    -*-perl-*-
-$description = "Test the test_xxx functions.";
+$description = "Test __FILE__, __LINE__, and __COUNTER__ variables.";
 
-$details = "Tests $(this_file ), $(this_line ), and $(this_counter ) nullary functions";
+$details = "Tests $(__FILE__), $(__LINE__), and $(__COUNTER__) magic variables";
 
 
 open(MAKEFILE,"> $makefile");
@@ -9,7 +9,7 @@ open(MAKEFILE,"> $makefile");
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE <<EOMAKE;
-string := \$(this_line ) \$(this_file ) \$(this_counter )
+string := \$(__LINE__) \$(__FILE__) \$(__COUNTER__)
 one: ; \@echo \$(string)
 EOMAKE
 
@@ -21,7 +21,7 @@ close(MAKEFILE);
 &run_make_with_options($makefile, "", &get_logfile, 0);
 
 # Create the answer to what should be produced by this Makefile
-$answer = "1 work/functions/this.mk 1\n";
+$answer = "1 work/variables/dunder_vars.mk 1\n";
 
 # COMPARE RESULTS
 

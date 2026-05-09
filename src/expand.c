@@ -1,4 +1,4 @@
-/* Variable expansion functions for GNU Make.
+/* Builtin function expansion header for GNU Make.
 Copyright (C) 1988-2020 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "variable.h"
 #include "rule.h"
+#include "function.h"
 
 /* Initially, any errors reported when expanding strings will be reported
    against the file where the error appears.  */
@@ -162,10 +163,32 @@ reference_variable (char *o, const char *name, size_t length)
   struct variable *v;
   char *value;
 
+  const char *variable_name = strndup(name, length);
+  const struct function_table_entry *entry_p = lookup_function(variable_name);
+  free((void *) variable_name);
+
+  if (entry_p && entry_p->maximum_args==0) {
+    char *p;
+    if (!entry_p->alloc_fn)
+      return entry_p->fptr.func_ptr (o, NULL, entry_p->name);
+
+    /* This function allocates memory and returns it to us.
+       Write it to the variable buffer, then free it.  */
+
+    p = entry_p->fptr.alloc_func_ptr (entry_p->name, 0, NULL);
+    if (p)
+      {
+	o = variable_buffer_output (o, p, strlen (p));
+	free (p);
+      }
+    return o;
+  }
+
   v = lookup_variable (name, length);
 
   if (v == 0)
     warn_undefined (name, length);
+
 
   /* If there's no variable by that name or it has no value, stop now.  */
   if (v == 0 || (*v->value == '\0' && !v->append))

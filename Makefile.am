@@ -101,7 +101,7 @@ test_FILES =	tests/run_make_tests \
 		tests/mkshadow tests/thelp.pl tests/guile.supp tests/README
 # test/scripts are added via dist-hook below.
 
-EXTRA_DIST =	ChangeLog README $(man_MANS) \
+EXTRA_DIST =	ChangeLog codespell-ignore.txt README $(man_MANS) \
 		README.customs \
 		src/gmk-default.scm src/gmk-default.h \
 		NEWS-remake.md README.remake REMAKE.todo Rakefile \
