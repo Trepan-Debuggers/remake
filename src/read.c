@@ -443,7 +443,10 @@ eval_makefile (const char *filename, unsigned short flags)
   fclose (ebuf.fp);
 
   free (ebuf.bufstart);
-  alloca (0);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+  (void) alloca (0);
+#pragma GCC diagnostic pop
 
   errno = 0;
   return deps;
@@ -485,7 +488,11 @@ eval_buffer (char *buffer, const gmk_floc *flocp)
 
   reading_file = curfile;
 
-  alloca (0);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+  (void) alloca (0);
+#pragma GCC diagnostic pop
+
 }
 
 /* Check LINE to see if it's a variable assignment or undefine.

@@ -1,5 +1,5 @@
 /* Definitions for managing subprocesses in GNU Make.
-Copyright (C) 1992-2020 Free Software Foundation, Inc.
+Copyright (C) 1992-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -22,20 +22,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Structure describing a running or dead child process.  */
 
-#ifdef VMS
-#define VMSCHILD                                                        \
-    char *comname;              /* Temporary command file name */       \
-    int efn;                    /* Completion event flag number */      \
-    int cstatus;                /* Completion status */                 \
-    int vms_launch_status;      /* non-zero if lib$spawn, etc failed */
-#else
-#define VMSCHILD
-#endif
 
 #define CHILDBASE                                               \
     char *cmd_name;       /* Alloced copy of command run.  */   \
     char **environment;   /* Environment for commands. */       \
-    VMSCHILD                                                    \
     struct output output  /* Output for this child.  */
 
 
@@ -78,6 +68,7 @@ extern void new_job (file_t *file, target_stack_node_t *p_call_stack);
 extern void reap_children (int block, int err,
 			   target_stack_node_t *p_call_stack);
 extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
+void free_childbase (struct childbase* child);
 
 char **construct_command_argv (char *line, char **restp, struct file *file,
                                int cmd_flags, char** batch_file);

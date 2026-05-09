@@ -53,6 +53,24 @@ make_toui (const char *str, const char **error)
   return val;
 }
 
+/* Convert val into a string, written to buf.  buf must be large enough
+   to hold the largest possible value, plus a nul byte.  Returns buf.
+   We can't use standard PRI* here: those are based on intNN_t types.  */
+
+char *
+make_lltoa (long val, char *buf)
+{
+  sprintf (buf, "%ld", val);
+  return buf;
+}
+
+char *
+make_ulltoa (unsigned long val, char *buf)
+{
+  sprintf (buf, "%lu", val);
+  return buf;
+}
+
 /* Simple random number generator, for use with shuffle.
    This doesn't need to be truly random, just pretty random.  Use our own
    implementation rather than relying on the C runtime's rand() so we always

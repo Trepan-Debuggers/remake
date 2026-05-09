@@ -69,6 +69,7 @@ struct function_table_entry
     unsigned char maximum_args;
     unsigned int expand_args:1;
     unsigned int alloc_fn:1;
+    unsigned int adds_command:1;
   };
 
 extern const struct function_table_entry *lookup_function (const char *s);

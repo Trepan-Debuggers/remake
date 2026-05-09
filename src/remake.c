@@ -342,7 +342,10 @@ update_file (struct file *file, unsigned int depth,
       check_renamed (f);
 
       /* Clean up any alloca() used during the update.  */
+#     pragma GCC diagnostic push
+#     pragma GCC diagnostic ignored "-Wunused-result"
       alloca (0);
+#     pragma GCC diagnostic pop
 
       /* If we got an error, don't bother with double_colon etc.  */
       if (new && !keep_going_flag)

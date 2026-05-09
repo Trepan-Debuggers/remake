@@ -151,8 +151,8 @@ jobserver_setup (int slots, const char *style)
 
       fifo_name = xmalloc (strlen (tmpdir) + CSTRLEN (FNAME_PREFIX)
                            + INTSTR_LENGTH + 2);
-      sprintf (fifo_name, "%s/" FNAME_PREFIX "%" MK_PRI64_PREFIX "d",
-               tmpdir, (long long)make_pid ());
+      sprintf (fifo_name, "%s/" FNAME_PREFIX "%ld",
+               tmpdir, (long)make_pid ());
 
       EINTRLOOP (r, mkfifo (fifo_name, 0600));
       if (r < 0)

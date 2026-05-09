@@ -544,11 +544,14 @@ void out_of_memory (void) NORETURN;
 
 /* void decode_env_switches (const char*, size_t line); */
 void temp_stdin_unlink (void);
+void decode_env_switches (const char*, size_t line);
 void die (int) NORETURN;
 void pfatal_with_name (const char *) NORETURN;
 void perror_with_name (const char *, const char *);
 #define xstrlen(_s) ((_s)==NULL ? 0 : strlen (_s))
 unsigned int make_toui (const char*, const char**);
+char *make_lltoa (long, char *);
+char *make_ulltoa (unsigned long, char *);
 void make_seed (unsigned int);
 unsigned int make_rand (void);
 pid_t make_pid (void);
@@ -701,6 +704,7 @@ extern int print_version_flag, print_directory, check_symlink_flag;
 extern int warn_undefined_variables_flag, trace_flag, posix_pedantic;
 extern int not_parallel, second_expansion, clock_skew_detected;
 extern int rebuilding_makefiles, one_shell, output_sync, verify_flag;
+extern unsigned long command_count;
 extern int watch_flag;
 struct goaldep;
 void watch_loop (struct goaldep *goals, struct goaldep *read_files,
@@ -708,6 +712,9 @@ void watch_loop (struct goaldep *goals, struct goaldep *read_files,
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
+
+#define GNUMAKEFLAGS_NAME       "GNUMAKEFLAGS"
+#define MAKEFLAGS_NAME          "MAKEFLAGS"
 
 /* Resetting the command script introduction prefix character.  */
 #define RECIPEPREFIX_NAME       ".RECIPEPREFIX"
