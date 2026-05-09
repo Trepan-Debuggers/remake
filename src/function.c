@@ -24,23 +24,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "os.h"
 #include "commands.h"
 #include "debug.h"
+#include "function.h"
 
 /* enter_debugger() header is found in: */
 #include <libdebugger/cmd.h>
-
-struct function_table_entry
-  {
-    union {
-      char *(*func_ptr) (char *output, char **argv, const char *fname);
-      gmk_func_ptr alloc_func_ptr;
-    } fptr;
-    const char *name;
-    unsigned char len;
-    unsigned char minimum_args;
-    unsigned char maximum_args;
-    unsigned int expand_args:1;
-    unsigned int alloc_fn:1;
-  };
 
 static unsigned long
 function_table_entry_hash_1 (const void *keyv)
@@ -267,7 +254,7 @@ patsubst_expand (char *o, const char *text, char *pattern, char *replace)
 
 /* Look up a function by name.  */
 
-static const struct function_table_entry *
+const struct function_table_entry *
 lookup_function (const char *s)
 {
   struct function_table_entry function_table_entry_key;
@@ -1377,18 +1364,14 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
 */
 
 /**
-  $(this_file )
+  $(__FILE__)
 
   Always expands to the current Makefile path.  Inspired by the
 __FILE__ macro of C.
-
-
-  Note the space after "this_file". This is needed to distinguish this
-  from being a variable.
 **/
 
-static char *func_this_file(char *o UNUSED, char **argv UNUSED,
-                            const char *funcname UNUSED) {
+static char *func_FILE(char *o UNUSED, char **argv UNUSED,
+		       const char *funcname UNUSED) {
   char *s;
   if (reading_file) {
     s = xstrdup(reading_file->filenm);
@@ -1404,7 +1387,7 @@ static char *func_this_file(char *o UNUSED, char **argv UNUSED,
 
 
 /**
-  $(this_line )
+  $(__LINE__)
 
   Always expands to the current line number.   Inspired by the __LINE__ macro of
 C.
@@ -1414,7 +1397,7 @@ C.
 **/
 
 static char *
-func_this_line (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
+func_LINE (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
   char *s;
 
@@ -1435,19 +1418,16 @@ func_this_line (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 
 
 /**
-  $(this_counter )
+  $(__COUNTER__)
 
   Always expands to a unique, incremented, counter.   Inspired by the
 __COUNTER__ macro of GCC.
-
-  Note the space after "this_counter". This is needed to distinguish
-  this from being a variable.
 **/
 
 
 
 static char *
-func_this_counter (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
+func_COUNTER (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 {
   static long counter;
   char cntbuf[32];
@@ -2303,10 +2283,12 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
   FT_ENTRY ("debugger",      0,  1,  1,  func_debugger),
-  /* The following three functions added by <basile@starynkevitch.net>. */
-  FT_ENTRY ("this_file",     0,  0,  0,  func_this_file),
-  FT_ENTRY ("this_line",     0,  0,  0,  func_this_line),
-  FT_ENTRY ("this_counter",  0,  0,  0,  func_this_counter),
+  /* The following three functions added by <basile@starynkevitch.net>.
+     Rocky changed later. Nullary functions are treated like variables.
+   */
+  FT_ENTRY ("__FILE__",      0,  0,  0,  func_FILE),
+  FT_ENTRY ("__LINE__",      0,  0,  0,  func_LINE),
+  FT_ENTRY ("__COUNTER__",   0,  0,  0,  func_COUNTER),
 #ifdef EXPERIMENTAL
   FT_ENTRY ("eq",            2,  2,  1,  func_eq),
   FT_ENTRY ("not",           0,  1,  1,  func_not),
@@ -2329,15 +2311,8 @@ expand_builtin_function (char *o, int argc, char **argv,
            _("insufficient number of arguments (%d) to function '%s'"),
            argc, entry_p->name);
 
-  /* I suppose technically some function could do something with no arguments,
-     but so far no internal ones do, so just test it for all functions here
-     rather than in each one.  We can change it later if necessary.  */
-
-  if (!argc
-      /* the functions named this_* by <basile@starynkevitch.net> take no arguments... */
-      && strncmp(entry_p->name, "this", sizeof("this")-1)
-      && !entry_p->alloc_fn)
-    return o;
+  /* Nullary functions (argc == 0) are treated in the code that expands variables. */
+  if (argc == 0) return o;
 
   if (!entry_p->fptr.func_ptr)
     OS (fatal, *expanding_var,

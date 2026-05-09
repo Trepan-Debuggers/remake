@@ -1,7 +1,7 @@
-/* $Id: function.h,v 1.10 2007/01/04 12:03:20 rockyb Exp $
+/* Function
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
-Copyright (C) 2005 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2005, 2026 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -33,8 +33,6 @@ Boston, MA 02111-1307, USA.  */
   Replace all carriage returns and linefeeds with spaces.
   Carriage return is replaced on UNIX as well. Is this desirable?
  */
-extern void fold_newlines (char *buffer, unsigned int *length);
-
 extern void hash_init_function_table (void);
 
 extern void hash_free_function_table (void);
@@ -54,6 +52,27 @@ extern char *strip_whitespace (const char **begpp, const char **endpp);
   Treat the arguments as a segment of makefile, and parse them.
 */
 extern char *func_eval (char *o, char **argv, const char *funcname UNUSED);
+
+/*!
+  Look up a function by name.
+*/
+
+struct function_table_entry
+  {
+    union {
+      char *(*func_ptr) (char *output, char **argv, const char *fname);
+      gmk_func_ptr alloc_func_ptr;
+    } fptr;
+    const char *name;
+    unsigned char len;
+    unsigned char minimum_args;
+    unsigned char maximum_args;
+    unsigned int expand_args:1;
+    unsigned int alloc_fn:1;
+  };
+
+extern const struct function_table_entry *lookup_function (const char *s);
+
 
 
 #endif /*FUNCTION_H*/
