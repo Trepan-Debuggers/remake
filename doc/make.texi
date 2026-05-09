@@ -7628,24 +7628,6 @@ function, @code{abspath} does not resolve symlinks and does not require
 the file names to refer to an existing file or directory.  Use the
 @code{wildcard} function to test for existence.
 
-@item $(__LINE__)
-@vindex __LINE__
-The invocation @code{$(this_line )} expands to the current line
-number.  It is inspired by the @code{__LINE__} magical macro of the C
-programming language.
-
-@item $(__FILE__)
-@vindex __FILE__
-The invocation @code{$(__FILE__)} expands to the current filename,
-e.g. to @code{Makefile}.  It is inspired by the @code{__FILE__}
-magical macro of the C programming language.
-
-@item $(__COUNTER__)
-@vindex __COUNTER__
-The invocation @code{$(__COUNTER__)} expands to a unique, incremented,
-counter (in decimal). It is inspired by the @code{__COUNTER__} magical
-macro of the C programming language understood by GCC.
-
 @end table
 
 @node Conditional Functions, Foreach Function, File Name Functions, Functions

@@ -144,6 +144,7 @@ Copyright (C) 2004, 2005, 2006, 2011, 2012, 2020 Rocky Bernstein
 * History and Acknowledgments:: History and Acknowledgments
 
 Indexes (nodes containing large menus)
+* Variable Index::            An item for each variable.
 * Command Index::             An item for each command name.
 * General Index::             An item for each concept.
 @end menu
@@ -1061,12 +1062,40 @@ Although the bulk of this document is devoted to @value{DBG}, there
 are a number of handy extensions to @value{MAKE} that we list here.
 
 @menu
+* C-Preprocessor like Variables:: @code{__COUNTER__}, @code{__FILE__}, and @code{__LINE__}
 * Profiling and Visualization:: Getting data on where build time is spent
 * Comments::     Listing and Documenting Makefile Targets
 * Searching::    Searching for a Makefile in Parent Directories
 * Improved-Tracing::      Improved Execution Tracing
 * Watching::     Rebuild on file-system changes
 @end menu
+
+@node C-Preprocessor like Variables
+@section C-Preprocessor like Variables
+
+The following variables, are read-only and are not settable. The are
+inspired by the corresponding C-preprocessor macros.
+
+@table @code
+@item $(__COUNTER__)
+@vindex __COUNTER__
+The invocation @code{$(__COUNTER__)} expands to a unique, incremented,
+counter (in decimal). It is inspired by the @code{__COUNTER__} magical
+macro of the C preprocessor.
+
+@item $(__FILE__)
+@vindex __FILE__
+The invocation @code{$(__FILE__)} expands to the current filename,
+e.g. to @code{Makefile}.  It is inspired by the @code{__FILE__}
+magical C-preprocessor macro of the C programming language.
+
+@item $(__LINE__)
+@vindex __LINE__
+The invocation @code{$(__LINE__)} expands to the current line
+number.  It is inspired by the @code{__LINE__} magical macro of the
+C-preprocessor macro of the C programming language.
+
+@end table
 
 @node Profiling and Visualization
 @section Profiling build execution timing and dependencies
@@ -3119,6 +3148,10 @@ this list, we would like to add your names!
 @c @include gpl.texi
 
 @c @include fdl.texi
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
 
 @node Command Index
 @unnumbered Command Index

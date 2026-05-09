@@ -1391,9 +1391,6 @@ static char *func_FILE(char *o UNUSED, char **argv UNUSED,
 
   Always expands to the current line number.   Inspired by the __LINE__ macro of
 C.
-
-  Note the space after "this_line". This is needed to distinguish this
-  from being a variable.
 **/
 
 static char *
@@ -1420,7 +1417,7 @@ func_LINE (char *o UNUSED, char **argv UNUSED, const char *funcname UNUSED)
 /**
   $(__COUNTER__)
 
-  Always expands to a unique, incremented, counter.   Inspired by the
+  Always expands to a unique, incremented, counter. Inspired by the
 __COUNTER__ macro of GCC.
 **/
 
