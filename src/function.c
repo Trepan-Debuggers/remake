@@ -2502,7 +2502,8 @@ expand_builtin_function (char *o, unsigned int argc, char **argv,
            argc, entry_p->name);
 
   /* Nullary functions (argc == 0) are treated in the code that expands variables. */
-  if (argc == 0) return o;
+  if (!argc && !entry_p->alloc_fn)
+    return o;
 
   if (!entry_p->fptr.func_ptr)
     OS (fatal, *expanding_var,
