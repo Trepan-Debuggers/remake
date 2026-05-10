@@ -43,6 +43,14 @@ int snapped_deps = 0;
 
 /* Hash table of files the makefile knows how to make.  */
 
+/* We can't free files we take out of the hash table, because they are still
+   likely pointed to in various places.  The check_renamed() will be used if
+   we come across these, to find the new correct file.  This is mainly to
+   prevent leak checkers from complaining.  */
+static struct file **rehashed_files = NULL;
+static size_t rehashed_files_len = 0;
+#define REHASHED_FILES_INCR 5
+
 /* Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
@@ -68,8 +76,7 @@ rehash_file (struct file *from_file, const char *to_hname)
 
   /* Find the end of the renamed list for the "from" file.  */
   file_key.hname = from_file->hname;
-  while (from_file->renamed != 0)
-    from_file = from_file->renamed;
+  check_renamed (from_file);
   if (file_hash_cmp (from_file, &file_key))
     /* hname changed unexpectedly!! */
     abort ();
@@ -165,18 +172,29 @@ rehash_file (struct file *from_file, const char *to_hname)
 
 #define MERGE(field) to_file->field |= from_file->field
   MERGE (precious);
+  MERGE (loaded);
   MERGE (tried_implicit);
   MERGE (updating);
   MERGE (updated);
   MERGE (is_target);
   MERGE (cmd_target);
   MERGE (phony);
-  MERGE (loaded);
+  /* Don't merge intermediate because this file might be pre-existing */
+  MERGE (is_explicit);
+  MERGE (secondary);
+  MERGE (notintermediate);
   MERGE (ignore_vpath);
 #undef MERGE
 
   to_file->builtin = 0;
   from_file->renamed = to_file;
+
+  if (rehashed_files_len % REHASHED_FILES_INCR == 0)
+    rehashed_files = xrealloc (rehashed_files,
+                               sizeof (struct file *) * (rehashed_files_len + REHASHED_FILES_INCR));
+
+  rehashed_files[rehashed_files_len++] = from_file;
+
 }
 
 /* Rename FILE to NAME.  This is not as simple as resetting
