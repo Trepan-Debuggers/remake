@@ -563,6 +563,7 @@ char *xstrndup (const char *, size_t);
 char *find_next_token (const char **, size_t *);
 char *next_token (const char *);
 char *end_of_token (const char *);
+char *skip_reference (const char *);
 void collapse_continuations (char *);
 char *lindex (const char *, const char *, int);
 int alpha_compare (const void *, const void *);

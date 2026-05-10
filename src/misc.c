@@ -397,6 +397,50 @@ next_token (const char *s)
   return (char *)s;
 }
 
+/* This function returns P if P points to EOS, or P+1 if P is NOT an open
+   paren or brace, or a pointer to the character after the matching close
+   paren or brace, skipping matched internal parens or braces.
+
+   It is typically called when we have seen a '$' in a string and we want to
+   treat it as a variable reference and find the end of it: in that case P
+   should point to the character after the '$'.  */
+
+char *
+skip_reference (const char *p)
+{
+  char openparen = *p;
+  char closeparen;
+  int count = 1;
+
+  if (openparen == '\0')
+    return (char*)p;
+
+  if (openparen == '(')
+    closeparen = ')';
+  else if (openparen == '{')
+    closeparen = '}';
+  else
+    return (char*)(p+1);
+
+  while (1)
+    {
+      ++p;
+      if (!STOP_SET (*p, MAP_NUL|MAP_VARSEP))
+        continue;
+      if (*p == '\0')
+        break;
+      if (*p == openparen)
+        ++count;
+      else if (*p == closeparen && --count == 0)
+        {
+          ++p;
+          break;
+        }
+    }
+
+  return (char*)p;
+}
+
 /* Find the next token in PTR; return the address of it, and store the length
    of the token into *LENGTHPTR if LENGTHPTR is not nil.  Set *PTR to the end
    of the token, so this function can be called repeatedly in a loop.  */

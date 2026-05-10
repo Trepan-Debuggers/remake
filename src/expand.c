@@ -44,6 +44,9 @@ const gmk_floc **expanding_var = &reading_file;
 
 #define VARIABLE_BUFFER_ZONE    5
 
+char * variable_expand (const char *line);
+
+
 static size_t variable_buffer_length;
 char *variable_buffer;
 
