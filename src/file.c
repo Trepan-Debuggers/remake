@@ -1,5 +1,5 @@
 /* Target file management for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2025 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "file_basic.h"
@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "file.h"
 #include "dep.h"
 #include "job.h"
+#include "shuffle.h"
 #include "commands.h"
 #include "variable.h"
 #include "debug.h"
@@ -107,25 +108,25 @@ rehash_file (struct file *from_file, const char *to_hname)
         {
           size_t l = strlen (from_file->name);
           /* We have two sets of commands.  We will go with the
-             one given in the rule explicitly mentioning this name,
+             one given in the rule found through directory search,
              but give a message to let the user know what's going on.  */
           if (to_file->cmds->fileinfo.filenm != 0)
             error (&from_file->cmds->fileinfo,
                    l + strlen (to_file->cmds->fileinfo.filenm) + INTSTR_LENGTH,
-                   _("Recipe was specified for file '%s' at %s:%lu,"),
-                   from_file->name, to_file->cmds->fileinfo.filenm,
-                   to_file->cmds->fileinfo.lineno);
+                   _("recipe was specified for file '%s' at %s:%lu,"),
+                   from_file->name, from_file->cmds->fileinfo.filenm,
+                   from_file->cmds->fileinfo.lineno);
           else
             error (&from_file->cmds->fileinfo, l,
-                   _("Recipe for file '%s' was found by implicit rule search,"),
+                   _("recipe for file '%s' was found by implicit rule search,"),
                    from_file->name);
           l += strlen (to_hname);
           error (&from_file->cmds->fileinfo, l,
-                 _("but '%s' is now considered the same file as '%s'."),
+                 _("but '%s' is now considered the same file as '%s'"),
                  from_file->name, to_hname);
           error (&from_file->cmds->fileinfo, l,
-                 _("Recipe for '%s' will be ignored in favor of the one for '%s'."),
-                 to_hname, from_file->name);
+                 _("recipe for '%s' will be ignored in favor of the one for '%s'"),
+                 from_file->name, to_hname);
         }
     }
 

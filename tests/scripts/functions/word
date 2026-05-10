@@ -43,7 +43,7 @@ $answer = "6\n"
 	 ."word.pl general_test2.pl FORCE.pl word.pl\n";
 &compare_output($answer, &get_logfile(1));
 
-
+## FIXME rocky: reinstate
 # Test error conditions
 
 # run_make_test('FOO = foo bar biz baz
