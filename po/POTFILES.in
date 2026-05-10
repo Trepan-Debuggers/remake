@@ -1,5 +1,5 @@
 # List of source files containing translatable strings.
-# Copyright (C) 2000-2020 Free Software Foundation, Inc.
+# Copyright (C) 2000-2022 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -13,7 +13,7 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program.  If not, see <http://www.gnu.org/licenses/>.
+# this program.  If not, see <https://www.gnu.org/licenses/>.
 
 libdebugger/break.c
 libdebugger/cmd.c
@@ -52,6 +52,7 @@ src/read.c
 src/remake.c
 src/remote-cstms.c
 src/rule.c
+src/shuffle.c
 src/signame.c
 src/strcache.c
 src/variable.c

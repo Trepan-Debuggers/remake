@@ -962,6 +962,20 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
 /* Free the storage allocated for CHILD.  */
 
+void
+free_childbase (struct childbase *child)
+{
+  if (child->environment != 0)
+    {
+      char **ep = child->environment;
+      while (*ep != 0)
+        free (*ep++);
+      free (child->environment);
+    }
+
+  free (child->cmd_name);
+}
+
 static void
 free_child (struct child *child)
 {
@@ -1235,7 +1249,7 @@ start_job_command (child_t *child,
 
   /* Set up the environment for the child.  */
   if (child->environment == 0)
-    child->environment = target_environment (child->file);
+    child->environment = target_environment (child->file, child->recursive);
 
 #if !defined(__MSDOS__) && !defined(WINDOWS32)
 

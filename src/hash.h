@@ -51,6 +51,7 @@ struct hash_table
   unsigned long ht_collisions;	/* # of failed calls to comparison function */
   unsigned long ht_lookups;	/* # of queries */
   unsigned int ht_rehashes;	/* # of times we've expanded table */
+  unsigned int ht_in_map:1;     /* 1 if we're inside a hash_map*() function */
 };
 
 typedef int (*qsort_cmp_t) __P((void const *, void const *));

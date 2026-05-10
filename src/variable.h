@@ -1,5 +1,5 @@
 /* Definitions for using variables in GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef VARIABLE_H
 #define VARIABLE_H
@@ -40,11 +40,27 @@ enum variable_flavor
     f_bogus,            /* Bogus (error) */
     f_simple,           /* Simple definition (:= or ::=) */
     f_recursive,        /* Recursive definition (=) */
+    f_expand,           /* POSIX :::= assignment */
     f_append,           /* Appending definition (+=) */
     f_conditional,      /* Conditional definition (?=) */
     f_shell,            /* Shell assignment (!=) */
     f_append_value      /* Append unexpanded value */
   };
+
+enum variable_export
+{
+    v_default = 0,      /* Decide in target_environment.  */
+    v_export,           /* Export this variable.  */
+    v_noexport,         /* Don't export this variable.  */
+    v_ifset             /* Export it if it has a non-default value.  */
+};
+
+enum variable_scope
+{
+    s_global = 0,       /* Global variable.  */
+    s_target,           /* Target-specific variable.  */
+    s_pattern           /* Pattern-specific variable.  */
+};
 
 /* Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
@@ -78,12 +94,7 @@ struct variable
     enum variable_origin
       origin ENUM_BITFIELD (4); /* Variable origin.  */
     enum variable_export
-      {
-        v_export,               /* Export this variable.  */
-        v_noexport,             /* Don't export this variable.  */
-        v_ifset,                /* Export it if it has a non-default value.  */
-        v_default               /* Decide in target_environment.  */
-      } export ENUM_BITFIELD (2);
+      export ENUM_BITFIELD (2); /* Export control. */
   };
 
 /* Structure that represents a variable set.  */
@@ -113,6 +124,7 @@ struct pattern_var
     struct variable variable;
   };
 
+extern unsigned long env_recursion;
 extern char *variable_buffer;
 extern struct variable_set_list *current_variable_set_list;
 extern struct variable *default_goal_var;
@@ -283,7 +295,7 @@ void undefine_variable_in_set (const char *name, size_t length,
                                        (int)(l), (n));                  \
                               }while(0)
 
-char **target_environment (struct file *file);
+char **target_environment (struct file *file, int recursive);
 
 struct pattern_var *create_pattern_var (const char *target,
                                         const char *suffix);

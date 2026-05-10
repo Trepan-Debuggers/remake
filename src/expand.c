@@ -1,5 +1,5 @@
-/* Builtin function expansion header for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+/* Variable expansion functions for GNU Make.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,15 +12,16 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 
 #include <assert.h>
 
+#include "commands.h"
+#include "debug.h"
 #include "filedef.h"
 #include "job.h"
-#include "commands.h"
 #include "variable.h"
 #include "rule.h"
 #include "function.h"
@@ -42,6 +43,9 @@ const gmk_floc **expanding_var = &reading_file;
    length was last checked.  */
 
 #define VARIABLE_BUFFER_ZONE    5
+
+char * variable_expand (const char *line);
+
 
 static size_t variable_buffer_length;
 char *variable_buffer;
@@ -68,13 +72,13 @@ variable_buffer_output (char *ptr, const char *string, size_t length)
       ptr = variable_buffer + offset;
     }
 
-  memcpy (ptr, string, length);
-  return ptr + length;
+  return mempcpy (ptr, string, length);
 }
 
-/* Return a pointer to the beginning of the variable buffer.  */
+/* Return a pointer to the beginning of the variable buffer.
+   This is called from main() and it should never be null afterward.  */
 
-static char *
+char *
 initialize_variable_output (void)
 {
   /* If we don't have a variable output buffer yet, get one.  */
@@ -91,6 +95,22 @@ initialize_variable_output (void)
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+char *
+variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
+{
+  char *psz_result;
+  variable_set_list_t *p_vars_save;
+
+  p_vars_save = current_variable_set_list;
+  if (p_file_vars)
+    current_variable_set_list = p_file_vars;
+  psz_result = variable_expand (psz_line);
+  current_variable_set_list = p_vars_save;
+
+  return psz_result;
+}
+
 static char *allocated_variable_append (const struct variable *v);
 
 char *
@@ -101,6 +121,29 @@ recursively_expand_for_file (struct variable *v, struct file *file)
   const gmk_floc **saved_varp;
   struct variable_set_list *save = 0;
   int set_reading = 0;
+
+  /* If we're expanding to put into the environment of a shell function then
+     ignore any recursion issues: for backward-compatibility we will use
+     the value of the environment variable we were started with.  */
+  if (v->expanding && env_recursion)
+    {
+      size_t nl = strlen (v->name);
+      char **ep;
+      DB (DB_VERBOSE,
+          (_("%s:%lu: not recursively expanding %s to export to shell function\n"),
+           v->fileinfo.filenm, v->fileinfo.lineno, v->name));
+
+      /* We could create a hash for the original environment for speed, but a
+         reasonably written makefile shouldn't hit this situation...  */
+      for (ep = environ; *ep != 0; ++ep)
+        if ((*ep)[nl] == '=' && strncmp (*ep, v->name, nl) == 0)
+          return xstrdup ((*ep) + nl + 1);
+
+      /* If there's nothing in the parent environment, use the empty string.
+         This isn't quite correct since the variable should not exist at all,
+         but getting that to work would be involved. */
+      return xstrdup ("");
+    }
 
   /* Don't install a new location if this location is empty.
      This can happen for command-line variables, builtin variables, etc.  */
@@ -189,7 +232,6 @@ reference_variable (char *o, const char *name, size_t length)
   if (v == 0)
     warn_undefined (name, length);
 
-
   /* If there's no variable by that name or it has no value, stop now.  */
   if (v == 0 || (*v->value == '\0' && !v->append))
     return o;
@@ -230,7 +272,7 @@ variable_expand_string (char *line, const char *string, size_t length)
   if (length == 0)
     {
       variable_buffer_output (o, "", 1);
-      return (variable_buffer);
+      return variable_buffer;
     }
 
   /* We need a copy of STRING: due to eval, it's possible that it will get
@@ -503,27 +545,11 @@ variable_expand_for_file (const char *line, struct file *file)
   return result;
 }
 
-/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
-char *
-variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
-{
-  char *psz_result;
-  variable_set_list_t *p_vars_save;
-
-  p_vars_save = current_variable_set_list;
-  if (p_file_vars)
-    current_variable_set_list = p_file_vars;
-  psz_result = variable_expand (psz_line);
-  current_variable_set_list = p_vars_save;
-
-  return psz_result;
-}
-
 /* Like allocated_variable_expand, but for += target-specific variables.
    First recursively construct the variable value from its appended parts in
    any upper variable sets.  Then expand the resulting value.  */
 
-static char *
+char *
 variable_append (const char *name, size_t length,
                  const struct variable_set_list *set, int local)
 {

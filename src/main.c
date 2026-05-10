@@ -68,7 +68,6 @@ static void print_data_base (void);
 void print_rule_data_base (bool b_verbose);
 static void print_version (void);
 static void decode_switches (int argc, const char **argv, int env);
-static void decode_env_switches (const char *envar, size_t len);
 static struct variable *define_makeflags (int all, int makefile);
 static char *quote_for_env (char *out, const char *in);
 static void initialize_global_hash_tables (void);
@@ -2965,7 +2964,7 @@ decode_switches (int argc, const char **argv, int env)
    dash to the first word if it lacks one, and passing the vector to
    decode_switches.  */
 
-static void
+void
 decode_env_switches (const char *envar, size_t len)
 {
   char *varref = alloca (2 + len + 2);

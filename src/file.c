@@ -1,5 +1,5 @@
 /* Target file management for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2025 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "file_basic.h"
@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "file.h"
 #include "dep.h"
 #include "job.h"
+#include "shuffle.h"
 #include "commands.h"
 #include "variable.h"
 #include "debug.h"
@@ -41,6 +42,14 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 int snapped_deps = 0;
 
 /* Hash table of files the makefile knows how to make.  */
+
+/* We can't free files we take out of the hash table, because they are still
+   likely pointed to in various places.  The check_renamed() will be used if
+   we come across these, to find the new correct file.  This is mainly to
+   prevent leak checkers from complaining.  */
+static struct file **rehashed_files = NULL;
+static size_t rehashed_files_len = 0;
+#define REHASHED_FILES_INCR 5
 
 /* Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
@@ -67,8 +76,7 @@ rehash_file (struct file *from_file, const char *to_hname)
 
   /* Find the end of the renamed list for the "from" file.  */
   file_key.hname = from_file->hname;
-  while (from_file->renamed != 0)
-    from_file = from_file->renamed;
+  check_renamed (from_file);
   if (file_hash_cmp (from_file, &file_key))
     /* hname changed unexpectedly!! */
     abort ();
@@ -107,25 +115,25 @@ rehash_file (struct file *from_file, const char *to_hname)
         {
           size_t l = strlen (from_file->name);
           /* We have two sets of commands.  We will go with the
-             one given in the rule explicitly mentioning this name,
+             one given in the rule found through directory search,
              but give a message to let the user know what's going on.  */
           if (to_file->cmds->fileinfo.filenm != 0)
             error (&from_file->cmds->fileinfo,
                    l + strlen (to_file->cmds->fileinfo.filenm) + INTSTR_LENGTH,
-                   _("Recipe was specified for file '%s' at %s:%lu,"),
-                   from_file->name, to_file->cmds->fileinfo.filenm,
-                   to_file->cmds->fileinfo.lineno);
+                   _("recipe was specified for file '%s' at %s:%lu,"),
+                   from_file->name, from_file->cmds->fileinfo.filenm,
+                   from_file->cmds->fileinfo.lineno);
           else
             error (&from_file->cmds->fileinfo, l,
-                   _("Recipe for file '%s' was found by implicit rule search,"),
+                   _("recipe for file '%s' was found by implicit rule search,"),
                    from_file->name);
           l += strlen (to_hname);
           error (&from_file->cmds->fileinfo, l,
-                 _("but '%s' is now considered the same file as '%s'."),
+                 _("but '%s' is now considered the same file as '%s'"),
                  from_file->name, to_hname);
           error (&from_file->cmds->fileinfo, l,
-                 _("Recipe for '%s' will be ignored in favor of the one for '%s'."),
-                 to_hname, from_file->name);
+                 _("recipe for '%s' will be ignored in favor of the one for '%s'"),
+                 from_file->name, to_hname);
         }
     }
 
@@ -164,18 +172,29 @@ rehash_file (struct file *from_file, const char *to_hname)
 
 #define MERGE(field) to_file->field |= from_file->field
   MERGE (precious);
+  MERGE (loaded);
   MERGE (tried_implicit);
   MERGE (updating);
   MERGE (updated);
   MERGE (is_target);
   MERGE (cmd_target);
   MERGE (phony);
-  MERGE (loaded);
+  /* Don't merge intermediate because this file might be pre-existing */
+  MERGE (is_explicit);
+  MERGE (secondary);
+  MERGE (notintermediate);
   MERGE (ignore_vpath);
 #undef MERGE
 
   to_file->builtin = 0;
   from_file->renamed = to_file;
+
+  if (rehashed_files_len % REHASHED_FILES_INCR == 0)
+    rehashed_files = xrealloc (rehashed_files,
+                               sizeof (struct file *) * (rehashed_files_len + REHASHED_FILES_INCR));
+
+  rehashed_files[rehashed_files_len++] = from_file;
+
 }
 
 /* Rename FILE to NAME.  This is not as simple as resetting

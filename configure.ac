@@ -49,7 +49,7 @@ AH_BOTTOM(
 # We have to enable "foreign" because ChangeLog is auto-generated
 # Automake 1.15 and gnulib don't get along: gnulib has some strange error
 # in the way it handles getloadavg.c which causes make distcheck to fail.
-# http://lists.gnu.org/archive/html/bug-gnulib/2018-06/msg00024.html
+# https://lists.gnu.org/archive/html/bug-gnulib/2018-06/msg00024.html
 #
 # We have to enable "info-in-builddir" because future versions of automake
 # would place generated .info files in srcdir instead of builddir. Using that
@@ -658,56 +658,6 @@ Makefile lib/Makefile po/Makefile.in doc/Makefile \
   tests/config-flags.pm \
   libdebugger/Makefile
 ])
-# We don't need this: the standard automake output suffices for POSIX systems.
-#mk/Posix.mk
-
-# We like mondo-warnings!
-# Also force comments to be preserved.  This helps when using ccache, in
-# combination with GCC 7's implicit-fallthrough warning.
-# check for some supported compiler flags, instead of have 'em hard coded in
-# maintMakefile
-# -Werror is too much, on different platform we get different warnings FOR
-# e.g. guile headers.
-# rocky: However to *test* for whether to use options below, we want to turn
-# warnings into errors, hence, the separate check for -Werror.
-WARN_TO_ERROR_CFLAG=""
-AX_CHECK_COMPILE_FLAG([-Werror], [WARN_TO_ERROR_CFLAG="-Werror "])
-CHECK_CFLAGS="
-        -C
-	-Wall
-	-Wbad-function-cast
-	-Wchar-subscripts
-	-Wdeclaration-after-statement
-	-Wdisabled-optimization
-	-Wduplicate-conk
-	-Wduplicate-enum
-	-Wendif-labels
-	-Wextra
-	-Wformat-security
-	-Wformat-signedness
-	-Wignore-qualifiers
-	-Winline
-	-Wlogical-op
-	-Wlong-long
-	-Wnested-externs
-	-Wno-sign-compare
-	-Wpointer-arith
-	-Wshadow
-	-Wtype-limits
-	-Wunused
-	-Wunused-but-set-parameter
-	-Wunused-parameter
-	-Wwrite-strings
-"
-
-# Warnings not used (because they trigger messages):
-#   -Wmissing-declarations
-#   -Wstrict-prototypes
-#   -Wundef
-
-for OPT in $CHECK_CFLAGS; do
-    AX_CHECK_COMPILE_FLAG([$OPT $WARN_TO_ERROR_CFLAG], [AM_CFLAGS="$AM_CFLAGS $OPT"])
-done
 
 AC_SUBST([AM_CFLAGS])
 
