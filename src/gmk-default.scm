@@ -1,5 +1,5 @@
 ;; Contents of the (gnu make) Guile module
-;; Copyright (C) 2011-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2022 Free Software Foundation, Inc.
 ;; This file is part of GNU Make.
 ;;
 ;; GNU Make is free software; you can redistribute it and/or modify it under
@@ -13,7 +13,7 @@
 ;; details.
 ;;
 ;; You should have received a copy of the GNU General Public License along
-;; with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 (define (to-string-maybe x)
   (cond

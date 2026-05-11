@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _hash_h_
 #define _hash_h_
@@ -51,15 +51,14 @@ struct hash_table
   unsigned long ht_collisions;	/* # of failed calls to comparison function */
   unsigned long ht_lookups;	/* # of queries */
   unsigned int ht_rehashes;	/* # of times we've expanded table */
-  unsigned int ht_in_map:1;     /* 1 if we're inside a hash_map*() function */
 };
 
 typedef int (*qsort_cmp_t) __P((void const *, void const *));
 
 void hash_init __P((struct hash_table *ht, unsigned long size,
-		    hash_func_t hash_1, hash_func_t hash_2, hash_cmp_func_t hash_cmp));
+                    hash_func_t hash_1, hash_func_t hash_2, hash_cmp_func_t hash_cmp));
 void hash_load __P((struct hash_table *ht, void *item_table,
-		    unsigned long cardinality, unsigned long size));
+                    unsigned long cardinality, unsigned long size));
 void **hash_find_slot __P((struct hash_table *ht, void const *key));
 void *hash_find_item __P((struct hash_table *ht, void const *key));
 void *hash_insert __P((struct hash_table *ht, const void *item));
@@ -155,7 +154,7 @@ extern void *hash_deleted_item;
 #define ISTRING_HASH_1(KEY, RESULT) do { \
   unsigned char const *_key_ = (unsigned char const *) (KEY) - 1; \
   while (*++_key_) \
-    (RESULT) += ((isupper (*_key_) ? tolower (*_key_) : *_key_) << (_key_[1] & 0xf)); \
+    (RESULT) += (tolower (*_key_) << (_key_[1] & 0xf)); \
 } while (0)
 #define return_ISTRING_HASH_1(KEY) do { \
   unsigned long _result_ = 0; \
@@ -166,7 +165,7 @@ extern void *hash_deleted_item;
 #define ISTRING_HASH_2(KEY, RESULT) do { \
   unsigned char const *_key_ = (unsigned char const *) (KEY) - 1; \
   while (*++_key_) \
-    (RESULT) += ((isupper (*_key_) ? tolower (*_key_) : *_key_) << (_key_[1] & 0x7)); \
+    (RESULT) += (tolower (*_key_) << (_key_[1] & 0x7)); \
 } while (0)
 #define return_ISTRING_HASH_2(KEY) do { \
   unsigned long _result_ = 0; \
