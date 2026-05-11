@@ -34,7 +34,7 @@ Downloading
 
 GNU Make can be obtained in many different ways.  See a description here:
 
-  http://www.gnu.org/software/software.html
+  https://www.gnu.org/software/software.html
 
 
 Documentation
@@ -45,9 +45,9 @@ in this distribution as the file make.texinfo.  You can also find
 on-line and preformatted (PostScript and DVI) versions at the FSF's web
 site.  There is information there about ordering hardcopy documentation.
 
-  http://www.gnu.org/
-  http://www.gnu.org/doc/doc.html
-  http://www.gnu.org/manual/manual.html
+  https://www.gnu.org/
+  https://www.gnu.org/doc/doc.html
+  https://www.gnu.org/manual/manual.html
 
 
 Development
@@ -177,4 +177,4 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.
+this program.  If not, see <https://www.gnu.org/licenses/>.

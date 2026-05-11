@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997-2020, 2026 Free Software Foundation, Inc.
+# Copyright (C) 1997-2022, 2026 Free Software Foundation, Inc.
 # This file is part of GNU ReMake.
 #
 # GNU Make is free software; you can redistribute it and/or modify it
@@ -14,7 +14,7 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program.  If not, see <http://www.gnu.org/licenses/>.
+# this program.  If not, see <https://www.gnu.org/licenses/>.
 
 AUTOMAKE_OPTIONS = 1.8 dist-lzip silent-rules std-options subdir-objects nostdinc
 ACLOCAL_AMFLAGS = -I m4
