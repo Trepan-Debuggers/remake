@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,12 +12,13 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "hash.h"
 #include "filedef.h"
 #include "dep.h"
+#include "debug.h"
 
 #ifdef  HAVE_DIRENT_H
 # include <dirent.h>
@@ -164,7 +165,7 @@ vms_hash (const char *name)
 
   while (*name)
     {
-      unsigned char uc = *name;
+      unsigned char uc = (unsigned char) *name;
       int g;
 #ifdef HAVE_CASE_INSENSITIVE_FS
       h = (h << 4) + (isupper (uc) ? tolower (uc) : uc);
@@ -221,6 +222,12 @@ vmsstat_dir (const char *name, struct stat *st)
 #endif /* _USE_STD_STAT */
 #endif /* VMS */
 
+/* Never have more than this many directories open at once.  */
+
+#define MAX_OPEN_DIRECTORIES 10
+
+static unsigned int open_directories = 0;
+
 /* Hash table of directories.  */
 
 #ifndef DIRECTORY_BUCKETS
@@ -251,8 +258,24 @@ struct directory_contents
 # endif
 #endif /* WINDOWS32 */
     struct hash_table dirfiles; /* Files in this directory.  */
+    unsigned long counter;      /* command_count value when last read. */
     DIR *dirstream;             /* Stream reading this directory.  */
   };
+
+static struct directory_contents *
+clear_directory_contents (struct directory_contents *dc)
+{
+  dc->counter = 0;
+  if (dc->dirstream)
+    {
+      --open_directories;
+      closedir (dc->dirstream);
+      dc->dirstream = 0;
+    }
+  hash_free (&dc->dirfiles, 1);
+
+  return NULL;
+}
 
 static unsigned long
 directory_contents_hash_1 (const void *key_0)
@@ -331,7 +354,9 @@ static struct hash_table directory_contents;
 
 struct directory
   {
-    const char *name;                   /* Name of the directory.  */
+    const char *name;           /* Name of the directory.  */
+    unsigned long counter;      /* command_count value when last read.
+                                   Used for non-existent directories.  */
 
     /* The directory's contents.  This data may be shared by several
        entries in the hash table, which refer to the same directory
@@ -360,12 +385,6 @@ directory_hash_cmp (const void *x, const void *y)
 
 /* Table of directories hashed by name.  */
 static struct hash_table directories;
-
-/* Never have more than this many directories open at once.  */
-
-#define MAX_OPEN_DIRECTORIES 10
-
-static unsigned int open_directories = 0;
 
 
 /* Hash table of files in each directory.  */
@@ -501,6 +520,10 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 {
   struct dirfile *df;
   struct dirent *d;
+#ifdef WINDOWS32
+  struct stat st;
+  int rehash = 0;
+#endif
 
   if (dir == 0 || dir->dirfiles.ht_vec == 0)
     /* The directory could not be stat'd or opened.  */
@@ -609,10 +632,8 @@ file_exists_p (const char *name)
   const char *slash;
 
 #ifndef NO_ARCHIVES
-  {
-    if (ar_name (name))
-      return ar_member_date (name) != (time_t) -1;
-  }
+  if (ar_name (name))
+    return ar_member_date (name) != (time_t) -1;
 #endif
 
   dirend = strrchr (name, '/');
@@ -831,8 +852,6 @@ print_dir_data_base (void)
 
 /* Hooks for globbing.  */
 
-#include <glob.h>
-
 /* Structure describing state of iterating through a directory hash table.  */
 
 struct dirstream
@@ -923,17 +942,10 @@ read_dirstream (__ptr_t stream)
  * On MS-Windows, stat() "succeeds" for foo/bar/. where foo/bar is a
  * regular file; fix that here.
  */
-#if !defined(stat) && !defined(WINDOWS32) || defined(VMS)
-# ifndef VMS
+#if !defined(stat) && !defined(WINDOWS32)
 #  ifndef HAVE_SYS_STAT_H
 int stat (const char *path, struct stat *sbuf);
 #  endif
-# else
-    /* We are done with the fake stat.  Go back to the real stat */
-#   ifdef stat
-#     undef stat
-#   endif
-# endif
 # define local_stat stat
 #else
 static int
@@ -946,17 +958,10 @@ local_stat (const char *path, struct stat *buf)
 #endif
 
 /* Similarly for lstat.  */
-#if !defined(lstat) && !defined(WINDOWS32) || defined(VMS)
-# ifndef VMS
+#if !defined(lstat) && !defined(WINDOWS32)
 #  ifndef HAVE_SYS_STAT_H
 int lstat (const char *path, struct stat *sbuf);
 #  endif
-# else
-    /* We are done with the fake lstat.  Go back to the real lstat */
-#   ifdef lstat
-#     undef lstat
-#   endif
-# endif
 # define local_lstat lstat
 #elif defined(WINDOWS32)
 /* Windows doesn't support lstat().  */

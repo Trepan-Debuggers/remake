@@ -1,5 +1,5 @@
 /* Declarations for getopt.
-Copyright (C) 1989-2020 Free Software Foundation, Inc.
+Copyright (C) 1989-2022 Free Software Foundation, Inc.
 
 NOTE: The canonical source of this file is maintained with the GNU C Library.
 Bugs can be reported to bug-glibc@gnu.org.
@@ -14,7 +14,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _GETOPT_H
 #define _GETOPT_H 1

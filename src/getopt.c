@@ -3,7 +3,7 @@ NOTE: getopt is now part of the C library, so if you don't know what
 "Keep this file name-space clean" means, talk to drepper@gnu.org
 before changing it!
 
-Copyright (C) 1987-2020 Free Software Foundation, Inc.
+Copyright (C) 1987-2022 Free Software Foundation, Inc.
 
 NOTE: The canonical source of this file is maintained with the GNU C Library.
 Bugs can be reported to bug-glibc@gnu.org.
@@ -18,7 +18,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* This tells Alpha OSF/1 not to define a getopt prototype in <stdio.h>.
    Ditto for AIX 3.2 and <stdlib.h>.  */
@@ -39,12 +39,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 #include <stdio.h>
-
-#ifdef _GNU_SOURCE
-# define ATTRIBUTE_UNUSED __attribute__((unused))
-#else
-# define ATTRIBUTE_UNUSED
-#endif
 
 /* Comment out all this code if we are using the GNU C Library, and are not
    actually compiling the library itself.  This code is part of the GNU C
@@ -383,9 +377,7 @@ exchange (char **argv)
 static const char *_getopt_initialize (int, char *const *, const char *);
 #endif
 static const char *
-_getopt_initialize (int argc ATTRIBUTE_UNUSED,
-		    char *const *argv ATTRIBUTE_UNUSED,
-		    const char *optstring)
+_getopt_initialize (int argc, char *const *argv, const char *optstring)
 {
   /* Start processing options with ARGV-element 1 (since ARGV-element 0
      is the program name); the sequence of previously skipped
@@ -434,7 +426,7 @@ _getopt_initialize (int argc ATTRIBUTE_UNUSED,
 	      if (__getopt_nonoption_flags == NULL)
 		nonoption_flags_max_len = -1;
 	      else
-		memset (mempcpy (__getopt_nonoption_flags, orig_str, len),
+		memset (__mempcpy (__getopt_nonoption_flags, orig_str, len),
 			'\0', nonoption_flags_max_len - len);
 	    }
 	}
@@ -505,8 +497,7 @@ _getopt_initialize (int argc ATTRIBUTE_UNUSED,
 
 int
 _getopt_internal (int argc, char *const *argv, const char *optstring,
-                  const struct option *longopts,
-		  int *longind, int long_only)
+                  const struct option *longopts, int *longind, int long_only)
 {
   optarg = NULL;
 
@@ -665,7 +656,7 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
       if (ambig && !exact)
 	{
 	  if (opterr)
-	    fprintf (stderr, _("%s: option `%s' is ambiguous\n"),
+	    fprintf (stderr, _("%s: option '%s' is ambiguous\n"),
 		     argv[0], argv[optind]);
 	  nextchar += strlen (nextchar);
 	  optind++;
@@ -686,23 +677,21 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
 	      else
 		{
 		  if (opterr)
-		    {
-		      if (argv[optind - 1][1] == '-')
-			/* --option */
-			fprintf (stderr,
-				 _("%s: option `--%s' doesn't allow an argument\n"),
-				 argv[0], pfound->name);
-		      else
-			/* +option or -option */
-			fprintf (stderr,
-				 _("%s: option `%c%s' doesn't allow an argument\n"),
-				 argv[0], argv[optind - 1][0], pfound->name);
+		   if (argv[optind - 1][1] == '-')
+		    /* --option */
+		    fprintf (stderr,
+		     _("%s: option '--%s' doesn't allow an argument\n"),
+		     argv[0], pfound->name);
+		   else
+		    /* +option or -option */
+		    fprintf (stderr,
+		     _("%s: option '%c%s' doesn't allow an argument\n"),
+		     argv[0], argv[optind - 1][0], pfound->name);
 
-		      nextchar += strlen (nextchar);
+		  nextchar += strlen (nextchar);
 
-		      optopt = pfound->val;
-		      return '?';
-		    }
+		  optopt = pfound->val;
+		  return '?';
 		}
 	    }
 	  else if (pfound->has_arg == 1)
@@ -713,7 +702,7 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
 		{
 		  if (opterr)
 		    fprintf (stderr,
-			   _("%s: option `%s' requires an argument\n"),
+			   _("%s: option '%s' requires an argument\n"),
 			   argv[0], argv[optind - 1]);
 		  nextchar += strlen (nextchar);
 		  optopt = pfound->val;
@@ -742,11 +731,11 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
 	    {
 	      if (argv[optind][1] == '-')
 		/* --option */
-		fprintf (stderr, _("%s: unrecognized option `--%s'\n"),
+		fprintf (stderr, _("%s: unrecognized option '--%s'\n"),
 			 argv[0], nextchar);
 	      else
 		/* +option or -option */
-		fprintf (stderr, _("%s: unrecognized option `%c%s'\n"),
+		fprintf (stderr, _("%s: unrecognized option '%c%s'\n"),
 			 argv[0], argv[optind][0], nextchar);
 	    }
 	  nextchar = (char *) "";
@@ -755,7 +744,6 @@ _getopt_internal (int argc, char *const *argv, const char *optstring,
 	  return '?';
 	}
     }
-
 
   /* Look at and handle the next short option-character.  */
 
