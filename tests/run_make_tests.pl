@@ -11,7 +11,7 @@
 #                         [-make <make prog>]
 #                        (and others)
 
-# Copyright (C) 1992-2020 Free Software Foundation, Inc.
+# Copyright (C) 1992-2022 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -25,7 +25,7 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program.  If not, see <http://www.gnu.org/licenses/>.
+# this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Add the working directory to @INC and load the test driver
 use FindBin;
