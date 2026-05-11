@@ -15,7 +15,7 @@ dnl FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for.
 dnl more details.
 dnl
 dnl You should have received a copy of the GNU General Public License along
-dnl with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 dnl ---------------------------------------------------------------------------
 dnl Got this from the lynx 2.8 distribution.

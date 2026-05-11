@@ -2,7 +2,7 @@
 
 # Copyright (C) 2007, 2008 Simon Josefsson <simon@josefsson.org>
 # Copyright (C) 2007 Luis Mondesi <lemsx1@gmail.com>
-# * calls git directly. To use it just: 
+# * calls git directly. To use it just:
 #   cd ~/Project/my_git_repo; git2cl > ChangeLog
 # * implements strptime()
 # * fixes bugs in $comment parsing
@@ -59,7 +59,7 @@ Thus, typically you would use it as follows:
 =head1 SEE ALSO
 
 Output format specification:
-    <http://www.gnu.org/prep/standards/html_node/Change-Logs.html>
+    <https://www.gnu.org/prep/standards/html_node/Change-Logs.html>
 
 =head1 AUTHORS
 
@@ -350,7 +350,7 @@ while (my $_l = <$fh>) {
 	$state = 1 if ($_l =~ m,^$, and $author and (@date+0>0));
     } elsif ($state == 1) {
         # * modifying our input text is a bad choice
-        #   let's make a copy of it first, then we remove spaces 
+        #   let's make a copy of it first, then we remove spaces
         # * if we meet a "merge branch" statement, we need to start
         #   over and find a real entry
         # Luis Mondesi <lemsx1@gmail.com>

@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 
@@ -313,7 +313,7 @@ static const char *default_variables[] =
     "COMPILE.s", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
     "LINK.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_MACH)",
     "COMPILE.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c",
-    "PREPROCESS.S", "$(CC) -E $(CPPFLAGS)",
+    "PREPROCESS.S", "$(CPP) $(CPPFLAGS)",
     "PREPROCESS.F", "$(FC) $(FFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -F",
     "PREPROCESS.r", "$(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -F",
     "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",

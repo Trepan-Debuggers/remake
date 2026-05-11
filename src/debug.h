@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-Copyright (C) 1999-2020 Free Software Foundation, Inc.
+Copyright (C) 1999-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef DEBUG_H
 #define DEBUG_H
@@ -40,13 +40,15 @@ typedef enum {
 				  rule searches for each target. Can be
 				  set via --debug=implicit
 			     */
-  DB_TRACE          = 0x010, /**< tracing */
-  DB_SHELL          = 0x020, /**< add +x to SHELL invocations */
-  DB_MAKEFILES      = 0x100,
-  DB_READ_MAKEFILES = 0x200, /**< Reading makefiles */
-  DB_CALL           = 0x400, /**< GNU Make function call and returns */
-  DB_UPDATE_GOAL    = 0x800, /**< GNU Make function call and returns */
-  DB_ALL            = 0xfff  /**< Bitmask for all of the above. */
+  DB_TRACE          = 0x0010, /**< tracing */
+  DB_SHELL          = 0x0020, /**< add +x to SHELL invocations */
+  DB_MAKEFILES      = 0x0100,
+  DB_READ_MAKEFILES = 0x0200, /**< Reading makefiles */
+  DB_CALL           = 0x0400, /**< GNU Make function call and returns */
+  DB_UPDATE_GOAL    = 0x0800, /**< GNU Make function call and returns */
+  DB_PRINT          = 0x1000,
+  DB_WHY            = 0x2000,
+  DB_ALL            = 0x3fff  /**< Bitmask for all of the above. */
 } debug_level_mask_t;
 
 typedef enum {
