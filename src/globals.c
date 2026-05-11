@@ -138,8 +138,6 @@ The value is set in job.c.
 */
 extern const char *default_shell;
 
-char *remote_description = 0;
-
 /* Remember the original value of the SHELL variable, from the environment.  */
 struct variable shell_var;
 
