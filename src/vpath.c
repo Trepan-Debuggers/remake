@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program.  If not, see <http://www.gnu.org/licenses/>.  */
+this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "filedef.h"
@@ -239,8 +239,7 @@ construct_vpath_list (char *pattern, char *dirpath)
                 also define HAVE_DOS_PATHS would like us to recognize
                 colons after the drive letter in the likes of
                 "D:/foo/bar:C:/xyzzy".  */
-             && (*p != PATH_SEPARATOR_CHAR
-                 || (p == v + 1 && (p[1] == '/' || p[1] == '\\')))
+             && (*p != PATH_SEPARATOR_CHAR || (p == v + 1 && ISDIRSEP (p[1])))
 #else
              && *p != PATH_SEPARATOR_CHAR
 #endif
@@ -277,7 +276,7 @@ construct_vpath_list (char *pattern, char *dirpath)
          entry, to where the nil-pointer terminator goes.
          Usually this is maxelem - 1.  If not, shrink down.  */
       if (elem < (maxelem - 1))
-        vpath = xrealloc (vpath, (elem+1) * sizeof (const char *));
+        vpath = xrealloc ((void *)vpath, (elem+1) * sizeof (const char *));
 
       /* Put the nil-pointer terminator on the end of the VPATH list.  */
       vpath[elem] = NULL;
@@ -379,21 +378,13 @@ selective_vpath_search (struct vpath *path, const char *file,
       size_t vlen = strlen (vpath[i]);
 
       /* Put the next VPATH entry into NAME at P and increment P past it.  */
-      memcpy (p, vpath[i], vlen);
-      p += vlen;
+      p = mempcpy (p, vpath[i], vlen);
 
       /* Add the directory prefix already in *FILE.  */
       if (name_dplen > 0)
         {
-#ifndef VMS
           *p++ = '/';
-#else
-          /* VMS: if this is not in VMS format, treat as Unix format */
-          if ((*p != ':') && (*p != ']') && (*p != '>'))
-            *p++ = '/';
-#endif
-          memcpy (p, file, name_dplen);
-          p += name_dplen;
+          p = mempcpy (p, file, name_dplen);
         }
 
 #ifdef HAVE_DOS_PATHS
@@ -402,23 +393,12 @@ selective_vpath_search (struct vpath *path, const char *file,
         p[-1] = '/';
 #endif
       /* Now add the name-within-directory at the end of NAME.  */
-#ifndef VMS
       if (p != name && p[-1] != '/')
         {
           *p = '/';
           memcpy (p + 1, filename, flen + 1);
         }
       else
-#else
-      /* VMS use a slash if no directory terminator present */
-      if (p != name && p[-1] != '/' && p[-1] != ':' &&
-          p[-1] != '>' && p[-1] != ']')
-        {
-          *p = '/';
-          memcpy (p + 1, filename, flen + 1);
-        }
-      else
-#endif
         memcpy (p, filename, flen + 1);
 
       /* Check if the file is mentioned in a makefile.  If *FILE is not
@@ -461,12 +441,6 @@ selective_vpath_search (struct vpath *path, const char *file,
           /* That file wasn't mentioned in the makefile.
              See if it actually exists.  */
 
-#ifdef VMS
-          /* For VMS syntax just use the original vpath */
-          if (*p != '/')
-            exists_in_cache = exists = dir_file_exists_p (vpath[i], filename);
-          else
-#endif
             {
               /* Clobber a null into the name at the last slash.
                  Now NAME is the name of the directory to look in.  */
@@ -488,14 +462,8 @@ selective_vpath_search (struct vpath *path, const char *file,
 
           struct stat st;
 
-#ifndef VMS
           /* Put the slash back in NAME.  */
           *p = '/';
-#else
-          /* If the slash was removed, put it back */
-          if (*p == 0)
-            *p = '/';
-#endif
 
           if (exists_in_cache)  /* Makefile-mentioned file need not exist.  */
             {
