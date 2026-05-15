@@ -172,7 +172,7 @@ For example here is GNU Make 4.3 code from `job.c`
 
 .. code:: cpp
 
-    #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
+    #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(MK_OS_W32)
             remote_status_lose:
     #endif
               pfatal_with_name ("remote_status");
@@ -180,7 +180,7 @@ For example here is GNU Make 4.3 code from `job.c`
           else
             {
               /* No remote children.  Check for local children.  */
-    #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
+    #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(MK_OS_W32)
               if (any_local)
                 {
     #ifdef VMS

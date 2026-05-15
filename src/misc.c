@@ -23,7 +23,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include <assert.h>
 #include <stdarg.h>
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 # include <windows.h>
 # include <io.h>
 #endif
@@ -564,7 +564,7 @@ spin (const char* type)
     {
       fprintf (stderr, "SPIN on %s\n", filenm);
       do
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
         Sleep (1000);
 #else
         sleep (1);
@@ -620,7 +620,7 @@ get_tmpdir ()
 
   if (!tmpdir)
     {
-#if defined (__MSDOS__) || defined (WINDOWS32) || defined (__EMX__)
+#if defined (__MSDOS__) || defined (MK_OS_W32) || defined (__EMX__)
 # define TMP_EXTRAS   "TMP", "TEMP",
 #else
 # define TMP_EXTRAS

@@ -93,8 +93,8 @@
 
 # include "intprops.h"
 
-# if defined _WIN32 && ! defined __CYGWIN__ && ! defined WINDOWS32
-#  define WINDOWS32
+# if defined _WIN32 && ! defined __CYGWIN__ && ! defined MK_OS_W32
+#  define MK_OS_W32
 # endif
 
 # ifdef NeXT
@@ -750,7 +750,7 @@ getloadavg (double loadavg[], int nelem)
        : (load_ave.tl_avenrun.l[0] / (double) load_ave.tl_lscale));
 # endif /* OSF_MIPS */
 
-# if !defined (LDAV_DONE) && (defined (__MSDOS__) || defined (WINDOWS32))
+# if !defined (LDAV_DONE) && (defined (__MSDOS__) || defined (MK_OS_W32))
                                                            /* DJGPP */
 #  define LDAV_DONE
 
@@ -759,7 +759,7 @@ getloadavg (double loadavg[], int nelem)
     {
       loadavg[elem] = 0.0;
     }
-# endif  /* __MSDOS__ || WINDOWS32 */
+# endif  /* __MSDOS__ || MK_OS_W32 */
 
 # if !defined (LDAV_DONE) && defined (OSF_ALPHA)           /* OSF/1 */
 #  define LDAV_DONE

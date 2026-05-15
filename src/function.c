@@ -1701,7 +1701,7 @@ shell_completed (int exit_code, int exit_sig)
   define_variable_cname (".SHELLSTATUS", buf, o_override, 0);
 }
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 /*untested*/
 
 #include <windows.h>
@@ -1901,7 +1901,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
   pid_t pid;
 
 #ifndef __MSDOS__
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   /* Reset just_print_flag.  This is needed on Windows when batch files
      are used to run the commands, because we normally refrain from
      creating batch files under -n.  */
@@ -1914,7 +1914,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
                                          &batch_filename);
   if (command_argv == 0)
     {
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
       just_print_flag = j_p_f;
 #endif
       return o;
@@ -1938,7 +1938,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
       goto done;
     }
 
-#elif defined(WINDOWS32)
+#elif defined(MK_OS_W32)
   windows32_openpipe (pipedes, errfd, &pid, command_argv, child.environment);
   /* Restore the value of just_print_flag.  */
   just_print_flag = j_p_f;

@@ -35,11 +35,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # include <sys/file.h>
 #endif
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 # include <windows.h>
 # include <io.h>
 # include "sub_proc.h"
-#endif /* WINDOWS32 */
+#endif /* MK_OS_W32 */
 
 struct output *output_context = NULL;
 unsigned int stdio_traced = 0;
@@ -179,7 +179,7 @@ sync_init (void)
 {
   int combined_output = 0;
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   if ((!STREAM_OK (stdout) && !STREAM_OK (stderr))
       || (sync_handle = create_mutex ()) == -1)
     {
@@ -221,7 +221,7 @@ pump_from_tmp (int from, FILE *to)
 {
   static char buffer[8192];
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   int prev_mode;
 
   /* "from" is opened by open_tmpfd, which does it in binary mode, so
@@ -248,7 +248,7 @@ pump_from_tmp (int from, FILE *to)
       fflush (to);
     }
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   /* Switch "to" back to its original mode, so that log messages by
      Make have the same EOL format as without --output-sync.  */
   _setmode (fileno (to), prev_mode);

@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #undef	__ptr_t
-#if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
+#if defined __cplusplus || (defined __STDC__ && __STDC__) || defined MK_OS_W32
 # if !defined __GLIBC__
 #  undef __P
 #  undef __PMT

@@ -33,12 +33,12 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hash.h"
 
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 #include <windows.h>
 #include "sub_proc.h"
-#else  /* !WINDOWS32 */
+#else  /* !MK_OS_W32 */
 #include <pwd.h>
-#endif /* !WINDOWS32 */
+#endif /* !MK_OS_W32 */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently
    eval'ing.
@@ -100,7 +100,7 @@ static struct conditionals *conditionals = &toplevel_conditionals;
 
 static const char *default_include_directories[] =
   {
-#if defined(WINDOWS32) && !defined(INCLUDEDIR)
+#if defined(MK_OS_W32) && !defined(INCLUDEDIR)
 /* This completely up to the user when they install MSVC or other packages.
    This is defined as a placeholder.  */
 # define INCLUDEDIR "."
@@ -2689,7 +2689,7 @@ readline (struct ebuffer *ebuf)
       /* We got a newline, so add one to the count of lines.  */
       ++nlines;
 
-#if !defined(WINDOWS32) && !defined(__MSDOS__) && !defined(__EMX__)
+#if !defined(MK_OS_W32) && !defined(__MSDOS__) && !defined(__EMX__)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
       if ((p - start) > 1 && p[-2] == '\r')
@@ -3086,7 +3086,7 @@ remake_tilde_expand (const char *name)
           free (home_dir);
           home_dir = getenv ("HOME");
         }
-# if !defined(_AMIGA) && !defined(WINDOWS32)
+# if !defined(_AMIGA) && !defined(MK_OS_W32)
       if (home_dir == 0 || home_dir[0] == '\0')
         {
           char *logname = getlogin ();
@@ -3098,7 +3098,7 @@ remake_tilde_expand (const char *name)
                 home_dir = p->pw_dir;
             }
         }
-# endif /* !AMIGA && !WINDOWS32 */
+# endif /* !AMIGA && !MK_OS_W32 */
       if (home_dir != 0)
         {
           char *new = xstrdup (concat (2, home_dir, name + 1));
@@ -3107,7 +3107,7 @@ remake_tilde_expand (const char *name)
           return new;
         }
     }
-# if !defined(_AMIGA) && !defined(WINDOWS32)
+# if !defined(_AMIGA) && !defined(MK_OS_W32)
   else
     {
       struct passwd *pwent;
@@ -3125,7 +3125,7 @@ remake_tilde_expand (const char *name)
       else if (userend != 0)
         *userend = '/';
     }
-# endif /* !AMIGA && !WINDOWS32 */
+# endif /* !AMIGA && !MK_OS_W32 */
   return 0;
 }
 

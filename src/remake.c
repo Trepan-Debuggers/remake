@@ -1442,7 +1442,7 @@ f_mtime (struct file *file, int search)
 
       FILE_TIMESTAMP adjusted_mtime = mtime;
 
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#if defined(MK_OS_W32) || defined(__MSDOS__)
       /* Experimentation has shown that FAT filesystems can set file times
          up to 3 seconds into the future!  Play it safe.  */
 
@@ -1531,7 +1531,7 @@ name_mtime (const char *name)
   struct stat st;
   int e;
 
-#if defined(WINDOWS32)
+#if defined(MK_OS_W32)
   {
     char tem[MAXPATHLEN], *tstart, *tend;
     const char *p = name + strlen (name);
@@ -1664,7 +1664,7 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
     {
       "/lib",
       "/usr/lib",
-#if defined(WINDOWS32) && !defined(LIBDIR)
+#if defined(MK_OS_W32) && !defined(LIBDIR)
 /*
  * This is completely up to the user at product install time. Just define
  * a placeholder.

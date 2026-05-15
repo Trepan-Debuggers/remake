@@ -31,7 +31,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "cmd.h"
 
 #include <assert.h>
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 # include <windows.h>
 # include <io.h>
 #ifdef HAVE_STRINGS_H
@@ -895,7 +895,7 @@ decode_profile_options(void)
   }
 }
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
 
 #ifndef NO_OUTPUT_SYNC
 
@@ -1123,7 +1123,7 @@ find_and_set_default_shell (const char *token)
 
   return (sh_found);
 }
-#endif  /* WINDOWS32 */
+#endif  /* MK_OS_W32 */
 
 #ifdef __MSDOS__
 static void
@@ -1168,7 +1168,7 @@ main (int argc, const char **argv, char **envp)
   unsigned int restarts = 0;
   unsigned int syncing = 0;
   int argv_slots;
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   const char *unix_path = NULL;
   const char *windows32_path = NULL;
 
@@ -1344,7 +1344,7 @@ main (int argc, const char **argv, char **envp)
 
   /* Figure out where we are.  */
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
   if (getcwd (current_directory, GET_PATH_MAX) == 0)
@@ -1761,7 +1761,7 @@ main (int argc, const char **argv, char **envp)
   /* If we chdir'ed, figure out where we are now.  */
   if (directories)
     {
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
       if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
       if (getcwd (current_directory, GET_PATH_MAX) == 0)
@@ -1951,11 +1951,11 @@ main (int argc, const char **argv, char **envp)
 
   read_makefiles = read_all_makefiles (makefiles == 0 ? 0 : makefiles->list);
 
-#ifdef WINDOWS32
+#ifdef MK_OS_W32
   /* look one last time after reading all Makefiles */
   if (no_default_sh_exe)
     no_default_sh_exe = !find_and_set_default_shell (NULL);
-#endif /* WINDOWS32 */
+#endif /* MK_OS_W32 */
 
 #if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
   /* We need to know what kind of shell we will be using.  */

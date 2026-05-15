@@ -68,7 +68,7 @@ int output_tmpfd (void);
 /* Dump any child output content to stdout, and reset it.  */
 void output_dump (struct output *out);
 
-# ifdef WINDOWS32
+# ifdef MK_OS_W32
 /* For emulations in w32/compat/posixfcn.c.  */
 #  define F_GETFD 1
 #  define F_SETLKW 2
@@ -101,7 +101,7 @@ int same_stream (FILE *f1, FILE *f2);
 #  define RECORD_SYNC_MUTEX(m) record_sync_mutex(m)
 void record_sync_mutex (const char *str);
 void prepare_mutex_handle_string (intptr_t hdl);
-# else  /* !WINDOWS32 */
+# else  /* !MK_OS_W32 */
 
 typedef int sync_handle_t;      /* file descriptor */
 
