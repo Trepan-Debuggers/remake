@@ -1,5 +1,5 @@
-/* Record version and build host architecture for GNU make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+/* Record version and build host architecture for GNU Make.
+Copyright (C) 1988-2025 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
