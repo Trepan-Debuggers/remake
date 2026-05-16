@@ -120,14 +120,6 @@ USA.  */
 /* Avoid depending on library functions or files
    whose names are inconsistent.  */
 
-# if !defined _LIBC && !defined getenv
-extern char *getenv ();
-# endif
-
-# ifndef errno
-extern int errno;
-# endif
-
 /* This function doesn't exist on most systems.  */
 
 # if !defined HAVE___STRCHRNUL && !defined _LIBC

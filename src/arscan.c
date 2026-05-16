@@ -199,26 +199,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *varg)
 # define __AR_BIG__
 #endif
 
-#ifndef MK_OS_W32
-# if !defined (__ANDROID__) && !defined (__BEOS__)
+#if !(defined MK_OS_W32 || defined __MINGW32__)
 #  include <ar.h>
-# else
-   /* These platforms don't have <ar.h> but have archives in the same format
-    * as many other Unices.  This was taken from GNU binutils for BeOS.
-    */
-#  define ARMAG "!<arch>\n"     /* String that begins an archive file.  */
-#  define SARMAG 8              /* Size of that string.  */
-#  define ARFMAG "`\n"          /* String in ar_fmag at end of each header.  */
-struct ar_hdr
-  {
-    char ar_name[16];           /* Member file name, sometimes / terminated. */
-    char ar_date[12];           /* File date, decimal seconds since Epoch.  */
-    char ar_uid[6], ar_gid[6];  /* User and group IDs, in ASCII decimal.  */
-    char ar_mode[8];            /* File mode, in ASCII octal.  */
-    char ar_size[10];           /* File size, in ASCII decimal.  */
-    char ar_fmag[2];            /* Always contains ARFMAG.  */
-  };
-# endif
 # define TOCHAR(_m)     (_m)
 #else
 /* These should allow us to read Windows (VC++) libraries (according to Frank
@@ -801,7 +783,7 @@ ar_member_touch (const char *arname, const char *memname)
   if (r < 0)
     goto lose;
   /* Advance member's time to that time */
-#if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(MK_OS_W32)
+#if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(MK_OS_W32) || defined(__MINGW32__)
   datelen = snprintf (TOCHAR (ar_hdr.ar_date), sizeof ar_hdr.ar_date,
                       "%lu", (intmax_t) statbuf.st_mtime);
   if (! (0 <= datelen && datelen < (int) sizeof ar_hdr.ar_date))

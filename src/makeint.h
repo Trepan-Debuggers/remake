@@ -476,7 +476,7 @@ extern int unixy_shell;
 #endif
 
 /* We can't run setrlimit when using posix_spawn.  */
-#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) && !defined(USE_POSIX_SPAWN)
+#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) && !defined(USE_POSIX_SPAWN) && !defined(__MINGW32__)
 # define SET_STACK_SIZE
 #endif
 #ifdef SET_STACK_SIZE
@@ -653,18 +653,11 @@ void spin (const char* suffix);
 
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(MK_OS_W32)
 
-long int atol ();
-# ifndef VMS
-long int lseek ();
-# endif
+long int atol (const char *);
 
 #endif  /* Not GNU C library or POSIX.  */
 
-#ifdef HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-# endif
-#else
+#if !defined HAVE_GETCWD
 char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
 #endif

@@ -322,6 +322,9 @@ extern int unixy_shell;
 #if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 # define SET_STACK_SIZE
 #endif
+#ifdef __MINGW32__
+#undef SET_STACK_SIZE
+#endif
 #ifdef SET_STACK_SIZE
 # include <sys/resource.h>
 extern struct rlimit stack_limit;
@@ -405,11 +408,6 @@ const char *strcache_add (const char *str);
    because such systems often declare them in header files anyway.  */
 
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(MK_OS_W32)
-
-long int atol ();
-# ifndef VMS
-long int lseek ();
-# endif
 
 #endif  /* Not GNU C library or POSIX.  */
 

@@ -489,6 +489,9 @@ void chomp(char * line)
   if (line[len-1] == '\n') line[len-1] = '\0';
 }
 
+# ifndef WEXITSTATUS
+#  define WEXITSTATUS(x) (((x) >> 8) & 0xff)
+# endif
 
 void shell_rc_status(int rc)
 {

@@ -1,7 +1,6 @@
 /* Command processing for GNU Make.
 Copyright (C) 1988-2022 Free Software Foundation, Inc.
 This file is part of GNU Make.
-
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 3 of the License, or (at your option) any later
@@ -22,9 +21,11 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "expand.h"
-#ifdef MK_OS_W32
+#if defined MK_OS_W32 || defined __MINGW32__
 #include <windows.h>
+#if !defined __MINGW32__
 #include "w32err.h"
+#endif
 #endif
 
 #define FILE_LIST_SEPARATOR ' '

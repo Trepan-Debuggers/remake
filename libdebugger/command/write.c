@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2011, 2017, 2020 R. Bernstein  <rocky@gnu.org>
+Copyright (C) 2011, 2017, 2020, 2026 R. Bernstein  <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -32,6 +32,10 @@ Boston, MA 02111-1307, USA.  */
  **/
 
 #include "../../src/trace.h"
+
+#ifdef __MINGW32__
+#include <io.h>
+#endif 
 
 extern debug_return_t
 dbg_cmd_write(char *psz_args)
@@ -189,10 +193,17 @@ dbg_cmd_write(char *psz_args)
 	  if (buf.st_mode & S_IRUSR) mode |= S_IXUSR;
 	  if (buf.st_mode & S_IRGRP) mode |= S_IXGRP;
 	  if (buf.st_mode & S_IROTH) mode |= S_IXOTH;
+#ifdef __MINGW32__          
+	  if (0 != _chmod(psz_filename, mode)) {
+	    printf(_("Can't set execute mode on \"%s\".\n"), psz_filename);
+	  }
+	}
+#else        
 	  if (0 != fchmod(fileno(outfd), mode)) {
 	    printf(_("Can't set execute mode on \"%s\".\n"), psz_filename);
 	  }
 	}
+#endif        
 	fclose(outfd);
 	printf(_("File \"%s\" written.\n"), psz_filename);
 	free(psz_filename);

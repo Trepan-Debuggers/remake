@@ -92,7 +92,7 @@ struct flock
 typedef intptr_t sync_handle_t;
 
 /* Public functions emulated/provided in posixfcn.c.  */
-#  if !defined(GNULIB_defined_rpl_fcntl) && !defined(GNULIB_defined_fcntl)
+#  if !defined(GNULIB_defined_rpl_fcntl) && !defined(GNULIB_defined_fcntl) && !defined(__MINGW32__)
 int fcntl (intptr_t fd, int cmd, ...);
 #  endif
 intptr_t create_mutex (void);

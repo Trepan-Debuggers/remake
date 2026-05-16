@@ -72,7 +72,7 @@ USA.  */
 # endif
 #endif
 
-#if !defined MK_OS_W32
+#if !(defined MK_OS_W32 || defined __MINGW32__)
 # include <pwd.h>
 #endif
 
@@ -634,7 +634,7 @@ glob (pattern, flags, errfunc, pglob)
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    home_dir = "SYS:";
 # else
-#  ifdef MK_OS_W32
+#  if defined MK_OS_W32 || __MINGW32__
 	  if (home_dir == NULL || home_dir[0] == '\0')
             home_dir = "c:/users/default"; /* poor default */
 #  else
@@ -722,7 +722,7 @@ glob (pattern, flags, errfunc, pglob)
 	      dirname = newp;
 	    }
 	}
-# if !defined _AMIGA && !defined MK_OS_W32 && !defined VMS
+# if !defined _AMIGA && !(defined MK_OS_W32 || __MINGW32__) && !defined VMS
       else
 	{
 	  char *end_name = strchr (dirname, '/');

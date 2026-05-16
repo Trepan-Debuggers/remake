@@ -95,8 +95,8 @@ libdebugger_a_SOURCES =  \
 # "src/gettext.h" which is used by "src/makeint.h" when <gettext.h> is not
 # found.
 #
-# Some debugger commands include "makeint.h".
-DEFAULT_INCLUDES = -I$(top_srcdir)/src -I.@am__isrc@ -I$(top_builddir)/src
+# Some debugger commands include "makeint.h" and assume <glob.h>.
+DEFAULT_INCLUDES = -I$(top_srcdir)/src -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/glob
 
 #: Reissue building this target in parent directory
 doxygen readthedocs:
