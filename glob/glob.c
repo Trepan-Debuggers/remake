@@ -396,9 +396,9 @@ glob (pattern, flags, errfunc, pglob)
 	  const char *rest;
 	  size_t rest_len;
 #ifdef __GNUC__
-	  char onealt[strlen (pattern) - 1];
+	  char onealt[strlen (pattern) + 1];
 #else
-	  char *onealt = (char *) malloc (strlen (pattern) - 1);
+	  char *onealt = (char *) malloc (strlen (pattern) + 1);
 	  if (onealt == NULL)
 	    {
 	      if (!(flags & GLOB_APPEND))
