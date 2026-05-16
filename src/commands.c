@@ -605,7 +605,7 @@ fatal_error_signal (int sig)
   remove_intermediates (1);
   exit (EXIT_FAILURE);
 #else /* not __MSDOS__ */
-#ifdef MK_OS_W32
+#if defined MK_OS_W32 || defined __MINGW32__
   extern HANDLE main_thread;
 
   /* Windows creates a separate thread for handling Ctrl+C, so we need

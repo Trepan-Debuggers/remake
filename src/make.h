@@ -438,8 +438,6 @@ int strncasecmp (const char *s1, const char *s2, int n);
 # endif
 #endif
 
-extern char **environ;
-
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
 extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;

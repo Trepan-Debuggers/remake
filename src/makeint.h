@@ -372,7 +372,7 @@ extern mode_t umask (mode_t);
 # include <direct.h>
 #endif
 
-#ifdef MK_OS_W32
+#if defined MK_OS_W32 || defined __MINGW32__
 # include <fcntl.h>
 # include <malloc.h>
 # define pipe(_p)        _pipe((_p), 512, O_BINARY)
@@ -385,6 +385,9 @@ extern mode_t umask (mode_t);
 # ifndef _S_ISDIR
 #  define _S_ISDIR(m)  S_ISDIR(m)
 # endif
+
+#include <windows.h>
+extern const char* map_windows32_error_to_string(DWORD error_code);
 
 void sync_Path_environment (void);
 int w32_kill (pid_t pid, int sig);
@@ -686,8 +689,6 @@ int strncasecmp (const char *s1, const char *s2, size_t n);
 
 extern const gmk_floc *reading_file;
 extern const gmk_floc **expanding_var;
-
-extern char **environ;
 
 extern unsigned short stopchar_map[];
 
