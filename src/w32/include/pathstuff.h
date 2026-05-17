@@ -17,9 +17,9 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #ifndef _PATHSTUFF_H
 #define _PATHSTUFF_H
 
-char *convert_Path_to_windows32(char *Path, char to_delim);
-char *convert_vpath_to_windows32(char *Path, char to_delim);
-char *w32ify(const char *file, int resolve);
-char *getcwd_fs(char *buf, int len);
+extern char *convert_Path_to_windows32(char *Path, char to_delim);
+extern char *convert_vpath_to_windows32(char *Path, char to_delim);
+extern char *w32ify(const char *file, int resolve);
+extern char *getcwd_fs(char *buf, int len);
 
 #endif

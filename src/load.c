@@ -254,10 +254,10 @@ unload_file (const char *name)
   return rc;
 }
 
-#else
+#else /* ! MAKE_LOAD */
 
 int
-load_file (const floc *flocp, const char **ldname UNUSED, int noerror)
+load_file (const gmk_floc *flocp, const char **ldname UNUSED, int noerror)
 {
   if (! noerror)
     O (fatal, flocp,

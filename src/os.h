@@ -20,14 +20,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #define IO_STDOUT_OK            0x0008
 #define IO_STDERR_OK            0x0010
 
-#if defined(VMS) || defined(_AMIGA) || defined(__MSDOS__)
-# define check_io_state()  (IO_STDIN_OK|IO_STDOUT_OK|IO_STDERR_OK)
-# define fd_inherit(_i)    (0)
-# define fd_noinherit(_i)  (0)
-# define fd_set_append(_i) (void)(0)
-# define os_anontmp()      (-1)
-#else
-
 /* Determine the state of stdin/stdout/stderr.  */
 unsigned int check_io_state (void);
 
@@ -40,7 +32,6 @@ void fd_set_append (int);
 
 /* Return a file descriptor for a new anonymous temp file, or -1.  */
 int os_anontmp (void);
-#endif
 
 /* This section provides OS-specific functions to support the jobserver.  */
 

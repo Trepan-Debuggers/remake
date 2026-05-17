@@ -1,6 +1,7 @@
 /* Job execution and handling for GNU Make.
 Copyright (C) 1988-2022 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2026 Rocky Bernstein
+This file is part of GNU Remake and GNU Make
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -30,10 +31,41 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "variable.h"
 #include "os.h"
+#include "dep.h"
+#include "shuffle.h"
 
 /* Default shell to use.  */
+#if defined(WINDOWS32) || defined(__MINGW32__)
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>  /* for strcasecmp, strncasecmp */
+# endif
+# include <windows.h>
+
+const char *default_shell = "sh.exe";
+int no_default_sh_exe = 1;
+int batch_mode_shell = 1;
+HANDLE main_thread;
+
+#else
+
 const char *default_shell = "/bin/sh";
 int batch_mode_shell = 0;
+
+#endif
+
+#if defined(WINDOWS32) || defined(__MINGW32__)
+# include <windows.h>
+# include <io.h>
+# include <process.h>
+# include "w32/include/sub_proc.h"
+# include "w32/include/w32err.h"
+# include "w32/include/pathstuff.h"
+# define WAIT_NOHANG 1
+#endif /* WINDOWS32 */
+
+#if defined (HAVE_FCNTL_H)
+# include <fcntl.h>
+#endif
 
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
 # include <sys/wait.h>
@@ -100,14 +132,12 @@ int wait ();
 
 #endif  /* Don't have 'union wait'.  */
 
-#if !defined(HAVE_UNISTD_H) && !defined(MK_OS_W32)
-int dup2 ();
-int execve ();
-void _exit ();
-int geteuid ();
-int getegid ();
-int setgid ();
-int getgid ();
+#if HAVE_SYS_LOADAVG_H
+# include <sys/loadavg.h>
+#endif
+
+#if HAVE_DECL_GETLOADAVG == 0
+int getloadavg (double loadavg[], int nelem);
 #endif
 
 /* Different systems have different requirements for pid_t.
@@ -116,7 +146,7 @@ static const char *
 pid2str (pid_t pid)
 {
   static char pidstring[100];
-#if defined(MK_OS_W32s) && (__GNUC__ > 3 || _MSC_VER > 1300)
+#if defined(WINDOWS32) && (__GNUC__ > 3 || _MSC_VER > 1300)
   /* %Id is only needed for 64-builds, which were not supported by
       older versions of Windows compilers.  */
   sprintf (pidstring, "%Id", pid);
@@ -125,10 +155,6 @@ pid2str (pid_t pid)
 #endif
   return pidstring;
 }
-
-#ifndef HAVE_GETLOADAVG
-int getloadavg (double loadavg[], int nelem);
-#endif
 
 static void free_child (struct child *);
 static void start_job_command (struct child *child,
@@ -167,7 +193,7 @@ unsigned long job_counter = 0;
 unsigned int jobserver_tokens = 0;
 
 
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
 /*
  * The macro which references this function is defined in makeint.h.
  */
@@ -186,7 +212,7 @@ create_batch_file (char const *base, int unixy, int *fd)
 {
   const char *const ext = unixy ? "sh" : "bat";
   const char *error_string = NULL;
-  char temp_path[MAXPATHLEN]; /* need to know its length */
+  char temp_path[MAX_PATH+1]; /* need to know its length */
   unsigned path_size = GetTempPath (sizeof temp_path, temp_path);
   int path_is_dot = 0;
   /* The following variable is static so we won't try to reuse a name
@@ -281,13 +307,13 @@ create_batch_file (char const *base, int unixy, int *fd)
 
   *fd = -1;
   if (error_string == NULL)
-    error_string = _("Cannot create a temporary file\n");
+    error_string = _("Cannot create a temporary file");
   O (fatal, NILF, error_string);
 
   /* not reached */
   return NULL;
 }
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
 
 /* determines whether path looks to be a Bourne-like shell. */
 int
@@ -297,39 +323,31 @@ is_bourne_compatible_shell (const char *path)
   static const char *unix_shells[] = {
     "sh",
     "bash",
+    "dash",
     "ksh",
     "rksh",
     "zsh",
     "ash",
-    "dash",
     NULL
   };
   const char **s;
 
-  /* find the rightmost '/' or '\\' */
-  const char *name = strrchr (path, '/');
-  char *p = strrchr (path, '\\');
+  /* find the last directory separator, or the beginning of the string.  */
+  const char *cp = path + strlen (path);
 
-  if (name && p)    /* take the max */
-    name = (name > p) ? name : p;
-  else if (p)       /* name must be 0 */
-    name = p;
-  else if (!name)   /* name and p must be 0 */
-    name = path;
-
-  if (*name == '/' || *name == '\\')
-    ++name;
+  while (cp > path && !ISDIRSEP (cp[-1]))
+    --cp;
 
   /* this should be able to deal with extensions on Windows-like systems */
   for (s = unix_shells; *s != NULL; ++s)
     {
-#if defined(MK_OS_W32s) || defined(__MSDOS__)
+#if defined(WINDOWS32) || defined(__MINGW32__)
       size_t len = strlen (*s);
-      if ((strlen (name) >= len && STOP_SET (name[len], MAP_DOT|MAP_NUL))
-          && strncasecmp (name, *s, len) == 0)
+      if ((strlen (cp) >= len && STOP_SET (cp[len], MAP_DOT|MAP_NUL))
+          && strncasecmp (cp, *s, len) == 0)
 #else
-      if (strcmp (name, *s) == 0)
-#endif
+      if (strcmp (cp, *s) == 0)
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
         return 1; /* a known unix-style shell */
     }
 
@@ -373,7 +391,7 @@ block_sigs ()
 static void
 unblock_sigs ()
 {
-  sigsetmask (siggetmask (0) & ~fatal_signal_mask)
+  sigsetmask (siggetmask () & ~fatal_signal_mask);
 }
 
 void
@@ -406,6 +424,10 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
   const char *post = "";
   const char *dump = "";
   const struct file *f = p_child->file;
+  const gmk_floc *flocp = &f->cmds->fileinfo;
+  const char *nm;
+  const char *smode;
+  size_t l;
 
   if (ignored && run_silent)
     return;
@@ -419,17 +441,42 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
       post = _(" (ignored)");
     }
 
+  if (! flocp->filenm)
+    nm = _("<builtin>");
+  else
+    {
+      char *a = alloca (strlen (flocp->filenm) + 6 + INTSTR_LENGTH + 1);
+      sprintf (a, "%s:%lu", flocp->filenm, flocp->lineno + flocp->offset);
+      nm = a;
+    }
+
+  l = strlen (pre) + strlen (nm) + strlen (f->name) + strlen (post);
+
+  smode = shuffle_get_mode ();
+  if (smode)
+    {
+#define SHUFFLE_PREFIX " shuffle="
+      char *a = alloca (CSTRLEN(SHUFFLE_PREFIX) + strlen (smode) + 1);
+      sprintf (a, SHUFFLE_PREFIX "%s", smode);
+      smode = a;
+      l += strlen (smode);
+#undef SHUFFLE_PREFIX
+    }
+
   OUTPUT_SET (&p_child->output);
 
   show_goal_error ();
 
   if (exit_sig == 0)
     err_with_stack(p_call_stack,
-		   _("%s[%s] error %d%s"),
-		   pre, f->name, exit_code, post);
+		   _("%s[%s: %s] Error %d%s%s"),
+		   pre, nm, f->name, exit_code, post, smode ? smode : "");
  else
-    err_with_stack(p_call_stack, "%s[%s] %s%s%s",
-		   pre, f->name, strsignal (exit_sig), dump, post);
+    {
+      const char *s = strsignal (exit_sig);
+      err_with_stack(p_call_stack, "%s[%s] %s%s%s%s",
+		     pre, nm, f->name, s, dump, post, smode ? smode : "");
+    }
 
   OUTPUT_UNSET ();
 
@@ -456,7 +503,7 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 
 static unsigned int dead_children = 0;
 
-RETSIGTYPE
+void
 child_handler (int sig UNUSED)
 {
   ++dead_children;
@@ -476,7 +523,7 @@ extern pid_t shell_function_pid;
 void
 reap_children (int block, int err, target_stack_node_t *p_call_stack)
 {
-#ifndef MK_OS_W32s
+#if !(defined(WINDOWS32) || defined(__MINGW32__))
   WAIT_T status;
 #endif
   /* Initially, assume we have some.  */
@@ -574,15 +621,12 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       else if (pid < 0)
         {
           /* A remote status command failed miserably.  Punt.  */
-#if !defined(__MSDOS__) && !defined(MK_OS_W32s)
-        remote_status_lose:
-#endif
           pfatal_with_name ("remote_status");
         }
       else
         {
           /* No remote children.  Check for local children.  */
-#if !defined(__MSDOS__) && !defined(MK_OS_W32s)
+#if !defined(WINDOWS32) && !defined(__MINGW32__)
           if (any_local)
             {
 #ifdef WAIT_NOHANG
@@ -618,27 +662,18 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
               /* Now try a blocking wait for a remote child.  */
               pid = remote_status (&exit_code, &exit_sig, &coredump, 1);
               if (pid < 0)
-                goto remote_status_lose;
-              else if (pid == 0)
+                pfatal_with_name ("remote_status");
+
+              if (pid == 0)
                 /* No remote children either.  Finally give up.  */
                 break;
 
               /* We got a remote child.  */
               remote = 1;
             }
-#endif /* !__MSDOS__, !MK_OS_W32s.  */
+#endif /* !defined(WINDOWS32) && !defined(__MINGW32__) */
 
-#ifdef __MSDOS__
-          /* Life is very different on MSDOS.  */
-          pid = dos_pid - 1;
-          status = dos_status;
-          exit_code = WEXITSTATUS (status);
-          if (exit_code == 0xff)
-            exit_code = -1;
-          exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
-          coredump = 0;
-#endif /* __MSDOS__ */
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
           {
             HANDLE hPID;
             HANDLE hcTID, hcPID;
@@ -704,8 +739,11 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
             pid = (pid_t) hPID;
           }
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
         }
+
+      /* Some child finished: increment the command count.  */
+      ++command_count;
 
       /* Check if this is the child of the 'shell' function.  */
       if (!remote && pid == shell_function_pid)
@@ -752,7 +790,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
              to fork/exec but I don't want to bother with that.  Just do the
              best we can.  */
 
-          EINTRLOOP(r, stat(c->cmd_name, &st));
+          EINTRLOOP(r, stat (c->cmd_name, &st));
           if (r < 0)
             e = strerror (errno);
           else if (S_ISDIR(st.st_mode) || !(st.st_mode & S_IXUSR))
@@ -1128,9 +1166,6 @@ start_job_command (child_t *child,
   if (argv == 0)
     {
     next_command:
-#ifdef __MSDOS__
-      execute_by_shell = 0;   /* in case construct_command_argv sets it */
-#endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child, p_call_stack);
@@ -1200,11 +1235,7 @@ start_job_command (child_t *child,
      printed, etc.  */
 
   if (
-#if defined __MSDOS__
-      unixy_shell       /* the test is complicated and we already did it */
-#else
       (argv[0] && is_bourne_compatible_shell (argv[0]))
-#endif
       && (argv[1] && argv[1][0] == '-'
         &&
             ((argv[1][1] == 'c' && argv[1][2] == '\0')
@@ -1251,7 +1282,7 @@ start_job_command (child_t *child,
   if (child->environment == 0)
     child->environment = target_environment (child->file, child->recursive);
 
-#if !defined(__MSDOS__) && !defined(MK_OS_W32s)
+#if !(defined(WINDOWS32) || defined(__MINGW32__))
 
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
   if (child->remote)
@@ -1297,64 +1328,7 @@ start_job_command (child_t *child,
       jobserver_post_child (flags & COMMANDS_RECURSE);
     }
 
-#else   /* __MSDOS__ or MK_OS_W32s */
-#ifdef __MSDOS__
-  {
-    int proc_return;
-
-    block_sigs ();
-    dos_status = 0;
-
-    /* We call 'system' to do the job of the SHELL, since stock DOS
-       shell is too dumb.  Our 'system' knows how to handle long
-       command lines even if pipes/redirection is needed; it will only
-       call COMMAND.COM when its internal commands are used.  */
-    if (execute_by_shell)
-      {
-        char *cmdline = argv[0];
-        /* We don't have a way to pass environment to 'system',
-           so we need to save and restore ours, sigh...  */
-        char **parent_environ = environ;
-
-        environ = child->environment;
-
-        /* If we have a *real* shell, tell 'system' to call
-           it to do everything for us.  */
-        if (unixy_shell)
-          {
-            /* A *real* shell on MSDOS may not support long
-               command lines the DJGPP way, so we must use 'system'.  */
-            cmdline = argv[2];  /* get past "shell -c" */
-          }
-
-        dos_command_running = 1;
-        proc_return = system (cmdline);
-        environ = parent_environ;
-        execute_by_shell = 0;   /* for the next time */
-      }
-    else
-      {
-        dos_command_running = 1;
-        proc_return = spawnvpe (P_WAIT, argv[0], argv, child->environment);
-      }
-
-    /* Need to unblock signals before turning off
-       dos_command_running, so that child's signals
-       will be treated as such (see fatal_error_signal).  */
-    unblock_sigs ();
-    dos_command_running = 0;
-
-    /* If the child got a signal, dos_status has its
-       high 8 bits set, so be careful not to alter them.  */
-    if (proc_return == -1)
-      dos_status |= 0xff;
-    else
-      dos_status |= (proc_return & 0xff);
-    ++dead_children;
-    child->pid = dos_pid++;
-  }
-#endif /* __MSDOS__ */
-#ifdef MK_OS_W32s
+#else   /* (defined(WINDOW32) || defined(__MINGW32__) */
   {
       HANDLE hPID;
       char* arg0;
@@ -1400,8 +1374,7 @@ start_job_command (child_t *child,
           child->pid = -1;
         }
   }
-#endif /* MK_OS_W32s */
-#endif  /* __MSDOS__ or MK_OS_W32s */
+#endif  /* defined(WINDOWS32) || defined(__MINGW32__) */
 
   /* Bump the number of jobs started in this second.  */
   if (child->pid >= 0)
@@ -1437,7 +1410,7 @@ start_waiting_job (struct child *c, target_stack_node_t *p_call_stack)
      is too high, make this one wait.  */
   if (!c->remote
       && ((job_slots_used > 0 && load_too_high ())
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
           || process_table_full ()
 #endif
           ))
@@ -1789,12 +1762,13 @@ job_next_command (struct child *child)
 
    On systems which provide /proc/loadavg (e.g., Linux), we use an idea
    provided by Sven C. Dack <sven.c.dack@sky.com>: retrieve the current number
-   of processes the kernel is running and, if it's greater than the requested
-   load we don't allow another job to start.  We allow a job to start with
-   equal processes since one of those will be for make itself, which will then
-   pause waiting for jobs to clear.
+   of runnable processes, if it's greater than the requested load we don't
+   allow another job to start.  We allow a job to start with equal processes
+   since one of those will be for make itself, which will then pause waiting
+   for jobs to clear.
 
-   Otherwise, we obtain the system load average and compare that.
+   If /proc/loadavg is not available for some reason, we obtain the system
+   load average and compare that.
 
    The system load average is only recomputed once every N (N>=1) seconds.
    However, a very parallel make can easily start tens or even hundreds of
@@ -1842,9 +1816,6 @@ job_next_command (struct child *child)
 static int
 load_too_high (void)
 {
-#if defined(__MSDOS__)
-  return 1;
-#else
   static double last_sec;
   static time_t last_now;
   static int proc_fd = -2;
@@ -1852,7 +1823,7 @@ load_too_high (void)
   double load, guess;
   time_t now;
 
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
   /* sub_proc.c is limited in the number of objects it can wait for. */
   if (process_table_full ())
     return 1;
@@ -1963,7 +1934,6 @@ load_too_high (void)
                 guess, load, max_load_average));
 
   return guess >= max_load_average;
-#endif
 }
 
 /* Start jobs that are waiting for the load to be lower.  */
@@ -1993,9 +1963,7 @@ start_waiting_jobs (target_stack_node_t *p_call_stack)
   return;
 }
 
-#ifndef MK_OS_W32s
-
-#if !defined (__MSDOS__)
+#if !(defined(WINDOWS32) || defined(__MINGW32__))
 
 /* POSIX:
    Create a child process executing the command in ARGV.
@@ -2006,7 +1974,7 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
   const int fdin = good_stdin ? FD_STDIN : get_bad_stdin ();
   int fdout = FD_STDOUT;
   int fderr = FD_STDERR;
-  pid_t pid;
+  pid_t pid = -1;
   int r;
 #if defined(USE_POSIX_SPAWN)
   char *cmd;
@@ -2026,9 +1994,16 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
 
 #if !defined(USE_POSIX_SPAWN)
 
-  pid = vfork();
-  if (pid != 0)
-    return pid;
+  {
+    /* The child may clobber environ so remember ours and restore it.  */
+    char **parent_env = environ;
+    pid = vfork ();
+    if (pid != 0)
+      {
+        environ = parent_env;
+        return pid;
+      }
+  }
 
   /* We are the child.  */
   unblock_all_sigs ();
@@ -2050,6 +2025,7 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
 
   /* Run the command.  */
   exec_command (argv, child->environment);
+  _exit (127);
 
 #else /* USE_POSIX_SPAWN */
 
@@ -2091,8 +2067,8 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
     if ((r = posix_spawn_file_actions_adddup2 (&fa, fderr, FD_STDERR)) != 0)
       goto cleanup;
 
-  /* Be the user, permanently.  */
-  flags |= POSIX_SPAWN_RESETIDS;
+  /* We can't use the POSIX_SPAWN_RESETIDS flag: when make is invoked under
+     restrictive environments like unshare it will fail with EINVAL.  */
 
   /* Apply the spawn flags.  */
   if ((r = posix_spawnattr_setflags (&attr, flags)) != 0)
@@ -2111,7 +2087,19 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
           break;
         }
 
-    cmd = (char *)find_in_given_path (argv[0], p, 0);
+    /* execvp() will use a default PATH if none is set; emulate that.  */
+    if (p == NULL)
+      {
+        size_t l = confstr (_CS_PATH, NULL, 0);
+        if (l)
+          {
+            char *dp = alloca (l);
+            confstr (_CS_PATH, dp, l);
+            p = dp;
+          }
+      }
+
+    cmd = (char *)find_in_given_path (argv[0], p, NULL, 0);
   }
 
   if (!cmd)
@@ -2174,15 +2162,14 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
 
   return pid;
 }
-#endif /* !__MSDOS__ */
-#endif /* !MK_OS_W32s */
+#endif /* !defined(__MINGW32S__) && !defined(WINDOWS32) */
 
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
 pid_t
 exec_command (char **argv, char **envp)
 {
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
   HANDLE hPID;
   HANDLE hWaitPID;
   int exit_code = EXIT_FAILURE;
@@ -2239,28 +2226,14 @@ exec_command (char **argv, char **envp)
   /* Use the child's exit code as our exit code */
   exit (exit_code);
 
-#else  /* !MK_OS_W32s */
+#else  /* !(defined(WINDOWS32) || defined(__MINGW32__)) */
 
   pid_t pid = -1;
-
-# ifdef __EMX__
-  /* Run the program.  */
-  pid = spawnvpe (P_NOWAIT, argv[0], argv, envp);
-  if (pid >= 0)
-    return pid;
-
-  /* the file might have a strange shell extension */
-  if (errno == ENOENT)
-    errno = ENOEXEC;
-
-# else
 
   /* Run the program.  Don't use execvpe() as we want the search for argv[0]
      to use the new PATH, but execvpe() searches before resetting PATH.  */
   environ = envp;
   execvp (argv[0], argv);
-
-# endif /* !__EMX__ */
 
   switch (errno)
     {
@@ -2275,16 +2248,7 @@ exec_command (char **argv, char **envp)
         int argc;
         int i=1;
 
-# ifdef __EMX__
-        /* Do not use $SHELL from the environment */
-        struct variable *p = lookup_variable ("SHELL", 5);
-        if (p)
-          shell = p->value;
-        else
-          shell = 0;
-# else
         shell = getenv ("SHELL");
-# endif
         if (shell == 0)
           shell = default_shell;
 
@@ -2292,22 +2256,9 @@ exec_command (char **argv, char **envp)
         while (argv[argc] != 0)
           ++argc;
 
-# ifdef __EMX__
-        if (!unixy_shell)
-          ++argc;
-# endif
 
         new_argv = alloca ((1 + argc + 1) * sizeof (char *));
         new_argv[0] = (char *)shell;
-
-# ifdef __EMX__
-        if (!unixy_shell)
-          {
-            new_argv[1] = "/c";
-            ++i;
-            --argc;
-          }
-# endif
 
         new_argv[i] = argv[0];
         while (argc > 0)
@@ -2316,23 +2267,10 @@ exec_command (char **argv, char **envp)
             --argc;
           }
 
-# ifdef __EMX__
-        pid = spawnvpe (P_NOWAIT, shell, new_argv, envp);
-        if (pid >= 0)
-          break;
-# else
         execvp (shell, new_argv);
-# endif
         OSS (error, NILF, "%s: %s", new_argv[0], strerror (errno));
         break;
       }
-
-# ifdef __EMX__
-    case EINVAL:
-      /* this nasty error was driving me nuts :-( */
-      O (error, NILF, _("spawnvpe: environment space might be exhausted"));
-      /* FALLTHROUGH */
-# endif
 
     default:
       OSS (error, NILF, "%s: %s", argv[0], strerror (errno));
@@ -2340,15 +2278,15 @@ exec_command (char **argv, char **envp)
     }
 
   return pid;
-#endif /* !MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
 }
 
 /* Figure out the argument list necessary to run LINE as a command.  Try to
    avoid using a shell.  This routine handles only ' quoting, and " quoting
    when no backslash, $ or ' characters are seen in the quotes.  Starting
    quotes may be escaped with a backslash.  If any of the characters in
-   sh_chars is seen, or any of the builtin commands listed in sh_cmds
-   is the first word of a line, the shell is used.
+   sh_chars is seen, or any of the builtin commands listed in sh_cmds is the
+   first word of a line, the shell is used.
 
    If RESTP is not NULL, *RESTP is set to point to the first newline in LINE.
    If *RESTP is NULL, newlines will be ignored.
@@ -2356,62 +2294,25 @@ exec_command (char **argv, char **envp)
    SHELL is the shell to use, or nil to use the default shell.
    IFS is the value of $IFS, or nil (meaning the default).
 
-   FLAGS is the value of lines_flags for this command line.  It is
-   used in the MK_OS_W32s port to check whether + or $(MAKE) were found
-   in this command line, in which case the effect of just_print_flag
-   is overridden.  */
+   FLAGS is the value of lines_flags for this command line.  It is used in the
+   WINDOWS32 port to check whether + or $(MAKE) were found in this command
+   line, in which case the effect of just_print_flag is overridden.
+
+   The returned value is either NULL if the line was empty, or else a pointer
+   to an array of strings.  The fist pointer points to the memory used by all
+   the strings, so to free you free the 0'th element then the returned pointer
+   (see the FREE_ARGV macro).  */
 
 static char **
 construct_command_argv_internal (char *line, char **restp, const char *shell,
                                  const char *shellflags, const char *ifs,
                                  int flags, char **batch_filename UNUSED)
 {
-#ifdef __MSDOS__
-  /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
-     We call 'system' for anything that requires ''slow'' processing,
-     because DOS shells are too dumb.  When $SHELL points to a real
-     (unix-style) shell, 'system' just calls it to do everything.  When
-     $SHELL points to a DOS shell, 'system' does most of the work
-     internally, calling the shell only for its internal commands.
-     However, it looks on the $PATH first, so you can e.g. have an
-     external command named 'mkdir'.
-
-     Since we call 'system', certain characters and commands below are
-     actually not specific to COMMAND.COM, but to the DJGPP implementation
-     of 'system'.  In particular:
-
-       The shell wildcard characters are in DOS_CHARS because they will
-       not be expanded if we call the child via 'spawnXX'.
-
-       The ';' is in DOS_CHARS, because our 'system' knows how to run
-       multiple commands on a single line.
-
-       DOS_CHARS also include characters special to 4DOS/NDOS, so we
-       won't have to tell one from another and have one more set of
-       commands and special characters.  */
-  static const char *sh_chars_dos = "*?[];|<>%^&()";
-  static const char *sh_cmds_dos[] =
-    { "break", "call", "cd", "chcp", "chdir", "cls", "copy", "ctty", "date",
-      "del", "dir", "echo", "erase", "exit", "for", "goto", "if", "md",
-      "mkdir", "path", "pause", "prompt", "rd", "rmdir", "rem", "ren",
-      "rename", "set", "shift", "time", "type", "ver", "verify", "vol", ":",
-      0 };
-
-  static const char *sh_chars_sh = "#;\"*?[]&|<>(){}$`^";
-  static const char *sh_cmds_sh[] =
-    { "cd", "echo", "eval", "exec", "exit", "login", "logout", "set", "umask",
-      "wait", "while", "for", "case", "if", ":", ".", "break", "continue",
-      "export", "read", "readonly", "shift", "times", "trap", "switch",
-      "unset", "ulimit", "command", 0 };
-
-  const char *sh_chars;
-  const char **sh_cmds;
-
-#elif defined (MK_OS_W32s)
+#if defined (WINDOWS32) || defined(__MINGW32__)
   /* We used to have a double quote (") in sh_chars_dos[] below, but
      that caused any command line with quoted file names be run
      through a temporary batch file, which introduces command-line
-     limit of 4K charcaters imposed by cmd.exe.  Since CreateProcess
+     limit of 4K characters imposed by cmd.exe.  Since CreateProcess
      can handle quoted file names just fine, removing the quote lifts
      the limit from a very frequent use case, because using quoted
      file names is commonplace on MS-Windows.  */
@@ -2447,7 +2348,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 
 # ifdef HAVE_DOS_PATHS
   /* This is required if the MSYS/Cygwin ports (which do not define
-     MK_OS_W32s) are compiled with HAVE_DOS_PATHS defined, which uses
+     WINDOWS32) are compiled with HAVE_DOS_PATHS defined, which uses
      sh_chars_sh directly (see below).  The value must be identical
      to that of sh_chars immediately above.  */
   static const char *sh_chars_sh =  "#;\"*?[]&|<>(){}$`^~!";
@@ -2464,7 +2365,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
   int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
   char *argstr = 0;
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
   int slow_flag = 0;
 
   if (!unixy_shell)
@@ -2477,7 +2378,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       sh_cmds = sh_cmds_sh;
       sh_chars = sh_chars_sh;
     }
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
 
   if (restp != NULL)
     *restp = NULL;
@@ -2494,7 +2395,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
   /* See if it is safe to parse commands internally.  */
   if (shell == 0)
     shell = default_shell;
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
   else if (strcmp (shell, default_shell))
   {
     char *s1 = _fullpath (NULL, shell, 0);
@@ -2507,34 +2408,10 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
   }
   if (slow_flag)
     goto slow;
-#else  /* not MK_OS_W32s */
-#if defined (__MSDOS__)
-  else if (strcasecmp (shell, default_shell))
-    {
-      extern int _is_unixy_shell (const char *_path);
-
-      DB (DB_BASIC, (_("$SHELL changed (was '%s', now '%s')\n"),
-                     default_shell, shell));
-      unixy_shell = _is_unixy_shell (shell);
-      /* we must allocate a copy of shell: construct_command_argv() will free
-       * shell after this function returns.  */
-      default_shell = xstrdup (shell);
-    }
-  if (unixy_shell)
-    {
-      sh_chars = sh_chars_sh;
-      sh_cmds  = sh_cmds_sh;
-    }
-  else
-    {
-      sh_chars = sh_chars_dos;
-      sh_cmds  = sh_cmds_dos;
-    }
-#else  /* !__MSDOS__ */
+#else  /* ! (defined(WINDOWS32) || defined(__MINGW32__)) */
   else if (strcmp (shell, default_shell))
     goto slow;
-#endif /* !__MSDOS__ */
-#endif /* not MK_OS_W32s */
+#endif /* !(defined(WINDOW32) || defined(__MINGW32__) */
 
   if (ifs)
     for (cap = ifs; *cap != '\0'; ++cap)
@@ -2583,7 +2460,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                  DOS/Windows/OS2, if we don't have a POSIX shell, we keep the
                  pre-POSIX behavior of removing the backslash-newline.  */
               if (instring == '"'
-#if defined (__MSDOS__) || defined (MK_OS_W32s)
+#if defined (WINDOW32) || defined (__MINGW32__)
                   || !unixy_shell
 #endif
                   )
@@ -2606,7 +2483,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
              quotes have the same effect.  */
           else if (instring == '"' && strchr ("\\$`", *p) != 0 && unixy_shell)
             goto slow;
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
           /* Quoted wildcard characters must be passed quoted to the
              command, so give up the fast route.  */
           else if (instring == '"' && strchr ("*?", *p) != 0 && !unixy_shell)
@@ -2623,11 +2500,6 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       else if (one_shell && *p == '\n')
         /* In .ONESHELL mode \n is a separator like ; or && */
         goto slow;
-#ifdef  __MSDOS__
-      else if (*p == '.' && p[1] == '.' && p[2] == '.' && p[3] != '.')
-        /* '...' is a wildcard in DJGPP.  */
-        goto slow;
-#endif
       else
         /* Not a special char.  */
         switch (*p)
@@ -2657,7 +2529,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                   while (ISBLANK (p[1]))
                     ++p;
               }
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
             /* Backslash before whitespace is not special if our shell
                is not Unixy.  */
             else if (ISSPACE (p[1]) && !unixy_shell)
@@ -2665,7 +2537,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                 *ap++ = *p;
                 break;
               }
-#endif
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
             else if (p[1] != '\0')
               {
 #ifdef HAVE_DOS_PATHS
@@ -2675,17 +2547,6 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                    still leaves a small window for problems, but at least it
                    should work for the vast majority of naive users.  */
 
-#ifdef __MSDOS__
-                /* A dot is only special as part of the "..."
-                   wildcard.  */
-                if (strneq (p + 1, ".\\.\\.", 5))
-                  {
-                    *ap++ = '.';
-                    *ap++ = '.';
-                    p += 4;
-                  }
-                else
-#endif
                   if (p[1] != '\\' && p[1] != '\''
                       && !ISSPACE (p[1])
                       && strchr (sh_chars_sh, p[1]) == 0)
@@ -2742,7 +2603,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
                   {
                     if (streq (sh_cmds[j], new_argv[0]))
                       goto slow;
-#if defined(MK_OS_W32s)
+#if defined(WINDOWS32) || defined(__MINW32__)
                     /* Non-Unix shells are case insensitive.  */
                     if (!unixy_shell
                         && strcasecmp (sh_cmds[j], new_argv[0]) == 0)
@@ -2802,11 +2663,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       free (new_argv);
     }
 
-#ifdef __MSDOS__
-  execute_by_shell = 1; /* actually, call 'system' if shell isn't unixy */
-#endif
-
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
   /*
    * Not eating this whitespace caused things like
    *
@@ -2821,7 +2678,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
   NEXT_TOKEN (line);
   if (*line == '\0')
     return 0;
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
 
   {
     /* SHELL may be a multi-word command.  Construct a command line
@@ -2833,7 +2690,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
     size_t shell_len = strlen (shell);
     size_t line_len = strlen (line);
     size_t sflags_len = shellflags ? strlen (shellflags) : 0;
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 #endif
 
@@ -2853,16 +2710,12 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
 
         /* Remove and ignore interior prefix chars [@+-] because they're
              meaningless given a single shell. */
-#if defined __MSDOS__
-        if (unixy_shell)     /* the test is complicated and we already did it */
-#else
         if (is_bourne_compatible_shell (shell)
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
             /* If we didn't find any sh.exe, don't behave is if we did!  */
             && !no_default_sh_exe
 #endif
             )
-#endif
           {
             const char *f = line;
             char *t = line;
@@ -2897,7 +2750,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
               }
             *t = '\0';
           }
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
         else    /* non-Posix shell (cmd.exe etc.) */
           {
             const char *f = line;
@@ -2969,28 +2822,47 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
             new_argv[1] = NULL;
             return new_argv;
           }
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
         /* Create an argv list for the shell command line.  */
         {
-          int n = 0;
+          int n = 1;
+          char *nextp;
 
           new_argv = xmalloc ((4 + sflags_len/2) * sizeof (char *));
-          new_argv[n++] = xstrdup (shell);
+
+          nextp = new_argv[0] = xmalloc (shell_len + sflags_len + line_len + 3);
+          nextp = mempcpy (nextp, shell, shell_len + 1);
 
           /* Chop up the shellflags (if any) and assign them.  */
           if (! shellflags)
-            new_argv[n++] = xstrdup ("");
+            {
+              new_argv[n++] = nextp;
+              *(nextp++) = '\0';
+            }
           else
             {
-              const char *s = shellflags;
-              char *t;
-              size_t len;
-              while ((t = find_next_token (&s, &len)) != 0)
-                new_argv[n++] = xstrndup (t, len);
+              /* Parse shellflags using construct_command_argv_internal to
+                 handle quotes. */
+              char **argv;
+              char *f = alloca (sflags_len + 1);
+              memcpy (f, shellflags, sflags_len + 1);
+              argv = construct_command_argv_internal (f, 0, 0, 0, 0, flags, 0);
+              if (argv)
+                {
+                  char **a;
+                  for (a = argv; *a; ++a)
+                    {
+                      new_argv[n++] = nextp;
+                      nextp = stpcpy (nextp, *a) + 1;
+                    }
+                  free (argv[0]);
+                  free (argv);
+                }
             }
 
           /* Set the command to invoke.  */
-          new_argv[n++] = line;
+          new_argv[n++] = nextp;
+          memcpy(nextp, line, line_len + 1);
           new_argv[n++] = NULL;
         }
         return new_argv;
@@ -3011,12 +2883,13 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       }
     *(ap++) = ' ';
     if (shellflags)
-      memcpy (ap, shellflags, sflags_len);
-    ap += sflags_len;
-    *(ap++) = ' ';
-#ifdef MK_OS_W32s
+      {
+        ap = mempcpy (ap, shellflags, sflags_len);
+        *(ap++) = ' ';
+      }
+#if defined(WINDOWS32) || defined(__MINGW32__)
     command_ptr = ap;
-#endif
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
     for (p = line; *p != '\0'; ++p)
       {
         if (restp != NULL && *p == '\n')
@@ -3029,11 +2902,11 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
             /* POSIX says we keep the backslash-newline.  If we don't have a
                POSIX shell on DOS/Windows/OS2, mimic the pre-POSIX behavior
                and remove the backslash/newline.  */
-#if defined (__MSDOS__) || defined (MK_OS_W32s)
+#if defined (WINDOWS32) || defined (__MINGW32__)
 # define PRESERVE_BSNL  unixy_shell
 #else
 # define PRESERVE_BSNL  1
-#endif
+#endif /* defined (WINDOWS32) || defined (__MINGW32__) */
             if (PRESERVE_BSNL)
               {
                 *(ap++) = '\\';
@@ -3054,15 +2927,6 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
              || ISSPACE (*p)
              || strchr (sh_chars, *p) != 0))
           *ap++ = '\\';
-#ifdef __MSDOS__
-        else if (unixy_shell && strneq (p, "...", 3))
-          {
-            /* The case of '...' wildcard again.  */
-            strcpy (ap, "\\.\\.\\");
-            ap += 5;
-            p  += 2;
-          }
-#endif
         *ap++ = *p;
       }
     if (ap == new_line + shell_len + sflags_len + 2)
@@ -3073,7 +2937,7 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
       }
     *ap = '\0';
 
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
     /* Some shells do not work well when invoked as 'sh -c xxx' to run a
        command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
        cases, run commands via a script file.  */
@@ -3126,31 +2990,16 @@ construct_command_argv_internal (char *line, char **restp, const char *shell,
         new_argv[2] = NULL;
       }
     else
-#endif /* MK_OS_W32s */
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
 
     if (unixy_shell)
       new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0,
                                                   flags, 0);
 
-#if defined(__MSDOS__)
-    else
-      {
-        /* With MSDOS shells, we must construct the command line here
-           instead of recursively calling ourselves, because we
-           cannot backslash-escape the special characters (see above).  */
-        new_argv = xmalloc (sizeof (char *));
-        line_len = strlen (new_line) - shell_len - sflags_len - 2;
-        new_argv[0] = xmalloc (line_len + 1);
-        strncpy (new_argv[0],
-                 new_line + shell_len + sflags_len + 2, line_len);
-        new_argv[0][line_len] = '\0';
-      }
-#else
     else
       fatal (NILF, CSTRLEN (__FILE__) + INTSTR_LENGTH,
              _("%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"),
             __FILE__, __LINE__);
-#endif
 
     free (new_line);
   }
@@ -3184,7 +3033,7 @@ construct_command_argv (char *line, char **restp, struct file *file,
     warn_undefined_variables_flag = 0;
 
     shell = allocated_variable_expand_for_file ("$(SHELL)", file);
-#ifdef MK_OS_W32s
+#if defined(WINDOWS32) || defined(__MINGW32__)
     /*
      * Convert to forward slashes so that construct_command_argv_internal()
      * is not confused.
@@ -3194,7 +3043,7 @@ construct_command_argv (char *line, char **restp, struct file *file,
         char *p = w32ify (shell, 0);
         strcpy (shell, p);
       }
-#endif
+#endif /* defined(WINDOWS32) || defined(__MINGW32__) */
     shellflags = allocated_variable_expand_for_file ("$(.SHELLFLAGS)", file);
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 

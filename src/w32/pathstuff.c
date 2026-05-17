@@ -19,6 +19,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include "pathstuff.h"
 
+#ifndef __MINGW32__
 /*
  * Convert delimiter separated vpath to Canonical format.
  */
@@ -127,6 +128,7 @@ getcwd_fs(char* buf, int len)
 
         return p;
 }
+#endif
 
 #ifdef unused
 /*

@@ -49,7 +49,14 @@ alloca_SRCS =	lib/alloca.c
 
 loadavg_SRCS =	lib/getloadavg.c
 
-make_SOURCES =	$(make_SRCS)
+w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
+		src/w32/compat/posixfcn.c src/w32/include/dirent.h \
+		src/w32/include/dlfcn.h src/w32/include/pathstuff.h \
+		src/w32/include/sub_proc.h src/w32/include/w32err.h \
+		src/w32/subproc/misc.c src/w32/subproc/proc.h \
+		src/w32/subproc/sub_proc.c src/w32/subproc/w32err.c
+
+make_SOURCES =	$(make_SRCS) $(w32_SRCS)
 
 EXTRA_make_SOURCES = src/mock.c
 
@@ -61,6 +68,14 @@ noinst_HEADERS = src/buildargv.h src/commands.h src/debug.h \
 				src/output.h src/print.h src/profile.h src/read.h \
 				src/rule.h src/trace.h src/types.h src/variable.h src/vpath.h
 
+if HAVE_GUILE
+  _GUILE_CFLAGS = $(GUILE_CFLAGS)
+  _GUILE_LIBS = $(GUILE_LIBS)
+else
+  _GUILE_CFLAGS =
+  _GUILE_LIBS =
+endif
+
 make_LDADD =	$(LIBOBJS) $(GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
 				libdebugger/libdebugger.a @LIBINTL@
 
@@ -71,6 +86,14 @@ AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/libdebugger \
 		-DINCLUDEDIR=\"$(includedir)\" -DLOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS += $(GUILE_CFLAGS)
+
+if WINDOWSENV
+  make_SOURCES += $(w32_SRCS)
+  AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
+  make_LDADD   += -lmingw32 
+else
+  make_SOURCES += src/posixos.c
+endif
 
 make_SOURCES += src/posixos.c
 

@@ -30,6 +30,14 @@ Boston, MA 02111-1307, USA.  */
 #include "read.h"
 #include "print.h"
 
+#if (defined(WINDOWS32) || defined(__MINGW32__))
+int geteuid ();
+int getegid ();
+int setgid ();
+int getgid ();
+int getuid ();
+#endif
+
 #include <stdarg.h>
 
 /* Think of the below not as an enumeration but as #defines done in a

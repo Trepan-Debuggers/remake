@@ -31,6 +31,10 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "os.h"
 #include "debug.h"
 
+static HANDLE get_handle_for_fd (int fd);
+
+
+#ifndef __MINGW32__
 unsigned int
 check_io_state ()
 {
@@ -390,6 +394,7 @@ jobserver_acquire (int timeout UNUSED)
 }
 
 #endif /* MAKE_JOBSERVER */
+#endif /* __MINGW32__ */
 
 #if !defined(NO_OUTPUT_SYNC)
 
@@ -398,6 +403,7 @@ jobserver_acquire (int timeout UNUSED)
 /* Since we're using this with CreateMutex, NULL is invalid.  */
 static HANDLE osync_handle = NULL;
 
+#ifndef __MINGW32__
 unsigned int
 osync_enabled ()
 {
@@ -492,8 +498,10 @@ osync_release ()
     ReleaseMutex (osync_handle);
 }
 
+#endif /* __MINGW__ */
 #endif /* NO_OUTPUT_SYNC */
 
+#ifndef __MINGW32__
 void
 fd_inherit(int fd)
 {
@@ -512,11 +520,9 @@ fd_noinherit(int fd)
         SetHandleInformation (fh, HANDLE_FLAG_INHERIT, 0);
 }
 
-int
+void
 fd_set_append (int fd UNUSED)
-{
-  return -1;
-}
+{}
 
 void
 fd_reset_append (int fd UNUSED, int flags UNUSED)
@@ -530,3 +536,4 @@ get_handle_for_fd (int fd)
   intptr_t fh = _get_osfhandle (fd);
   return (HANDLE) fh;
 }
+#endif /* __MINGW32__ */

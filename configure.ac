@@ -570,6 +570,17 @@ AC_DEFINE_UNQUOTED([MAKE_HOST],["$host"],[Build host information.])
 MAKE_HOST="$host"
 AC_SUBST([MAKE_HOST])
 
+w32_target_env=no
+AM_CONDITIONAL([WINDOWSENV], [false])
+
+AS_CASE([$host],
+  [*-*-mingw32],
+   [AM_CONDITIONAL([WINDOWSENV], [true])
+    w32_target_env=yes
+    AC_DEFINE([WINDOWS32], [1], [Build for the WINDOWS32 API.])
+    AC_DEFINE([HAVE_DOS_PATHS], [1], [Support DOS-style pathnames.])
+  ])
+
 AC_DEFINE_UNQUOTED([PATH_SEPARATOR_CHAR],['$PATH_SEPARATOR'],
         [Define to the character that separates directories in PATH.])
 

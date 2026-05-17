@@ -103,7 +103,7 @@ dosify (const char *filename)
 }
 #endif /* __MSDOS__ */
 
-#if defined MK_OS_W32  || defined __MINGW32__
+#if defined(WINDOWS32)  || defined(__MINGW32__)
 #include "w32/include/pathstuff.h"
 #endif
 

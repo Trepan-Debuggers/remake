@@ -39,6 +39,8 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #define STREAM_OK(_s) ((fcntl (fileno (_s), F_GETFD) != -1) || (errno != EBADF))
 
+
+
 unsigned int
 check_io_state ()
 {
@@ -543,16 +545,14 @@ job_noop (int sig UNUSED)
 static void
 set_child_handler_action_flags (int set_handler, int set_alarm)
 {
-  struct sigaction sa;
 
-#ifdef __EMX__
-  /* The child handler must be turned off here.  */
-  signal (SIGCHLD, SIG_DFL);
-#endif
+#if !defined(__MINGW32__)
+  struct sigaction sa;
 
   memset (&sa, '\0', sizeof sa);
   sa.sa_handler = child_handler;
   sa.sa_flags = set_handler ? 0 : SA_RESTART;
+#endif
 
 #if defined SIGCHLD
   if (sigaction (SIGCHLD, &sa, NULL) < 0)
@@ -708,6 +708,7 @@ osync_clear ()
 unsigned int
 osync_acquire ()
 {
+#ifndef __MINGW32__  
   if (osync_enabled())
     {
       struct flock fl;
@@ -723,6 +724,7 @@ osync_acquire ()
           return 0;
         }
     }
+#endif /* __MINGW32__ */
 
   return 1;
 }
@@ -730,6 +732,7 @@ osync_acquire ()
 void
 osync_release ()
 {
+#ifndef __MINGW32__  
   if (osync_enabled())
     {
       struct flock fl;
@@ -742,6 +745,7 @@ osync_release ()
       if (fcntl (osync_handle, F_SETLKW, &fl) == -1)
         perror ("fcntl()");
     }
+#endif /* __MINGW32__ */
 }
 
 #endif
