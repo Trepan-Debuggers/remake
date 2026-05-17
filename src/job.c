@@ -474,7 +474,7 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
  else
     {
       const char *s = strsignal (exit_sig);
-      err_with_stack(p_call_stack, "%s[%s] %s%s%s%s",
+      err_with_stack(p_call_stack, "%s[%s] %s%s%s%s%s",
 		     pre, nm, f->name, s, dump, post, smode ? smode : "");
     }
 
@@ -2099,7 +2099,7 @@ child_execute_job (struct childbase *child, int good_stdin, char **argv)
           }
       }
 
-    cmd = (char *)find_in_given_path (argv[0], p, NULL, 0);
+    cmd = (char *)find_in_given_path (argv[0], p, 0);
   }
 
   if (!cmd)

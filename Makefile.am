@@ -56,7 +56,7 @@ w32_SRCS =	src/w32/pathstuff.c src/w32/w32os.c src/w32/compat/dirent.c \
 		src/w32/subproc/misc.c src/w32/subproc/proc.h \
 		src/w32/subproc/sub_proc.c src/w32/subproc/w32err.c
 
-make_SOURCES =	$(make_SRCS) $(w32_SRCS)
+make_SOURCES =	$(make_SRCS)
 
 EXTRA_make_SOURCES = src/mock.c
 
@@ -90,7 +90,7 @@ AM_CFLAGS += $(GUILE_CFLAGS)
 if WINDOWSENV
   make_SOURCES += $(w32_SRCS)
   AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
-  make_LDADD   += -lmingw32 
+  make_LDADD   += -lmingw32
 else
   make_SOURCES += src/posixos.c
 endif
