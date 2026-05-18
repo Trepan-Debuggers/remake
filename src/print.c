@@ -36,7 +36,21 @@ int getegid ();
 int setgid ();
 int getgid ();
 int getuid ();
-#endif
+
+
+#include <windows.h>
+#include <lmcons.h> // Defines UNLEN
+
+const char* get_windows_username(void) {
+    static char username[UNLEN + 1];
+    DWORD size = sizeof(username);
+    if (GetUserNameA(username, &size)) {
+        return username;
+    }
+    return "unknown";
+}
+
+#endif /* (defined(WINDOWS32) || defined(__MINGW32__)) */
 
 #include <stdarg.h>
 
@@ -198,9 +212,15 @@ log_access (char *flavor)
      but we write this one to stderr because it might be
      run in a child fork whose stdout is piped.  */
 
+
+#if (defined(WINDOWS32) || defined(__MINGW32__))
+  fprintf (stderr, _("%s: %s \n"), get_windows_username());
+#else
   fprintf (stderr, _("%s: user %lu (real %lu), group %lu (real %lu)\n"),
 	   flavor, (unsigned long) geteuid (), (unsigned long) getuid (),
            (unsigned long) getegid (), (unsigned long) getgid ());
+#endif /* (defined(WINDOWS32) || defined(__MINGW32__)) */
+
   fflush (stderr);
 }
 
