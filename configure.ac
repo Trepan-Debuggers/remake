@@ -431,8 +431,8 @@ AS_IF([test "$make_cv_sa_restart" != no],
 AS_CASE([/$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohang/],
   [*/no/*], [make_cv_job_server=no])
 
-# Also supported on OS2 and MinGW
-AS_CASE([$host_os], [os2*|mingw*], [make_cv_job_server=yes])
+# Not supported on MinGW yet
+AS_CASE([$host_os], [os2*|mingw*], [make_cv_job_server=no])
 
 # If we support it and the user didn't disable it, build with jobserver
 AS_CASE([/$make_cv_job_server/$user_job_server/],

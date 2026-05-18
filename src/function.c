@@ -1701,7 +1701,7 @@ shell_completed (int exit_code, int exit_sig)
   define_variable_cname (".SHELLSTATUS", buf, o_override, 0);
 }
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
 /*untested*/
 
 #include <windows.h>
@@ -1900,8 +1900,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
   int pipedes[2];
   pid_t pid;
 
-#ifndef __MSDOS__
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
   /* Reset just_print_flag.  This is needed on Windows when batch files
      are used to run the commands, because we normally refrain from
      creating batch files under -n.  */
@@ -1914,12 +1913,11 @@ func_shell_base (char *o, char **argv, int trim_newlines)
                                          &batch_filename);
   if (command_argv == 0)
     {
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
       just_print_flag = j_p_f;
 #endif
       return o;
     }
-#endif /* !__MSDOS__ */
 
   /* Set up the output in case the shell writes something.  */
   output_start ();
@@ -1929,16 +1927,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
 
   child.environment = target_environment (NULL, 0);
 
-#if defined(__MSDOS__)
-  fpipe = msdos_openpipe (pipedes, &pid, argv[0]);
-  if (pipedes[0] < 0)
-    {
-      OS (error, reading_file, "pipe: %s", strerror (errno));
-      pid = -1;
-      goto done;
-    }
-
-#elif defined(MK_OS_W32)
+#if defined(WINDOWS32) || defined(__MINGW32__)
   windows32_openpipe (pipedes, errfd, &pid, command_argv, child.environment);
   /* Restore the value of just_print_flag.  */
   just_print_flag = j_p_f;

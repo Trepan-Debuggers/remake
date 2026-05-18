@@ -377,12 +377,14 @@ output_dump (struct output *out)
       /* Try to acquire the semaphore.  If it fails, dump the output
          unsynchronized; still better than silently discarding it.
          We want to keep this lock for as little time as possible.  */
+#ifndef __MINGW32__
       if (!osync_acquire ())
         {
           O (error, NILF,
              _("warning: Cannot acquire output lock, disabling output sync."));
           osync_clear ();
         }
+#endif
 
       /* Log the working directory for this dump.  */
       if (print_directory && output_sync != OUTPUT_SYNC_RECURSE)
@@ -397,7 +399,9 @@ output_dump (struct output *out)
         log_working_directory (0);
 
       /* Exit the critical section.  */
+#ifndef __MINGW32__
       osync_release ();
+#endif
 
       /* Truncate and reset the output, in case we use it again.  */
       if (out->out != OUTPUT_NONE)

@@ -26,7 +26,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #include "os.h"
 #include "rule.h"
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
 #include "pathstuff.h"
 #endif
 #include "hash.h"
@@ -1218,7 +1218,7 @@ target_environment (struct file *file, int recursive)
               }
           }
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
         if (streq (v->name, "Path") || streq (v->name, "PATH"))
           {
             if (!cp)
@@ -1438,88 +1438,7 @@ do_variable_definition (const gmk_floc *flocp, const char *varname,
       abort ();
     }
 
-#ifdef __MSDOS__
-  /* Many Unix Makefiles include a line saying "SHELL=/bin/sh", but
-     non-Unix systems don't conform to this default configuration (in
-     fact, most of them don't even have '/bin').  On the other hand,
-     $SHELL in the environment, if set, points to the real pathname of
-     the shell.
-     Therefore, we generally won't let lines like "SHELL=/bin/sh" from
-     the Makefile override $SHELL from the environment.  But first, we
-     look for the basename of the shell in the directory where SHELL=
-     points, and along the $PATH; if it is found in any of these places,
-     we define $SHELL to be the actual pathname of the shell.  Thus, if
-     you have bash.exe installed as d:/unix/bash.exe, and d:/unix is on
-     your $PATH, then SHELL=/usr/local/bin/bash will have the effect of
-     defining SHELL to be "d:/unix/bash.exe".  */
-  if ((origin == o_file || origin == o_override)
-      && strcmp (varname, "SHELL") == 0)
-    {
-      PATH_VAR (shellpath);
-      extern char * __dosexec_find_on_path (const char *, char *[], char *);
-
-      /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
-      if (__dosexec_find_on_path (p, NULL, shellpath))
-        {
-          char *tp;
-
-          for (tp = shellpath; *tp; tp++)
-            if (*tp == '\\')
-              *tp = '/';
-
-          v = define_variable_loc (varname, strlen (varname),
-                                   shellpath, origin, flavor == f_recursive,
-                                   flocp);
-        }
-      else
-        {
-          const char *shellbase, *bslash;
-          struct variable *pathv = lookup_variable ("PATH", 4);
-          char *path_string;
-          char *fake_env[2];
-          size_t pathlen = 0;
-
-          shellbase = strrchr (p, '/');
-          bslash = strrchr (p, '\\');
-          if (!shellbase || bslash > shellbase)
-            shellbase = bslash;
-          if (!shellbase && p[1] == ':')
-            shellbase = p + 1;
-          if (shellbase)
-            shellbase++;
-          else
-            shellbase = p;
-
-          /* Search for the basename of the shell (with standard
-             executable extensions) along the $PATH.  */
-          if (pathv)
-            pathlen = strlen (pathv->value);
-          path_string = xmalloc (5 + pathlen + 2 + 1);
-          /* On MSDOS, current directory is considered as part of $PATH.  */
-          sprintf (path_string, "PATH=.;%s", pathv ? pathv->value : "");
-          fake_env[0] = path_string;
-          fake_env[1] = 0;
-          if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
-            {
-              char *tp;
-
-              for (tp = shellpath; *tp; tp++)
-                if (*tp == '\\')
-                  *tp = '/';
-
-              v = define_variable_loc (varname, strlen (varname),
-                                       shellpath, origin,
-                                       flavor == f_recursive, flocp);
-            }
-          else
-            v = lookup_variable (varname, strlen (varname));
-
-          free (path_string);
-        }
-    }
-  else
-#endif /* __MSDOS__ */
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
   if ((origin == o_file || origin == o_override || origin == o_command)
       && streq (varname, "SHELL"))
     {
@@ -2028,7 +1947,7 @@ print_target_variables (const struct file *file)
     }
 }
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
 void
 sync_Path_environment (void)
 {

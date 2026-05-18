@@ -207,6 +207,7 @@ os_anontmp ()
     errno = EEXIST;
   return -1;
 }
+#endif /* __MINGW32__ */
 
 #if defined(MAKE_JOBSERVER)
 
@@ -214,6 +215,8 @@ os_anontmp ()
 
 static char jobserver_semaphore_name[MAX_PATH + 1];
 static HANDLE jobserver_semaphore = NULL;
+
+#ifndef __MINGW32__
 
 unsigned int
 jobserver_setup (int slots, const char *style)
@@ -284,12 +287,14 @@ jobserver_get_invalid_auth ()
   return NULL;
 }
 
+#endif /* __MINGW32__ */
 unsigned int
 jobserver_enabled ()
 {
   return jobserver_semaphore != NULL;
 }
 
+#ifndef __MINGW32__
 /* Close jobserver semaphore */
 void
 jobserver_clear ()
@@ -300,6 +305,7 @@ jobserver_clear ()
       jobserver_semaphore = NULL;
     }
 }
+#endif /* __MINGW32__ */
 
 void
 jobserver_release (int is_fatal)
@@ -320,6 +326,7 @@ jobserver_release (int is_fatal)
     }
 }
 
+#ifndef __MINGW32__
 unsigned int
 jobserver_acquire_all ()
 {
