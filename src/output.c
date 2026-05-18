@@ -81,7 +81,7 @@ _outputs (struct output *out, int is_err, const char *msg)
 /* Write a message indicating that we've just entered or
    left (according to ENTERING) the current directory.  */
 
-int
+static int
 log_working_directory (int entering)
 {
   static char *buf = NULL;
@@ -225,13 +225,13 @@ pump_from_tmp (int from, FILE *to)
 {
   static char buffer[8192];
 
-#ifdef MK_OS_W32
+#if defined(WINDOW32) || defined(__MINGW32__)
   int prev_mode;
 
   /* "from" is opened by open_tmpfd, which does it in binary mode, so
      we need the mode of "to" to match that.  */
   prev_mode = _setmode (fileno (to), _O_BINARY);
-#endif
+#endif /* defined(WINDOW32) || defined(__MINGW32__) */
 
   if (lseek (from, 0, SEEK_SET) == -1)
     perror ("lseek()");
@@ -252,11 +252,11 @@ pump_from_tmp (int from, FILE *to)
       fflush (to);
     }
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || __MINGW32__
   /* Switch "to" back to its original mode, so that log messages by
      Make have the same EOL format as without --output-sync.  */
   _setmode (fileno (to), prev_mode);
-#endif
+#endif /* defined(WINDOW32) || defined(__MINGW32__) */
 }
 
 /* Obtain the lock for writing output.  */
@@ -318,6 +318,15 @@ output_tmpfd (void)
 static void
 setup_tmpfile (struct output *out)
 {
+  static unsigned int in_setup = 0;
+  unsigned int io_state;
+
+  /* If something fails during setup we might recurse back into this function
+     while writing errors.  Make sure we don't do so infinitely.  */
+  if (in_setup)
+    return;
+  in_setup = 1;
+
   /* Is make's stdout going to the same place as stderr?  */
   static int combined_output = -1;
 
@@ -347,12 +356,15 @@ setup_tmpfile (struct output *out)
         }
     }
 
+  in_setup = 0;
   return;
 
   /* If we failed to create a temp file, disable output sync going forward.  */
  error:
   output_close (out);
   output_sync = OUTPUT_SYNC_NONE;
+  osync_clear ();
+  in_setup = 0;
 }
 
 /* Synchronize the output of jobs in -j mode to keep the results of
@@ -363,6 +375,8 @@ setup_tmpfile (struct output *out)
 void
 output_dump (struct output *out)
 {
+#define FD_NOT_EMPTY(_f) ((_f) != OUTPUT_NONE && lseek ((_f), 0, SEEK_END) > 0)
+
   int outfd_not_empty = FD_NOT_EMPTY (out->out);
   int errfd_not_empty = FD_NOT_EMPTY (out->err);
 
@@ -373,7 +387,12 @@ output_dump (struct output *out)
       /* Try to acquire the semaphore.  If it fails, dump the output
          unsynchronized; still better than silently discarding it.
          We want to keep this lock for as little time as possible.  */
-      void *sem = acquire_semaphore ();
+      if (!osync_acquire ())
+        {
+          O (error, NILF,
+             _("warning: Cannot acquire output lock, disabling output sync."));
+          osync_clear ();
+        }
 
       /* Log the working directory for this dump.  */
       if (print_directory && output_sync != OUTPUT_SYNC_RECURSE)
@@ -388,8 +407,7 @@ output_dump (struct output *out)
         log_working_directory (0);
 
       /* Exit the critical section.  */
-      if (sem)
-        release_semaphore (sem);
+      osync_release ();
 
       /* Truncate and reset the output, in case we use it again.  */
       if (out->out != OUTPUT_NONE)
