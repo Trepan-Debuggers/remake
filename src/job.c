@@ -469,13 +469,13 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 
   if (exit_sig == 0)
     err_with_stack(p_call_stack,
-		   _("%s[%s: %s] Error %d%s%s"),
-		   pre, nm, f->name, exit_code, post, smode ? smode : "");
+		   _("%s[%s] error %d%s%s"),
+		   pre, f->name, exit_code, post, smode ? smode : "");
  else
     {
       const char *s = strsignal (exit_sig);
-      err_with_stack(p_call_stack, "%s[%s] %s%s%s%s%s",
-		     pre, nm, f->name, s, dump, post, smode ? smode : "");
+      err_with_stack(p_call_stack, "%s[%s] %s%s%s%s",
+		   pre, f->name, s, dump, post, smode ? smode : "");
     }
 
   OUTPUT_UNSET ();

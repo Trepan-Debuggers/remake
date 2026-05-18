@@ -37,7 +37,8 @@ make_SRCS =	\
 		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \
 		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
 		src/output.c src/print.c src/profile.c src/read.c src/remake.c \
-		src/rule.c src/rule.h src/signame.c src/strcache.c \
+		src/rule.c src/rule.h src/shuffle.h src/shuffle.c \
+                src/signame.c src/strcache.c \
 		src/types.h  src/trace.c src/variable.c src/version.c src/vpath.c \
 		src/callgrind_format.c src/json_format.c \
 		src/watch.c src/watch_inotify.c src/watch_poll.c \
@@ -91,7 +92,6 @@ if WINDOWSENV
   make_SOURCES += $(w32_SRCS)
   AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
   make_LDADD   += -lmingw32
-else
   make_SOURCES += src/posixos.c
 endif
 
