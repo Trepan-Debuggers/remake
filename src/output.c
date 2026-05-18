@@ -183,7 +183,7 @@ sync_init (void)
 {
   int combined_output = 0;
 
-#ifdef MK_OS_W32
+#if defined(WINDOW32) || defined(__MINGW32__)
   if ((!STREAM_OK (stdout) && !STREAM_OK (stderr))
       || (sync_handle = create_mutex ()) == -1)
     {
