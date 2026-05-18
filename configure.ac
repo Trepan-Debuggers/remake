@@ -151,6 +151,9 @@ AC_TYPE_SSIZE_T
 AC_TYPE_INTMAX_T
 AC_TYPE_UINTMAX_T
 
+# Check for sig_atomic_t
+gt_TYPE_SIG_ATOMIC_T
+
 # Find out whether our struct stat returns nanosecond resolution timestamps.
 
 AC_STRUCT_ST_MTIM_NSEC
@@ -572,6 +575,7 @@ AC_SUBST([MAKE_HOST])
 
 w32_target_env=no
 AM_CONDITIONAL([WINDOWSENV], [false])
+AM_CONDITIONAL([HAVE_WINDRES], [false])
 
 AS_CASE([$host],
   [*-*-mingw32],
@@ -579,6 +583,10 @@ AS_CASE([$host],
     w32_target_env=yes
     AC_DEFINE([WINDOWS32], [1], [Build for the WINDOWS32 API.])
     AC_DEFINE([HAVE_DOS_PATHS], [1], [Support DOS-style pathnames.])
+    # Windows host tools.
+    # If windres is available, make will use UTF-8.
+    AC_CHECK_TOOL([WINDRES], [windres], [:])
+    AM_CONDITIONAL([HAVE_WINDRES], [test "$WINDRES" != ':'])
   ])
 
 AC_DEFINE_UNQUOTED([PATH_SEPARATOR_CHAR],['$PATH_SEPARATOR'],
