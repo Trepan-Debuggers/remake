@@ -149,6 +149,7 @@ log_working_directory (int entering)
   return 1;
 }
 
+#if defined(WINDOW32) || defined(__MINGW32__)
 /* Set a file descriptor referring to a regular file
    to be in O_APPEND mode.  If it fails, just ignore it.  */
 
@@ -183,20 +184,6 @@ sync_init (void)
 {
   int combined_output = 0;
 
-#if defined(WINDOW32) || defined(__MINGW32__)
-  if ((!STREAM_OK (stdout) && !STREAM_OK (stderr))
-      || (sync_handle = create_mutex ()) == -1)
-    {
-      perror_with_name ("output-sync suppressed: ", "stderr");
-      output_sync = 0;
-    }
-  else
-    {
-      combined_output = same_stream (stdout, stderr);
-      prepare_mutex_handle_string (sync_handle);
-    }
-
-#else
   if (STREAM_OK (stdout))
     {
       struct stat stbuf_o, stbuf_e;
@@ -214,10 +201,10 @@ sync_init (void)
       perror_with_name ("output-sync suppressed: ", "stderr");
       output_sync = 0;
     }
-#endif
 
   return combined_output;
 }
+#endif /* defined(WINDOW32) || defined(__MINGW32__) */
 
 /* Support routine for output_sync() */
 static void
@@ -252,13 +239,15 @@ pump_from_tmp (int from, FILE *to)
       fflush (to);
     }
 
-#if defined(WINDOWS32) || __MINGW32__
+#if defined(WINDOWS32) || defined(__MINGW32__)
   /* Switch "to" back to its original mode, so that log messages by
      Make have the same EOL format as without --output-sync.  */
   _setmode (fileno (to), prev_mode);
 #endif /* defined(WINDOW32) || defined(__MINGW32__) */
 }
 
+
+#if !(defined(WINDOWS32) || defined(__MINGW32__))
 /* Obtain the lock for writing output.  */
 static void *
 acquire_semaphore (void)
@@ -284,6 +273,7 @@ release_semaphore (void *sem)
   if (fcntl (sync_handle, F_SETLKW, flp) == -1)
     perror ("fcntl()");
 }
+#endif /* !(defined(WINDOWS32) || defined(__MINGW32__)) */
 
 /* Returns a file descriptor to a temporary file.  The file is automatically
    closed/deleted on exit.  Don't use a FILE* stream.  */
