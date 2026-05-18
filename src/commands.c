@@ -633,8 +633,10 @@ fatal_error_signal (int sig)
   signal (sig, SIG_DFL);
 
   temp_stdin_unlink ();
+#if !defined(__MINGW32__)
   osync_clear ();
   jobserver_clear ();
+#endif
 
   /* A termination signal won't be sent to the entire
      process group, but it means we want to kill the children.  */

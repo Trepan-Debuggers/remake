@@ -41,6 +41,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 
 
+#if !defined(__MINGW32__)
 unsigned int
 check_io_state ()
 {
@@ -70,6 +71,7 @@ check_io_state ()
 
   return state;
 }
+#endif /*!defined(__MINGW32__) */
 
 #if defined(MAKE_JOBSERVER)
 
@@ -137,6 +139,7 @@ set_blocking (int fd, int blocking)
 #endif
 }
 
+#if !defined(__MINGW32__)
 unsigned int
 jobserver_setup (int slots, const char *style)
 {
@@ -323,7 +326,9 @@ jobserver_enabled ()
 {
   return js_type != js_none;
 }
+#endif /* !defined(__MINGW32__) */
 
+#if !defined(__MINGW32__)
 void
 jobserver_clear ()
 {
@@ -540,6 +545,7 @@ static void
 job_noop (int sig UNUSED)
 {
 }
+#endif /* !defined(__MINGW32__) */
 
 /* Set the child handler action flags to FLAGS.  */
 static void
@@ -635,6 +641,7 @@ static char *osync_tmpfile = NULL;
 
 static unsigned int sync_root = 0;
 
+#if !defined(__MINGW32__)
 unsigned int
 osync_enabled ()
 {
@@ -708,7 +715,6 @@ osync_clear ()
 unsigned int
 osync_acquire ()
 {
-#ifndef __MINGW32__  
   if (osync_enabled())
     {
       struct flock fl;
@@ -724,7 +730,6 @@ osync_acquire ()
           return 0;
         }
     }
-#endif /* __MINGW32__ */
 
   return 1;
 }
@@ -732,7 +737,6 @@ osync_acquire ()
 void
 osync_release ()
 {
-#ifndef __MINGW32__  
   if (osync_enabled())
     {
       struct flock fl;
@@ -745,11 +749,12 @@ osync_release ()
       if (fcntl (osync_handle, F_SETLKW, &fl) == -1)
         perror ("fcntl()");
     }
-#endif /* __MINGW32__ */
 }
+#endif /* !defined(__MINGW32__) */
 
-#endif
+#endif /* NO_OUTPUT_SYNC */
 
+#if !defined(__MINGW32__)
 /* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
 int
 get_bad_stdin ()
@@ -817,7 +822,7 @@ fd_noinherit (int fd)
         EINTRLOOP (r, fcntl(fd, F_SETFD, flags));
       }
 }
-#endif
+#endif /* !defined(F_SETFD) || !defined(F_GETFD) */
 
 /* Set a file descriptor referring to a regular file to be in O_APPEND mode.
    If it fails, just ignore it.  */
@@ -837,7 +842,7 @@ fd_set_append (int fd)
           EINTRLOOP(r, fcntl (fd, F_SETFL, flags | O_APPEND));
         }
     }
-#endif
+#endif /* defined(F_GETFL) && defined(F_SETFL) && defined(O_APPEND) */
 }
 
 /* Return a file descriptor for a new anonymous temp file, or -1.  */
@@ -860,7 +865,7 @@ os_anontmp ()
                      tdir, strerror (errno)));
       tmpfile_works = 0;
     }
-#endif
+#endif /* O_TMPFILE */
 
 #if HAVE_DUP
   /* If we can dup and we are creating temp files in the default location then
@@ -879,7 +884,8 @@ os_anontmp ()
         pfatal_with_name ("dup");
       fclose (tfile);
     }
-#endif
+#endif /* HAVE_DUP */
 
   return fd;
 }
+#endif /* !defined(__MINGW32__) */
