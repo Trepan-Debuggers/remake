@@ -1,6 +1,7 @@
 /* Internals of variables for GNU Make.
 Copyright (C) 1988-2022 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2026 Rocky Bernstein
+This file is part of GNU [Re]Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -26,7 +27,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #include "os.h"
 #include "rule.h"
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
 #include "pathstuff.h"
 #endif
 #include "hash.h"
@@ -253,34 +254,6 @@ define_variable_in_set (const char *name, size_t length,
   var_key.length = (unsigned int) length;
   var_slot = (struct variable **) hash_find_slot (&set->table, &var_key);
   v = *var_slot;
-
-#ifdef VMS
-  /* VMS does not populate envp[] with DCL symbols and logical names which
-     historically are mapped to environment variables.
-     If the variable is not yet defined, then we need to check if getenv()
-     can find it.  Do not do this for origin == o_env to avoid infinite
-     recursion */
-  if (HASH_VACANT (v) && (origin != o_env))
-    {
-      struct variable * vms_variable;
-      char * vname = alloca (length + 1);
-      char * vvalue;
-
-      strncpy (vname, name, length);
-      vvalue = getenv(vname);
-
-      /* Values starting with '$' are probably foreign commands.
-         We want to treat them as Shell aliases and not look them up here */
-      if ((vvalue != NULL) && (vvalue[0] != '$'))
-        {
-          vms_variable =  lookup_variable(name, length);
-          /* Refresh the slot */
-          var_slot = (struct variable **) hash_find_slot (&set->table,
-                                                          &var_key);
-          v = *var_slot;
-        }
-    }
-#endif
 
   if (env_overrides && origin == o_env)
     origin = o_env_override;
@@ -517,63 +490,6 @@ lookup_variable (const char *name, size_t length)
 
       is_parent |= setlist->next_is_parent;
     }
-
-#ifdef VMS
-  /* VMS doesn't populate envp[] with DCL symbols and logical names, which
-     historically are mapped to environment variables and returned by
-     getenv().  */
-  {
-    char *vname = alloca (length + 1);
-    char *value;
-    strncpy (vname, name, length);
-    vname[length] = 0;
-    value = getenv (vname);
-    if (value != 0)
-      {
-        char *sptr;
-        int scnt;
-
-        sptr = value;
-        scnt = 0;
-
-        while ((sptr = strchr (sptr, '$')))
-          {
-            scnt++;
-            sptr++;
-          }
-
-        if (scnt > 0)
-          {
-            char *nvalue;
-            char *nptr;
-
-            nvalue = alloca (strlen (value) + scnt + 1);
-            sptr = value;
-            nptr = nvalue;
-
-            while (*sptr)
-              {
-                if (*sptr == '$')
-                  {
-                    *nptr++ = '$';
-                    *nptr++ = '$';
-                  }
-                else
-                  {
-                    *nptr++ = *sptr;
-                  }
-                sptr++;
-              }
-
-            *nptr = '\0';
-            return define_variable (vname, length, nvalue, o_env, 1);
-
-          }
-
-        return define_variable (vname, length, value, o_env, 1);
-      }
-  }
-#endif /* VMS */
 
   return 0;
 }
@@ -1218,7 +1134,7 @@ target_environment (struct file *file, int recursive)
               }
           }
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
         if (streq (v->name, "Path") || streq (v->name, "PATH"))
           {
             if (!cp)
@@ -1438,7 +1354,7 @@ do_variable_definition (const gmk_floc *flocp, const char *varname,
       abort ();
     }
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   if ((origin == o_file || origin == o_override || origin == o_command)
       && streq (varname, "SHELL"))
     {
@@ -1947,7 +1863,7 @@ print_target_variables (const struct file *file)
     }
 }
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
 void
 sync_Path_environment (void)
 {

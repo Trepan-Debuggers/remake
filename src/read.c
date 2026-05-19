@@ -425,7 +425,7 @@ eval_makefile (const char *filename, unsigned short flags)
       enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
   }
 
-  /* Evaluate the makefile */
+  /* Evaluate the Makefile */
 
   ebuf.size = 200;
   ebuf.buffer = ebuf.bufnext = ebuf.bufstart = xmalloc (ebuf.size);
