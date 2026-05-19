@@ -55,7 +55,7 @@ AH_BOTTOM(
 # would place generated .info files in srcdir instead of builddir. Using that
 # option everything stays as it is.
 # https://www.gnu.org/software/automake/manual/html_node/List-of-Automake-options.html
-AM_INIT_AUTOMAKE([subdir-objects 1.14 silent-rules foreign -Wall
+AM_INIT_AUTOMAKE([subdir-objects 1.14 silent-rules foreign -Wall -Wno-portability
                   info-in-builddir])
 
 # Checks for programs.
@@ -113,10 +113,6 @@ AC_CHECK_INCLUDES_DEFAULT
 AC_PROG_EGREP
 
 # Checks for header files.
-m4_warn([obsolete],
-[The preprocessor macro `STDC_HEADERS' is obsolete.
-  Except in unusual embedded environments, you can safely include all
-  ISO C90 headers unconditionally.])dnl
 # Autoupdate added the next two lines to ensure that your configure
 # script's behavior did not change.  They are probably safe to remove.
 AC_CHECK_INCLUDES_DEFAULT

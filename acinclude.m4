@@ -60,7 +60,7 @@ AC_CHECK_FUNCS(gethostbyname,,[
 	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
 ])
 LIBS="$LIBS $cf_cv_netlibs"
-test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
+test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AS_MESSAGE_FD
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Re-check on a function to see if we can pick it up by adding a library.

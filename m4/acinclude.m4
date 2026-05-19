@@ -2,6 +2,7 @@ dnl acinclude.m4 -- Extra macros needed for GNU make.
 dnl
 dnl Automake will incorporate this into its generated aclocal.m4.
 dnl Copyright (C) 1998-2022 Free Software Foundation, Inc.
+dnl Copyright (C) 2026 Rocky Bernstein
 dnl This file is part of GNU Make.
 dnl
 dnl GNU Make is free software; you can redistribute it and/or modify it under
@@ -60,7 +61,7 @@ AC_CHECK_FUNCS(gethostbyname,,[
 	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
 ])
 LIBS="$LIBS $cf_cv_netlibs"
-test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
+test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AS_MESSAGE_FD
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Re-check on a function to see if we can pick it up by adding a library.
