@@ -1126,14 +1126,6 @@ find_and_set_default_shell (const char *token)
 }
 #endif  /* defined(WINDOWS32) || defined(__MINGW32__) */
 
-#ifdef __MSDOS__
-static void
-msdos_return_to_initial_directory (void)
-{
-  if (directory_before_chdir)
-    chdir (directory_before_chdir);
-}
-#endif  /* __MSDOS__ */
 
 static void
 reset_jobserver (void)
@@ -1175,10 +1167,12 @@ main (int argc, const char **argv, char **envp)
 
   SetUnhandledExceptionFilter (handle_runtime_exceptions);
 
+#ifndef __MINGW32__
   /* start off assuming we have no shell */
   unixy_shell = 0;
   no_default_sh_exe = 1;
-#endif
+#endif /* __MINGW32__ */
+#endif /* WINDOWS32 */
 
   /* Useful for attaching debuggers, etc.  */
 #ifdef SPIN
@@ -1217,17 +1211,6 @@ main (int argc, const char **argv, char **envp)
   verify_flag = 1;
 #endif
 
-#if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
-  /* Request the most powerful version of 'system', to
-     make up for the dumb default shell.  */
-  __system_flags = (__system_redirect
-                    | __system_use_shell
-                    | __system_allow_multiple_cmds
-                    | __system_allow_long_cmds
-                    | __system_handle_null_commands
-                    | __system_emulate_chdir);
-
-#endif
 
   /* Set up gettext/internationalization support.  */
   setlocale (LC_ALL, "");
@@ -1362,10 +1345,6 @@ main (int argc, const char **argv, char **envp)
   else
     directory_before_chdir = xstrdup (current_directory);
 
-#ifdef  __MSDOS__
-  /* Make sure we will return to the initial directory, come what may.  */
-  atexit (msdos_return_to_initial_directory);
-#endif
 
   /* Initialize the special variables.  */
   define_variable_cname (".VARIABLES", "", o_default, 0)->special = 1;
@@ -1852,7 +1831,6 @@ main (int argc, const char **argv, char **envp)
           }
     }
 
-#ifndef __EMX__ /* Don't use a SIGCHLD handler for OS/2 */
 #if !defined(HAVE_WAIT_NOHANG) || defined(MAKE_JOBSERVER)
   /* Set up to handle children dying.  This must be done before
      reading in the makefiles so that 'shell' function calls will work.
@@ -1869,10 +1847,10 @@ main (int argc, const char **argv, char **envp)
   {
 # if defined SIGCHLD
     bsd_signal (SIGCHLD, child_handler);
-# endif
+# endif /* SIGCHLD */
 # if defined SIGCLD && SIGCLD != SIGCHLD
     bsd_signal (SIGCLD, child_handler);
-# endif
+# endif /* SIGCLD && SIGCLD != SIGCHLD */
   }
 
 #ifdef HAVE_PSELECT
@@ -1884,10 +1862,9 @@ main (int argc, const char **argv, char **envp)
     if (sigprocmask (SIG_SETMASK, &block, NULL) < 0)
       pfatal_with_name ("sigprocmask(SIG_SETMASK, SIGCHLD)");
   }
-#endif
+#endif /* HAVE_PSELECT */
 
-#endif
-#endif
+#endif /* !defined(HAVE_WAIT_NOHANG) || defined(MAKE_JOBSERVER) */
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
 #ifdef SIGUSR1
