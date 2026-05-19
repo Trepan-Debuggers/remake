@@ -643,13 +643,8 @@ typedef int (*load_func_t)(const gmk_floc *flocp);
 int load_file (const gmk_floc *flocp, const char **filename, int noerror);
 int unload_file (const char *name);
 
-/* Maintainer mode support */
-#ifdef MAKE_MAINTAINER_MODE
-# define SPIN(_s) spin (_s)
-void spin (const char* suffix);
-#else
-# define SPIN(_s)
-#endif
+/* Maintainer mode support defines, spin, but I (rocky) don't know how to use it.*/
+#define SPIN(_s)
 
 /* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
    because such systems often declare them in header files anyway.  */
