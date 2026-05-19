@@ -328,7 +328,7 @@ static const char *default_variables[] =
 
 #if defined(__APPLE__)
     ".LIBPATTERNS", "lib%.dylib lib%.a",
-#elif defined(__CYGWIN__) || defined(MK_OS_W32)
+#elif defined(__CYGWIN__) || defined(WINDOWS32)
     ".LIBPATTERNS", "lib%.dll.a %.dll.a lib%.a %.lib lib%.dll %.dll",
 #else
     ".LIBPATTERNS", "lib%.so lib%.a",

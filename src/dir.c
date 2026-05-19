@@ -237,8 +237,8 @@ static unsigned int open_directories = 0;
 struct directory_contents
   {
     dev_t dev;                  /* Device and inode numbers of this dir.  */
-#if defined MK_OS_W32 || defined __MINGW32__
-    /* Inode means nothing on MK_OS_W32. Even file key information is
+#if defined WINDOWS32 || defined __MINGW32__
+    /* Inode means nothing on WINDOWS32. Even file key information is
      * unreliable because it is random per file open and undefined for remote
      * filesystems. The most unique attribute I can come up with is the fully
      * qualified name of the directory. Beware though, this is also
@@ -256,7 +256,7 @@ struct directory_contents
 # else
     ino_t ino;
 # endif
-#endif /* MK_OS_W32 */
+#endif /* WINDOWS32 */
     struct hash_table dirfiles; /* Files in this directory.  */
     unsigned long counter;      /* command_count value when last read. */
     DIR *dirstream;             /* Stream reading this directory.  */
@@ -283,7 +283,7 @@ directory_contents_hash_1 (const void *key_0)
   const struct directory_contents *key = key_0;
   unsigned long hash;
 
-#if defined MK_OS_W32 || defined __MINGW32__
+#if defined WINDOWS32 || defined __MINGW32__
   hash = 0;
   ISTRING_HASH_1 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) key->ctime;
@@ -296,7 +296,7 @@ directory_contents_hash_1 (const void *key_0)
 # else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) key->ino;
 # endif
-#endif /* MK_OS_W32 */
+#endif /* WINDOWS32 */
   return hash;
 }
 
@@ -306,7 +306,7 @@ directory_contents_hash_2 (const void *key_0)
   const struct directory_contents *key = key_0;
   unsigned long hash;
 
-#if defined MK_OS_W32 || defined __MINGW32__
+#if defined WINDOWS32 || defined __MINGW32__
   hash = 0;
   ISTRING_HASH_2 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ctime;
@@ -319,7 +319,7 @@ directory_contents_hash_2 (const void *key_0)
 # else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ino;
 # endif
-#endif /* MK_OS_W32 */
+#endif /* WINDOWS32 */
 
   return hash;
 }
@@ -628,7 +628,7 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 {
   struct dirfile *df;
   struct dirent *d;
-#ifdef MK_OS_W32
+#ifdef WINDOWS32
   struct stat st;
   int rehash = 0;
 #endif
@@ -1071,7 +1071,7 @@ read_dirstream (__ptr_t stream)
  * On MS-Windows, stat() "succeeds" for foo/bar/. where foo/bar is a
  * regular file; fix that here.
  */
-#if !defined(stat) && !defined(MK_OS_W32)
+#if !defined(stat) && !defined(WINDOWS32)
 #  ifndef HAVE_SYS_STAT_H
 int stat (const char *path, struct stat *sbuf);
 #  endif
@@ -1087,12 +1087,12 @@ local_stat (const char *path, struct stat *buf)
 #endif
 
 /* Similarly for lstat.  */
-#if !defined(lstat) && !(defined MK_OS_W32 || defined __MINGW32__)
+#if !defined(lstat) && !(defined WINDOWS32 || defined __MINGW32__)
 #  ifndef HAVE_SYS_STAT_H
 int lstat (const char *path, struct stat *sbuf);
 #  endif
 # define local_lstat lstat
-#elif defined(MK_OS_W32) || defined(__MINGW32__)
+#elif defined(WINDOWS32) || defined(__MINGW32__)
 /* Windows doesn't support lstat().  */
 # define local_lstat local_stat
 #else

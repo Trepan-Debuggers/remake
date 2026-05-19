@@ -1442,7 +1442,7 @@ f_mtime (struct file *file, int search)
 
       FILE_TIMESTAMP adjusted_mtime = mtime;
 
-#if defined(MK_OS_W32) || defined(__MSDOS__)
+#if defined(WINDOWS32)
       /* Experimentation has shown that FAT filesystems can set file times
          up to 3 seconds into the future!  Play it safe.  */
 
@@ -1451,14 +1451,6 @@ f_mtime (struct file *file, int search)
       FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
       if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
         adjusted_mtime -= adjustment;
-#elif defined(__EMX__)
-      /* FAT filesystems round time to the nearest even second!
-         Allow for any file (NTFS or FAT) to perhaps suffer from this
-         brain damage.  */
-      FILE_TIMESTAMP adjustment = (((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
-                     && FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
-                    ? (FILE_TIMESTAMP) 1 << FILE_TIMESTAMP_LO_BITS
-                    : 0);
 #endif
 
       /* If the file's time appears to be in the future, update our
@@ -1531,7 +1523,7 @@ name_mtime (const char *name)
   struct stat st;
   int e;
 
-#if defined(MK_OS_W32)
+#if defined(WINDOWS32)
   {
     char tem[MAXPATHLEN], *tstart, *tend;
     const char *p = name + strlen (name);
@@ -1664,7 +1656,7 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
     {
       "/lib",
       "/usr/lib",
-#if defined(MK_OS_W32) && !defined(LIBDIR)
+#if defined(WINDOWS32) && !defined(LIBDIR)
 /*
  * This is completely up to the user at product install time. Just define
  * a placeholder.

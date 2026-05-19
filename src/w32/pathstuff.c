@@ -19,7 +19,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include "pathstuff.h"
 
-#ifndef __MINGW32__
 /*
  * Convert delimiter separated vpath to Canonical format.
  */
@@ -38,7 +37,6 @@ convert_vpath_to_windows32(char *Path, char to_delim)
 
         return (convert_Path_to_windows32(Path, to_delim));
 }
-#endif /*__MINGW32__ */
 
 /*
  * Convert delimiter separated path to Canonical format.

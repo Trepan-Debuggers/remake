@@ -29,7 +29,7 @@ const char *make_host = MAKE_HOST;
 #ifndef NULL
 #define NULL        0
 #endif
-#ifdef MK_OS_W32
+#ifdef WINDOWS32
 /* On MS-Windows, we chop off the .exe suffix in 'main', so this
    cannot be 'const'.  */
 char *program = NULL;

@@ -987,7 +987,7 @@ define_automatic_variables (void)
   /* Define the magic D and F variables in terms of
      the automatic variables they are variations of.  */
 
-#if defined(__MSDOS__) || defined(MK_OS_W32)
+#if defined(WINDOWS32)
   /* For consistency, remove the trailing backslash as well as slash.  */
   define_variable_cname ("@D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $@)))",
                          o_automatic, 1);
@@ -1003,7 +1003,7 @@ define_automatic_variables (void)
                          o_automatic, 1);
   define_variable_cname ("+D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $+)))",
                          o_automatic, 1);
-#else  /* not __MSDOS__, not MK_OS_W32 */
+#else  /* !WINDOWS32 */
   define_variable_cname ("@D", "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
   define_variable_cname ("%D", "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
   define_variable_cname ("*D", "$(patsubst %/,%,$(dir $*))", o_automatic, 1);
@@ -1011,7 +1011,7 @@ define_automatic_variables (void)
   define_variable_cname ("?D", "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
   define_variable_cname ("^D", "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
   define_variable_cname ("+D", "$(patsubst %/,%,$(dir $+))", o_automatic, 1);
-#endif
+#endif /* WINDOWS32 */
   define_variable_cname ("@F", "$(notdir $@)", o_automatic, 1);
   define_variable_cname ("%F", "$(notdir $%)", o_automatic, 1);
   define_variable_cname ("*F", "$(notdir $*)", o_automatic, 1);
@@ -1958,7 +1958,7 @@ sync_Path_environment (void)
   if (!path)
     return;
 
-  /* Convert PATH into something MK_OS_W32 world can grok.  */
+  /* Convert PATH into something WINDOWS32 world can grok.  */
   convert_Path_to_windows32 (path, ';');
 
   environ_path = path;

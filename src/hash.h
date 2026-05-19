@@ -20,7 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined __cplusplus || (defined __STDC__ && __STDC__) || defined MK_OS_W32
+#if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
 # if !defined __GLIBC__ || !defined __P
 #  undef	__P
 #  define __P(protos)	protos

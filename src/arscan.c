@@ -199,7 +199,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *varg)
 # define __AR_BIG__
 #endif
 
-#if !(defined MK_OS_W32 || defined __MINGW32__)
+#if !(defined WINDOWS32 || defined __MINGW32__)
 #  include <ar.h>
 # define TOCHAR(_m)     (_m)
 #else
@@ -783,7 +783,7 @@ ar_member_touch (const char *arname, const char *memname)
   if (r < 0)
     goto lose;
   /* Advance member's time to that time */
-#if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(MK_OS_W32) || defined(__MINGW32__)
+#if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(WINDOWS32) || defined(__MINGW32__)
   datelen = snprintf (TOCHAR (ar_hdr.ar_date), sizeof ar_hdr.ar_date,
                       "%lu", (intmax_t) statbuf.st_mtime);
   if (! (0 <= datelen && datelen < (int) sizeof ar_hdr.ar_date))

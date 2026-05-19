@@ -1169,7 +1169,7 @@ main (int argc, const char **argv, char **envp)
   unsigned int restarts = 0;
   unsigned int syncing = 0;
   int argv_slots;
-#ifdef MK_OS_W32
+#ifdef WINDOWS32
   const char *unix_path = NULL;
   const char *windows32_path = NULL;
 
@@ -1345,7 +1345,7 @@ main (int argc, const char **argv, char **envp)
 
   /* Figure out where we are.  */
 
-#ifdef MK_OS_W32
+#ifdef WINDOWS32
   if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
   if (getcwd (current_directory, GET_PATH_MAX) == 0)

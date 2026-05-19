@@ -38,7 +38,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # ifdef _AIX
  #pragma alloca
 # else
-#  if !defined(__GNUC__) && !defined(MK_OS_W32)
+#  if !defined(__GNUC__) && !defined(WINDOWS32)
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
 #   endif
@@ -301,7 +301,7 @@ char *strsignal (int signum);
 # include <direct.h>
 #endif
 
-#ifdef MK_OS_W32
+#ifdef WINDOWS32
 # include <fcntl.h>
 # include <malloc.h>
 # define pipe(_p)        _pipe((_p), 512, O_BINARY)
@@ -317,7 +317,7 @@ extern int no_default_sh_exe;
 
 /* is default_shell unixy? */
 extern int unixy_shell;
-#endif  /* MK_OS_W32 */
+#endif  /* WINDOWS32 */
 
 #if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 # define SET_STACK_SIZE
@@ -407,7 +407,7 @@ const char *strcache_add (const char *str);
 /* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
    because such systems often declare them in header files anyway.  */
 
-#if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(MK_OS_W32)
+#if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WINDOWS32)
 
 #endif  /* Not GNU C library or POSIX.  */
 

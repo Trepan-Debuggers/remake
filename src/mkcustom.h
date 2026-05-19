@@ -36,7 +36,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # ifdef _AIX
  #pragma alloca
 # else
-#  if !defined(__GNUC__) && !MK_OS_W32
+#  if !defined(__GNUC__) && !WINDOWS32
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
 #   endif
