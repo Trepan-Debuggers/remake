@@ -31,7 +31,8 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "cmd.h"
 
 #include <assert.h>
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
+# define NO_OUTPUT_SYNC
 # include <windows.h>
 # include <io.h>
 #ifdef HAVE_STRINGS_H
@@ -895,7 +896,7 @@ decode_profile_options(void)
   }
 }
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32)
 
 #ifndef NO_OUTPUT_SYNC
 
@@ -1123,7 +1124,7 @@ find_and_set_default_shell (const char *token)
 
   return (sh_found);
 }
-#endif  /* MK_OS_W32 */
+#endif  /* defined(WINDOWS32) || defined(__MINGW32__) */
 
 #ifdef __MSDOS__
 static void
@@ -1761,7 +1762,7 @@ main (int argc, const char **argv, char **envp)
   /* If we chdir'ed, figure out where we are now.  */
   if (directories)
     {
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
       if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
       if (getcwd (current_directory, GET_PATH_MAX) == 0)
@@ -1951,33 +1952,12 @@ main (int argc, const char **argv, char **envp)
 
   read_makefiles = read_all_makefiles (makefiles == 0 ? 0 : makefiles->list);
 
-#ifdef MK_OS_W32
+#if defined(WINDOWS32) || defined(__MINGW32__)
   /* look one last time after reading all Makefiles */
   if (no_default_sh_exe)
     no_default_sh_exe = !find_and_set_default_shell (NULL);
-#endif /* MK_OS_W32 */
+#endif /* defined(WINDOWS32_ || defined(__MINGW32__) */
 
-#if defined (__MSDOS__) || defined (__EMX__) || defined (VMS)
-  /* We need to know what kind of shell we will be using.  */
-  {
-    extern int _is_unixy_shell (const char *_path);
-    struct variable *shv = lookup_variable (STRING_SIZE_TUPLE ("SHELL"));
-    extern int unixy_shell;
-    extern const char *default_shell;
-
-    if (shv && *shv->value)
-      {
-        char *shell_path = recursively_expand (shv);
-
-        if (shell_path && _is_unixy_shell (shell_path))
-          unixy_shell = 1;
-        else
-          unixy_shell = 0;
-        if (shell_path)
-          default_shell = shell_path;
-      }
-  }
-#endif /* __MSDOS__ || __EMX__ */
 
   {
     int old_builtin_rules_flag = no_builtin_rules_flag;

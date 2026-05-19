@@ -53,8 +53,7 @@ itself.
 
 */
 
-void freeargv (vector)
-char **vector;
+void freeargv (char **vector)
 {
   register char **scan;
 
@@ -108,8 +107,7 @@ returned, as appropriate.
 
 */
 
-char **buildargv (input)
-     const char *input;
+char **buildargv (const char *input)
 {
   char *arg;
   char *copybuf;

@@ -113,6 +113,8 @@ check_io_state ()
   return state;
 }
 
+#endif /* __MINGW32__ */
+
 /* A replacement for tmpfile, since the MSVCRT implementation creates
    the file in the root directory of the current drive, which might
    not be writable by our user, and also it returns a FILE* and we want a file
@@ -207,8 +209,6 @@ os_anontmp ()
     errno = EEXIST;
   return -1;
 }
-#endif /* __MINGW32__ */
-
 #if defined(MAKE_JOBSERVER)
 
 /* This section provides OS-specific functions to support the jobserver.  */

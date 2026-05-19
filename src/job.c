@@ -39,6 +39,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # ifdef HAVE_STRINGS_H
 #  include <strings.h>  /* for strcasecmp, strncasecmp */
 # endif
+#define NO_OUTPUT_SYNC
 # include <windows.h>
 
 const char *default_shell = "sh.exe";
@@ -1827,7 +1828,8 @@ load_too_high (void)
   /* sub_proc.c is limited in the number of objects it can wait for. */
   if (process_table_full ())
     return 1;
-#endif
+  return 0;
+#else
 
   if (max_load_average < 0)
     return 0;
@@ -1934,6 +1936,7 @@ load_too_high (void)
                 guess, load, max_load_average));
 
   return guess >= max_load_average;
+#endif /* defined(WINDOWS32) || defined(__MINgW__) */
 }
 
 /* Start jobs that are waiting for the load to be lower.  */

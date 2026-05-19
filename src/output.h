@@ -70,7 +70,6 @@ void output_dump (struct output *out);
 
 # if defined(WINDOWS32) || defined(__MINGW32__)
 /* For emulations in w32/compat/posixfcn.c.  */
-#  define F_GETFD 1
 #  define F_SETLKW 2
 /* Implementation note: None of the values of l_type below can be zero
    -- they are compared with a static instance of the struct, so zero

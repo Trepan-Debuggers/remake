@@ -41,7 +41,9 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 
 
-#if !defined(__MINGW32__)
+#if defined(__MINGW32__)
+# define O_TMPFILE
+#else
 unsigned int
 check_io_state ()
 {
@@ -724,7 +726,10 @@ osync_release ()
 
 #endif /* NO_OUTPUT_SYNC */
 
-#if !defined(__MINGW32__)
+#if defined(__MINGW32__)
+void fd_inherit (int fd) {}
+void fd_noinherit (int fd) {}
+#else
 /* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
 int
 get_bad_stdin ()

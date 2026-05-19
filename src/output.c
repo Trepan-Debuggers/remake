@@ -39,6 +39,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # include <windows.h>
 # include <io.h>
 # include "w32/include/sub_proc.h"
+#define NO_OUTPUT_SYNC
 #endif /* defined(WINDOW32) || defined(__MINGW32__) */
 
 struct output *output_context = NULL;
@@ -169,6 +170,7 @@ set_append_mode (int fd)
       int r;
       EINTRLOOP(r, fcntl (fd, F_SETFL, flags | O_APPEND));
     }
+#endif
 }
 
 
@@ -200,7 +202,6 @@ sync_init (void)
 
   return combined_output;
 }
-#endif /* defined(WINDOW32) || defined(__MINGW32__) */
 
 #ifndef NO_OUTPUT_SYNC
 
@@ -375,14 +376,12 @@ output_dump (struct output *out)
       /* Try to acquire the semaphore.  If it fails, dump the output
          unsynchronized; still better than silently discarding it.
          We want to keep this lock for as little time as possible.  */
-#ifndef __MINGW32__
       if (!osync_acquire ())
         {
           O (error, NILF,
              _("warning: Cannot acquire output lock, disabling output sync."));
           osync_clear ();
         }
-#endif
 
       /* Log the working directory for this dump.  */
       if (print_directory && output_sync != OUTPUT_SYNC_RECURSE)
@@ -397,9 +396,7 @@ output_dump (struct output *out)
         log_working_directory (0);
 
       /* Exit the critical section.  */
-#ifndef __MINGW32__
       osync_release ();
-#endif
 
       /* Truncate and reset the output, in case we use it again.  */
       if (out->out != OUTPUT_NONE)
@@ -448,6 +445,7 @@ output_dump (struct output *out)
    It's important to detect such failures and exit nonzero because many
    tools (most notably 'make' and other build-management systems) depend
    on being able to detect failure in other tools via their exit status.  */
+
 
 static void
 close_stdout (void)
