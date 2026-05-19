@@ -54,6 +54,9 @@ unsigned int stdio_traced = 0;
 # define STREAM_OK(_s) 1
 #endif
 
+/* Semaphore for use in -j mode with output_sync. */
+static sync_handle_t sync_handle = -1;
+
 /* Write a string to the current STDOUT or STDERR.  */
 static void
 _outputs (struct output *out, int is_err, const char *msg)
@@ -149,7 +152,6 @@ log_working_directory (int entering)
   return 1;
 }
 
-#if defined(WINDOW32) || defined(__MINGW32__)
 /* Set a file descriptor referring to a regular file
    to be in O_APPEND mode.  If it fails, just ignore it.  */
 
@@ -167,14 +169,8 @@ set_append_mode (int fd)
       int r;
       EINTRLOOP(r, fcntl (fd, F_SETFL, flags | O_APPEND));
     }
-#endif
 }
 
-
-#ifndef NO_OUTPUT_SYNC
-
-/* Semaphore for use in -j mode with output_sync. */
-static sync_handle_t sync_handle = -1;
 
 #define FD_NOT_EMPTY(_f) ((_f) != OUTPUT_NONE && lseek ((_f), 0, SEEK_END) > 0)
 
@@ -205,6 +201,8 @@ sync_init (void)
   return combined_output;
 }
 #endif /* defined(WINDOW32) || defined(__MINGW32__) */
+
+#ifndef NO_OUTPUT_SYNC
 
 /* Support routine for output_sync() */
 static void

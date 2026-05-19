@@ -541,11 +541,12 @@ jobserver_acquire (int timeout)
    during the section mentioned above, the read(2) will be invoked with an
    invalid FD and will return immediately with EBADF.  */
 
+#endif /* !defined(__MINGW32__) */
+
 static void
 job_noop (int sig UNUSED)
 {
 }
-#endif /* !defined(__MINGW32__) */
 
 /* Set the child handler action flags to FLAGS.  */
 static void
@@ -596,42 +597,11 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
 #endif
 }
 
-unsigned int
-jobserver_acquire (int timeout)
-{
-  char intake;
-  int got_token;
-  int saved_errno;
-
-  /* Set interruptible system calls, and read() for a job token.  */
-  set_child_handler_action_flags (1, timeout);
-
-  EINTRLOOP (got_token, read (job_rfd, &intake, 1));
-  saved_errno = errno;
-
-  set_child_handler_action_flags (0, timeout);
-
-  if (got_token == 1)
-    return 1;
-
-  /* If the error _wasn't_ expected (EINTR or EBADF), fatal.  Otherwise,
-     go back and reap_children(), and try again.  */
-  errno = saved_errno;
-
-  if (errno != EINTR && errno != EBADF)
-    pfatal_with_name (_("read jobs pipe"));
-
-  if (errno == EBADF)
-    DB (DB_JOBS, ("Read returned EBADF.\n"));
-
-  return 0;
-}
-
 #endif /* HAVE_PSELECT */
 
 #endif /* MAKE_JOBSERVER */
 
-#if !defined(NO_OUTPUT_SYNC)
+#ifndef NO_OUTPUT_SYNC
 
 #define MUTEX_PREFIX    "fnm:"
 

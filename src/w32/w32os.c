@@ -403,7 +403,7 @@ jobserver_acquire (int timeout UNUSED)
 #endif /* MAKE_JOBSERVER */
 #endif /* __MINGW32__ */
 
-#if !defined(NO_OUTPUT_SYNC)
+#ifndef NO_OUTPUT_SYNC
 
 #define MUTEX_PREFIX    "fnm:"
 

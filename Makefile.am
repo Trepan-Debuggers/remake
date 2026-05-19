@@ -92,7 +92,6 @@ if WINDOWSENV
   make_SOURCES += $(w32_SRCS)
   AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
   make_LDADD   += -lmingw32
-  make_SOURCES += src/posixos.c
 endif
 
 make_SOURCES += src/posixos.c
