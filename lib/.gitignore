@@ -47,6 +47,7 @@
 /msvc-inval.h
 /msvc-nothrow.c
 /msvc-nothrow.h
+/stdbool.h
 /stdbool.in.h
 /stddef.in.h
 /stdint.h

@@ -2,6 +2,7 @@
 *.o
 *~
 .deps
+.dirstamp
 /.dep_segment
 /.pc
 /.python-version
@@ -42,6 +43,7 @@
 /loadavg
 /m4
 /make
+/make.exe
 /po-check-*
 /remake
 /remake-*.tar.bz2
