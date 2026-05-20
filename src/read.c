@@ -33,12 +33,15 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hash.h"
 
 
-#if (defined(WINDOWS32) || defined(__MINGW32__))
+#if defined(WINDOWS32)
 #include <windows.h>
 # include "w32/include/sub_proc.h"
-#else  /* !(defined(WINDOWS32) || defined(__MINGW32__)) */
+# include "w32/include/pathstuff.h"
+# define GETCWD getcwd_fs
+#else  /* !defined(WINDOWS32) */
 #include <pwd.h>
-#endif /* (defined(WINDOWS32) || defined(__MINGW32__)) */
+# define GETCWD getcwd
+#endif /* defined(WINDOWS32) */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently
    eval'ing.
@@ -232,7 +235,7 @@ read_all_makefiles (const char **makefiles)
 
       while (1) {
 	p = default_makefiles;
-	if (getcwd (current_directory, GET_PATH_MAX) == NULL)
+	if (GETCWD(current_directory, GET_PATH_MAX) == NULL)
 	  break;
 	while (*p != 0 && !dir_file_exists_p (current_directory, *p))
 	  ++p;

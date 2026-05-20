@@ -108,12 +108,10 @@ w32ify(const char *filename, int resolve)
     else
       strncpy(w32_path, filename, sizeof (w32_path) - 1);
 
-#ifndef __MINGW32__
-    /* Replace / with \ on True Windows (not MINGW which understands / fine) */
+    /* Replace \ in w32_path with /  */
     for (p = w32_path; p && *p; p++)
       if (*p == '\\')
         *p = '/';
-#endif
 
     return w32_path;
 }
