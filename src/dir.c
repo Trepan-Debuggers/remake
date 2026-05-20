@@ -53,57 +53,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
 #endif /* POSIX */
 
-#ifdef __MSDOS__
-#include <ctype.h>
-#include <fcntl.h>
-
-/* If it's MSDOS that doesn't have _USE_LFN, disable LFN support.  */
-#ifndef _USE_LFN
-#define _USE_LFN 0
-#endif
-
-static const char *
-dosify (const char *filename)
-{
-  static char dos_filename[14];
-  char *df;
-  int i;
-
-  if (filename == 0 || _USE_LFN)
-    return filename;
-
-  /* FIXME: what about filenames which violate
-     8+3 constraints, like "config.h.in", or ".emacs"?  */
-  if (strpbrk (filename, "\"*+,;<=>?[\\]|") != 0)
-    return filename;
-
-  df = dos_filename;
-
-  /* First, transform the name part.  */
-  for (i = 0; i < 8 && ! STOP_SET (*filename, MAP_DOT|MAP_NUL); ++i)
-    *df++ = tolower ((unsigned char)*filename++);
-
-  /* Now skip to the next dot.  */
-  while (! STOP_SET (*filename, MAP_DOT|MAP_NUL))
-    ++filename;
-  if (*filename != '\0')
-    {
-      *df++ = *filename++;
-      for (i = 0; i < 3 && ! STOP_SET (*filename, MAP_DOT|MAP_NUL); ++i)
-        *df++ = tolower ((unsigned char)*filename++);
-    }
-
-  /* Look for more dots.  */
-  while (! STOP_SET (*filename, MAP_DOT|MAP_NUL))
-    ++filename;
-  if (*filename == '.')
-    return filename;
-  *df = 0;
-  return dos_filename;
-}
-#endif /* __MSDOS__ */
-
-#if defined(WINDOWS32)  || defined(__MINGW32__)
+#if defined(WINDOWS32)
 #include "w32/include/pathstuff.h"
 #endif
 
@@ -130,97 +80,6 @@ downcase (const char *filename)
 }
 #endif /* HAVE_CASE_INSENSITIVE_FS */
 
-#ifdef VMS
-
-static char *
-downcase_inplace(char *filename)
-{
-  char *name;
-  name = filename;
-  while (*name != '\0')
-    {
-      *name = tolower ((unsigned char)*name);
-      ++name;
-    }
-  return filename;
-}
-
-#ifndef _USE_STD_STAT
-/* VMS 8.2 fixed the VMS stat output to have unique st_dev and st_ino
-   when _USE_STD_STAT is used on the compile line.
-
-   Prior to _USE_STD_STAT support, the st_dev is a pointer to thread
-   static memory containing the device of the last filename looked up.
-
-   Todo: find out if the ino_t still needs to be faked on a directory.
- */
-
-/* Define this if the older VMS_INO_T is needed */
-#define VMS_INO_T 1
-
-static int
-vms_hash (const char *name)
-{
-  int h = 0;
-
-  while (*name)
-    {
-      unsigned char uc = (unsigned char) *name;
-      int g;
-#ifdef HAVE_CASE_INSENSITIVE_FS
-      h = (h << 4) + (isupper (uc) ? tolower (uc) : uc);
-#else
-      h = (h << 4) + uc;
-#endif
-      name++;
-      g = h & 0xf0000000;
-      if (g)
-        {
-          h = h ^ (g >> 24);
-          h = h ^ g;
-        }
-    }
-  return h;
-}
-
-/* fake stat entry for a directory */
-static int
-vmsstat_dir (const char *name, struct stat *st)
-{
-  char *s;
-  int h;
-  DIR *dir;
-
-  dir = opendir (name);
-  if (dir == 0)
-    return -1;
-  closedir (dir);
-  s = strchr (name, ':');       /* find device */
-  if (s)
-    {
-      /* to keep the compiler happy we said "const char *name", now we cheat */
-      *s++ = 0;
-      st->st_dev = (char *)vms_hash (name);
-      h = vms_hash (s);
-      *(s-1) = ':';
-    }
-  else
-    {
-      st->st_dev = 0;
-      h = vms_hash (name);
-    }
-
-  st->st_ino[0] = h & 0xff;
-  st->st_ino[1] = h & 0xff00;
-  st->st_ino[2] = h >> 16;
-
-  return 0;
-}
-
-# define stat(__path, __sbuf) vmsstat_dir (__path, __sbuf)
-
-#endif /* _USE_STD_STAT */
-#endif /* VMS */
 
 /* Never have more than this many directories open at once.  */
 
@@ -237,7 +96,7 @@ static unsigned int open_directories = 0;
 struct directory_contents
   {
     dev_t dev;                  /* Device and inode numbers of this dir.  */
-#if defined WINDOWS32 || defined __MINGW32__
+#if defined WINDOWS32
     /* Inode means nothing on WINDOWS32. Even file key information is
      * unreliable because it is random per file open and undefined for remote
      * filesystems. The most unique attribute I can come up with is the fully
@@ -251,11 +110,7 @@ struct directory_contents
 # define FS_NTFS     0x2
 # define FS_UNKNOWN  0x4
 #else
-# ifdef VMS_INO_T
-    ino_t ino[3];
-# else
     ino_t ino;
-# endif
 #endif /* WINDOWS32 */
     struct hash_table dirfiles; /* Files in this directory.  */
     unsigned long counter;      /* command_count value when last read. */
@@ -283,19 +138,12 @@ directory_contents_hash_1 (const void *key_0)
   const struct directory_contents *key = key_0;
   unsigned long hash;
 
-#if defined WINDOWS32 || defined __MINGW32__
+#if defined WINDOWS32
   hash = 0;
   ISTRING_HASH_1 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) key->ctime;
 #else
-# ifdef VMS_INO_T
-  hash = (((unsigned int) key->dev << 4)
-          ^ ((unsigned int) key->ino[0]
-             + (unsigned int) key->ino[1]
-             + (unsigned int) key->ino[2]));
-# else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) key->ino;
-# endif
 #endif /* WINDOWS32 */
   return hash;
 }
@@ -306,19 +154,12 @@ directory_contents_hash_2 (const void *key_0)
   const struct directory_contents *key = key_0;
   unsigned long hash;
 
-#if defined WINDOWS32 || defined __MINGW32__
+#if defined WINDOWS32
   hash = 0;
   ISTRING_HASH_2 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ctime;
 #else
-# ifdef VMS_INO_T
-  hash = (((unsigned int) key->dev << 4)
-          ^ ~((unsigned int) key->ino[0]
-              + (unsigned int) key->ino[1]
-              + (unsigned int) key->ino[2]));
-# else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ino;
-# endif
 #endif /* WINDOWS32 */
 
   return hash;
@@ -342,7 +183,7 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   const struct directory_contents *y = yv;
   int result;
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   ISTRING_COMPARE (x->path_key, y->path_key, result);
   if (result)
     return result;
@@ -350,21 +191,9 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   if (result)
     return result;
 #else
-# ifdef VMS_INO_T
-  result = MAKECMP(x->ino[0], y->ino[0]);
-  if (result)
-    return result;
-  result = MAKECMP(x->ino[1], y->ino[1]);
-  if (result)
-    return result;
-  result = MAKECMP(x->ino[2], y->ino[2]);
-  if (result)
-    return result;
-# else
   result = MAKECMP(x->ino, y->ino);
   if (result)
     return result;
-# endif
 #endif /* WINDOWS32 */
 
   return MAKECMP(x->dev, y->dev);
@@ -463,7 +292,7 @@ find_directory (const char *name)
 
   struct stat st;
   int r;
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   char *w32_path;
 #endif
 
@@ -508,7 +337,7 @@ find_directory (const char *name)
   dir->counter = command_count;
 
   /* See if the directory exists.  */
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   {
     char tem[MAX_PATH+1], *tstart, *tend;
     size_t len = strlen (name);
@@ -536,7 +365,7 @@ find_directory (const char *name)
 
   memset (&dc_key, '\0', sizeof (dc_key));
   dc_key.dev = st.st_dev;
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   dc_key.path_key = w32_path = w32ify (name, 1);
   dc_key.ctime = st.st_ctime;
 #else
@@ -554,7 +383,7 @@ find_directory (const char *name)
   if (HASH_VACANT (dc))
     {
       /* Nope; this really is a directory we haven't seen before.  */
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
       char  fs_label[BUFSIZ];
       char  fs_type[BUFSIZ];
       unsigned long  fs_serno;
@@ -565,7 +394,7 @@ find_directory (const char *name)
       dc = xcalloc (sizeof (struct directory_contents));
       *dc = dc_key;
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
       dc->path_key = xstrdup (w32_path);
       dc->mtime = st.st_mtime;
 
@@ -690,12 +519,7 @@ dir_contents_file_exists_p (struct directory_contents *dir,
       dirfile_slot = (struct dirfile **) hash_find_slot (&dir->dirfiles, &dirfile_key);
         {
           df = xmalloc (sizeof (struct dirfile));
-#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
-          /* TODO: Why is this only needed on VMS? */
-          df->name = strcache_add_len (downcase_inplace (d->d_name), len);
-#else
           df->name = strcache_add_len (d->d_name, len);
-#endif
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
           df->type = d->d_type;
 #endif
@@ -882,7 +706,7 @@ print_dir_data_base (void)
   unsigned int impossible;
   struct directory **dir_slot;
   struct directory **dir_end;
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
   char buf[INTSTR_LENGTH + 1];
 #endif
 
@@ -900,15 +724,10 @@ print_dir_data_base (void)
           if (dir->contents == 0)
             printf (_("# %s: could not be stat'd.\n"), dir->name);
           else if (dir->contents->dirfiles.ht_vec == 0)
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
             printf (_("# %s (key %s, mtime %s): could not be opened.\n"),
                     dir->name, dir->contents->path_key,
                     make_ulltoa ((unsigned long long)dir->contents->mtime, buf));
-#elif defined(VMS_INO_T)
-            printf (_("# %s (device %d, inode [%d,%d,%d]): could not be opened.\n"),
-                    dir->name, dir->contents->dev,
-                    dir->contents->ino[0], dir->contents->ino[1],
-                    dir->contents->ino[2]);
 #else
             printf (_("# %s (device %ld, inode %ld): could not be opened.\n"),
                     dir->name, (long) dir->contents->dev, (long) dir->contents->ino);
@@ -933,15 +752,10 @@ print_dir_data_base (void)
                         ++f;
                     }
                 }
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
               printf (_("# %s (key %s, mtime %s): "),
                       dir->name, dir->contents->path_key,
                       make_ulltoa ((unsigned long long)dir->contents->mtime, buf));
-#elif defined(VMS_INO_T)
-              printf (_("# %s (device %d, inode [%d,%d,%d]): "),
-                      dir->name, dir->contents->dev,
-                      dir->contents->ino[0], dir->contents->ino[1],
-                      dir->contents->ino[2]);
 #else
               printf (_("# %s (device %ld, inode %ld): "), dir->name,
                       (long)dir->contents->dev, (long)dir->contents->ino);
@@ -1087,12 +901,12 @@ local_stat (const char *path, struct stat *buf)
 #endif
 
 /* Similarly for lstat.  */
-#if !defined(lstat) && !(defined WINDOWS32 || defined __MINGW32__)
+#if !defined(lstat) && !(defined WINDOWS32)
 #  ifndef HAVE_SYS_STAT_H
 int lstat (const char *path, struct stat *sbuf);
 #  endif
 # define local_lstat lstat
-#elif defined(WINDOWS32) || defined(__MINGW32__)
+#elif defined(WINDOWS32)
 /* Windows doesn't support lstat().  */
 # define local_lstat local_stat
 #else
