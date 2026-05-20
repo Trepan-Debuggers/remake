@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005, 2007-2009, 2011, 2020 R. Bernstein
+/* Copyright (C) 2004-2005, 2007-2009, 2011, 2020, 2026 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
  *  Debugger command to the show the current working directory.
  */
 
+#include "../../src/makeint.h"
 #include "../../src/trace.h"
 
 extern debug_return_t
@@ -31,7 +32,7 @@ dbg_cmd_pwd(char *psz_args)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     char wd[300];
-    if (NULL == getcwd (wd, sizeof(wd))) {
+    if (NULL == GETCWD (wd, sizeof(wd))) {
       printf (_("cannot get current directory %s\n"), strerror(errno));
     } else {
       printf (_("Working directory %s.\n"), wd);

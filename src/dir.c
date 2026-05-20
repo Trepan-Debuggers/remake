@@ -53,9 +53,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
 #endif /* POSIX */
 
-#if defined(WINDOWS32)
-#include "w32/include/pathstuff.h"
-#endif
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
 static const char *

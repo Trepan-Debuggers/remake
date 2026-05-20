@@ -1328,11 +1328,7 @@ main (int argc, const char **argv, char **envp)
 
   /* Figure out where we are.  */
 
-#ifdef WINDOWS32
-  if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
-#else
-  if (getcwd (current_directory, GET_PATH_MAX) == 0)
-#endif
+  if (GETCWD (current_directory, GET_PATH_MAX) == 0)
     {
 #ifdef  HAVE_GETCWD
       perror_with_name ("getcwd", "");
@@ -1741,11 +1737,7 @@ main (int argc, const char **argv, char **envp)
   /* If we chdir'ed, figure out where we are now.  */
   if (directories)
     {
-#if defined(WINDOWS32) || defined(__MINGW32__)
-      if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
-#else
-      if (getcwd (current_directory, GET_PATH_MAX) == 0)
-#endif
+      if (GETCWD (current_directory, GET_PATH_MAX) == 0)
         {
 #ifdef  HAVE_GETCWD
           perror_with_name ("getcwd", "");

@@ -17,9 +17,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "makeint.h"
 #include "filedef.h"
 #include "variable.h"
-#if defined(WINDOWS32) || defined(__MINGW32__)
-#include "pathstuff.h"
-#endif
 
 
 /* Structure used to represent a selective VPATH searchpath.  */

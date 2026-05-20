@@ -37,10 +37,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <windows.h>
 # include "w32/include/sub_proc.h"
 # include "w32/include/pathstuff.h"
-# define GETCWD getcwd_fs
 #else  /* !defined(WINDOWS32) */
 #include <pwd.h>
-# define GETCWD getcwd
 #endif /* defined(WINDOWS32) */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently

@@ -372,15 +372,19 @@ extern mode_t umask (mode_t);
 # include <direct.h>
 #endif
 
-#if defined WINDOWS32 || defined __MINGW32__
+#if defined WINDOWS32
+# include "w32/include/pathstuff.h"
+# define GETCWD getcwd_fs
+#else
+# define GETCWD getcwd
+#endif
+
+
+#if defined WINDOWS32
 # include <fcntl.h>
 # include <malloc.h>
 # define pipe(_p)        _pipe((_p), 512, O_BINARY)
 # define kill(_pid,_sig) w32_kill((_pid),(_sig))
-/* MSVC and Watcom C don't have ftruncate.  */
-# if defined(_MSC_VER) || defined(__WATCOMC__)
-#  define ftruncate(_fd,_len) _chsize(_fd,_len)
-# endif
 /* MinGW64 doesn't have _S_ISDIR.  */
 # ifndef _S_ISDIR
 #  define _S_ISDIR(m)  S_ISDIR(m)

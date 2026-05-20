@@ -41,9 +41,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 
 
-#if defined(__MINGW32__)
-# define O_TMPFILE
-#else
+#ifndef __MINGW32__
 unsigned int
 check_io_state ()
 {
@@ -73,7 +71,7 @@ check_io_state ()
 
   return state;
 }
-#endif /*!defined(__MINGW32__) */
+#endif /*__MINGW32__*/
 
 #if defined(MAKE_JOBSERVER)
 
@@ -726,9 +724,30 @@ osync_release ()
 
 #endif /* NO_OUTPUT_SYNC */
 
-#if defined(__MINGW32__)
+#if !defined(__MINGW32__)
 void fd_inherit (int fd) {}
 void fd_noinherit (int fd) {}
+
+/* Return a file descriptor for a new anonymous temp file, or -1.  */
+int
+os_anontmp ()
+{
+  const char *tdir = get_tmpdir ();
+  int fd = -1;
+
+#ifdef O_TMPFILE
+  static unsigned int tmpfile_works = 1;
+
+  if (tmpfile_works)
+    {
+      EINTRLOOP (fd, open (tdir, O_RDWR | O_TMPFILE | O_EXCL, 0600));
+      if (fd >= 0)
+        return fd;
+
+      DB (DB_BASIC, (_("Cannot open '%s' with O_TMPFILE: %s.\n"),
+                     tdir, strerror (errno)));
+      tmpfile_works = 0;
+    }
 #else
 /* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
 int
@@ -819,27 +838,6 @@ fd_set_append (int fd)
     }
 #endif /* defined(F_GETFL) && defined(F_SETFL) && defined(O_APPEND) */
 }
-
-/* Return a file descriptor for a new anonymous temp file, or -1.  */
-int
-os_anontmp ()
-{
-  const char *tdir = get_tmpdir ();
-  int fd = -1;
-
-#ifdef O_TMPFILE
-  static unsigned int tmpfile_works = 1;
-
-  if (tmpfile_works)
-    {
-      EINTRLOOP (fd, open (tdir, O_RDWR | O_TMPFILE | O_EXCL, 0600));
-      if (fd >= 0)
-        return fd;
-
-      DB (DB_BASIC, (_("Cannot open '%s' with O_TMPFILE: %s.\n"),
-                     tdir, strerror (errno)));
-      tmpfile_works = 0;
-    }
 #endif /* O_TMPFILE */
 
 #if HAVE_DUP

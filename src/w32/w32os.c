@@ -25,7 +25,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #if _WIN32_WINNT > 0x0601
 #include <synchapi.h>
 #endif
-#include "pathstuff.h"
 #include "sub_proc.h"
 #include "w32err.h"
 #include "os.h"
@@ -216,8 +215,6 @@ os_anontmp ()
 static char jobserver_semaphore_name[MAX_PATH + 1];
 static HANDLE jobserver_semaphore = NULL;
 
-#ifndef __MINGW32__
-
 unsigned int
 jobserver_setup (int slots, const char *style)
 {
@@ -287,14 +284,12 @@ jobserver_get_invalid_auth ()
   return NULL;
 }
 
-#endif /* __MINGW32__ */
 unsigned int
 jobserver_enabled ()
 {
   return jobserver_semaphore != NULL;
 }
 
-#ifndef __MINGW32__
 /* Close jobserver semaphore */
 void
 jobserver_clear ()
@@ -305,7 +300,6 @@ jobserver_clear ()
       jobserver_semaphore = NULL;
     }
 }
-#endif /* __MINGW32__ */
 
 void
 jobserver_release (int is_fatal)
@@ -326,7 +320,16 @@ jobserver_release (int is_fatal)
     }
 }
 
-#ifndef __MINGW32__
+void
+jobserver_signal ()
+{
+}
+
+void
+jobserver_pre_acquire ()
+{
+}
+
 unsigned int
 jobserver_acquire_all ()
 {
@@ -344,21 +347,11 @@ jobserver_acquire_all ()
     }
 }
 
-void
-jobserver_signal ()
-{
-}
-
 void jobserver_pre_child (int recursive UNUSED)
 {
 }
 
 void jobserver_post_child (int recursive UNUSED)
-{
-}
-
-void
-jobserver_pre_acquire ()
 {
 }
 
@@ -401,7 +394,6 @@ jobserver_acquire (int timeout UNUSED)
 }
 
 #endif /* MAKE_JOBSERVER */
-#endif /* __MINGW32__ */
 
 #ifndef NO_OUTPUT_SYNC
 
@@ -508,7 +500,6 @@ osync_release ()
 #endif /* __MINGW__ */
 #endif /* NO_OUTPUT_SYNC */
 
-#ifndef __MINGW32__
 void
 fd_inherit(int fd)
 {
@@ -543,4 +534,3 @@ get_handle_for_fd (int fd)
   intptr_t fh = _get_osfhandle (fd);
   return (HANDLE) fh;
 }
-#endif /* __MINGW32__ */

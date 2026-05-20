@@ -60,7 +60,6 @@ int batch_mode_shell = 0;
 # include <process.h>
 # include "w32/include/sub_proc.h"
 # include "w32/include/w32err.h"
-# include "w32/include/pathstuff.h"
 # define WAIT_NOHANG 1
 #endif /* WINDOWS32 */
 
