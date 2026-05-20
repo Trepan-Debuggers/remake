@@ -83,3 +83,29 @@ int main(int argc, const char * const* argv) {
     return 1;
   }
 }
+
+void xperror(const char *format, ...) {
+    // Save errno immediately so it isn't accidentally modified by internal calls
+    int saved_errno = errno;
+
+    va_list args;
+    va_start(args, format);
+
+    // Print the custom formatted message to stderr
+    vfprintf(stderr, format, args);
+
+    va_end(args);
+
+    // Append the standard perror-style colon, spacing, and errno string
+    if (saved_errno != 0) {
+        fprintf(stderr, ": %s\n", strerror(saved_errno));
+    } else {
+        fprintf(stderr, ": Success\n");
+    }
+}
+/*
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
