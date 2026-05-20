@@ -441,6 +441,38 @@ jobserver_pre_acquire ()
     pfatal_with_name (_("duping jobs pipe"));
 }
 
+/* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
+int
+get_bad_stdin ()
+{
+  static int bad_stdin = -1;
+
+  /* Set up a bad standard input that reads from a broken pipe.  */
+
+  if (bad_stdin == -1)
+    {
+      /* Make a file descriptor that is the read end of a broken pipe.
+         This will be used for some children's standard inputs.  */
+      int pd[2];
+      if (pipe (pd) == 0)
+        {
+          /* Close the write side.  */
+          close (pd[1]);
+          /* Save the read side.  */
+          bad_stdin = pd[0];
+
+          /* Set the descriptor to close on exec, so it does not litter any
+             child's descriptor table.  When it is dup2'd onto descriptor 0,
+             that descriptor will not close on exec.  */
+          fd_noinherit (bad_stdin);
+        }
+    }
+
+  return bad_stdin;
+}
+
+
+
 #ifdef HAVE_PSELECT
 
 /* Use pselect() to atomically wait for both a signal and a file descriptor.
@@ -722,36 +754,6 @@ osync_release ()
 }
 #endif /* !defined(__MINGW32__) */
 #endif /* NO_OUTPUT_SYNC */
-
-/* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
-int
-get_bad_stdin ()
-{
-  static int bad_stdin = -1;
-
-  /* Set up a bad standard input that reads from a broken pipe.  */
-
-  if (bad_stdin == -1)
-    {
-      /* Make a file descriptor that is the read end of a broken pipe.
-         This will be used for some children's standard inputs.  */
-      int pd[2];
-      if (pipe (pd) == 0)
-        {
-          /* Close the write side.  */
-          close (pd[1]);
-          /* Save the read side.  */
-          bad_stdin = pd[0];
-
-          /* Set the descriptor to close on exec, so it does not litter any
-             child's descriptor table.  When it is dup2'd onto descriptor 0,
-             that descriptor will not close on exec.  */
-          fd_noinherit (bad_stdin);
-        }
-    }
-
-  return bad_stdin;
-}
 
 #if !defined(__MINGW32__)
 void fd_inherit (int fd) {}
