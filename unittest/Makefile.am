@@ -17,6 +17,10 @@ test_profile_LDADD = \
 	../lib/libgnu.a \
 	@LIBINTL@
 
+if WINDOWSENV
+  test_profile_LDADD   += ../src/w32/w32os.o ../src/w32/pathstuff.o -lmingw32
+endif
+
 check_PROGRAMS = test_profile
 
 TESTS = $(check_PROGRAMS)
