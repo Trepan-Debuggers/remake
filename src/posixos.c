@@ -721,34 +721,8 @@ osync_release ()
     }
 }
 #endif /* !defined(__MINGW32__) */
-
 #endif /* NO_OUTPUT_SYNC */
 
-#if !defined(__MINGW32__)
-void fd_inherit (int fd) {}
-void fd_noinherit (int fd) {}
-
-/* Return a file descriptor for a new anonymous temp file, or -1.  */
-int
-os_anontmp ()
-{
-  const char *tdir = get_tmpdir ();
-  int fd = -1;
-
-#ifdef O_TMPFILE
-  static unsigned int tmpfile_works = 1;
-
-  if (tmpfile_works)
-    {
-      EINTRLOOP (fd, open (tdir, O_RDWR | O_TMPFILE | O_EXCL, 0600));
-      if (fd >= 0)
-        return fd;
-
-      DB (DB_BASIC, (_("Cannot open '%s' with O_TMPFILE: %s.\n"),
-                     tdir, strerror (errno)));
-      tmpfile_works = 0;
-    }
-#else
 /* Create a "bad" file descriptor for stdin when parallel jobs are run.  */
 int
 get_bad_stdin ()
@@ -778,6 +752,32 @@ get_bad_stdin ()
 
   return bad_stdin;
 }
+
+#if !defined(__MINGW32__)
+void fd_inherit (int fd) {}
+void fd_noinherit (int fd) {}
+
+/* Return a file descriptor for a new anonymous temp file, or -1.  */
+int
+os_anontmp ()
+{
+  const char *tdir = get_tmpdir ();
+  int fd = -1;
+
+#ifdef O_TMPFILE
+  static unsigned int tmpfile_works = 1;
+
+  if (tmpfile_works)
+    {
+      EINTRLOOP (fd, open (tdir, O_RDWR | O_TMPFILE | O_EXCL, 0600));
+      if (fd >= 0)
+        return fd;
+
+      DB (DB_BASIC, (_("Cannot open '%s' with O_TMPFILE: %s.\n"),
+                     tdir, strerror (errno)));
+      tmpfile_works = 0;
+    }
+#else
 
 /* Set file descriptors to be inherited / not inherited by subprocesses.  */
 
