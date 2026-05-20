@@ -812,4 +812,7 @@ extern volatile sig_atomic_t handling_fatal_signal;
 #define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
                            while((_v)==0 && errno==EINTR)
 
+extern void xperror(const char *format, ...);
+
+
 #endif /* REMAKE_MAKEINT_H */

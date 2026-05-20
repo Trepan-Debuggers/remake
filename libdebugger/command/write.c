@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef __MINGW32__
 #include <io.h>
-#endif 
+#endif
 
 extern debug_return_t
 dbg_cmd_write(char *psz_args)
@@ -108,7 +108,7 @@ dbg_cmd_write(char *psz_args)
       if (b_stdout)
 	outfd = stdout;
       else if (!(outfd = fopen (psz_filename, "w"))) {
-	perror ("write target");
+	xperror ("write target %s", psz_filename);
 	free(psz_filename);
 	return debug_readloop;
       }
@@ -193,17 +193,17 @@ dbg_cmd_write(char *psz_args)
 	  if (buf.st_mode & S_IRUSR) mode |= S_IXUSR;
 	  if (buf.st_mode & S_IRGRP) mode |= S_IXGRP;
 	  if (buf.st_mode & S_IROTH) mode |= S_IXOTH;
-#ifdef __MINGW32__          
+#ifdef __MINGW32__
 	  if (0 != _chmod(psz_filename, mode)) {
 	    printf(_("Can't set execute mode on \"%s\".\n"), psz_filename);
 	  }
 	}
-#else        
+#else
 	  if (0 != fchmod(fileno(outfd), mode)) {
 	    printf(_("Can't set execute mode on \"%s\".\n"), psz_filename);
 	  }
 	}
-#endif        
+#endif
 	fclose(outfd);
 	printf(_("File \"%s\" written.\n"), psz_filename);
 	free(psz_filename);

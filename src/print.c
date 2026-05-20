@@ -52,7 +52,7 @@ const char* get_windows_username(void) {
 
 #endif /* (defined(WINDOWS32) || defined(__MINGW32__)) */
 
-#include <stdarg.h>
+#include <errno.h>
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -455,6 +455,27 @@ void print_cmdline (void)
 }
 
 
+
+
+void xperror(const char *format, ...) {
+    // Save errno immediately so it isn't accidentally modified by internal calls
+    int saved_errno = errno;
+
+    va_list args;
+    va_start(args, format);
+
+    // Print the custom formatted message to stderr
+    vfprintf(stderr, format, args);
+
+    va_end(args);
+
+    // Append the standard perror-style colon, spacing, and errno string
+    if (saved_errno != 0) {
+        fprintf(stderr, ": %s\n", strerror(saved_errno));
+    } else {
+        fprintf(stderr, ": Success\n");
+    }
+}
 /*
  * Local variables:
  * eval: (c-set-style "gnu")
