@@ -25,10 +25,10 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
  *  file.
  */
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <config.h>
+#include "makeint.h"
 
 #include "json_format.h"
 #include "dep.h"
@@ -272,9 +272,9 @@ json_init(profile_context_t *ctx, const char *creator, const char *const *argv)
     return false;
   }
 
-  json_fd = fopen(json_fname, "w");
+  json_fd = FOPEN(json_fname, "w");
   if (NULL == json_fd) {
-    printf("Error in opening json file %s\n", json_fname);
+    xperror("json file %s\n", json_fname);
     return false;
   }
 

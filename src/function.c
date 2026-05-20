@@ -2298,7 +2298,7 @@ func_file (char *o, char **argv, const char *funcname UNUSED)
       if (fn[0] == '\0')
         O (fatal, *expanding_var, _("file: missing filename"));
 
-      ENULLLOOP (fp, fopen (fn, mode));
+      ENULLLOOP (fp, FOPEN (fn, mode));
       if (fp == NULL)
         OSS (fatal, reading_file, _("open: %s: %s"), fn, strerror (errno));
 
@@ -2331,7 +2331,7 @@ func_file (char *o, char **argv, const char *funcname UNUSED)
       if (argv[1])
         O (fatal, *expanding_var, _("file: too many arguments"));
 
-      ENULLLOOP (fp, fopen (fn, "r"));
+      ENULLLOOP (fp, FOPEN (fn, "r"));
       if (fp == NULL)
         {
           if (errno == ENOENT)

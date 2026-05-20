@@ -17,10 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
 #include <sys/types.h>
 #include <config.h>
 
+#include "makeint.h"
 #include "callgrind_format.h"
 
 #define CALLGRIND_FILE_PREFIX "callgrind.out."
@@ -57,7 +57,7 @@ callgrind_init(profile_context_t *ctx, const char *creator, const char *const *a
     return false;
   }
 
-  callgrind_fd = fopen(callgrind_fname, "w");
+  callgrind_fd = FOPEN(callgrind_fname, "w");
   if (NULL == callgrind_fd) {
     printf("Error in opening callgrind file %s\n", callgrind_fname);
     return false;

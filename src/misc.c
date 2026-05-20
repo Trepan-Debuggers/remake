@@ -23,10 +23,11 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include <assert.h>
 #include <stdarg.h>
 
-#if defined(WINDOWS32) || defined(__MINGW32__)
+#if defined(WINDOWS32)
 # include <windows.h>
 # include <io.h>
-#endif
+# include "w32/include/pathstuff.h"
+#endif /* WINDOWS32 */
 
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
@@ -613,46 +614,44 @@ umask (mode_t mask)
 
 #define DEFAULT_TMPFILE    "GmXXXXXX"
 
-const char *
-get_tmpdir ()
-{
-  static const char *tmpdir = NULL;
+/**
+ * Retrieves a writable temporary directory path.
+ *
+ * @param buffer       Pointer to a char array where the path will be stored.
+ * @param buffer_size  The size of the allocated buffer.
+ * @return             A pointer to the buffer on success, or NULL on failure.
+ */
+const char*
+get_tmpdir() {
+  // static ensures the buffer remains valid in memory after the function exits
+  static char temp_path[512];
+  const size_t buffer_size = sizeof(temp_path);
 
-  if (!tmpdir)
-    {
-#if defined (WINDOWS32) || defined (__MINGW32__)
-# define TMP_EXTRAS   "TMP", "TEMP",
-#else
-# define TMP_EXTRAS
-#endif
-      const char *tlist[] = { "MAKE_TMPDIR", "TMPDIR", TMP_EXTRAS NULL };
-      const char **tp;
-      unsigned int found = 0;
-
-      for (tp = tlist; *tp; ++tp)
-        if ((tmpdir = getenv (*tp)) && *tmpdir != '\0')
-          {
-            struct stat st;
-            int r;
-            found = 1;
-            EINTRLOOP(r, stat (tmpdir, &st));
-            if (r < 0)
-              OSSS (error, NILF,
-                    _("%s value %s: %s"), *tp, tmpdir, strerror (errno));
-            else if (! S_ISDIR (st.st_mode))
-              OSS (error, NILF,
-                   _("%s value %s: not a directory"), *tp, tmpdir);
-            else
-              return tmpdir;
-          }
-
-      tmpdir = DEFAULT_TMPDIR;
-
-      if (found)
-        OS (error, NILF, _("using default temporary directory '%s'"), tmpdir);
+#if defined(_WIN32) || defined(__MINGW32__)
+    // Native Windows / MinGW approach: Uses the official Win32 API
+    // This automatically checks %TMP%, %TEMP%, %USERPROFILE%, etc.
+    DWORD result = GetTempPathA((DWORD)buffer_size, temp_path);
+    if (result > 0 && result < buffer_size) {
+        // Success: GetTempPathA automatically appends a trailing backslash '\'
+      return w32ify(temp_path, 1);
     }
+#else
+    // POSIX approach:
+    // Check standard POSIX environment variables
+    const char *env_tmp = getenv("TMPDIR");
+    if (!env_tmp) env_tmp = getenv("TMP");
+    if (!env_tmp) env_tmp = getenv("TEMP");
 
-  return tmpdir;
+    // Fall back to the standard hardcoded POSIX directory if no env var exists
+    if (!env_tmp) env_tmp = "/tmp";
+
+    // Safely copy the string to the provided buffer
+    if (snprintf(temp_path, buffer_size, "%s", env_tmp) < (int)buffer_size) {
+      return temp_path;
+    }
+#endif
+
+    return NULL;
 }
 
 static char *

@@ -374,8 +374,10 @@ extern mode_t umask (mode_t);
 
 #if defined WINDOWS32
 # include "w32/include/pathstuff.h"
-# define GETCWD getcwd_fs
+# define FOPEN  w32_fopen
+# define GETCWD w32_getcwd
 #else
+# define FOPEN  fopen
 # define GETCWD getcwd
 #endif
 
@@ -514,12 +516,7 @@ extern struct rlimit stack_limit;
 # define TTYNAME(_f) DEFAULT_TTYNAME
 #endif
 
-#if defined(P_tmpdir)
-# define DEFAULT_TMPDIR     P_tmpdir
-#else
-# define DEFAULT_TMPDIR     "/tmp"
-#endif
-
+extern const char* get_tmpdir();
 
 
 const char *concat (unsigned int, ...);

@@ -354,7 +354,7 @@ eval_makefile (const char *filename, unsigned short flags)
     }
 
   errno = 0;
-  ENULLLOOP (ebuf.fp, fopen (filename, "r"));
+  ENULLLOOP (ebuf.fp, FOPEN (filename, "r"));
   deps->error = errno;
 
   /* Check for unrecoverable errors: out of mem or FILE slots.  */

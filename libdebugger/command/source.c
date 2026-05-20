@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2011, 2020 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2011, 2020, 2026 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
  * Read and run debugger commands from a file.
  **/
 
+#include "../../src/makeint.h"
 #include "../../src/trace.h"
 #include "../cmd.h"
 #include "../fns.h"
@@ -60,7 +61,7 @@ dbg_cmd_source(char *psz_filename)
       psz_expanded_file = p.gl_pathv[0];
     }
 
-    p_source_file = fopen(psz_expanded_file, "r");
+    p_source_file = FOPEN(psz_expanded_file, "r");
 
     if (p_source_file != NULL) {
       debug_return_t debug_return = debug_readloop;

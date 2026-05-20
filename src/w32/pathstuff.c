@@ -116,8 +116,16 @@ w32ify(const char *filename, int resolve)
     return w32_path;
 }
 
+/**
+ * A wrapper around POSIX fopen that normalizes the file path for Windows environments.
+ *
+ * @param  buf place to put the current working directory
+ * @param  len number of characters of buf
+ * @return A pointer a newly allocated string containing the current working directory string.
+ */
+
 char *
-getcwd_fs(char* buf, int len)
+w32_getcwd(char* buf, int len)
 {
         char *p = getcwd(buf, len);
 
@@ -127,4 +135,30 @@ getcwd_fs(char* buf, int len)
         }
 
         return p;
+}
+
+
+/**
+ * A wrapper around POSIX fopen that normalizes the file path for Windows environments.
+ *
+ * @param filename The original POSIX-style file path.
+ * @param mode     The file access mode (e.g., "r", "w", "wb").
+ * @return         A pointer to the open FILE stream, or NULL on failure.
+ */
+FILE* w32_fopen(const char* filename, const char* mode) {
+    if (filename == NULL || mode == NULL) {
+        return NULL;
+    }
+
+    // Wrap the filename parameter with a call to w32ify.
+    // Assuming w32ify dynamically allocates a new string that needs to be freed.
+    char* win_filename = w32ify(filename, 0);
+    if (win_filename == NULL) {
+        return NULL; // w32ify failed to convert the path
+    }
+
+    // Call the underlying standard/POSIX fopen with the translated path
+    FILE* file = fopen(win_filename, mode);
+
+    return file;
 }

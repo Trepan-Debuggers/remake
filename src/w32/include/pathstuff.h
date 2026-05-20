@@ -1,6 +1,7 @@
 /* Definitions for Windows path manipulation.
 Copyright (C) 1996-2025 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2026 Rocky Bernstein
+This file is part of GNU Remake.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -20,6 +21,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 extern char *convert_Path_to_windows32(char *Path, char to_delim);
 extern char *convert_vpath_to_windows32(char *Path, char to_delim);
 extern char *w32ify(const char *file, int resolve);
-extern char *getcwd_fs(char *buf, int len);
+extern char *w32_getcwd(char *buf, int len);
+extern FILE* w32_fopen(const char* filename, const char* mode);
 
 #endif

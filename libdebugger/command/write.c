@@ -74,8 +74,9 @@ dbg_cmd_write(char *psz_args)
       else
 	psz_target_basename++; /* Skip delimiter */
       psz_filename = xcalloc(strlen(psz_target_basename) + 10);
-      snprintf(psz_filename, MAX_FILE_LENGTH, "/tmp/%s.sh",
-	       psz_target_basename);
+
+      snprintf(psz_filename, MAX_FILE_LENGTH, "%s%s.sh",
+	       get_tmpdir(), psz_target_basename);
     }
 
     /* Skip leading space, MAKE's command prefixes:
@@ -107,7 +108,7 @@ dbg_cmd_write(char *psz_args)
 
       if (b_stdout)
 	outfd = stdout;
-      else if (!(outfd = fopen (psz_filename, "w"))) {
+      else if (!(outfd = FOPEN (psz_filename, "w"))) {
 	xperror ("write target %s", psz_filename);
 	free(psz_filename);
 	return debug_readloop;

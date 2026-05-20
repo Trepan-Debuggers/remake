@@ -845,7 +845,7 @@ fd_set_append (int fd)
 #if HAVE_DUP
   /* If we can dup and we are creating temp files in the default location then
      try tmpfile() + dup() + fclose() to avoid ever having a named file.  */
-  if (streq (tdir, DEFAULT_TMPDIR))
+  if (streq (tdir, get_tmpdir()))
     {
       mode_t mask = umask (0077);
       FILE *tfile;
