@@ -43,7 +43,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if defined (POSIX) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 # define REAL_DIR_ENTRY(dp) 1
