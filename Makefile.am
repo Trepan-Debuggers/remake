@@ -193,6 +193,10 @@ check-regression: tests/config-flags.pm
 	  echo "Can't find the GNU Make test suite ($(top_srcdir)/tests)."; \
 	fi
 
+#: run unit tests (in unittest)
+check-unittests: unittest/test_profile$(EXEEXT)
+	$(MAKE) -C unittest check
+
 #: Generate the ReadTheDocs manual in HTML format
 readthedocs:
 	$(MAKE) -C doc/readthedocs html
