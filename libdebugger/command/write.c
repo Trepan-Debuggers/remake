@@ -156,7 +156,7 @@ dbg_cmd_write(char *psz_args)
 
       {
 	char wd[300];
-	if (getcwd (wd, sizeof(wd))) {
+	if (GETCWD (wd, sizeof(wd))) {
 	  fprintf(outfd, "\n#cd %s\n", wd);
 	}
       }

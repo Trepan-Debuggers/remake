@@ -38,7 +38,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #ifdef HAVE_STRINGS_H
 # include <strings.h> /* for strcasecmp */
 #endif
-# include "pathstuff.h"
+# include "w32/include/pathstuff.h"
 # include "sub_proc.h"
 # include "w32err.h"
 #endif
@@ -1179,9 +1179,13 @@ main (int argc, const char **argv, char **envp)
   SPIN ("main-entry");
 #endif
 
+#ifdef WINDOWS32
+  argv0 = strdup(w32ify(argv[0], 1));
+#else
   argv0 = strdup(argv[0]);
-  output_init (&make_sync);
+#endif
 
+  output_init (&make_sync);
   initialize_stopchar_map();
 
 #ifdef SET_STACK_SIZE
@@ -1312,9 +1316,9 @@ main (int argc, const char **argv, char **envp)
           }
         }
 #else
-      program = strrchr (argv[0], '/');
+      program = strrchr (argv0, '/');
       if (program == 0)
-        program = argv[0];
+        program = argv0;
       else
         ++program;
 #endif
@@ -1607,7 +1611,7 @@ main (int argc, const char **argv, char **envp)
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0
       )
-    argv[0] = xstrdup (concat (3, current_directory, "/", argv[0]));
+    argv0 = xstrdup (concat (3, current_directory, "/", argv0));
 
   /* We may move, but until we do, here we are.  */
   starting_directory = current_directory;
@@ -1654,7 +1658,7 @@ main (int argc, const char **argv, char **envp)
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
 
-  define_variable_cname ("MAKE_COMMAND", argv[0], o_default, 0);
+  define_variable_cname ("MAKE_COMMAND", argv0, o_default, 0);
   define_variable_cname ("MAKE", "$(MAKE_COMMAND)", o_default, 1);
 
   if (command_variables != 0)
