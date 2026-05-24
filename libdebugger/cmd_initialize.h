@@ -54,6 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command/help/target.h"
 #include "command/help/up.h"
 #include "command/help/where.h"
+#include "command/help/watch.h"
 #include "command/help/write.h"
 
 /* A structure which contains information on the commands this program
@@ -90,6 +91,7 @@ long_cmd_t dbg_commands[] = {
   { "step"    , 's' },
   { "target"  , 't' },
   { "up"      , 'u' },
+  { "watch"   , 'W' },
   { "where"   , 'T' },
   { "write"   , 'w' },
   { (char *)NULL, ' '}
@@ -323,6 +325,13 @@ dbg_cmd_up_init(unsigned int c)
 }
 
 static void
+dbg_cmd_watch_init(unsigned int c)
+{
+  short_command[c].func = &dbg_cmd_watch;
+  short_command[c].use =  _("watch");
+}
+
+static void
 dbg_cmd_where_init(unsigned int c)
 {
   short_command[c].func = &dbg_cmd_where;
@@ -375,6 +384,7 @@ cmd_initialize(void)
   DBG_CMD_INIT(step, 's', true);
   DBG_CMD_INIT(target, 't', false);
   DBG_CMD_INIT(up, 'u', false);
+  DBG_CMD_INIT(watch, 'W', false);
   DBG_CMD_INIT(where, 'T', false);
   DBG_CMD_INIT(write, 'w', false);
 }

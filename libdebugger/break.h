@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #define DBG_BREAK_H
 
 #include "types.h"
+#include "trace.h"
 
 /*! Opaque type definition for an item in the breakpoint list. */
 typedef struct breakpoint_node breakpoint_node_t;
@@ -45,6 +46,11 @@ extern unsigned int i_breakpoints;
 */
 extern bool add_breakpoint (file_t *p_target, unsigned int brkp_mask);
 
+/*! Add "psz_regex" command watchpoint to the list of breakpoints.
+    Return true if there were no errors.
+*/
+extern bool add_command_watchpoint (const char *psz_regex);
+
 /*! Remove breakpoint i from the list of breakpoints. Return true if
     there were no errors. If silent is true, then don't warn about
     not finding breakpoint at "i".
@@ -53,5 +59,7 @@ extern bool remove_breakpoint (unsigned int i, bool silent);
 
 /*! List breakpoints.*/
 extern void list_breakpoints (void);
+
+extern void check_command_watchpoint (target_stack_node_t *p_call_stack, file_t *p_target, const char *psz_expanded_command);
 
 #endif /* DBG_BREAK_H */

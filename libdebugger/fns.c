@@ -292,7 +292,8 @@ static const char *reason2str[] = {
     "!!",
     "--",
     "++",
-    ":o"
+    ":o",
+    "wp"
 };
 
 
