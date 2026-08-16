@@ -56,12 +56,6 @@ extern void initialize_stopchar_map ();
 #ifndef HAVE_UNISTD_H
 int chdir ();
 #endif
-#ifndef STDC_HEADERS
-# ifndef sun                    /* Sun has an incorrect decl in a header.  */
-void exit (int) NORETURN;
-# endif
-double atof ();
-#endif
 
 static void clean_jobserver (int status);
 static void print_data_base (void);

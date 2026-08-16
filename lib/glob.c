@@ -59,9 +59,7 @@ USA.  */
 
 #ifndef ELIDE_CODE
 
-#if defined STDC_HEADERS || defined __GNU_LIBRARY__
-# include <stddef.h>
-#endif
+#include <stddef.h>
 
 #if defined HAVE_UNISTD_H || defined _LIBC
 # include <unistd.h>
@@ -76,9 +74,6 @@ USA.  */
 # include <pwd.h>
 #endif
 
-#if !defined __GNU_LIBRARY__ && !defined STDC_HEADERS
-extern int errno;
-#endif
 #ifndef __set_errno
 # define __set_errno(val) errno = (val)
 #endif
@@ -130,31 +125,9 @@ extern int errno;
 # define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* POSIX */
 
-#if defined STDC_HEADERS || defined __GNU_LIBRARY__
-# include <stdlib.h>
-# include <string.h>
-# define	ANSI_STRING
-#else	/* No standard headers.  */
-
-extern char *getenv ();
-
-# ifdef HAVE_STRING_H
-#  include <string.h>
-#  define ANSI_STRING
-# else
-#  include <strings.h>
-# endif
-# ifdef	HAVE_MEMORY_H
-#  include <memory.h>
-# endif
-
-extern char *malloc (), *realloc ();
-extern void free ();
-
-extern void qsort ();
-extern void abort (), exit ();
-
-#endif	/* Standard headers.  */
+#include <stdlib.h>
+#include <string.h>
+#define	ANSI_STRING
 
 #ifndef	ANSI_STRING
 
@@ -252,7 +225,7 @@ extern char *alloca ();
 # endif
 #endif
 
-#if !(defined STDC_HEADERS || defined __GNU_LIBRARY__)
+#if !defined __GNU_LIBRARY__
 # undef	size_t
 # define size_t	unsigned int
 #endif

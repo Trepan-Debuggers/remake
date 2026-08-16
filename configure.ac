@@ -42,6 +42,9 @@ AH_TOP(
 #define INCLUDED_REMAKE_CONFIG_H
 )
 AH_BOTTOM(
+/* We assume everyone nowadays has ANSI C header files. */
+/* This is what autoconf now assumes. */
+#define STDC_HEADERS 1
 #endif /*INCLUDED_REMAKE_CONFIG_H*/
 )
 
@@ -107,16 +110,6 @@ AC_SYS_LARGEFILE
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_SEARCH_LIBS([getpwnam], [sun])
 
-# Autoupdate added the next two lines to ensure that your configure
-# script's behavior did not change.  They are probably safe to remove.
-AC_CHECK_INCLUDES_DEFAULT
-AC_PROG_EGREP
-
-# Checks for header files.
-m4_warn([obsolete],
-[The preprocessor macro `STDC_HEADERS' is obsolete.
-  Except in unusual embedded environments, you can safely include all
-  ISO C90 headers unconditionally.])dnl
 # Autoupdate added the next two lines to ensure that your configure
 # script's behavior did not change.  They are probably safe to remove.
 AC_CHECK_INCLUDES_DEFAULT

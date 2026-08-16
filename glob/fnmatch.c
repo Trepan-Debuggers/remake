@@ -36,9 +36,7 @@ USA.  */
 # include <strings.h>
 #endif
 
-#if defined STDC_HEADERS || defined _LIBC
-# include <stdlib.h>
-#endif
+#include <stdlib.h>
 
 /* For platform which support the ISO C amendement 1 functionality we
    support user defined character classes.  */
@@ -59,11 +57,7 @@ USA.  */
 #if defined _LIBC || !defined __GNU_LIBRARY__
 
 
-# if defined STDC_HEADERS || !defined isascii
-#  define ISASCII(c) 1
-# else
-#  define ISASCII(c) isascii(c)
-# endif
+#define ISASCII(c) 1
 
 # ifdef isblank
 #  define ISBLANK(c) (ISASCII (c) && isblank (c))
