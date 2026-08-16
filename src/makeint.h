@@ -294,6 +294,7 @@ typedef int mode_t;
 extern mode_t umask (mode_t);
 #endif
 
+#ifndef ISDIGIT
 /* ISDIGIT offers the following features:
    - Its arg may be any int or unsigned int; it need not be an unsigned char.
    - It's guaranteed to evaluate its argument exactly once.
@@ -304,6 +305,7 @@ extern mode_t umask (mode_t);
    it's important to use the locale's definition of 'digit' even when the
    host does not conform to POSIX.  */
 #define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
+#endif
 
 /* Test if two strings are equal. Is this worthwhile?  Should be profiled.  */
 #define streq(a, b) \
@@ -636,15 +638,6 @@ long int lseek ();
 # endif
 
 #endif  /* Not GNU C library or POSIX.  */
-
-#ifdef HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
-char *getcwd ();
-# endif
-#else
-char *getwd ();
-# define getcwd(buf, len)       getwd (buf)
-#endif
 
 #if !HAVE_STRCASECMP
 # if HAVE_STRICMP

@@ -354,11 +354,14 @@ AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"],
 AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
      [Define this to the default  to be used $(SHELL)])
 
+# Find termcap/ncurses library before checking for readline
+AC_SEARCH_LIBS([tgetent], [ncurses tinfo termcap curses])
+
 #
 # Check for readline to see if we can add debugging support.
 #
 AC_CHECK_HEADERS([readline/readline.h readline/history.h])
-AC_CHECK_LIB(readline, readline)
+AC_CHECK_LIB([readline], [readline])
 AC_SUBST(HAVE_LIBREADLINE)
 
 REMAKE_SOURCE_PATH="`pwd`"
