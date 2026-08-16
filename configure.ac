@@ -358,6 +358,10 @@ AC_SEARCH_LIBS([tgetent], [ncurses tinfo termcap curses])
 # Check for readline to see if we can add debugging support.
 #
 AC_CHECK_HEADERS([readline/readline.h readline/history.h])
+AC_CHECK_LIB([history], [history_list],
+			[LIBS="$LIBS -lhistory"],
+			[AC_MSG_WARN([libhistory not found; history_list unavailable])])
+
 AC_CHECK_LIB([readline], [readline])
 AC_SUBST(HAVE_LIBREADLINE)
 
