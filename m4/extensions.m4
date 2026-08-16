@@ -163,13 +163,5 @@ dnl configure.ac when using autoheader 2.62.
 # typically due to standards-conformance issues.
 AC_DEFUN_ONCE([gl_USE_SYSTEM_EXTENSIONS],
 [
-  dnl Require this macro before AC_USE_SYSTEM_EXTENSIONS.
-  dnl gnulib does not need it. But if it gets required by third-party macros
-  dnl after AC_USE_SYSTEM_EXTENSIONS is required, autoconf 2.62..2.63 emit a
-  dnl warning: "AC_COMPILE_IFELSE was called before AC_USE_SYSTEM_EXTENSIONS".
-  dnl Note: We can do this only for one of the macros AC_AIX, AC_GNU_SOURCE,
-  dnl AC_MINIX. If people still use AC_AIX or AC_MINIX, they are out of luck.
-  AC_REQUIRE([AC_GNU_SOURCE])
-
   AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 ])

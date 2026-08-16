@@ -13495,8 +13495,6 @@ INSTALLDATA = /usr/local/bin/install -c -m 644
 @end group
 
 # Things you might add to DEFS:
-# -DSTDC_HEADERS        If you have ANSI C headers and
-#                       libraries.
 # -DPOSIX               If you have POSIX.1 headers and
 #                       libraries.
 # -DBSD42               If you have sys/dir.h (unless

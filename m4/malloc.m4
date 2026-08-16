@@ -15,7 +15,7 @@ AC_DEFUN([_AC_FUNC_MALLOC_IF],
     [ac_cv_func_malloc_0_nonnull],
     [AC_RUN_IFELSE(
        [AC_LANG_PROGRAM(
-          [[#if defined STDC_HEADERS || defined HAVE_STDLIB_H
+          [[#if defined HAVE_STDLIB_H
             # include <stdlib.h>
             #else
             char *malloc ();
