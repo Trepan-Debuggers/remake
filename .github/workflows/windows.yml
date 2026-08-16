@@ -12,6 +12,10 @@ jobs:
 
     runs-on: windows-latest
 
+  defaults:
+    run:
+      shell: msys2 {0}
+
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
