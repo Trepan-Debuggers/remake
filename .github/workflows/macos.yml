@@ -28,8 +28,7 @@ jobs:
       - name: Run GNU make to build
       # FIXME: something is not right. Probably about the includes are picking up a wrong stat buffer that doesn't have mtim.
       # For now, we'll just turn say that we don't have nanosecond resolution.
-        run: make CPPFLAGS="-UFILE_TIMESTAMP_HI_RES"
-
+        run: make CPPFLAGS="-UFILE_TIMESTAMP_HI_RES -UHAVE_READLINE_HISTORY_H"
       - name: Test "remake" just built
         run: make check
       # - name: Check distribution building
