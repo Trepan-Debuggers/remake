@@ -154,7 +154,7 @@ void print_file_data_base (void);
 int try_implicit_rule (struct file *file, unsigned int depth);
 int stemlen_compare (const void *v1, const void *v2);
 
-#if FILE_TIMESTAMP_HI_RES
+#if defined(FILE_TIMESTAMP_HI_RES) && !defined(GITHUB_ACTIONS)
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
     file_timestamp_cons (fname, (st).st_mtime, (st).ST_MTIM_NSEC)
 #else

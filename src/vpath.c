@@ -21,6 +21,10 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "pathstuff.h"
 #endif
 
+/* Only compile/declare if autoconf did not find mempcpy */
+#ifndef HAVE_MEMPCPY
+#include "compat.h"
+#endif
 
 /* Structure used to represent a selective VPATH searchpath.  */
 
@@ -45,7 +49,7 @@ static struct vpath *general_vpath;
 /* Structure for GPATH given in the variable.  */
 
 static struct vpath *gpaths;
-
+
 
 /* Reverse the chain of selective VPATH lists so they will be searched in the
    order given in the makefiles and construct the list from the VPATH
@@ -134,7 +138,7 @@ build_vpath_lists (void)
       vpaths = save_vpaths;
     }
 }
-
+
 /* Construct the VPATH listing for the PATTERN and DIRPATH given.
 
    This function is called to generate selective VPATH lists and also for
@@ -298,7 +302,7 @@ construct_vpath_list (char *pattern, char *dirpath)
     /* MSVC erroneously warns without a cast here.  */
     free ((void *)vpath);
 }
-
+
 /* Search the GPATH list for a pathname string that matches the one passed
    in.  If it is found, return 1.  Otherwise we return 0.  */
 
@@ -315,7 +319,7 @@ gpath_search (const char *file, size_t len)
 
   return 0;
 }
-
+
 
 /* Search the given VPATH list for a directory where the name pointed to by
    FILE exists.  If it is found, we return a cached name of the existing file
@@ -559,7 +563,7 @@ vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
 
 
 
-
+
 /* Print the data base of VPATH search paths.  */
 
 void

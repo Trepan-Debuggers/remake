@@ -25,8 +25,13 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #include "rule.h"
 
+/* Only compile/declare if autoconf did not find mempcpy */
+#ifndef HAVE_MEMPCPY
+#include "compat.h"
+#endif
+
 static void freerule (struct rule *rule, struct rule *lastrule);
-
+
 /* Chain of all pattern rules.  */
 
 struct rule *pattern_rules;
@@ -116,7 +121,7 @@ get_rule_defn (struct rule *r)
   return r->_defn;
 }
 
-
+
 /* Compute the maximum dependency length and maximum number of dependencies of
    all implicit rules.  Also sets the subdir flag for a rule when appropriate,
    possibly removing the rule completely when appropriate.
@@ -218,7 +223,7 @@ snap_implicit_rules (void)
   free (name);
   free_dep_chain (prereqs);
 }
-
+
 /* Create a pattern rule from a suffix rule.
    TARGET is the target suffix; SOURCE is the source suffix.
    CMDS are the commands.
@@ -522,7 +527,7 @@ freerule (struct rule *rule, struct rule *lastrule)
   if (last_pattern_rule == rule)
     last_pattern_rule = lastrule;
 }
-
+
 /* Create a new pattern rule with the targets in the nil-terminated array
    TARGETS.  TARGET_PERCENTS is an array of pointers to the % in each element
    of TARGETS.  N is the number of items in the array (not counting the nil
@@ -567,7 +572,7 @@ create_pattern_rule (const char **targets, const char **target_percents,
   if (new_pattern_rule (r, override))
     r->terminal = terminal ? 1 : 0;
 }
-
+
 /* Print the data base of rules.  */
 
 /*! Show information about a given rule. Useful from the debugger or gdb.  */
