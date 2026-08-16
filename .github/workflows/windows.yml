@@ -19,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
+        shell: pwsh
         run: |
           choco install mingw make -y
       - name: Install MSYS2
