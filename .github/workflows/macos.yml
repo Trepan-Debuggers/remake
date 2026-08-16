@@ -13,10 +13,10 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
-          brew install gcc pkg-config autoconf automake gettext readline guile texinfo texlive
+          brew install gcc pkg-config autoconf automake gettext readline guile texinfo texlive coreutils
       - name: Generate configure POSIX script
         run: autoreconf -i
       - name: Configure for GNU Make
