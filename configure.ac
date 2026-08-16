@@ -25,7 +25,7 @@ MAKE_PACKAGE=make
 AC_SUBST(MAKE_VERSION)
 AC_SUBST(MAKE_PACKAGE)
 
-AC_PREREQ([2.71])
+AC_PREREQ([2.72])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR([build-aux])
@@ -35,6 +35,15 @@ AC_CONFIG_HEADERS([src/config.h])
 AM_MAINTAINER_MODE
 
 AC_CONFIG_LIBOBJ_DIR([lib])
+
+AC_USE_SYSTEM_EXTENSIONS
+
+# The GNULIB headers (unistd.h, xalloc.h, etc.) are generated (when needed) during the build process.
+# These require macro definitions from config.h (specifically
+# _GL_INLINE_HEADER_BEGIN, _GL_INLINE_HEADER_END, and _GL_INLINE) to
+# properly parse header inlining semantics.
+AC_C_INLINE
+
 
 AH_TOP(
 /* Guard against #including config.h more than once */
@@ -59,7 +68,6 @@ AM_INIT_AUTOMAKE([subdir-objects 1.14 silent-rules foreign -Wall
                   info-in-builddir])
 
 # Checks for programs.
-AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AC_PROG_CXX
 AC_DEFINE_UNQUOTED(MAKE_CXX, ["$CXX"], [Default C++ compiler.])
@@ -112,11 +120,6 @@ AC_SEARCH_LIBS([getpwnam], [sun])
 AC_CHECK_INCLUDES_DEFAULT
 AC_PROG_EGREP
 
-# Checks for header files.
-m4_warn([obsolete],
-[The preprocessor macro `STDC_HEADERS' is obsolete.
-  Except in unusual embedded environments, you can safely include all
-  ISO C90 headers unconditionally.])dnl
 # Autoupdate added the next two lines to ensure that your configure
 # script's behavior did not change.  They are probably safe to remove.
 AC_CHECK_INCLUDES_DEFAULT

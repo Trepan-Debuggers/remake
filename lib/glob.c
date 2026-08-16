@@ -59,9 +59,7 @@ USA.  */
 
 #ifndef ELIDE_CODE
 
-#if defined STDC_HEADERS || defined __GNU_LIBRARY__
-# include <stddef.h>
-#endif
+#include <stddef.h>
 
 #if defined HAVE_UNISTD_H || defined _LIBC
 # include <unistd.h>
@@ -130,23 +128,9 @@ extern int errno;
 # define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* POSIX */
 
-#if defined STDC_HEADERS || defined __GNU_LIBRARY__
-# include <stdlib.h>
-# include <string.h>
-# define	ANSI_STRING
-#else	/* No standard headers.  */
-
-extern char *getenv ();
-
-# ifdef HAVE_STRING_H
-#  include <string.h>
-#  define ANSI_STRING
-# else
-#  include <strings.h>
-# endif
-# ifdef	HAVE_MEMORY_H
-#  include <memory.h>
-# endif
+#include <stdlib.h>
+#include <string.h>
+#define	ANSI_STRING
 
 extern char *malloc (), *realloc ();
 extern void free ();
@@ -252,10 +236,8 @@ extern char *alloca ();
 # endif
 #endif
 
-#if !(defined STDC_HEADERS || defined __GNU_LIBRARY__)
-# undef	size_t
-# define size_t	unsigned int
-#endif
+#undef	size_t
+#define size_t	unsigned int
 
 /* Some system header files erroneously define these.
    We want our own definitions from <fnmatch.h> to take precedence.  */

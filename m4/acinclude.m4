@@ -60,7 +60,7 @@ AC_CHECK_FUNCS(gethostbyname,,[
 	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
 ])
 LIBS="$LIBS $cf_cv_netlibs"
-test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
+test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AS_MESSAGE_FD
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Re-check on a function to see if we can pick it up by adding a library.
@@ -116,10 +116,9 @@ AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
     # st_mtimespec.tv_nsec -- Darwin (Mac OSX)
     for ac_val in st_mtim.tv_nsec st_mtim._tv_nsec st_mtim.st__tim.tv_nsec st_mtime_n st_mtimespec.tv_nsec; do
       CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
-      AC_TRY_COMPILE([#include <sys/types.h>
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <sys/stat.h>
-	], [struct stat s; s.ST_MTIM_NSEC;],
-        [ac_cv_struct_st_mtim_nsec=$ac_val; break])
+	]], [[struct stat s; s.ST_MTIM_NSEC;]])],[ac_cv_struct_st_mtim_nsec=$ac_val; break],[])
     done
     CPPFLAGS="$ac_save_CPPFLAGS"
    ])

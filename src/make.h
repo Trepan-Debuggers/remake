@@ -191,32 +191,9 @@ unsigned int get_path_max (void);
 #endif
 // #define UNUSED  __attribute__ ((unused))
 
-#if defined (STDC_HEADERS) || defined (__GNU_LIBRARY__)
 # include <stdlib.h>
 # include <string.h>
 # define ANSI_STRING 1
-#else   /* No standard headers.  */
-# ifdef HAVE_STRING_H
-#  include <string.h>
-#  define ANSI_STRING 1
-# else
-#  include <strings.h>
-# endif
-# ifdef HAVE_MEMORY_H
-#  include <memory.h>
-# endif
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# else
-void *malloc (int);
-void *realloc (void *, int);
-void free (void *);
-
-void abort (void) __attribute__ ((noreturn));
-void exit (int) __attribute__ ((noreturn));
-# endif /* HAVE_STDLIB_H.  */
-
-#endif /* Standard headers.  */
 
 /* These should be in stdlib.h.  Make sure we have them.  */
 #ifndef EXIT_SUCCESS

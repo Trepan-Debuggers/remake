@@ -169,7 +169,6 @@ AC_DEFUN_ONCE([gl_USE_SYSTEM_EXTENSIONS],
   dnl warning: "AC_COMPILE_IFELSE was called before AC_USE_SYSTEM_EXTENSIONS".
   dnl Note: We can do this only for one of the macros AC_AIX, AC_GNU_SOURCE,
   dnl AC_MINIX. If people still use AC_AIX or AC_MINIX, they are out of luck.
-  AC_REQUIRE([AC_GNU_SOURCE])
 
   AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 ])
