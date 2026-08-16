@@ -97,37 +97,36 @@ changequote([,])dnl
 ])dnl
 
 
-# AC_STRUCT_ST_MTIM_NSEC
-# ----------------------
-# Check for the nanoseconds field in struct stat across POSIX, Darwin, AIX, and Solaris.
+dnl ---------------------------------------------------------------------------
+dnl From Paul Eggert <eggert@twinsun.com>
+dnl Update for Darwin by Troy Runkel <Troy.Runkel@mathworks.com>
+dnl Update for AIX by Olexiy Buyanskyy (Savannah bug 32485)
+
 AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
-[AC_CACHE_CHECK([for nanoseconds field of struct stat],
-  [ac_cv_struct_st_mtim_nsec],
-  [ac_save_CPPFLAGS="$CPPFLAGS"
-   ac_cv_struct_st_mtim_nsec=no
+ [AC_CACHE_CHECK([for nanoseconds field of struct stat],
+   ac_cv_struct_st_mtim_nsec,
+   [ac_save_CPPFLAGS="$CPPFLAGS"
+    ac_cv_struct_st_mtim_nsec=no
+    # st_mtim.tv_nsec -- the usual case
+    # st_mtim._tv_nsec -- Solaris 2.6, if
+    #	(defined _XOPEN_SOURCE && _XOPEN_SOURCE_EXTENDED == 1
+    #	 && !defined __EXTENSIONS__)
+    # st_mtim.st__tim.tv_nsec -- UnixWare 2.1.2
+    # st_mtime_n -- AIX 5.2 and above
+    # st_mtimespec.tv_nsec -- Darwin (Mac OSX)
+    for ac_val in st_mtim.tv_nsec st_mtim._tv_nsec st_mtim.st__tim.tv_nsec st_mtime_n st_mtimespec.tv_nsec; do
+      CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
+      AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/stat.h>
+        ], [struct stat s; s.ST_MTIM_NSEC;],
+        [ac_cv_struct_st_mtim_nsec=$ac_val; break])
+    done
+    CPPFLAGS="$ac_save_CPPFLAGS"
+   ])
 
-   # Candidate field names:
-   # st_mtim.tv_nsec       -- POSIX standard / modern macOS (with _DARWIN_C_SOURCE)
-   # st_mtimespec.tv_nsec  -- macOS / BSD legacy
-   # st_mtim._tv_nsec      -- Solaris 2.6
-   # st_mtim.st__tim.tv_nsec -- UnixWare 2.1.2
-   # st_mtime_n            -- AIX 5.2+
-   for ac_val in st_mtim.tv_nsec st_mtimespec.tv_nsec st_mtim._tv_nsec st_mtim.st__tim.tv_nsec st_mtime_n; do
-     CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
-     AC_COMPILE_IFELSE(
-       [AC_LANG_PROGRAM(
-          [[#include <sys/types.h>
-            #include <sys/stat.h>]],
-          [[struct stat s; return (int) s.ST_MTIM_NSEC;]]
-       )],
-       [ac_cv_struct_st_mtim_nsec=$ac_val; break]
-     )
-   done
-   CPPFLAGS="$ac_save_CPPFLAGS"
-  ])
-
- if test "$ac_cv_struct_st_mtim_nsec" != no; then
-   AC_DEFINE_UNQUOTED([ST_MTIM_NSEC], [$ac_cv_struct_st_mtim_nsec],
-     [Define to the nanoseconds field name in struct stat if present.])
- fi
-])
+  if test $ac_cv_struct_st_mtim_nsec != no; then
+    AC_DEFINE_UNQUOTED([ST_MTIM_NSEC], [$ac_cv_struct_st_mtim_nsec],
+        [Define if struct stat contains a nanoseconds field])
+  fi
+ ]
+)

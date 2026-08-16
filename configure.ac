@@ -162,14 +162,14 @@ AS_IF([test "$make_cv_file_timestamp_hi_res" = yes], [val=1], [val=0])
 AC_DEFINE_UNQUOTED([FILE_TIMESTAMP_HI_RES], [$val],
                    [Use high resolution file timestamps if nonzero.])
 
-# Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
-# Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
-# The probe is unconditional so the --watch self-trigger guard can use
-# CLOCK_MONOTONIC regardless of file-timestamp resolution.
-AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AS_IF([test "$ac_cv_search_clock_gettime" != no],
-[ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
-            [Define to 1 if you have the clock_gettime function.])
+AS_IF([test "$make_cv_file_timestamp_hi_res" = yes],
+[ # Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
+  # Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
+  AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+  AS_IF([test "$ac_cv_search_clock_gettime" != no],
+  [ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
+              [Define to 1 if you have the clock_gettime function.])
+  ])
 ])
 
 # See if we have a standard version of gettimeofday().  Since actual
