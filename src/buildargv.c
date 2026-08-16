@@ -3,7 +3,7 @@
    Copyright (C) 1992, 2001 Free Software Foundation, Inc.
    Written by Fred Fish @ Cygnus Support
 
-   Copyright (C) 2008 R. Bernstein rocky@gnu.org
+   Copyright (C) 2008, 2026 R. Bernstein rocky@gnu.org
 
 This file is part of the libiberty library.
 Libiberty is free software; you can redistribute it and/or
@@ -53,8 +53,7 @@ itself.
 
 */
 
-void freeargv (vector)
-char **vector;
+void freeargv (char **vector)
 {
   register char **scan;
 
@@ -108,8 +107,7 @@ returned, as appropriate.
 
 */
 
-char **buildargv (input)
-     const char *input;
+char **buildargv (const char *input)
 {
   char *arg;
   char *copybuf;
