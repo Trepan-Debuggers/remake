@@ -32,7 +32,7 @@ man_MANS =	doc/make.1
 
 make_SRCS =	\
 		src/ar.c src/arscan.c src/buildargv.c \
-		src/commands.c src/debug.c src/default.c src/dir.c src/expand.c \
+		src/commands.c src/compat.h src/debug.c src/default.c src/dir.c src/expand.c \
 		src/file.c src/file_basic.c src/function.c src/getopt.c \
 		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \
 		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
