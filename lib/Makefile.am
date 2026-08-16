@@ -344,34 +344,6 @@ EXTRA_DIST += limits.in.h
 
 ## begin gnulib module make-glob
 
-if !USE_SYSTEM_GLOB
-libgnu_a_SOURCES += fnmatch.c
-
-BUILT_SOURCES += fnmatch.h
-
-fnmatch.h: fnmatch.in.h $(top_builddir)/config.status
-	$(AM_V_GEN)rm -f $@-t $@ && \
-	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
-	  cat $(srcdir)/fnmatch.in.h; \
-	} > $@-t && \
-	mv -f $@-t $@
-
-MOSTLYCLEANFILES += fnmatch.h fnmatch.h-t
-
-libgnu_a_SOURCES += glob.c
-
-BUILT_SOURCES += glob.h
-
-glob.h: glob.in.h $(top_builddir)/config.status
-	$(AM_V_GEN)rm -f $@-t $@ && \
-	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
-	  cat $(srcdir)/glob.in.h; \
-	} > $@-t && \
-	mv -f $@-t $@
-
-MOSTLYCLEANFILES += glob.h glob.h-t
-endif
-
 EXTRA_DIST += fnmatch.in.h glob.in.h
 
 

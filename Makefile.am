@@ -43,8 +43,6 @@ make_SRCS =	\
 		src/watch.c src/watch_inotify.c src/watch_poll.c \
 		src/watchbackend.h
 
-glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
-
 alloca_SRCS =	lib/alloca.c
 
 loadavg_SRCS =	lib/getloadavg.c
