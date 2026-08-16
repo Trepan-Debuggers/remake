@@ -1,0 +1,44 @@
+---
+name: remake 4.4 (Microsoft Windows)
+
+on:
+  push:
+    branches: [remake-4-4]
+  pull_request:
+    branches: [remake-4-4]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: |
+          choco install mingw make -y
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc autoconf automake mingw-w64-x86_64-gettext mingw-w64-x86_64-readline mingw-w64-x86_64-texinfo mingw-w64-x86_64-pkg-config mingw-w64-x86_64-make base-devel rsync
+      - name: Generate configure POSIX script
+        shell: msys2 {0}
+        run: autoreconf -i --force
+      - name: Configure for GNU Make
+        shell: msys2 {0}
+        run: ./configure --enable-maintainer-mode
+      - name: Pull localization files
+        shell: msys2 {0}
+        run: make po-update
+      - name: Set up to rebuild doc
+        shell: msys2 {0}
+        run: (cd doc && make stamp-1 stamp-vti)
+      - name: Run GNU make to build
+        shell: msys2 {0}
+        run: make
+      - name: Test "remake" just built
+        shell: msys2 {0}
+        run: make check
+      # - name: Check distribution building
+      #   run: make distcheck
