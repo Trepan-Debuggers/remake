@@ -26,7 +26,10 @@ jobs:
       - name: Set up to rebuild doc
         run: (cd doc && make stamp-1 stamp-vti)
       - name: Run GNU make to build
-        run: make
+      # FIXME: something is not right. Probably about the includes are picking up a wrong stat buffer that doesn't have mtim.
+      # For now, we'll just turn say that we don't have nanosecond resolution.
+        run: make CPPFLAGS="-UFILE_TIMESTAMP_HI_RES"
+
       - name: Test "remake" just built
         run: make check
       # - name: Check distribution building
