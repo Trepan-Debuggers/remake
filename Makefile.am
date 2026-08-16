@@ -23,7 +23,7 @@ transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-SUBDIRS =	lib po doc glob unittest libdebugger
+SUBDIRS =	lib po doc unittest libdebugger
 
 bin_PROGRAMS =	make
 include_HEADERS = src/gnuremake.h

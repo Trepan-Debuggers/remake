@@ -56,7 +56,7 @@ strerror (int n)
     {
       static char const fmt[] = "Unknown error %d";
       verify (sizeof buf >= sizeof (fmt) + INT_STRLEN_BOUND (n));
-      sprintf (buf, fmt, n);
+      snprintf (buf, n, fmt);
       errno = EINVAL;
       return buf;
     }

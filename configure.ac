@@ -212,9 +212,6 @@ AC_FUNC_FORK
 # make the effort here.
 AC_CHECK_FUNCS([strcasecmp strncasecmp strcmpi strncmpi stricmp strnicmp])
 
-# Tell automake about this, so it can build the right .c files.
-AM_CONDITIONAL([USE_LOCAL_GLOB], [test "$make_cv_sys_gnu_glob" = no])
-
 AC_FUNC_VPRINTF
 
 # strcoll() is used by the GNU glob library
@@ -649,7 +646,6 @@ AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
 AC_CONFIG_FILES([ \
 Makefile lib/Makefile po/Makefile.in doc/Makefile \
   doc/doxygen/Doxyfile \
-  glob/Makefile \
   unittest/Makefile \
   tests/config-flags.pm \
   libdebugger/Makefile
