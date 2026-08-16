@@ -114,10 +114,6 @@ USA.  */
 /* Avoid depending on library functions or files
    whose names are inconsistent.  */
 
-# if !defined _LIBC && !defined getenv
-extern char *getenv ();
-# endif
-
 # ifndef errno
 extern int errno;
 # endif
