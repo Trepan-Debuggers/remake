@@ -108,17 +108,6 @@ extern void __error_at_line (int status, int errnum, const char *file_name,
 /* The gnulib override of fcntl is not needed in this file.  */
 # undef fcntl
 
-# if !(GNULIB_STRERROR_R_POSIX || HAVE_DECL_STRERROR_R)
-#  ifndef HAVE_DECL_STRERROR_R
-"this configure-time declaration test was not run"
-#  endif
-#  if STRERROR_R_CHAR_P
-char *strerror_r (int errnum, char *buf, size_t buflen);
-#  else
-int strerror_r (int errnum, char *buf, size_t buflen);
-#  endif
-# endif
-
 # define program_name getprogname ()
 
 # if GNULIB_STRERROR_R_POSIX || HAVE_STRERROR_R || defined strerror_r
@@ -330,7 +319,7 @@ error (int status, int errnum, const char *message, ...)
 # endif
 #endif
 }
-
+
 /* Sometimes we want to have at most one error per line.  This
    variable controls whether this mode is selected or not.  */
 int error_one_per_line;

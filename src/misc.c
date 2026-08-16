@@ -113,7 +113,7 @@ alpha_compare (const void *v1, const void *v2)
     return *s1 - *s2;
   return strcmp (s1, s2);
 }
-
+
 /* Discard each backslash-newline combination from LINE.
    Backslash-backslash-newline combinations become backslash-newlines.
    This is done by copying the text at LINE into itself.  */
@@ -181,7 +181,7 @@ collapse_continuations (char *line)
 
   memmove(out, in, strlen(in) + 1);
 }
-
+
 /* Print N spaces (used in debug for target-depth).  */
 
 void
@@ -191,7 +191,7 @@ print_spaces (unsigned int n)
     putchar (' ');
 }
 
-
+
 /* Return a string whose contents concatenate the NUM strings provided
    This string lives in static, re-used memory.  */
 
@@ -237,7 +237,7 @@ concat (unsigned int num, ...)
 
   return result;
 }
-
+
 
 #ifndef HAVE_UNISTD_H
 pid_t getpid ();
@@ -360,7 +360,7 @@ memrchr(const void* str, int ch, size_t len)
 }
 #endif
 
-
+
 
 /* Limited INDEX:
    Search through the string STRING, which ends at LIMIT, for the character C.
@@ -377,7 +377,7 @@ lindex (const char *s, const char *limit, int c)
 
   return 0;
 }
-
+
 /* Return the address of the first whitespace or null in the string S.  */
 
 char *
@@ -459,7 +459,7 @@ find_next_token (const char **ptr, size_t *lengthptr)
 
   return (char *)p;
 }
-
+
 /* Write a BUFFER of size LEN to file descriptor FD.
    Retry short writes from EINTR.  Return LEN, or -1 on error.  */
 ssize_t
@@ -505,7 +505,7 @@ readbuf (int fd, void *buffer, size_t len)
 
   return (ssize_t)(msg - (char*)buffer);
 }
-
+
 
 /* Copy a chain of 'struct dep'.  For 2nd expansion deps, dup the name.  */
 
@@ -548,7 +548,7 @@ free_ns_chain (struct nameseq *ns)
       free_ns (t);
     }
 }
-
+
 
 #ifdef MAKE_MAINTAINER_MODE
 
@@ -591,7 +591,7 @@ dbg (const char *fmt, ...)
 
 #endif
 
-
+
 
 /* Provide support for temporary files.  */
 
@@ -798,7 +798,7 @@ get_tmpfile (char **name)
 
   return file;
 }
-
+
 
 #if !HAVE_STRCASECMP && !HAVE_STRICMP && !HAVE_STRCMPI
 /* If we don't have strcasecmp() (from POSIX), or anything that can substitute
@@ -851,7 +851,7 @@ strncasecmp (const char *s1, const char *s2, size_t n)
   return 0;
 }
 #endif
-
+
 
 #ifdef NEED_GET_PATH_MAX
 unsigned int
@@ -872,15 +872,7 @@ get_path_max (void)
 }
 #endif
 
-#if !HAVE_MEMPCPY
-void *
-mempcpy (void *dest, const void *src, size_t n)
-{
-  return (char *) memcpy (dest, src, n) + n;
-}
-#endif
-
-#if !HAVE_STPCPY
+#ifndef HAVE_STPCPY
 char *
 stpcpy (char *dest, const char *src)
 {
@@ -895,7 +887,7 @@ stpcpy (char *dest, const char *src)
 }
 #endif
 
-#if !HAVE_STRTOLL
+#ifndef HAVE_STRTOLL
 # undef UNSIGNED
 # undef USE_NUMBER_GROUPING
 # undef USE_WIDE_CHAR
@@ -903,7 +895,7 @@ stpcpy (char *dest, const char *src)
 # include <strtol.c>
 #endif
 
-#if !HAVE_STRERROR
+#ifndef HAVE_STRERROR
 char *
 strerror (int errnum)
 {

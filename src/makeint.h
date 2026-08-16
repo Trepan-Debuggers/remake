@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988-2023 Free Software Foundation, Inc.
+Copyright (C) 1988-2023, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -29,6 +29,11 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
    system headers are included.  */
 
 #define _GNU_SOURCE 1
+
+/* Only compile/declare if autoconf did not find mempcpy */
+#ifndef HAVE_MEMPCPY
+#include "compat.h"
+#endif
 
 /* AIX requires this to be the first thing in the file.  */
 #if HAVE_ALLOCA_H
@@ -493,7 +498,7 @@ extern struct rlimit stack_limit;
 #endif
 
 
-
+
 const char *concat (unsigned int, ...);
 void message (int prefix, size_t length, const char *fmt, ...)
               ATTRIBUTE ((__format__ (__printf__, 3, 4)));

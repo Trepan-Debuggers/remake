@@ -34,7 +34,6 @@
 /multiarch.m4
 /off_t.m4
 /ssize_t.m4
-/stdbool.m4
 /stddef_h.m4
 /stdint.m4
 /stdio_h.m4

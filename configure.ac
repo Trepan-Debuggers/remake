@@ -92,7 +92,6 @@ AM_PROG_AR
 # Specialized system macros
 AC_CANONICAL_HOST
 AC_USE_SYSTEM_EXTENSIONS
-AC_SEARCH_LIBS([strerror],[cposix])
 AC_C_BIGENDIAN
 
 AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
@@ -107,7 +106,6 @@ AM_GNU_GETTEXT([external])
 AC_SYS_LARGEFILE
 
 # Checks for libraries.
-AC_SEARCH_LIBS([strerror],[cposix])
 AC_SEARCH_LIBS([getpwnam], [sun])
 
 # Autoupdate added the next two lines to ensure that your configure

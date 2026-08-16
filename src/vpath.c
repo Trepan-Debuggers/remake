@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2022, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -19,11 +19,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "variable.h"
 #ifdef MK_OS_W32
 #include "pathstuff.h"
-#endif
-
-/* Only compile/declare if autoconf did not find mempcpy */
-#ifndef HAVE_MEMPCPY
-#include "compat.h"
 #endif
 
 /* Structure used to represent a selective VPATH searchpath.  */

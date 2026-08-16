@@ -81,7 +81,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
   # Code from module ssize_t:
-  # Code from module stdbool:
   # Code from module stddef:
   # Code from module stdint:
   # Code from module stdio:
@@ -204,7 +203,6 @@ AC_DEFUN([gl_INIT],
   gl_MODULE_INDICATOR([msvc-nothrow])
   gl_MULTIARCH
   gt_TYPE_SSIZE_T
-  AM_STDBOOL_H
   gl_STDDEF_H
   gl_STDINT_H
   gl_STDIO_H
@@ -215,18 +213,12 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_STPCPY
   fi
   gl_STRING_MODULE_INDICATOR([stpcpy])
-  gl_FUNC_STRERROR
   if test $REPLACE_STRERROR = 1; then
     AC_LIBOBJ([strerror])
   fi
   gl_MODULE_INDICATOR([strerror])
   gl_STRING_MODULE_INDICATOR([strerror])
   AC_REQUIRE([gl_HEADER_ERRNO_H])
-  AC_REQUIRE([gl_FUNC_STRERROR_0])
-  if test -n "$ERRNO_H" || test $REPLACE_STRERROR_0 = 1; then
-    AC_LIBOBJ([strerror-override])
-    gl_PREREQ_SYS_H_WINSOCK2
-  fi
   gl_HEADER_STRING_H
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
@@ -417,9 +409,6 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdio.in.h
   lib/stdlib.in.h
   lib/stpcpy.c
-  lib/strerror-override.c
-  lib/strerror-override.h
-  lib/strerror.c
   lib/string.in.h
   lib/stripslash.c
   lib/sys_types.in.h
@@ -463,13 +452,11 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/multiarch.m4
   m4/off_t.m4
   m4/ssize_t.m4
-  m4/stdbool.m4
   m4/stddef_h.m4
   m4/stdint.m4
   m4/stdio_h.m4
   m4/stdlib_h.m4
   m4/stpcpy.m4
-  m4/strerror.m4
   m4/string_h.m4
   m4/sys_socket_h.m4
   m4/sys_types_h.m4

@@ -1,5 +1,5 @@
 /* Pattern and suffix rule internals for GNU Make.
-Copyright (C) 1988-2020 Free Software Foundation, Inc.
+Copyright (C) 1988-2020, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -24,11 +24,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "commands.h"
 #include "variable.h"
 #include "rule.h"
-
-/* Only compile/declare if autoconf did not find mempcpy */
-#ifndef HAVE_MEMPCPY
-#include "compat.h"
-#endif
 
 static void freerule (struct rule *rule, struct rule *lastrule);
 
