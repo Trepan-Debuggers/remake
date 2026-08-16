@@ -156,7 +156,7 @@ int stemlen_compare (const void *v1, const void *v2);
 
 #if FILE_TIMESTAMP_HI_RES
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
-    file_timestamp_cons (fname, (st).st_mtime, (st).ST_MTIM_NSEC)
+    file_timestamp_cons (fname, (st).st_mtime, (st).tv_nsec)
 #else
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
     file_timestamp_cons (fname, (st).st_mtime, 0)
