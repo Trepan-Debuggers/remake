@@ -37,8 +37,7 @@
 #  findprog-in \
 #  getloadavg \
 #  host-cpu-c-abi \
-#  make-glob \
-#  strerror
+#  make-glob
 
 AUTOMAKE_OPTIONS = 1.11 gnits
 
@@ -344,34 +343,6 @@ EXTRA_DIST += limits.in.h
 
 ## begin gnulib module make-glob
 
-if !USE_SYSTEM_GLOB
-libgnu_a_SOURCES += fnmatch.c
-
-BUILT_SOURCES += fnmatch.h
-
-fnmatch.h: fnmatch.in.h $(top_builddir)/config.status
-	$(AM_V_GEN)rm -f $@-t $@ && \
-	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
-	  cat $(srcdir)/fnmatch.in.h; \
-	} > $@-t && \
-	mv -f $@-t $@
-
-MOSTLYCLEANFILES += fnmatch.h fnmatch.h-t
-
-libgnu_a_SOURCES += glob.c
-
-BUILT_SOURCES += glob.h
-
-glob.h: glob.in.h $(top_builddir)/config.status
-	$(AM_V_GEN)rm -f $@-t $@ && \
-	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
-	  cat $(srcdir)/glob.in.h; \
-	} > $@-t && \
-	mv -f $@-t $@
-
-MOSTLYCLEANFILES += glob.h glob.h-t
-endif
-
 EXTRA_DIST += fnmatch.in.h glob.in.h
 
 
@@ -451,29 +422,6 @@ WARN_ON_USE_H=$(srcdir)/warn-on-use.h
 EXTRA_DIST += warn-on-use.h
 
 ## end   gnulib module snippet/warn-on-use
-
-## begin gnulib module stdbool
-
-BUILT_SOURCES += $(STDBOOL_H)
-
-# We need the following in order to create <stdbool.h> when the system
-# doesn't have one that works.
-if GL_GENERATE_STDBOOL_H
-stdbool.h: stdbool.in.h $(top_builddir)/config.status
-	$(AM_V_GEN)rm -f $@-t $@ && \
-	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
-	  sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool.in.h; \
-	} > $@-t && \
-	mv $@-t $@
-else
-stdbool.h: $(top_builddir)/config.status
-	rm -f $@
-endif
-MOSTLYCLEANFILES += stdbool.h stdbool.h-t
-
-EXTRA_DIST += stdbool.in.h
-
-## end   gnulib module stdbool
 
 ## begin gnulib module stddef
 
@@ -811,24 +759,6 @@ EXTRA_DIST += stpcpy.c
 EXTRA_libgnu_a_SOURCES += stpcpy.c
 
 ## end   gnulib module stpcpy
-
-## begin gnulib module strerror
-
-
-EXTRA_DIST += strerror.c
-
-EXTRA_libgnu_a_SOURCES += strerror.c
-
-## end   gnulib module strerror
-
-## begin gnulib module strerror-override
-
-
-EXTRA_DIST += strerror-override.c strerror-override.h
-
-EXTRA_libgnu_a_SOURCES += strerror-override.c
-
-## end   gnulib module strerror-override
 
 ## begin gnulib module string
 

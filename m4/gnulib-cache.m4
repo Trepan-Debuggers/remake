@@ -45,7 +45,7 @@
 #  make-glob \
 #  strerror
 
-# Specification in the form of a few gnulib-tool.m4 macro invocations:
+# Specification in the form of a few xognulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gl])
 gl_MODULES([
   alloca

@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2022, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -32,7 +32,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #ifndef HAVE_UNISTD_H
 pid_t getpid ();
 #endif
-
 
 static unsigned long
 dep_hash_1 (const void *key)
@@ -316,7 +315,7 @@ set_file_variables (struct file *file, const char *stem)
 
 #undef  DEFINE_VARIABLE
 }
-
+
 /* Chop CMDS up into individual command lines if necessary.
    Also set the 'lines_flags' and 'any_recurse' members.  */
 
@@ -704,7 +703,7 @@ fatal_error_signal (int sig)
 #endif /* not MK_OS_W32 */
 #endif /* not __MSDOS__  */
 }
-
+
 /* Delete FILE unless it's precious or not actually a file (phony),
    and it has changed on disk since we last stat'd it.  */
 
@@ -775,7 +774,7 @@ delete_child_targets (struct child *child)
 
   child->deleted = 1;
 }
-
+
 /* Print out the commands in CMDS.  */
 
 /*!

@@ -92,7 +92,6 @@ AM_PROG_AR
 # Specialized system macros
 AC_CANONICAL_HOST
 AC_USE_SYSTEM_EXTENSIONS
-AC_SEARCH_LIBS([strerror],[cposix])
 AC_C_BIGENDIAN
 
 AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
@@ -107,7 +106,6 @@ AM_GNU_GETTEXT([external])
 AC_SYS_LARGEFILE
 
 # Checks for libraries.
-AC_SEARCH_LIBS([strerror],[cposix])
 AC_SEARCH_LIBS([getpwnam], [sun])
 
 # Autoupdate added the next two lines to ensure that your configure
@@ -162,14 +160,14 @@ AS_IF([test "$make_cv_file_timestamp_hi_res" = yes], [val=1], [val=0])
 AC_DEFINE_UNQUOTED([FILE_TIMESTAMP_HI_RES], [$val],
                    [Use high resolution file timestamps if nonzero.])
 
-# Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
-# Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
-# The probe is unconditional so the --watch self-trigger guard can use
-# CLOCK_MONOTONIC regardless of file-timestamp resolution.
-AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AS_IF([test "$ac_cv_search_clock_gettime" != no],
-[ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
-            [Define to 1 if you have the clock_gettime function.])
+AS_IF([test "$make_cv_file_timestamp_hi_res" = yes],
+[ # Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
+  # Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
+  AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+  AS_IF([test "$ac_cv_search_clock_gettime" != no],
+  [ AC_DEFINE([HAVE_CLOCK_GETTIME], [1],
+              [Define to 1 if you have the clock_gettime function.])
+  ])
 ])
 
 # See if we have a standard version of gettimeofday().  Since actual
@@ -211,9 +209,6 @@ AC_FUNC_FORK
 # It doesn't hurt much to use our own if we can't find it so I don't
 # make the effort here.
 AC_CHECK_FUNCS([strcasecmp strncasecmp strcmpi strncmpi stricmp strnicmp])
-
-# Tell automake about this, so it can build the right .c files.
-AM_CONDITIONAL([USE_LOCAL_GLOB], [test "$make_cv_sys_gnu_glob" = no])
 
 AC_FUNC_VPRINTF
 
@@ -354,11 +349,18 @@ AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"],
 AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
      [Define this to the default  to be used $(SHELL)])
 
+# Find termcap/ncurses library before checking for readline
+AC_SEARCH_LIBS([tgetent], [ncurses tinfo termcap curses])
+
 #
 # Check for readline to see if we can add debugging support.
 #
 AC_CHECK_HEADERS([readline/readline.h readline/history.h])
-AC_CHECK_LIB(readline, readline)
+AC_CHECK_LIB([history], [history_list],
+			[LIBS="$LIBS -lhistory"],
+			[AC_MSG_WARN([libhistory not found; history_list unavailable])])
+
+AC_CHECK_LIB([readline], [readline])
 AC_SUBST(HAVE_LIBREADLINE)
 
 REMAKE_SOURCE_PATH="`pwd`"
@@ -642,13 +644,13 @@ AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
   echo
 ])
 
+# Configure Makefiles: adjust the list to match your project layout
 # Specify what files are to be created.
 AC_CONFIG_FILES([ \
-Makefile lib/Makefile po/Makefile.in doc/Makefile \
-  doc/doxygen/Doxyfile \
-  glob/Makefile \
-  unittest/Makefile \
-  tests/config-flags.pm \
+Makefile lib/Makefile po/Makefile.in doc/Makefile
+  doc/doxygen/Doxyfile
+  unittest/Makefile
+  tests/config-flags.pm
   libdebugger/Makefile
 ])
 

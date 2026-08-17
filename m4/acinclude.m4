@@ -118,7 +118,7 @@ AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
       CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
       AC_TRY_COMPILE([#include <sys/types.h>
 #include <sys/stat.h>
-	], [struct stat s; s.ST_MTIM_NSEC;],
+        ], [struct stat s; s.ST_MTIM_NSEC;],
         [ac_cv_struct_st_mtim_nsec=$ac_val; break])
     done
     CPPFLAGS="$ac_save_CPPFLAGS"
@@ -126,7 +126,7 @@ AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
 
   if test $ac_cv_struct_st_mtim_nsec != no; then
     AC_DEFINE_UNQUOTED([ST_MTIM_NSEC], [$ac_cv_struct_st_mtim_nsec],
-	[Define if struct stat contains a nanoseconds field])
+        [Define if struct stat contains a nanoseconds field])
   fi
  ]
 )

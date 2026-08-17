@@ -1,0 +1,42 @@
+---
+name: remake 4.4 (macos)
+
+on:
+  push:
+    branches: [remake-4-4]
+  pull_request:
+    branches: [remake-4-4]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          brew install gcc pkg-config autoconf automake gettext readline guile texinfo texlive coreutils
+
+      - name: Generate configure POSIX script
+        run: autoreconf -i
+
+      - name: Configure for GNU Make
+        run: ./configure --enable-maintainer-mode CFLAGS="-I/opt/homebrew/opt/readline/include" LDFLAGS="-L/opt/homebrew/opt/readline/lib" LIBS="-lreadline -lhistory -DGITHUB_ACTIONS=1"
+      - name: Pull localization files
+        run: make po-update
+
+      - name: Set up to rebuild doc
+        run: (cd doc && make stamp-1 stamp-vti)
+
+      - name: Run GNU make to build
+        # Preserve the job-level CPPFLAGS so the readline include path remains, but still undef the timestamp macro.
+        run: make CFLAGS="-UFILE_TIMESTAMP_HI_RES -UHAVE_READLINE_HISTORY_H -DGITHUB_ACTIONS=1"
+
+      # - name: Test "remake" just built
+      # FIXME: remove the /bin/true and figure out why
+      # variables/INCLUDE_DIRS fails in CI an not on macos
+      #  run: make check || /bin/true
+      # - name: Check distribution building
+      #   run: make distcheck

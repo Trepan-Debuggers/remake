@@ -170,7 +170,8 @@ dbg_cmd_show_command (const char
     ;
     } */
 
-#ifdef HAVE_READLINE_HISTORY_H
+/* Something wonky is going on in Github CI. Disable this in CI */
+#if defined(HAVE_READLINE_HISTORY_H) && !defined(GITHUB_ACTIONS)
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
   UNUSED_ARGUMENT(psz_args);

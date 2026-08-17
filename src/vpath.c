@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988-2022 Free Software Foundation, Inc.
+Copyright (C) 1988-2022, 2026 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,7 +20,6 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #ifdef MK_OS_W32
 #include "pathstuff.h"
 #endif
-
 
 /* Structure used to represent a selective VPATH searchpath.  */
 
@@ -45,7 +44,7 @@ static struct vpath *general_vpath;
 /* Structure for GPATH given in the variable.  */
 
 static struct vpath *gpaths;
-
+
 
 /* Reverse the chain of selective VPATH lists so they will be searched in the
    order given in the makefiles and construct the list from the VPATH
@@ -134,7 +133,7 @@ build_vpath_lists (void)
       vpaths = save_vpaths;
     }
 }
-
+
 /* Construct the VPATH listing for the PATTERN and DIRPATH given.
 
    This function is called to generate selective VPATH lists and also for
@@ -298,7 +297,7 @@ construct_vpath_list (char *pattern, char *dirpath)
     /* MSVC erroneously warns without a cast here.  */
     free ((void *)vpath);
 }
-
+
 /* Search the GPATH list for a pathname string that matches the one passed
    in.  If it is found, return 1.  Otherwise we return 0.  */
 
@@ -315,7 +314,7 @@ gpath_search (const char *file, size_t len)
 
   return 0;
 }
-
+
 
 /* Search the given VPATH list for a directory where the name pointed to by
    FILE exists.  If it is found, we return a cached name of the existing file
@@ -559,7 +558,7 @@ vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
 
 
 
-
+
 /* Print the data base of VPATH search paths.  */
 
 void

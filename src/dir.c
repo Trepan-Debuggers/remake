@@ -20,7 +20,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 #include "dep.h"
 #include "debug.h"
 
-#ifdef  HAVE_DIRENT_H
+#ifdef HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
 #else
@@ -52,7 +52,7 @@ this program.  If not, see <https://www.gnu.org/licenses/>.  */
 # define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 # define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
 #endif /* POSIX */
-
+
 #ifdef __MSDOS__
 #include <ctype.h>
 #include <fcntl.h>
@@ -221,7 +221,7 @@ vmsstat_dir (const char *name, struct stat *st)
 
 #endif /* _USE_STD_STAT */
 #endif /* VMS */
-
+
 /* Never have more than this many directories open at once.  */
 
 #define MAX_OPEN_DIRECTORIES 10
@@ -423,7 +423,7 @@ dirfile_hash_cmp (const void *xv, const void *yv)
 #ifndef DIRFILE_BUCKETS
 #define DIRFILE_BUCKETS 107
 #endif
-
+
 static int dir_contents_file_exists_p (struct directory_contents *dir,
                                        const char *filename);
 static struct directory *find_directory (const char *name);
@@ -510,7 +510,10 @@ find_directory (const char *name)
 
   return dir;
 }
-
+
+/* Forward declarations.  */
+static void *open_dirstream (const char *);
+static struct dirent *read_dirstream (void *);
 /* Return 1 if the name FILENAME is entered in DIR's hash table.
    FILENAME must contain no slashes.  */
 
@@ -582,12 +585,7 @@ dir_contents_file_exists_p (struct directory_contents *dir,
       dirfile_slot = (struct dirfile **) hash_find_slot (&dir->dirfiles, &dirfile_key);
         {
           df = xmalloc (sizeof (struct dirfile));
-#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
-          /* TODO: Why is this only needed on VMS? */
-          df->name = strcache_add_len (downcase_inplace (d->d_name), len);
-#else
           df->name = strcache_add_len (d->d_name, len);
-#endif
 #ifdef HAVE_STRUCT_DIRENT_D_TYPE
           df->type = d->d_type;
 #endif
@@ -621,7 +619,7 @@ dir_file_exists_p (const char *dirname, const char *filename)
   return dir_contents_file_exists_p (find_directory (dirname)->contents,
                                      filename);
 }
-
+
 /* Return 1 if the file named NAME exists.  */
 
 int
@@ -654,7 +652,7 @@ file_exists_p (const char *name)
   slash++;
   return dir_file_exists_p (dirname, slash);
 }
-
+
 /* Mark FILENAME as 'impossible' for 'file_impossible_p'.
    This means an attempt has been made to search for FILENAME
    as an intermediate file, and it has failed.  */
@@ -707,7 +705,7 @@ file_impossible (const char *filename)
   new->impossible = 1;
   hash_insert (&dir->contents->dirfiles, new);
 }
-
+
 /* Return nonzero if FILENAME has been marked impossible.  */
 
 int
@@ -755,7 +753,7 @@ file_impossible_p (const char *filename)
 
   return 0;
 }
-
+
 /* Return the already allocated name in the
    directory hash table that matches DIR.  */
 
@@ -764,7 +762,7 @@ dir_name (const char *dir)
 {
   return find_directory (dir)->name;
 }
-
+
 /* Print the data base of directories.  */
 
 void
@@ -849,7 +847,7 @@ print_dir_data_base (void)
     printf ("%u", impossible);
   printf (_(" impossibilities in %lu directories.\n"), directories.ht_fill);
 }
-
+
 /* Hooks for globbing.  */
 
 /* Structure describing state of iterating through a directory hash table.  */
@@ -861,22 +859,16 @@ struct dirstream
   };
 
 /* Forward declarations.  */
-static __ptr_t open_dirstream (const char *);
-static struct dirent *read_dirstream (__ptr_t);
+static struct dirent *read_dirstream (void *stream);
 
-static __ptr_t
+static void *
 open_dirstream (const char *directory)
 {
   struct dirstream *new;
   struct directory *dir = find_directory (directory);
 
   if (dir->contents == 0 || dir->contents->dirfiles.ht_vec == 0)
-    /* DIR->contents is nil if the directory could not be stat'd.
-       DIR->contents->dirfiles is nil if it could not be opened.  */
     return 0;
-
-  /* Read all the contents of the directory now.  There is no benefit
-     in being lazy, since glob will want to see every file anyway.  */
 
   dir_contents_file_exists_p (dir->contents, 0);
 
@@ -884,11 +876,11 @@ open_dirstream (const char *directory)
   new->contents = dir->contents;
   new->dirfile_slot = (struct dirfile **) new->contents->dirfiles.ht_vec;
 
-  return (__ptr_t) new;
+  return (void *) new;
 }
 
 static struct dirent *
-read_dirstream (__ptr_t stream)
+read_dirstream (void *stream)
 {
   static char *buf;
   static size_t bufsz;

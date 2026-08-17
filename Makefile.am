@@ -23,7 +23,7 @@ transform = s,make,@MAKE_NAME@,
 
 MAKE_HOST =	@MAKE_HOST@
 
-SUBDIRS =	lib po doc glob unittest libdebugger
+SUBDIRS =	lib po doc unittest libdebugger
 
 bin_PROGRAMS =	make
 include_HEADERS = src/gnuremake.h
@@ -32,7 +32,7 @@ man_MANS =	doc/make.1
 
 make_SRCS =	\
 		src/ar.c src/arscan.c src/buildargv.c \
-		src/commands.c src/debug.c src/default.c src/dir.c src/expand.c \
+		src/commands.c src/compat.h src/debug.c src/default.c src/dir.c src/expand.c \
 		src/file.c src/file_basic.c src/function.c src/getopt.c \
 		src/getopt1.c src/globals.c src/guile.c src/hash.c src/implicit.c \
 		src/job.c src/load.c src/loadapi.c src/main.c src/misc.c \
@@ -42,8 +42,6 @@ make_SRCS =	\
 		src/callgrind_format.c src/json_format.c \
 		src/watch.c src/watch_inotify.c src/watch_poll.c \
 		src/watchbackend.h
-
-glob_SRCS =	lib/fnmatch.c lib/fnmatch.h lib/glob.c lib/glob.h
 
 alloca_SRCS =	lib/alloca.c
 

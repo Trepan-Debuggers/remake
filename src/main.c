@@ -2751,7 +2751,7 @@ print_usage (int bad)
     fprintf (usageto, _("\nThis program built for %s (%s)\n"),
              make_host, remote_description);
 
-  fprintf (usageto, _("Report bugs to https://github.com/rocky/remake/issues\n"));
+  fprintf (usageto, "Report bugs to https://github.com/Trepan-Debuggers/remake/issues\n");
 }
 
 /* Decode switches from ARGC and ARGV.

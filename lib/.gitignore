@@ -44,7 +44,6 @@
 /msvc-inval.h
 /msvc-nothrow.c
 /msvc-nothrow.h
-/stdbool.in.h
 /stddef.in.h
 /stdint.in.h
 /stdio.h
@@ -52,9 +51,6 @@
 /stdlib.h
 /stdlib.in.h
 /stpcpy.c
-/strerror-override.c
-/strerror-override.h
-/strerror.c
 /string.h
 /string.in.h
 /stripslash.c
