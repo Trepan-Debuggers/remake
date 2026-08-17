@@ -116,7 +116,7 @@ AC_PROG_EGREP
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 
-AC_CHECK_HEADERS([stdlib.h string.h strings.h locale.h unistd.h limits.h \
+AC_CHECK_HEADERS([fnmatch.h glob.h stdlib.h string.h strings.h locale.h unistd.h limits.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/select.h \
                   sys/file.h fcntl.h spawn.h])
 

@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     defaults:
@@ -17,29 +16,43 @@ jobs:
         shell: msys2 {0}
 
     steps:
-      - uses: actions/checkout@v7
-      - name: Install MSYS2
+      - uses: actions/checkout@v4
+
+      - name: Install MSYS2 & Toolchain
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: mingw-w64-x86_64-gcc autoconf automake mingw-w64-x86_64-gettext mingw-w64-x86_64-readline mingw-w64-x86_64-texinfo mingw-w64-x86_64-pkg-config mingw-w64-x86_64-make base-devel rsync
+          update: true
+          install: >-
+            base-devel
+            autoconf
+            automake
+            libtool
+            rsync
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-gettext
+            mingw-w64-x86_64-readline
+            mingw-w64-x86_64-texinfo
+            mingw-w64-x86_64-pkg-config
+            msys2-runtime-devel
+            libtre
+
       - name: Generate configure POSIX script
-        shell: msys2 {0}
         run: autoreconf -i --force
-      - name: Configure for GNU Make
-        shell: msys2 {0}
+
+      - name: Configure for GNU (re)Make
         run: ./configure --enable-maintainer-mode
+
       - name: Pull localization files
-        shell: msys2 {0}
         run: make po-update
+
       - name: Set up to rebuild doc
-        shell: msys2 {0}
         run: (cd doc && make stamp-1 stamp-vti)
+
       - name: Run GNU make to build
-        shell: msys2 {0}
         run: make
+
       - name: Test "remake" just built
-        shell: msys2 {0}
         run: make check
       # - name: Check distribution building
       #   run: make distcheck
