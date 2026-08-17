@@ -918,7 +918,7 @@ $ @b{cat -n test2.mk}
 3 all: $(PACKAGE).txt
 4
 5 $(PACKAGE).txt: ../doc/remake.texi
-6 	makeinfo --no-headers $< > $@
+6 	makeinfo --no-headers $< > $@@
 @end group
 @end smallexample
 
@@ -977,7 +977,7 @@ We can see a full expansion of the command that is about to be run:
 remake<5> @b{target @@ expand}
 
 #  commands to execute (from `test2.mk', line 6):
-	makeinfo --no-headers $< > $@
+	makeinfo --no-headers $< > $@@
 
 #  commands to execute (from `test2.mk', line 6):
 	-makeinfo --no-headers ../doc/remake.texi > make.txt
