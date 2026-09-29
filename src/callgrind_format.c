@@ -53,13 +53,13 @@ callgrind_init(profile_context_t *ctx, const char *creator, const char *const *a
   len = sprintf(callgrind_fname, CALLGRIND_FILE_TEMPLATE, ctx->output_dir, ctx->pid);
 
   if (len >= CALLGRIND_FILENAME_LEN) {
-    printf("Error in generating callgrind name\n");
+    fprintf(stderr, "Error in generating callgrind name\n");
     return false;
   }
 
   callgrind_fd = fopen(callgrind_fname, "w");
   if (NULL == callgrind_fd) {
-    printf("Error in opening callgrind file %s\n", callgrind_fname);
+    fprintf(stderr, "Error in opening callgrind file %s\n", callgrind_fname);
     return false;
   }
 
@@ -119,5 +119,5 @@ callgrind_close(profile_context_t *ctx, const char *program_status) {
   profile_dump_entries(callgrind_profile_entry);
   fclose(callgrind_fd);
 
-  printf("Created callgrind profiling data file: %s\n", callgrind_fname);
+  fprintf(stderr, "Created callgrind profiling data file: %s\n", callgrind_fname);
 }
