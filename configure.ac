@@ -116,7 +116,7 @@ AC_PROG_EGREP
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 
-AC_CHECK_HEADERS([stdlib.h string.h strings.h locale.h unistd.h limits.h \
+AC_CHECK_HEADERS([fnmatch.h glob.h stdlib.h string.h strings.h locale.h unistd.h limits.h \
                   memory.h sys/param.h sys/resource.h sys/time.h sys/select.h \
                   sys/file.h fcntl.h spawn.h])
 
@@ -646,7 +646,7 @@ AS_IF([test "x$make_cv_posix_spawn" = xno && test "x$user_posix_spawn" = xyes],
 
 # Configure Makefiles: adjust the list to match your project layout
 # Specify what files are to be created.
-AC_CONFIG_FILES([ \
+AC_CONFIG_FILES([
 Makefile lib/Makefile po/Makefile.in doc/Makefile
   doc/doxygen/Doxyfile
   unittest/Makefile
